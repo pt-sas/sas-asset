@@ -595,8 +595,10 @@ function Edit(id, status = '') {
 
                     // Show datatable line
                     if (arrMsg.line) {
+                        let arrLine = arrMsg.line;
+
                         if (form.find('table.tb_displayline').length > 0) {
-                            let line = JSON.parse(arrMsg.line);
+                            let line = JSON.parse(arrLine);
 
                             $.each(line, function (idx, elem) {
                                 _tableLine.row.add(elem).draw(false);
@@ -633,181 +635,161 @@ function Edit(id, status = '') {
                                 btnAction.css('display', 'block');
                             }
                         }
-                    }
 
-                    if (arrMsg.header) {
-                        let header = arrMsg.header;
-                        for (let i = 0; i < header.length; i++) {
-                            if (form.find('table.tb_tree').length > 0) {
+                        if (form.find('table.tb_tree').length > 0) {
+                            for (let i = 0; i < arrLine.length; i++) {
                                 const table = form.find('table.tb_tree');
                                 const input = table.find('td input:checkbox');
-
-                                let keyName = Object.keys(header[i]);
-                                let label = Object.values(header[i]);
 
                                 $.each(input, function (idx, elem) {
                                     // Menu parent
                                     if ($(elem).attr('data-menu') === 'parent') {
 
-                                        if (header[i].sys_menu_id == $(elem).val() && header[i].sys_submenu_id == 0) {
-                                            if ((header[i].isview == 'Y' && $(elem).attr('name') === 'isview') ||
-                                                (header[i].iscreate == 'Y' && $(elem).attr('name') === 'iscreate') ||
-                                                (header[i].isupdate == 'Y' && $(elem).attr('name') === 'isupdate') ||
-                                                (header[i].isdelete == 'Y' && $(elem).attr('name') === 'isdelete')) {
+                                        if (arrLine[i].sys_menu_id == $(elem).val() && arrLine[i].sys_submenu_id == 0) {
+                                            if ((arrLine[i].isview == 'Y' && $(elem).attr('name') === 'isview') ||
+                                                (arrLine[i].iscreate == 'Y' && $(elem).attr('name') === 'iscreate') ||
+                                                (arrLine[i].isupdate == 'Y' && $(elem).attr('name') === 'isupdate') ||
+                                                (arrLine[i].isdelete == 'Y' && $(elem).attr('name') === 'isdelete')) {
                                                 $(elem).prop('checked', true);
                                             } else {
                                                 $(elem).prop('checked', false);
                                             }
 
                                             // Set attribute id element to value sys_access_menu_id
-                                            $(elem).attr('id', header[i].sys_access_menu_id);
+                                            $(elem).attr('id', arrLine[i].sys_access_menu_id);
                                         }
 
                                     } else {
-                                        if (header[i].sys_submenu_id === $(elem).val()) {
-                                            if ((header[i].isview == 'Y' && $(elem).attr('name') === 'isview') ||
-                                                (header[i].iscreate == 'Y' && $(elem).attr('name') === 'iscreate') ||
-                                                (header[i].isupdate == 'Y' && $(elem).attr('name') === 'isupdate') ||
-                                                (header[i].isdelete == 'Y' && $(elem).attr('name') === 'isdelete')) {
+                                        if (arrLine[i].sys_submenu_id === $(elem).val()) {
+                                            if ((arrLine[i].isview == 'Y' && $(elem).attr('name') === 'isview') ||
+                                                (arrLine[i].iscreate == 'Y' && $(elem).attr('name') === 'iscreate') ||
+                                                (arrLine[i].isupdate == 'Y' && $(elem).attr('name') === 'isupdate') ||
+                                                (arrLine[i].isdelete == 'Y' && $(elem).attr('name') === 'isdelete')) {
                                                 $(elem).prop('checked', true);
                                             } else {
                                                 $(elem).prop('checked', false);
                                             }
 
                                             // Set attribute id element to value sys_access_menu_id
-                                            $(elem).attr('id', header[i].sys_access_menu_id);
+                                            $(elem).attr('id', arrLine[i].sys_access_menu_id);
                                         }
                                     }
                                 });
+                            }
+                        }
+                    }
 
-                                // Populate data into the form field
-                                $.each(keyName, function (idx, elem) {
-                                    form.find('input:text[name=' + elem + '], textarea[name=' + elem + '], input:password[name=' + field[i].name + ']').val(label[idx]);
+                    if (arrMsg.header) {
+                        let header = arrMsg.header;
 
-                                    if (elem === 'isactive' && label[idx] === 'Y') {
-                                        form.find('input:checkbox[name=' + elem + ']').prop('checked', true);
-                                        readonly(form, false);
-                                    } else if (elem === 'isactive' && label[idx] === 'N') {
-                                        form.find('input:checkbox[name=' + elem + ']').removeAttr('checked');
-                                        readonly(form, true);
+                        for (let i = 0; i < header.length; i++) {
+                            let fieldInput = header[i].field;
+                            let label = header[i].label;
+
+                            if (formList.contains('modal') && fieldInput === 'title') {
+                                modalTitle.html(capitalize(label));
+                            } else if (fieldInput === 'title') {
+                                cardTitle.html(capitalize(label));
+                            }
+
+                            for (let i = 0; i < field.length; i++) {
+                                if (field[i].name !== '' && field[i].name === fieldInput) {
+                                    let className = field[i].className.split(/\s+/);
+
+                                    if (className.includes('datepicker')) {
+                                        form.find('input:text[name=' + field[i].name + ']').val(moment(label).format('Y-MM-DD'));
+                                    } else if (className.includes('rupiah')) {
+                                        form.find('input:text[name=' + field[i].name + ']').val(formatRupiah(label));
+                                    } else {
+                                        form.find('input:text[name=' + field[i].name + ']').val(label);
                                     }
 
-                                    if (formList.contains('modal') && elem === 'name') {
-                                        modalTitle.html(capitalize(label[idx]));
-                                    } else if (elem === 'name') {
-                                        cardTitle.html(capitalize(label[idx]));
+                                    form.find('textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']').val(label);
+
+                                    if (form.find('textarea.summernote[name=' + field[i].name + ']').length > 0 ||
+                                        form.find('textarea.summernote-product[name=' + field[i].name + ']').length > 0) {
+                                        $('[name =' + field[i].name + ']').summernote('code', label);
                                     }
-                                });
 
-                            } else {
-                                let fieldInput = header[i].field;
-                                let label = header[i].label;
+                                    if (field[i].type === 'select-one') {
+                                        let fieldName = field[i].name;
+                                        let value = label;
 
-                                if (formList.contains('modal') && fieldInput === 'title') {
-                                    modalTitle.html(capitalize(label));
-                                } else if (fieldInput === 'title') {
-                                    cardTitle.html(capitalize(label));
-                                }
+                                        if (typeof label === 'object') {
+                                            value = label.id;
+                                            let text = label.name;
+                                            option.push({
+                                                fieldName,
+                                                value,
+                                                text
+                                            });
 
-                                for (let i = 0; i < field.length; i++) {
-                                    if (field[i].name !== '' && field[i].name === fieldInput) {
-                                        let className = field[i].className.split(/\s+/);
+                                            let newOption = $("<option selected='selected'></option>").val(label.id).text(label.name);
 
-                                        if (className.includes('datepicker')) {
-                                            form.find('input:text[name=' + field[i].name + ']').val(moment(label).format('Y-MM-DD'));
-                                        } else if (className.includes('rupiah')) {
-                                            form.find('input:text[name=' + field[i].name + ']').val(formatRupiah(label));
+                                            form.find('select[name=' + field[i].name + ']').append(newOption).change();
                                         } else {
-                                            form.find('input:text[name=' + field[i].name + ']').val(label);
+                                            option.push({
+                                                fieldName,
+                                                value
+                                            });
+
+                                            form.find('select[name=' + field[i].name + ']').val(label).change();
                                         }
 
-                                        form.find('textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']').val(label);
+                                        // // Logic for set value null select if not exist data
+                                        // $('select[name=' + field[i].name + ']').each(function () {
+                                        //     console.log(this)
+                                        //     if (this.selectedIndex <= 0) {
+                                        //         console.log($(this))
+                                        //         $(this).val(null).change();
+                                        //     }
+                                        // });
+                                    }
 
-                                        if (form.find('textarea.summernote[name=' + field[i].name + ']').length > 0 ||
-                                            form.find('textarea.summernote-product[name=' + field[i].name + ']').length > 0) {
-                                            $('[name =' + field[i].name + ']').summernote('code', label);
-                                        }
+                                    if (field[i].type === 'select-multiple' && label !== null) {
+                                        // array label explode into array
+                                        let arrLabel = label.split(',');
 
-                                        if (field[i].type === 'select-one') {
-                                            let fieldName = field[i].name;
-                                            let value = label;
-
-                                            if (typeof label === 'object') {
-                                                value = label.id;
-                                                let text = label.name;
-                                                option.push({
-                                                    fieldName,
-                                                    value,
-                                                    text
-                                                });
-
-                                                let newOption = $("<option selected='selected'></option>").val(label.id).text(label.name);
-
-                                                form.find('select[name=' + field[i].name + ']').append(newOption).change();
-                                            } else {
-                                                option.push({
-                                                    fieldName,
-                                                    value
-                                                });
-
-                                                form.find('select[name=' + field[i].name + ']').val(label).change();
-                                            }
-
-                                            // // Logic for set value null select if not exist data
-                                            // $('select[name=' + field[i].name + ']').each(function () {
-                                            //     console.log(this)
-                                            //     if (this.selectedIndex <= 0) {
-                                            //         console.log($(this))
-                                            //         $(this).val(null).change();
-                                            //     }
-                                            // });
-                                        }
-
-                                        if (field[i].type === 'select-multiple' && label !== null) {
-                                            // array label explode into array
-                                            let arrLabel = label.split(',');
-
-                                            // Condition data length more than 1
-                                            if (arrLabel.length > 1) {
-                                                form.find('select[name=' + field[i].name + ']').val(arrLabel).change();
-                                            } else {
-                                                arrMultiSelect.push(label);
-                                                form.find('select[name=' + field[i].name + ']').val(arrMultiSelect).change();
-                                            }
-                                        }
-
-                                        // Set condition value checked for field type Checkbox based on database
-                                        if (field[i].type === 'checkbox' && label === 'Y') {
-                                            form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', true);
-
-                                            if (className.includes('active'))
-                                                readonly(form, false);
+                                        // Condition data length more than 1
+                                        if (arrLabel.length > 1) {
+                                            form.find('select[name=' + field[i].name + ']').val(arrLabel).change();
                                         } else {
-                                            form.find('input:checkbox[name=' + field[i].name + ']').removeAttr('checked');
-
-                                            if (className.includes('active'))
-                                                readonly(form, true);
-
-                                            let fieldActive = form.find('input.active');
-
-                                            // set field is readonly/disabled by default condition not field active and when detail content
-                                            if (fieldActive.length == 0 && setSave !== 'detail' && (field[i].readOnly || field[i].disabled)) {
-                                                fieldReadOnly.push(field[i].name);
-                                            }
+                                            arrMultiSelect.push(label);
+                                            form.find('select[name=' + field[i].name + ']').val(arrMultiSelect).change();
                                         }
+                                    }
 
-                                        // Set value checked for field type Radio Button
-                                        if (field[i].type == 'radio') {
-                                            if (field[i].value == label) {
-                                                field[i].checked = true;
-                                            }
+                                    // Set condition value checked for field type Checkbox based on database
+                                    if (field[i].type === 'checkbox' && label === 'Y') {
+                                        form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', true);
+
+                                        if (className.includes('active'))
+                                            readonly(form, false);
+                                    } else {
+                                        form.find('input:checkbox[name=' + field[i].name + ']').removeAttr('checked');
+
+                                        if (className.includes('active'))
+                                            readonly(form, true);
+
+                                        let fieldActive = form.find('input.active');
+
+                                        // set field is readonly/disabled by default condition not field active and when detail content
+                                        if (fieldActive.length == 0 && setSave !== 'detail' && (field[i].readOnly || field[i].disabled)) {
+                                            fieldReadOnly.push(field[i].name);
                                         }
+                                    }
 
-                                        // Pass data form input file to function previewImage
-                                        if (field[i].type === 'file') {
-                                            if (className.includes('control-upload-image')) {
-                                                previewImage(form.find('input[name=' + field[i].name + ']')[0], '', label);
-                                            }
+                                    // Set value checked for field type Radio Button
+                                    if (field[i].type == 'radio') {
+                                        if (field[i].value == label) {
+                                            field[i].checked = true;
+                                        }
+                                    }
+
+                                    // Pass data form input file to function previewImage
+                                    if (field[i].type === 'file') {
+                                        if (className.includes('control-upload-image')) {
+                                            previewImage(form.find('input[name=' + field[i].name + ']')[0], '', label);
                                         }
                                     }
                                 }
