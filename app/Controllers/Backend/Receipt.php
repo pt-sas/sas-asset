@@ -267,7 +267,7 @@ class Receipt extends BaseController
                         foreach ($line as $key => $value) :
                             $data = $value;
                             $data->transactiontype = $this->Inventory_In;
-                            $data->transactiondate = $row->receiptdate;
+                            $data->transactiondate = $row->getReceiptDate();
                             $arrLine[$key] = $data;
                         endforeach;
 
