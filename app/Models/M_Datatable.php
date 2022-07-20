@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+use CodeIgniter\HTTP\RequestInterface;
+
+class M_Datatable extends Model
+{
+    protected $request;
+    protected $db;
+    protected $builder;
+
+    public function __construct(RequestInterface $request)
+    {
+        parent::__construct();
+        $this->db = db_connect();
+        $this->request = $request;
+    }
+
+    private function getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join = [])
+    {
+        $post = $this->request->getVar();
+        $this->builder = $this->db->table($table);
+
+        if (is_array($select) && count($select) > 0)
+            $select;
+        else
+            $this->builder->select($select);
+
+        if (count($join) > 0)
+            $this->setJoin($join);
+
+        if (isset($post['form']))
+            $this->filterDatatable($table, $post);
+
+        $i = 0;
+        foreach ($column_search as $item) :
+            if ($this->request->getPost('search')['value']) {
+                if ($i === 0) {
+                    $this->builder->groupStart();
+                    $this->builder->like($item, $this->request->getPost('search')['value']);
+                } else {
+                    $this->builder->orLike($item, $this->request->getPost('search')['value']);
+                }
+                if (count($column_search) - 1 == $i)
+                    $this->builder->groupEnd();
+            }
+            $i++;
+        endforeach;
+
+        if ($this->request->getPost('order')) {
+            $this->builder->orderBy($column_order[$this->request->getPost('order')['0']['column']], $this->request->getPost('order')['0']['dir']);
+        } else if (isset($order)) {
+            $this->builder->orderBy(key($order), $order[key($order)]);
+        }
+    }
+
+    public function getDatatables($table, $select, $column_order, $order, $column_search, $join = [])
+    {
+        $this->getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join);
+
+        if ($this->request->getPost('length') != -1)
+            $this->builder->limit($this->request->getPost('length'), $this->request->getPost('start'));
+        $query = $this->builder->get();
+        return $query->getResult();
+    }
+
+    public function countAll($table)
+    {
+        $this->builder = $this->db->table($table);
+        return $this->builder->countAllResults();
+    }
+
+    public function countFiltered($table, $select, $column_order, $order, $column_search, $join = [])
+    {
+        $this->getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join);
+        return $this->builder->countAllResults();
+    }
+
+    public function filterDatatable($table, $post)
+    {
+        foreach ($post['form'] as $value) :
+            if (!empty($value['value']) && $this->db->fieldExists($value['name'], $table))
+                $this->builder->where($table . '.' . $value['name'] . '', $value['value']);
+        endforeach;
+    }
+
+    private function setJoin($data)
+    {
+        foreach ($data as $row) :
+            $tableJoin = $row['tableJoin'];
+            $columnJoin = $row['columnJoin'];
+            $typeJoin = $row['typeJoin'];
+
+            $this->builder->join($tableJoin, $columnJoin, $typeJoin);
+        endforeach;
+    }
+}

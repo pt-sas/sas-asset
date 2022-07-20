@@ -1,0 +1,733 @@
+/**
+ * Event Listener Quotation Detail
+ */
+_tableLine.on('change', 'input[name="isspare"]', function (evt) {
+    const tr = _tableLine.$(this).closest('tr');
+
+    if ($(this).is(':checked')) {
+        tr.find('select[name="employee_id"]')
+            .val(100130).change()
+            .attr('disabled', true);
+
+        if (tr.find('select[name="branch_id"]').length > 0) {
+            tr.find('select[name="branch_id"]')
+                .val(100001).change()
+                .attr('disabled', true);
+        }
+
+        if (tr.find('select[name="division_id"]').length > 0) {
+            tr.find('select[name="division_id"]')
+                .val(100006).change()
+                .attr('disabled', true);
+        }
+    } else {
+        tr.find('select[name="employee_id"]')
+            .val(null).change()
+            .removeAttr('disabled');
+
+        if (tr.find('select[name="branch_id"]').length > 0) {
+            tr.find('select[name="branch_id"]')
+                .val(null).change()
+                .removeAttr('disabled');
+        }
+
+        if (tr.find('select[name="division_id"]').length > 0) {
+            tr.find('select[name="division_id"]')
+                .val(null).change()
+                .removeAttr('disabled');
+        }
+
+        if (tr.find('select[name="room_id"]').length > 0) {
+            tr.find('select[name="room_id"]').empty();
+        }
+    }
+});
+
+// update field input name line amount
+_tableLine.on('keyup', 'input[name="qtyentered"], input[name="unitprice"]', function (evt) {
+    const tr = _tableLine.$(this).closest('tr');
+
+    let value = this.value;
+    let lineamt, qty, unitprice = 0;
+
+    if ($(this).attr('name') == 'unitprice') {
+        qty = replaceRupiah(tr.find('input[name="qtyentered"]').val());
+        value = replaceRupiah(this.value);
+
+        lineamt = (value * qty);
+    }
+
+    if ($(this).attr('name') == 'qtyentered') {
+        unitprice = replaceRupiah(tr.find('input[name="unitprice"]').val());
+
+        lineamt = (value * unitprice);
+    }
+
+    tr.find('input[name="lineamt"]').val(formatRupiah(lineamt));
+});
+
+/**
+ * Event Listener Receipt Detail
+ */
+let prev;
+
+$(document).ready(function (evt) {
+    $('#trx_quotation_id').on('focus', function (e) {
+        prev = this.value;
+    }).change(function (evt) {
+        const form = $(this).closest('form');
+        const attrName = $(this).attr('name');
+
+        let quotation_id = this.value;
+
+        // create data
+        if (quotation_id !== '' && setSave === 'add') {
+            _tableLine.clear().draw(false);
+            setReceiptDetail(form, attrName, quotation_id);
+        }
+
+        // update data
+        $.each(option, function (idx, elem) {
+            if (elem.fieldName === attrName && setSave !== 'add') {
+                // Logic quotation_id is not null and current value not same value from database and datatable is not empty
+                if (quotation_id !== '' && quotation_id != elem.value && _tableLine.data().any()) {
+                    Swal.fire({
+                        title: 'Delete?',
+                        text: "Are you sure you want to change all data ? ",
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Okay',
+                        cancelButtonText: 'Close',
+                        reverseButtons: true
+                    }).then((data) => {
+                        if (data.value) {
+                            _tableLine.clear().draw(false);
+                            setReceiptDetail(form, attrName, quotation_id, ID);
+                        } else {
+                            form.find('select[name=' + attrName + ']').val(elem.value).change();
+                        }
+                    });
+                }
+
+                // Logic quotation_id is not null and not same value from database and datatable is empty
+                if (quotation_id !== '' && quotation_id != elem.value && !_tableLine.data().any()) {
+                    setReceiptDetail(form, attrName, quotation_id);
+                }
+
+                // Logic prev data not same currentvalue and value from database and datatable is empty
+                if (typeof prev !== 'undefined' && prev !== '' && quotation_id !== '' && prev != quotation_id && prev != elem.value && !_tableLine.data().any()) {
+                    _tableLine.clear().draw(false);
+                    setReceiptDetail(form, attrName, quotation_id);
+                }
+            }
+        });
+
+        // callback value to prev
+        prev = this.value;
+    });
+});
+
+_tableLine.on('change', 'select[name="employee_id"]', function (evt) {
+    const tr = _tableLine.$(this).closest('tr');
+    let employee_id = this.value;
+    let isSpare = tr.find('input[name="isspare"]')[0];
+
+    if (employee_id !== '') {
+        // Column Branch
+        getOption('branch', 'branch_id', tr, null, employee_id);
+        // Column Division
+        getOption('division', 'division_id', tr, null, employee_id);
+
+        // Column Room
+        if (isSpare.checked) {
+            getOption('room', 'room_id', tr, null, 'IT'); // Based on division IT
+        } else {
+            getOption('room', 'room_id', tr, null, employee_id);
+        }
+    }
+});
+
+// Function for getter datatable from quotation
+function setReceiptDetail(form, fieldName, id, receipt_id = 0) {
+    const field = form.find('select, textarea');
+    let url = SITE_URL + '/getDetailQuotation';
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            id: id,
+            receipt_id: receipt_id
+        },
+        cache: false,
+        dataType: 'JSON',
+        beforeSend: function () {
+            $('.x_form').prop('disabled', true);
+            $('.close_form').prop('disabled', true);
+            loadingForm(form.prop('id'), 'facebook');
+        },
+        complete: function () {
+            $('.x_form').removeAttr('disabled');
+            $('.close_form').removeAttr('disabled');
+            hideLoadingForm(form.prop('id'));
+        },
+        success: function (result) {
+            if (result[0].success) {
+                let arrMsg = result[0].message;
+
+                if (arrMsg.header) {
+                    let header = arrMsg.header;
+
+                    for (let i = 0; i < header.length; i++) {
+                        let fieldInput = header[i].field;
+                        let label = header[i].label;
+
+                        for (let i = 0; i < field.length; i++) {
+                            // To set value on the field from quotation
+                            if (field[i].name !== '' && field[i].name === fieldInput) {
+                                if (field[i].type === 'select-one' && fieldName !== fieldInput) {
+                                    form.find('select[name=' + field[i].name + ']').val(label).change();
+                                }
+
+                                form.find('textarea[name=' + field[i].name + ']').val(label);
+                            }
+                        }
+                    }
+                }
+
+                if (arrMsg.line) {
+                    if (form.find('table.tb_displayline').length > 0) {
+                        let line = JSON.parse(arrMsg.line);
+
+                        $.each(line, function (idx, elem) {
+                            _tableLine.row.add(elem).draw(false);
+                        });
+
+                        const input = _tableLine.rows().nodes().to$().find('input, select');
+
+                        $.each(input, function (idx, item) {
+                            const tr = $(item).closest('tr');
+
+                            if ($(item).attr('name') === 'isspare') {
+                                if (item.checked) {
+                                    // Column Branch
+                                    getOption('branch', 'branch_id', tr, 100001);
+                                    // Column Division
+                                    getOption('division', 'division_id', tr, 100006);
+                                    // Column Room
+                                    getOption('room', 'room_id', tr, null, 'IT');
+                                } else {
+                                    let employee_id = tr.find('select[name="employee_id"]').val();
+                                    // Column Branch
+                                    getOption('branch', 'branch_id', tr, null, employee_id);
+                                    // Column Division
+                                    getOption('division', 'division_id', tr, null, employee_id);
+                                    // Column Room
+                                    getOption('room', 'room_id', tr, null, employee_id);
+                                }
+                            }
+                        });
+                    }
+                }
+            } else {
+                Toast.fire({
+                    type: 'error',
+                    title: result[0].message
+                });
+            }
+        },
+        error: function (jqXHR, exception) {
+            showError(jqXHR, exception);
+        }
+    });
+}
+
+function getOption(controller, field, tr, selected_id, ref_id = null) {
+    let url = ADMIN_URL + controller + '/getList';
+
+    tr.find('select[name =' + field + ']').empty();
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        cache: false,
+        data: {
+            reference: ref_id
+        },
+        dataType: 'JSON',
+        success: function (result) {
+            tr.find('select[name =' + field + ']').append('<option value=""></option>');
+
+            if (!result[0].error) {
+                $.each(result, function (idx, item) {
+                    // Check property key isset and key equal id or set selected equal id
+                    if (typeof item.key !== 'undefined' && item.key == item.id || selected_id == item.id) {
+                        tr.find('select[name =' + field + ']').append('<option value="' + item.id + '" selected>' + item.text + '</option>')
+                        tr.find('select[name =' + field + ']').attr('value', item.id);
+                    } else {
+                        tr.find('select[name =' + field + ']').append('<option value="' + item.id + '">' + item.text + '</option>');
+                    }
+                });
+            } else {
+                Swal.fire({
+                    type: 'error',
+                    title: result[0].message,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+        },
+        error: function (jqXHR, exception) {
+            showError(jqXHR, exception);
+        }
+    });
+}
+
+/**
+ * MASTER DATA EMPLOYEE
+ */
+$('#form_employee').on('change', '#md_branch_id', function (evt) {
+    let url = ADMIN_URL + 'room' + '/getList';
+    let value = this.value;
+
+    $('#md_room_id').empty();
+
+    if (value !== '') {
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: {
+                reference: value,
+                key: 'branch'
+            },
+            dataType: 'JSON',
+            success: function (result) {
+                $('#md_room_id').append('<option value=""></option>');
+
+                let md_room_id = 0;
+
+                $.each(option, function (i, item) {
+                    if (item.fieldName == 'md_room_id')
+                        md_room_id = item.value;
+                });
+
+                if (!result[0].error) {
+                    $.each(result, function (idx, item) {
+                        if (md_room_id == item.id) {
+                            $('#md_room_id').append('<option value="' + item.id + '" selected>' + item.text + '</option>');
+                        } else {
+                            $('#md_room_id').append('<option value="' + item.id + '">' + item.text + '</option>');
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        type: 'error',
+                        title: result[0].message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            },
+            error: function (jqXHR, exception) {
+                showError(jqXHR, exception);
+            }
+        });
+    }
+});
+
+/**
+ * Event Listener Movement Detail
+ */
+_tableLine.on('change', 'select[name="assetcode"]', function (evt) {
+    const tr = _tableLine.$(this).closest('tr');
+
+    let url = SITE_URL + '/getAssetDetail';
+    let value = this.value;
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        cache: false,
+        data: {
+            assetcode: value
+        },
+        dataType: 'JSON',
+        success: function (result) {
+            if (result[0].success) {
+                $.each(result[0].message, function (idx, item) {
+                    if (tr.find('select[name="product_id"]').length > 0) {
+                        tr.find('select[name="product_id"]').val(item.md_product_id).change();
+                    }
+
+                    if (tr.find('select[name="employee_from"]').length > 0) {
+                        tr.find('select[name="employee_from"]').val(item.md_employee_id).change();
+                    }
+
+                    if (tr.find('select[name="branch_from"]').length > 0) {
+                        tr.find('select[name="branch_from"]').val(item.md_branch_id).change();
+                    }
+
+                    if (tr.find('select[name="division_from"]').length > 0) {
+                        tr.find('select[name="division_from"]').val(item.md_division_id).change();
+                    }
+
+                    if (tr.find('select[name="room_from"]').length > 0) {
+                        tr.find('select[name="room_from"]').val(item.md_room_id).change();
+                    }
+                });
+            } else {
+                Toast.fire({
+                    type: 'error',
+                    title: result[0].message
+                });
+            }
+        },
+        error: function (jqXHR, exception) {
+            showError(jqXHR, exception);
+        }
+    });
+});
+
+// Event change field Status
+_tableLine.on('change', 'select[name="status_id"]', function (evt) {
+    const tr = _tableLine.$(this).closest('tr');
+    let value = $(this).find('option:selected').text();
+
+    if (value === 'RUSAK') {
+        tr.find('select[name="employee_to"]')
+            .val(100130).change()
+            .attr('disabled', true);
+    } else {
+        tr.find('select[name="employee_to"]')
+            .val(null).change()
+            .removeAttr('disabled');
+    }
+});
+
+// Event change field Employee To
+_tableLine.on('change', 'select[name="employee_to"]', function (evt) {
+    const tr = _tableLine.$(this).closest('tr');
+    let value = $(this).find('option:selected').text();
+    let status = tr.find('select[name="status_id"] option:selected').text();
+    let employee_id = this.value;
+
+    if (value === 'IT') {
+        // Column Branch
+        getOption('branch', 'branch_to', tr, 100001);
+        // Column Division
+        getOption('division', 'division_to', tr, 100006);
+
+        if (status === 'RUSAK') {
+            // Column Room
+            getOption('room', 'room_to', tr, 100041);
+            tr.find('select[name="room_to"]').attr('disabled', true);
+        }
+
+        if (status === 'BAGUS') {
+            // Column Room
+            getOption('room', 'room_to', tr, null, 'IT');
+            tr.find('select[name="room_to"]').removeAttr('disabled');
+        }
+    } else {
+        // Column Branch
+        getOption('branch', 'branch_to', tr, null, employee_id);
+        // Column Division
+        getOption('division', 'division_to', tr, null, employee_id);
+        // Column Room
+        getOption('room', 'room_to', tr, null, employee_id);
+        tr.find('select[name="room_to"]').removeAttr('disabled');
+        // tr.find('select[name="room_to"]').attr('disabled', true);
+    }
+
+    if (value === '') {
+        tr.find('select[name="branch_to"]').val(null).change();
+        tr.find('select[name="division_to"]').val(null).change();
+        tr.find('select[name="room_to"]').val(null).change();
+    }
+});
+
+/**
+ * Event Menu Inventory
+ */
+// Form Inventory
+$('#form_inventory').on('change', '#md_branch_id', function (evt) {
+    let url = ADMIN_URL + 'room' + '/getList';
+    let value = this.value;
+
+    $('#md_room_id').empty();
+
+    if (value !== '') {
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: {
+                reference: value,
+                key: 'all'
+            },
+            beforeSend: function () {
+                $('.save_form').attr('disabled', true);
+                $('.close_form').attr('disabled', true);
+                loadingForm('form_inventory', 'pulse');
+            },
+            complete: function () {
+                $('.save_form').removeAttr('disabled');
+                $('.close_form').removeAttr('disabled');
+                hideLoadingForm('form_inventory');
+            },
+            dataType: 'JSON',
+            success: function (result) {
+                $('#md_room_id').append('<option value=""></option>');
+
+                let md_room_id = 0;
+
+                $.each(option, function (i, item) {
+                    if (item.fieldName == 'md_room_id')
+                        md_room_id = item.value;
+                });
+
+                if (!result[0].error) {
+                    $.each(result, function (idx, item) {
+                        if (md_room_id == item.id) {
+                            $('#md_room_id').append('<option value="' + item.id + '" selected>' + item.text + '</option>');
+                        } else {
+                            $('#md_room_id').append('<option value="' + item.id + '">' + item.text + '</option>');
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        type: 'error',
+                        title: result[0].message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            },
+            error: function (jqXHR, exception) {
+                showError(jqXHR, exception);
+            }
+        });
+    }
+});
+
+$('#form_inventory').on('change', '#md_room_id', function (evt) {
+    let url = ADMIN_URL + 'employee' + '/getList';
+    let value = this.value;
+    let md_room_id = 0;
+    let md_branch_id = $('#md_branch_id option:selected').val();
+
+    $.each(option, function (i, item) {
+        if (item.fieldName == 'md_room_id') {
+            md_room_id = item.value;
+        }
+    });
+
+    $('#md_employee_id').empty();
+
+    if (value !== '' || md_room_id !== '') {
+        let refValue = value !== '' ? value : md_room_id;
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: {
+                reference: refValue,
+                branch: md_branch_id
+            },
+            beforeSend: function () {
+                $('.save_form').attr('disabled', true);
+                $('.close_form').attr('disabled', true);
+                loadingForm('form_inventory', 'pulse');
+            },
+            complete: function () {
+                $('.save_form').removeAttr('disabled');
+                $('.close_form').removeAttr('disabled');
+                hideLoadingForm('form_inventory');
+            },
+            dataType: 'JSON',
+            success: function (result) {
+                $('#md_employee_id').append('<option value=""></option>');
+
+                let md_employee_id = 0;
+
+                $.each(option, function (i, item) {
+                    if (item.fieldName == 'md_employee_id') {
+                        md_employee_id = item.value;
+                    }
+                });
+
+                if (!result[0].error) {
+                    $.each(result, function (idx, item) {
+                        // Check employee from db and event first change edit is null value or event change get value
+                        if (md_employee_id == item.id && value == '' || md_employee_id == item.id && value == md_room_id) {
+                            $('#md_employee_id').append('<option value="' + item.id + '" selected>' + item.text + '</option>');
+                        } else {
+                            $('#md_employee_id').append('<option value="' + item.id + '">' + item.text + '</option>');
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        type: 'error',
+                        title: result[0].message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            },
+            error: function (jqXHR, exception) {
+                showError(jqXHR, exception);
+            }
+        });
+    }
+});
+
+// Form Filter
+$(document).ready(function (e) {
+    $('.select-product').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        allowClear: true,
+        minimumInputLength: 3,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'product/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-branch').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        allowClear: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'branch/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-employee').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        allowClear: true,
+        minimumInputLength: 3,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'employee/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+});
+
+$('#filter_inventory').on('change', '[name="md_branch_id"]', function (evt) {
+    let url = ADMIN_URL + 'room' + '/getList';
+    let value = this.value;
+
+    $('[name="md_room_id"]').empty();
+
+    // Set condition when clear or value zero
+    if (value !== '' && value !== '0') {
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: {
+                reference: value,
+                key: 'all'
+            },
+            dataType: 'JSON',
+            success: function (result) {
+                $('[name="md_room_id"]').append('<option value=""></option>');
+
+                if (!result[0].error) {
+                    $.each(result, function (idx, item) {
+                        $('[name="md_room_id"]').append('<option value="' + item.id + '">' + item.text + '</option>');
+                    });
+                } else {
+                    Swal.fire({
+                        type: 'error',
+                        title: result[0].message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            },
+            error: function (jqXHR, exception) {
+                showError(jqXHR, exception);
+            }
+        });
+    }
+});
+
+$('.upload_form').click(function (evt) {
+    console.log(evt)
+    $('.modal_upload').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
+    Scrollmodal();
+})
+
+$('.custom-file-input').change(function (e) {
+    var name = document.getElementById("customFileInput").files[0].name;
+    var nextSibling = e.target.nextElementSibling
+    nextSibling.innerText = name
+});
+
+$('.save_upload').click(function (evt) {
+    var fd = new FormData();
+
+    fd.append('file', $('#customFileInput')[0].files[0])
+    $.ajax({
+        url: SITE_URL + '/import',
+        type: "POST",
+        data: fd,
+        processData: false, // important
+        contentType: false, // important
+        dataType: "JSON",
+        success: function (response) {
+            console.log(response)
+        }
+    });
+
+    // console.log(fd)
+})
