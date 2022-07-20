@@ -7,6 +7,7 @@ use App\Models\M_Datatable;
 use App\Models\M_Role;
 use App\Models\M_Menu;
 use App\Models\M_Submenu;
+use App\Models\M_AccessMenu;
 use Config\Services;
 
 class Role extends BaseController
@@ -113,12 +114,16 @@ class Role extends BaseController
 
 	public function show($id)
 	{
+		$acessMenu = new M_AccessMenu($this->request);
+
 		if ($this->request->isAJAX()) {
 			try {
-				$list = $this->model->detail([], $this->model->table . '.' . $this->model->primaryKey, $id)->getResult();
+				$list = $this->model->where($this->model->primaryKey, $id)->findAll();
+				$detail = $acessMenu->where($this->model->primaryKey, $id)->findAll();
 
 				$result = [
-					'header'    => $this->field->store($this->model->table, $list)
+					'header'	=> $this->field->store($this->model->table, $list),
+					'line'    	=> $this->field->store($acessMenu->table, $detail, 'table')
 				];
 
 				$response = message('success', true, $result);
