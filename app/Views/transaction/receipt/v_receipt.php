@@ -12,7 +12,7 @@
                 <th>Doc No</th>
                 <th>Date</th>
                 <th>Supplier</th>
-                <th>Status</th>
+                <th>Active</th>
                 <th>Invoice No</th>
                 <th>Grand Total</th>
                 <th>Doc Status</th>

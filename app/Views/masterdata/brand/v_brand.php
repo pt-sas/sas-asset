@@ -11,7 +11,7 @@
                 <th>No</th>
                 <th>Brand Code</th>
                 <th>Name</th>
-                <th>Status</th>
+                <th>Active</th>
                 <th>Actions</th>
             </tr>
         </thead>

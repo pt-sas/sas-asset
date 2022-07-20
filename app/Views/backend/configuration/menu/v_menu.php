@@ -13,7 +13,7 @@
         <th>Url</th>
         <th>Sequence</th>
         <th>Icon</th>
-        <th>Status</th>
+        <th>Active</th>
         <th>Actions</th>
       </tr>
     </thead>

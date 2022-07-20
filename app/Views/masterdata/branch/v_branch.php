@@ -14,7 +14,7 @@
                 <th>Address</th>
                 <th>Leader</th>
                 <th>Telephone</th>
-                <th>Status</th>
+                <th>Active</th>
                 <th>Actions</th>
             </tr>
         </thead>

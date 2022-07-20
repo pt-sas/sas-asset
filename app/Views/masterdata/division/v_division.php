@@ -12,7 +12,7 @@
                 <th>Division Code</th>
                 <th>Name</th>
                 <th>Description</th>
-                <th>Status</th>
+                <th>Active</th>
                 <th>Actions</th>
             </tr>
         </thead>

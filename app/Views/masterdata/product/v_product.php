@@ -16,7 +16,7 @@
                 <th>Sub-Category</th>
                 <th>Type</th>
                 <th>Description</th>
-                <th>Status</th>
+                <th>Active</th>
                 <th>Actions</th>
             </tr>
         </thead>

@@ -17,7 +17,7 @@
                 <th>Telephone</th>
                 <th>Vendor</th>
                 <th>Service</th>
-                <th>Status</th>
+                <th>Active</th>
                 <th>Actions</th>
             </tr>
         </thead>

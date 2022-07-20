@@ -12,7 +12,7 @@
                 <th>Room Code</th>
                 <th>Name</th>
                 <th>Branch</th>
-                <th>Status</th>
+                <th>Active</th>
                 <th>Actions</th>
             </tr>
         </thead>

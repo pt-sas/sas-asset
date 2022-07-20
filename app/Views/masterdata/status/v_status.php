@@ -14,7 +14,7 @@
                 <th>Description</th>
                 <th>Menu</th>
                 <th>Line</th>
-                <th>Status</th>
+                <th>Active</th>
                 <th>Actions</th>
             </tr>
         </thead>

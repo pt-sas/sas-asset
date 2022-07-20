@@ -12,7 +12,7 @@
                 <th>Subcategory Code</th>
                 <th>Name</th>
                 <th>Category</th>
-                <th>Status</th>
+                <th>Active</th>
                 <th>Actions</th>
             </tr>
         </thead>

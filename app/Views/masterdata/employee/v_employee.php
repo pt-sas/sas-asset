@@ -14,7 +14,7 @@
                 <th>Branch</th>
                 <th>Division</th>
                 <th>Room</th>
-                <th>Status</th>
+                <th>Active</th>
                 <th>Actions</th>
             </tr>
         </thead>
