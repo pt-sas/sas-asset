@@ -260,18 +260,19 @@ class Receipt extends BaseController
                         $quotationDetail->updateQty($arrQuoDetail, 'qtyreceipt');
 
                         //* Passing data to table inventory
+                        $line = $this->field->mergeArrObject($line, [
+                            'md_status_id'      => $row->getStatusId()
+                        ]);
+
                         $inventory->create($line);
 
                         //* Passing data to table transaction
-                        $arrLine = [];
-                        foreach ($line as $key => $value) :
-                            $data = $value;
-                            $data->transactiontype = $this->Inventory_In;
-                            $data->transactiondate = $row->getReceiptDate();
-                            $arrLine[$key] = $data;
-                        endforeach;
+                        $line = $this->field->mergeArrObject($line, [
+                            'transactiontype'   => $this->Inventory_In,
+                            'transactiondate'   => $row->getReceiptDate()
+                        ]);
 
-                        $transaction->create($arrLine);
+                        $transaction->create($line);
                     }
 
                     $msg = $result ? $msg : $result;
