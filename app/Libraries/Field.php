@@ -272,6 +272,16 @@ class Field
         return $div;
     }
 
+    /**
+     * Function to add array key to more than one data
+     *
+     * @param [type] $table
+     * @param [type] $data
+     * @param string $field
+     * @param [type] $value
+     * @param [type] $text
+     * @return void
+     */
     public function setDataSelect($table, $data, $field = 'id', $value, $text)
     {
         foreach ($data as $row) :
@@ -283,5 +293,28 @@ class Field
         endforeach;
 
         return $data;
+    }
+
+    /**
+     * Function for merge object to array object
+     *
+     * @param [type] $arr
+     * @param array $data array object
+     * @return void
+     */
+    public function mergeArrObject($arr, $data = [])
+    {
+        foreach ($arr as $key => $value) :
+            $row = $value;
+
+            if (count($data) > 0)
+                foreach ($data as $field => $val) :
+                    $row->$field = $val;
+                endforeach;
+
+            $arr[$key] = $row;
+        endforeach;
+
+        return $arr;
     }
 }
