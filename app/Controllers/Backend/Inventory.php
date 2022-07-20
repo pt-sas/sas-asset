@@ -62,6 +62,7 @@ class Inventory extends BaseController
                 $row[] = $value->division;
                 $row[] = $value->room;
                 $row[] = $value->employee;
+                $row[] = $value->status;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
@@ -204,6 +205,4 @@ class Inventory extends BaseController
             return $this->response->setJSON($response);
         }
     }
-
-    
 }

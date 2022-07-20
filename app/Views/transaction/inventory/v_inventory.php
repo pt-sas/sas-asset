@@ -4,7 +4,7 @@
 
 <?= $this->include('transaction/inventory/form_inventory'); ?>
 <div class="card-body card-main">
-    <table class="table table-bordered table-hover tb_display" style="width: 100%">
+    <table class="table table-striped table-hover tb_display" style="width: 100%">
         <thead>
             <tr>
                 <th>ID</th>
@@ -16,6 +16,7 @@
                 <th>Room</th>
                 <th>Employee</th>
                 <th>Status</th>
+                <th>Active</th>
                 <th>Actions</th>
             </tr>
         </thead>
