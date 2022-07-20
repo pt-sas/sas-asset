@@ -28,8 +28,16 @@ function message($param, $value, $message)
 
 function active($string)
 {
-    return $string === 'Y' ? '<center><span class="badge badge-success">Active</span></center>' :
-        '<center><span class="badge badge-danger">Non-active</span></center>';
+    $isChecked = $string === 'Y' ? ' checked ' : '';
+
+    $html = '<center><div class="form-check">
+        <label class="form-check-label">
+            <input type="checkbox" class="form-check-input"' . $isChecked  . 'disabled>
+            <span class="form-check-sign"></span>
+        </label>
+    </div></center>';
+
+    return $html;
 }
 
 function status($string)
