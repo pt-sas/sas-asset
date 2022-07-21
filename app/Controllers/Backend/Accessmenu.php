@@ -8,7 +8,7 @@ use App\Models\M_Menu;
 use App\Models\M_Submenu;
 use Config\Services;
 
-class Accessmenu extends BaseController
+class AccessMenu extends BaseController
 {
 	protected $request;
 
