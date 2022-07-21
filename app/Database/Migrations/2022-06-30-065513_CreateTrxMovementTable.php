@@ -21,7 +21,7 @@ class CreateTrxMovementTable extends Migration
             'movementdate'          => ['type' => 'timestamp', 'null' => false],
             'docstatus'             => ['type' => 'CHAR', 'constraint' => 2, 'null' => false],
             'description'           => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-            'md_status_id'          => ['type' => 'INT', 'constraint' => 6, 'null' => false],
+            'md_status_id'          => ['type' => 'INT', 'constraint' => 6, 'null' => true],
         ]);
         $this->forge->addKey('trx_movement_id', true);
         $this->forge->createTable('trx_movement', true);
