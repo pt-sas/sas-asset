@@ -37,7 +37,7 @@ class Access
         $user = new M_User($this->request);
 
         $dataUser = $user->detail([
-            'username'    => $post['username']
+            'BINARY(username)'    => $post['username']
         ])->getRow();
 
         if ($dataUser) {
