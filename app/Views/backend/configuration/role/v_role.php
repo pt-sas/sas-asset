@@ -10,6 +10,10 @@
         <th>No</th>
         <th>Name</th>
         <th>Description</th>
+        <th>Manual</th>
+        <th>Can Export</th>
+        <th>Can Report</th>
+        <th>Allow Multiple Print</th>
         <th>Active</th>
         <th>Actions</th>
       </tr>

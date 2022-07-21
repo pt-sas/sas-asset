@@ -14,6 +14,10 @@ class M_Role extends Model
         'name',
         'description',
         'isactive',
+        'ismanual',
+        'iscanexport',
+        'iscanreport',
+        'isallowmultipleprint',
         'created_by',
         'updated_by'
     ];

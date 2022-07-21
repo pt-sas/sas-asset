@@ -68,6 +68,10 @@ class Role extends BaseController
 				$row[] = $number;
 				$row[] = $value->name;
 				$row[] = $value->description;
+				$row[] = status($value->ismanual);
+				$row[] = status($value->iscanexport);
+				$row[] = status($value->iscanreport);
+				$row[] = status($value->isallowmultipleprint);
 				$row[] = active($value->isactive);
 				$row[] = $this->template->tableButton($ID);
 				$data[] = $row;
@@ -92,6 +96,10 @@ class Role extends BaseController
 			try {
 				$this->entity->fill($post);
 				$this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
+				$this->entity->setIsManual(setCheckbox(isset($post['ismanual'])));
+				$this->entity->setIsCanExport(setCheckbox(isset($post['iscanexport'])));
+				$this->entity->setIsCanReport(setCheckbox(isset($post['iscanreport'])));
+				$this->entity->setIsAllowMultiplePrint(setCheckbox(isset($post['isallowmultipleprint'])));
 				$this->entity->setCreatedBy($this->session->get('sys_user_id'));
 				$this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
@@ -144,6 +152,10 @@ class Role extends BaseController
 				$this->entity->fill($post);
 				$this->entity->setRoleId($post['id']);
 				$this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
+				$this->entity->setIsManual(setCheckbox(isset($post['ismanual'])));
+				$this->entity->setIsCanExport(setCheckbox(isset($post['iscanexport'])));
+				$this->entity->setIsCanReport(setCheckbox(isset($post['iscanreport'])));
+				$this->entity->setIsAllowMultiplePrint(setCheckbox(isset($post['isallowmultipleprint'])));
 				$this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
 				if (!$this->validation->run($post, 'role')) {

@@ -8,16 +8,48 @@
                     <input type="text" class="form-control" id="name" name="name">
                     <small class="form-text text-danger" id="error_name"></small>
                 </div>
-                <div class="form-group">
-                    <label for="description">Description </label>
-                    <textarea type="text" class="form-control" id="description" name="description" rows="3"></textarea>
-                </div>
             </div>
             <div class="col-md-6 mt-4">
                 <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">
                         <span class="form-check-sign">Active</span>
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="description">Description </label>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="col-md-2 mt-4">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="ismanual" name="ismanual" checked>
+                        <span class="form-check-sign">Manual</span>
+                    </label>
+                </div>
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="isallowmultipleprint" name="isallowmultipleprint">
+                        <span class="form-check-sign">Allow Multiple Print</span>
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-2 mt-4">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="iscanexport" name="iscanexport" checked>
+                        <span class="form-check-sign">Can Export</span>
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-2 mt-4">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="iscanreport" name="iscanreport" checked>
+                        <span class="form-check-sign">Can Report</span>
                     </label>
                 </div>
             </div>
