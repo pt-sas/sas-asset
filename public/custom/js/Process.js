@@ -168,12 +168,14 @@ $('.save_form').click(function (evt) {
     const parent = $(evt.target).closest('.row');
     const form = parent.find('form');
     cardForm = parent.find('.card-form');
+    const container = target.closest('.container');
 
     let _this = $(this);
     let oriElement = _this.html();
 
     let url;
     let action = 'create';
+    let oriTitle = container.find('.page-title').text();
 
     let checkAccess = isAccess(action, LAST_URL);
 
@@ -428,7 +430,7 @@ $('.save_form').click(function (evt) {
                         modalForm.modal('hide');
                     }
 
-                    cardTitle.html(capitalize(LAST_URL));
+                    cardTitle.html(oriTitle);
 
                     reloadTable();
 
@@ -1053,6 +1055,9 @@ function docProcess(id, status) {
  */
 $(document).on('click', '.x_form, .close_form', function (evt) {
     let target = $(evt.currentTarget);
+    const container = target.closest('.container');
+
+    let oriTitle = container.find('.page-title').text();
 
     setSave = 'close';
 
@@ -1090,7 +1095,7 @@ $(document).on('click', '.x_form, .close_form', function (evt) {
     }
 
     clearForm(evt);
-    cardTitle.html(capitalize(LAST_URL));
+    cardTitle.html(oriTitle);
 
     // Clear button attribute disable 
     $(this).removeAttr('disabled');
@@ -1111,6 +1116,8 @@ $('.new_form').click(function (evt) {
 
     let form;
     let action = 'create';
+
+    let oriTitle = parent.find('.page-title').text();
 
     let checkAccess = isAccess(action, LAST_URL);
 
@@ -1149,7 +1156,7 @@ $('.new_form').click(function (evt) {
                     $(this).css('display', 'block');
                     cardBtn.css('display', 'block');
 
-                    cardTitle.html('New ' + capitalize(LAST_URL));
+                    cardTitle.html('New ' + oriTitle);
 
                     form = $(this).find('form');
 
