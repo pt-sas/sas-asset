@@ -17,6 +17,8 @@ class M_AccessMenu extends Model
         'iscreate',
         'isupdate',
         'isdelete',
+        'created_by',
+        'updated_by'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\Accessmenu';
