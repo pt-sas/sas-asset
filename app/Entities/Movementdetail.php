@@ -4,7 +4,7 @@ namespace App\Entities;
 
 use CodeIgniter\Entity;
 
-class Movementdetail extends Entity
+class MovementDetail extends Entity
 {
 	protected $datamap = [];
 	protected $dates   = [

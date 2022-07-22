@@ -4,7 +4,7 @@ namespace App\Entities;
 
 use CodeIgniter\Entity;
 
-class Receiptdetail extends Entity
+class ReceiptDetail extends Entity
 {
 	protected $datamap = [];
 	protected $dates   = [
