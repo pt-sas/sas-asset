@@ -739,4 +739,36 @@ class Validation
             ]
         ]
     ];
+
+    public $groupasset = [
+        'value'  => [
+            'label'                 => 'Group Asset Code',
+            'rules'                 => 'required|is_unique[md_groupasset.value,md_groupasset_id,{id}]',
+            'errors'                => [
+                'required' => 'Please Insert the {field}',
+                'is_unique' => 'This {field} already exists.'
+            ]
+        ],
+        'name' => [
+            'label'                 => 'Name',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Insert the {field}'
+            ]
+        ],
+        'initialcode' => [
+            'label'                 => 'Initial Code',
+            'rules'                 => 'required|min_length[2]|max_length[2]',
+            'errors'                => [
+                'required' => 'Please Insert the {field}'
+            ]
+        ],
+        'usefullife' => [
+            'label'                 => 'Useful Life',
+            'rules'                 => 'required|is_natural_no_zero',
+            'errors'                => [
+                'required' => 'Please Insert the {field}'
+            ]
+        ]
+    ];
 }
