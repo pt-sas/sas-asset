@@ -168,7 +168,7 @@ $('.save_form').click(function (evt) {
     const parent = $(evt.target).closest('.row');
     const form = parent.find('form');
     cardForm = parent.find('.card-form');
-    const container = target.closest('.container');
+    const container = $(evt.target).closest('.container');
 
     let _this = $(this);
     let oriElement = _this.html();
