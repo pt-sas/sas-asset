@@ -19,8 +19,8 @@ class CreateDivisionTable extends Migration
             'updated_by'            => ['type' => 'INT', 'constraint' => 6, 'null' => false],
             'value'                 => ['type' => 'VARCHAR', 'constraint' => 10, 'null' => false],
             'name'                  => ['type' => 'VARCHAR', 'constraint' => 32, 'null' => false],
-            'description'           => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-            'superior_id'           => ['type' => 'INT', 'constraint' => 6, 'null' => false]
+            'description'           => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false]
+            // 'superior_id'           => ['type' => 'INT', 'constraint' => 6, 'null' => false]
         ]);
         $this->forge->addKey('md_division_id', true);
         $this->forge->createTable('md_division', true);
