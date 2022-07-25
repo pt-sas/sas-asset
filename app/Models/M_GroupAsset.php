@@ -20,7 +20,7 @@ class M_GroupAsset extends Model
         'updated_by'
     ];
     protected $useTimestamps = true;
-    protected $returnType = 'App\Entities\Brand';
+    protected $returnType = 'App\Entities\GroupAsset';
     protected $column_order = [
         '', // Hide column
         '', // Number column
