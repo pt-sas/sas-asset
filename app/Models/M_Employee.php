@@ -4,6 +4,7 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 use CodeIgniter\HTTP\RequestInterface;
+use App\Models\M_AlertRecipient;
 
 class M_Employee extends Model
 {
@@ -22,7 +23,14 @@ class M_Employee extends Model
 		'updated_by'
 	];
 	protected $useTimestamps        = true;
-	protected $returnType = 'App\Entities\Employee';
+	protected $returnType 			= 'App\Entities\Employee';
+	protected $allowCallbacks		= true;
+	protected $beforeInsert			= [];
+	protected $afterInsert			= ['createAlert'];
+	protected $beforeUpdate			= [];
+	protected $afterUpdate			= ['createAlert'];
+	protected $beforeDelete			= [];
+	protected $afterDelete			= ['deleteAlert'];
 	protected $column_order = [
 		'', // Hide column
 		'', // Number column
@@ -84,5 +92,86 @@ class M_Employee extends Model
 			"columnJoin" => $columnJoin,
 			"typeJoin" => $typeJoin
 		];
+	}
+
+	public function detail($arrParam = [], $field = null, $where = null)
+	{
+		$this->builder->select($this->table . '.*,' .
+			'md_alertrecipient.md_alertrecipient_id,
+			md_alertrecipient.record_id,
+			md_alertrecipient.sys_user_id AS alert');
+
+		$this->builder->join('md_alertrecipient', 'md_alertrecipient.record_id = ' . $this->table . '.md_employee_id', 'left');
+		$this->builder->join('sys_user', 'sys_user.sys_user_id = md_alertrecipient.sys_user_id', 'left');
+
+		if (count($arrParam) > 0) {
+			$this->builder->where($arrParam);
+		} else {
+			if (!empty($where)) {
+				$this->builder->where($field, $where);
+			}
+		}
+
+		$this->builder->orderBy('sys_user.name', 'ASC');
+
+		$query = $this->builder->get();
+		return $query;
+	}
+
+	public function createAlert(array $rows)
+	{
+		$alert = new M_AlertRecipient($this->request);
+		$entity = new \App\Entities\AlertRecipient();
+
+		$post = $this->request->getVar();
+
+		if (isset($post['alert'])) {
+			$post['alert'] = explode(',', $post['alert']);
+
+			if (!isset($post['id'])) {
+				foreach ($post['alert'] as $key => $val) :
+					$entity->setRecordId($rows['id']);
+					$entity->setUserId($val);
+					$entity->setCreatedBy(session()->get('sys_user_id'));
+					$entity->setUpdatedBy(session()->get('sys_user_id'));
+
+					$alert->save($entity);
+				endforeach;
+			} else {
+				$arrAlert = $alert->where('record_id', $post['id'])->findAll();
+
+				$arrUser = [];
+
+				foreach ($arrAlert as $key => $row) :
+					if (!in_array($row->getUserId(), $post['alert'])) {
+						$alert->where([
+							'record_id'		=> $rows['id'],
+							'sys_user_id'	=> $row->getUserId()
+						])->delete();
+					}
+
+					// Get list user in this employee before update
+					$arrUser[] = $row->getUserId();
+				endforeach;
+
+				// Add new user when update employee
+				foreach ($post['alert'] as $key => $val) :
+					if (!in_array($val, $arrUser)) {
+						$entity->setRecordId($rows['id']);
+						$entity->setUserId($val);
+						$entity->setCreatedBy(session()->get('sys_user_id'));
+						$entity->setUpdatedBy(session()->get('sys_user_id'));
+
+						$alert->save($entity);
+					}
+				endforeach;
+			}
+		}
+	}
+
+	public function deleteAlert(array $rows)
+	{
+		$alert = new M_AlertRecipient($this->request);
+		$alert->where('record_id', $rows['id'])->delete();
 	}
 }

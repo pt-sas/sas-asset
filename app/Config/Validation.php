@@ -158,6 +158,10 @@ class Validation
         'md_room_id'         => [
             'label'            =>    'Room',
             'rules'            =>    'required'
+        ],
+        'alert.*'           => [
+            'label'         => 'Alert',
+            'rules'         => 'required'
         ]
     ];
 

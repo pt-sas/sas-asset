@@ -27,7 +27,15 @@ class Employee extends BaseController
 
     public function index()
     {
-        return $this->template->render('masterdata/employee/v_employee');
+        $user = new M_User($this->request);
+
+        $data = [
+            'user'        => $user->where('isactive', 'Y')
+                ->orderBy('name', 'ASC')
+                ->findAll()
+        ];
+
+        return $this->template->render('masterdata/employee/v_employee', $data);
     }
 
     public function showAll()
@@ -106,12 +114,22 @@ class Employee extends BaseController
 
     public function show($id)
     {
+        $branch = new M_Branch($this->request);
+        $division = new M_Division($this->request);
+
         if ($this->request->isAJAX()) {
             try {
-                $list = $this->model->where($this->model->primaryKey, $id)->findAll();
+                $list = $this->model->detail([], $this->model->table . '.' . $this->model->primaryKey, $id);
+
+                $arrList = $list->getResult();
+                $rowBranch = $branch->find($arrList[0]->md_branch_id);
+                $rowDivision = $division->find($arrList[0]->md_division_id);
+
+                $arrList = $this->field->setDataSelect($branch->table, $list->getResult(), $branch->primaryKey, $rowBranch->getBranchId(), $rowBranch->getName());
+                $arrList = $this->field->setDataSelect($division->table, $list->getResult(), $division->primaryKey, $rowDivision->getDivisionId(), $rowDivision->getName());
 
                 $result = [
-                    'header'   => $this->field->store($this->model->table, $list)
+                    'header'   => $this->field->store($this->model->table, $arrList, $list)
                 ];
 
                 $response = message('success', true, $result);
