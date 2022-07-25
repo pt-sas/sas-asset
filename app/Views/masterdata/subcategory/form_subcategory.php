@@ -19,7 +19,9 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_category_id">Category <span class="required">*</span></label>
-                    <select class="form-control select-data" id="md_category_id" name="md_category_id" data-url="category/getList"></select>
+                    <select class="form-control select-data" id="md_category_id" name="md_category_id" data-url="category/getList">
+                        <option value="">Select Category</option>
+                    </select>
                     <small class="form-text text-danger" id="error_md_category_id"></small>
                 </div>
                 <div class="form-check">

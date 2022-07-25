@@ -11,6 +11,7 @@
                 <th>No</th>
                 <th>Category Code</th>
                 <th>Name</th>
+                <th>Initial Code</th>
                 <th>Active</th>
                 <th>Actions</th>
             </tr>

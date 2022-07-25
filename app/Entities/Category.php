@@ -11,6 +11,7 @@ class Category extends Entity
 	protected $name;
 	protected $description;
 	protected $initialcode;
+	protected $md_groupasset_id;
 	protected $isactive;
 	protected $created_by;
 	protected $updated_by;
@@ -69,6 +70,16 @@ class Category extends Entity
 	public function setInitialCode($initialcode)
 	{
 		$this->attributes['initialcode'] = $initialcode;
+	}
+
+	public function getGroupAssetId()
+	{
+		return $this->attributes['md_groupasset_id'];
+	}
+
+	public function setGroupAssetId($md_groupasset_id)
+	{
+		$this->attributes['md_groupasset_id'] = $md_groupasset_id;
 	}
 
 	public function getIsActive()

@@ -12,6 +12,8 @@ class M_Category extends Model
     protected $allowedFields = [
         'value',
         'name',
+        'initialcode',
+        'md_groupasset_id',
         'isactive',
         'created_by',
         'updated_by'
@@ -23,11 +25,13 @@ class M_Category extends Model
         '', // Number column
         'md_category.value',
         'md_category.name',
+        'md_category.initialcode',
         'md_category.isactive'
     ];
     protected $column_search = [
         'md_category.value',
         'md_category.name',
+        'md_category.initialcode',
         'md_category.isactive'
     ];
     protected $order = ['value' => 'ASC'];

@@ -5,6 +5,7 @@ namespace App\Controllers\Backend;
 use App\Controllers\BaseController;
 use App\Models\M_Datatable;
 use App\Models\M_Category;
+use App\Models\M_GroupAsset;
 use Config\Services;
 
 class Category extends BaseController
@@ -53,6 +54,7 @@ class Category extends BaseController
                 $row[] = $number;
                 $row[] = $value->value;
                 $row[] = $value->name;
+                $row[] = $value->initialcode;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
@@ -99,9 +101,17 @@ class Category extends BaseController
 
     public function show($id)
     {
+        $groupasset = new M_GroupAsset($this->request);
+
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
+
+                if (!empty($list[0]->getGroupAssetId())) {
+                    $rowGroup = $groupasset->find($list[0]->getGroupAssetId());
+
+                    $list = $this->field->setDataSelect($groupasset->table, $list, $groupasset->primaryKey, $rowGroup->getGroupAssetId(), $rowGroup->getName());
+                }
 
                 $result = [
                     'header'   => $this->field->store($this->model->table, $list)

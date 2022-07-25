@@ -281,6 +281,20 @@ class Validation
                 'is_unique' => 'This {field} already exists.',
                 'required'    => 'Please Fill {field} first'
             ]
+        ],
+        'initialcode' => [
+            'label'                 => 'Initial Code',
+            'rules'                 => 'required|min_length[2]|max_length[2]',
+            'errors'                => [
+                'required' => 'Please Insert the {field}'
+            ]
+        ],
+        'md_groupasset_id'            => [
+            'label'            => 'Group Asset',
+            'rules'            => 'required',
+            'errors'        => [
+                'required'    => 'Please Choose the {field} first'
+            ]
         ]
     ];
 
