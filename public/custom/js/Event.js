@@ -770,15 +770,3 @@ $('.save_upload').click(function (evt) {
 
     // console.log(fd)
 })
-
-_table.on('click', '.edit', function (evt) {
-    const parent = $(evt.target).closest('.container');
-    const form = parent.find('form');
-    const row = _table.row(this).data();
-
-    ID = row[0];
-
-    if (form.find('input:checkbox[name="isinternaluse"]').is(':checked')) {
-        form.find('select[name="md_supplier_id"]').prop('disabled', true);
-    }
-});

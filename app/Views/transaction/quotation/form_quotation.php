@@ -17,7 +17,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_supplier_id">Supplier <span class="required">*</span></label>
-                    <select class="form-control select-data" id="md_supplier_id" name="md_supplier_id" data-url="supplier/getList">
+                    <select class="form-control select-data" id="md_supplier_id" name="md_supplier_id" data-url="supplier/getList" edit-disabled="disabled">
                         <option value="">Select Supplier</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_supplier_id"></small>
