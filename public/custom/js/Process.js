@@ -489,72 +489,71 @@ $('.save_form').click(function (evt) {
 /**
  * Button edit data
  * Show data on the form
- * @param {*} id data
  */
-function Edit(id, status = '') {
-    ID = id;
+_table.on('click', '.edit', function (evt) {
+    const parent = $(evt.target).closest('.container');
+    const cardBody = parent.find('.card-body');
+    const form = parent.find('form');
+    const row = _table.row(this).data();
 
-    let form, formList;
+    ID = row[0];
+
+    let formList, status;
     let arrMultiSelect = [];
-
     let action = 'update';
 
     let checkAccess = isAccess(action, LAST_URL);
 
+    if ($(this).attr('data-status'))
+        status = $(this).attr('data-status');
+
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
-        if (cardMain.length > 0) {
-            cardMain.css('display', 'none');
-            cardForm.css('display', 'block');
+        $.each(cardBody, function (idx, elem) {
+            let className = elem.className.split(/\s+/);
 
-            const container = cardForm.closest('.container');
+            if (cardBody.length > 1) {
+                if (className.includes('card-main')) {
+                    $(this).css('display', 'none');
 
-            if (!cardForm.prop('classList').contains('modal')) {
-                cardBtn.css('display', 'block');
-                const card = cardForm.closest('.card');
-                const btnList = card.find('.float-right').find('button');
+                    const pageHeader = parent.find('.page-header');
+                    ul = pageHeader.find('ul.breadcrumbs');
 
-                const pageHeader = container.find('.page-header');
-                ul = pageHeader.find('ul.breadcrumbs');
+                    // Append list separator and text create
+                    ul.find('li.nav-item > a').attr('href', CURRENT_URL);
 
-                // Append list separator and text create
-                ul.find('li.nav-item > a').attr('href', CURRENT_URL);
+                    let list = '<li class="separator">' +
+                        '<i class="flaticon-right-arrow"></i>' +
+                        '</li>';
 
-                let list = '<li class="separator">' +
-                    '<i class="flaticon-right-arrow"></i>' +
-                    '</li>';
+                    if ((typeof status === 'undefined' || status === '') || status === 'DR')
+                        list += '<li class="nav-item">' +
+                        '<a class="text-primary font-weight-bold">Update</a>' +
+                        '</li>';
+                    else
+                        list += '<li class="nav-item">' +
+                        '<a class="text-primary font-weight-bold">Detail</a>' +
+                        '</li>';
 
-                if (status === '' || status === 'DR')
-                    list += '<li class="nav-item">' +
-                    '<a class="text-primary font-weight-bold">Update</a>' +
-                    '</li>';
-                else
-                    list += '<li class="nav-item">' +
-                    '<a class="text-primary font-weight-bold">Detail</a>' +
-                    '</li>';
+                    ul.append(list);
 
-
-                ul.append(list);
-
-                if (container.find('div.filter_page').length > 0) {
-                    container.find('div.filter_page').css('display', 'none');
+                    if (parent.find('div.filter_page').length > 0)
+                        parent.find('div.filter_page').css('display', 'none');
                 }
 
-                btnList.css('display', 'none');
-
-                formList = cardForm.prop('classList');
-                form = cardForm.find('form');
+                if (className.includes('card-form')) {
+                    const cardHeader = $(evt.target).closest('.card-header');
+                    cardHeader.find('button').css('display', 'none');
+                    $(this).css('display', 'block');
+                    cardBtn.css('display', 'block');
+                    formList = $(this).prop('classList');
+                }
             } else {
-                cardMain.css('display', 'block');
-                cardForm.css('display', 'none');
+                openModalForm();
+                Scrollmodal();
+                form = modalForm.find('form');
                 formList = cardForm.prop('classList');
-                form = cardForm.find('form');
             }
-        } else {
-            openModalForm();
-            Scrollmodal();
-            form = modalForm.find('form');
-            formList = cardForm.prop('classList');
-        }
+        });
 
         const field = form.find('input, textarea, select');
 
@@ -565,15 +564,12 @@ function Edit(id, status = '') {
 
         let url = SITE_URL + SHOW + ID;
 
-        if (status === '' || status === 'DR')
-            setSave = 'update';
-        else
-            setSave = 'detail';
+        setSave = ((typeof status === 'undefined' || status === '') || status === 'DR') ? 'update' : 'detail';
 
         $.ajax({
             url: url,
             type: 'GET',
-            // async: false,
+            async: false,
             cache: false,
             dataType: 'JSON',
             beforeSend: function () {
@@ -583,9 +579,8 @@ function Edit(id, status = '') {
                 loadingForm(form.prop('id'), 'facebook');
             },
             complete: function () {
-                if (setSave !== 'detail') {
+                if (setSave !== 'detail')
                     $('.save_form').removeAttr('disabled');
-                }
 
                 $('.x_form').removeAttr('disabled');
                 $('.close_form').removeAttr('disabled');
@@ -824,7 +819,7 @@ function Edit(id, status = '') {
             title: checkAccess[0].message
         });
     }
-}
+});
 
 /**
  * Button delete data
@@ -1257,6 +1252,8 @@ $('.btn_filter').click(function (evt) {
 });
 
 $('.add_row').click(function (evt) {
+    let form = $(evt.target).closest('form');
+
     let url = SITE_URL + TABLE_LINE;
 
     let action = 'create';
@@ -1267,8 +1264,15 @@ $('.add_row').click(function (evt) {
         let _this = $(this);
         let oriElement = _this.html();
 
+        let formData = new FormData(form[0]);
+
         $.ajax({
             url: url,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            cache: false,
             dataType: 'JSON',
             beforeSend: function () {
                 $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
@@ -2112,6 +2116,46 @@ function initSelectData(select) {
             });
         }
     });
+}
+
+/**
+ * Function for get data from database
+ * @param {*} url 
+ * @param {*} field 
+ * @param {*} reference 
+ * @returns 
+ */
+function getList(url, field, reference) {
+    let value;
+
+    $.ajax({
+        url: ADMIN_URL + url,
+        type: 'POST',
+        data: {
+            field: field,
+            reference: reference
+        },
+        async: false,
+        dataType: 'JSON',
+        success: function (response) {
+            value = response;
+        }
+    });
+
+    return value;
+}
+
+/**
+ * Remove element from array
+ * @param {*} array 
+ * @param {*} itemsToRemove 
+ * @returns 
+ */
+function removeItems(array, itemsToRemove) {
+    const index = array.indexOf(itemsToRemove);
+
+    if (index > -1)
+        return array.splice(index, 1);
 }
 
 $(document).ready(function (e) {
