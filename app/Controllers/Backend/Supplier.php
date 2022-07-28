@@ -205,6 +205,12 @@ class Supplier extends BaseController
                     ])->like('name', $post['search'])
                         ->orderBy('name', 'ASC')
                         ->findAll();
+                } else if (isset($post['field']) && isset($post['reference'])) {
+                    $list = $this->model->where([
+                        'isactive'      => 'Y',
+                        $post['field']  => $post['reference']
+                    ])->orderBy('name', 'ASC')
+                        ->findAll();
                 } else {
                     $list = $this->model->where([
                         'isactive'  => 'Y',
