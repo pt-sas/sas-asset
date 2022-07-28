@@ -108,6 +108,7 @@ class Quotation extends BaseController
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+                $this->entity->setIsInternalUse(setCheckbox(isset($post['isinternaluse'])));
                 $this->entity->setCreatedBy($this->session->get('sys_user_id'));
                 $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
@@ -172,6 +173,7 @@ class Quotation extends BaseController
             try {
                 $this->entity->fill($post);
                 $this->entity->setQuotationId($post['id']);
+                $this->entity->setIsInternalUse(setCheckbox(isset($post['isinternaluse'])));
                 $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                 if (!$this->validation->run($post, 'quotation')) {
@@ -284,6 +286,8 @@ class Quotation extends BaseController
         $product = new M_Product($this->request);
         $employee = new M_Employee($this->request);
 
+        $post = $this->request->getVar();
+
         $dataProduct = $product->where('isactive', 'Y')
             ->orderBy('name', 'ASC')
             ->findAll();
@@ -298,7 +302,7 @@ class Quotation extends BaseController
             $table = [
                 $this->field->fieldTable('select', null, 'product_id', null, 'required', null, null, $dataProduct, null, 300, 'md_product_id', 'name'),
                 $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, null, 70),
-                $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, null, 125),
+                $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', isset($post['isinternaluse']) ? 'readonly' : null, null, null, isset($post['isinternaluse']) ? 0 : null, 125),
                 $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, 0, 125),
                 $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, 'checked'),
                 $this->field->fieldTable('select', null, 'employee_id', null, 'required', 'readonly', null, $dataEmployee, 'IT', 200, 'md_employee_id', 'name'),
@@ -311,10 +315,12 @@ class Quotation extends BaseController
         //? Update
         if (!empty($set) && count($detail) > 0) {
             foreach ($detail as $row) :
+                $quotation = $this->model->where($this->model->primaryKey, $row->trx_quotation_id)->first();
+
                 $table[] = [
                     $this->field->fieldTable('select', null, 'product_id', null, 'required', null, null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'qtyentered', 'rupiah', 'required', null, null, null, $row->qtyentered, 70),
-                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, $row->unitprice, 125),
+                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $quotation->isinternaluse == 'Y' ? 'readonly' : null, null, null, $row->unitprice, 125),
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row->lineamt, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
                     $this->field->fieldTable('select', 'text', 'employee_id', null, 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),

@@ -38,6 +38,12 @@
                     <label for="description">Description </label>
                     <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
                 </div>
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="isinternaluse" name="isinternaluse">
+                        <span class="form-check-sign">Internal Use</span>
+                    </label>
+                </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">

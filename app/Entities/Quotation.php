@@ -16,6 +16,7 @@ class Quotation extends Entity
 	protected $description;
 	protected $created_by;
 	protected $updated_by;
+	protected $isinternaluse;
 
 	protected $dates   = [
 		'created_at',
@@ -64,14 +65,14 @@ class Quotation extends Entity
 	}
 
 	public function getStatusId()
-    {
-        return $this->attributes['md_status_id'];
-    }
+	{
+		return $this->attributes['md_status_id'];
+	}
 
-    public function setStatusId($md_status_id)
-    {
-        $this->attributes['md_status_id'] = $md_status_id;
-    }
+	public function setStatusId($md_status_id)
+	{
+		$this->attributes['md_status_id'] = $md_status_id;
+	}
 
 	public function getGrandTotal()
 	{
@@ -131,5 +132,15 @@ class Quotation extends Entity
 	public function setUpdatedBy($updated_by)
 	{
 		$this->attributes['updated_by'] = $updated_by;
+	}
+
+	public function getIsInternalUse()
+	{
+		return $this->attributes['isinternaluse'];
+	}
+
+	public function setIsInternalUse($isinternaluse)
+	{
+		$this->attributes['isinternaluse'] = $isinternaluse;
 	}
 }

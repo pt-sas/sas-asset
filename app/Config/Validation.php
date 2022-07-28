@@ -545,9 +545,10 @@ class Validation
         ],
         'detail.table.*.qtyentered'  => [
             'label'             => 'Qty',
-            'rules'             => 'required',
+            'rules'             => 'required|is_natural_no_zero',
             'errors'            => [
-                'required'      => 'Please Insert the {field} Line'
+                'required'      => 'Please Insert the {field} Line',
+                'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
             ]
         ],
         'detail.table.*.unitprice'  => [

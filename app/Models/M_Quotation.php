@@ -18,7 +18,8 @@ class M_Quotation extends Model
 		'md_status_id',
 		'created_by',
 		'updated_by',
-		'grandtotal'
+		'grandtotal',
+		'isinternaluse'
 	];
 	protected $useTimestamps        = true;
 	protected $returnType 			= 'App\Entities\Quotation';
