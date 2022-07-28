@@ -72,13 +72,13 @@ class Template
         $uri = $this->request->uri->getSegment(2);
         $allBtn = '';
 
-        $btnUpdate = '<a class="btn" id="edit" onclick="Edit(' . "'" . $btnID . "'" . ')" data-toggle="tooltip" title="Edit" data-original-title="Edit"><i class="far fa-edit text-info"></i></a>';
+        $btnUpdate = '<a class="btn edit" data-toggle="tooltip" title="Edit" data-original-title="Edit"><i class="far fa-edit text-info"></i></a>';
 
         $btnDelete = '<a class="btn" onclick="Destroy(' . "'" . $btnID . "'" . ')" data-toggle="tooltip" title="Delete" data-original-title="Delete"><i class="fas fa-trash-alt text-danger"></i></a>';
 
         $btnProcess = '<a class="btn" onclick="docProcess(' . "'" . $btnID . "'," . "'" . $status . "'" . ')" data-toggle="tooltip" title="Document Action" data-original-title="Document Action"><i class="fas fa-cog text-primary"></i></a>';
 
-        $btnDetail = '<a class="btn" id="edit" onclick="Edit(' . "'" . $btnID . "'," . "'" . $status . "'" . ')" data-toggle="tooltip" title="Detail" data-original-title="Detail"><i class="far fa-edit text-info"></i></a>';
+        $btnDetail = '<a class="btn edit" data-status="' . $status . '" data-toggle="tooltip" title="Detail" data-original-title="Detail"><i class="far fa-edit text-info"></i></a>';
 
         $update = $this->access->checkCrud($uri, $this->isUpdate);
         $delete = $this->access->checkCrud($uri, $this->isDelete);
