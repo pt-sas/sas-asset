@@ -66,6 +66,45 @@ _tableLine.on('keyup', 'input[name="qtyentered"], input[name="unitprice"]', func
     tr.find('input[name="lineamt"]').val(formatRupiah(lineamt));
 });
 
+$('#form_quotation').on('click', '#isinternaluse', function (evt) {
+    const field = _tableLine.rows().nodes().to$().find('input');
+
+    if ($(this).is(':checked')) {
+        let listSup = getList('supplier/getList', 'name', 'SAS');
+        let supOption = $("<option selected='selected'></option>").val(listSup[0].id).text(listSup[0].text);
+
+        //! Set field md_supplier_id disabled
+        $('#md_supplier_id').append(supOption)
+            .change()
+            .prop('disabled', true);
+        fieldReadOnly.push('md_supplier_id');
+
+        $.each(field, function (index, item) {
+            const tr = $(this).closest('tr');
+
+            //! Set value is zero and readonly
+            tr.find('input:text[name="unitprice"]').val(0)
+                .prop('readonly', true);
+
+            tr.find('input:text[name="lineamt"]').val(0);
+        });
+    } else {
+        //! Set field md_supplier_id remove attribute disabled
+        $('#md_supplier_id').val(null)
+            .change()
+            .removeAttr('disabled');
+        removeItems(fieldReadOnly, 'md_supplier_id');
+
+        $.each(field, function (index, item) {
+            const tr = $(this).closest('tr');
+
+            //! Set value unitprice is null and remove attribute readonly
+            tr.find('input:text[name="unitprice"]').val(null)
+                .removeAttr('readonly');
+        });
+    }
+});
+
 /**
  * Event Listener Receipt Detail
  */
@@ -731,3 +770,15 @@ $('.save_upload').click(function (evt) {
 
     // console.log(fd)
 })
+
+_table.on('click', '.edit', function (evt) {
+    const parent = $(evt.target).closest('.container');
+    const form = parent.find('form');
+    const row = _table.row(this).data();
+
+    ID = row[0];
+
+    if (form.find('input:checkbox[name="isinternaluse"]').is(':checked')) {
+        form.find('select[name="md_supplier_id"]').prop('disabled', true);
+    }
+});
