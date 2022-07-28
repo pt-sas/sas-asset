@@ -637,10 +637,9 @@ class Validation
         ],
         'detail.table.*.unitprice' => [
             'label'                 => 'Unitprice',
-            'rules'                 => 'required|greater_than_equal_to[1]',
+            'rules'                 => 'required',
             'errors'                => [
-                'required' => 'Please Insert the {field} Line',
-                'greater_than_equal_to' => 'The {field} must contain a number greater than or equal to 1 Line'
+                'required' => 'Please Insert the {field} Line'
             ]
         ],
         'detail.table.*.employee_id' => [
