@@ -22,8 +22,10 @@ let ID,
 // Data array from option
 let option = [];
 
-// Data field array is readonly default
+// Data field array is readonly/disabled default
 let fieldReadOnly = [];
+// Data field array is checked default
+let fieldChecked = [];
 
 // Method default controller
 const SHOWALL = '/showAll',
@@ -698,6 +700,8 @@ _table.on('click', '.edit', function (evt) {
                                 }
 
                                 for (let i = 0; i < field.length; i++) {
+                                    let fields = [];
+
                                     if (field[i].name !== '' && field[i].name === fieldInput) {
                                         let className = field[i].className.split(/\s+/);
 
@@ -764,6 +768,10 @@ _table.on('click', '.edit', function (evt) {
                                             }
                                         }
 
+                                        // Populate checked field default set on the attribute field
+                                        if (field[i].type === 'checkbox' && field[i].checked)
+                                            fieldChecked.push(field[i].name);
+
                                         // Set condition value checked for field type Checkbox based on database
                                         if (field[i].type === 'checkbox' && label === 'Y') {
                                             form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', true);
@@ -799,6 +807,42 @@ _table.on('click', '.edit', function (evt) {
                                         if (field[i].type === 'file') {
                                             if (className.includes('control-upload-image')) {
                                                 previewImage(form.find('input[name=' + field[i].name + ']')[0], '', label);
+                                            }
+                                        }
+                                    }
+
+                                    if (field[i].name !== '') {
+                                        //? Condition field checked and contain attribute checked-hide-field
+                                        if (field[i].type === 'checkbox' && $(field[i]).attr('checked-hide-field')) {
+                                            fields = $(field[i]).attr('checked-hide-field').split(',').map(element => element.trim());
+
+                                            if (field[i].checked) {
+                                                for (let i = 0; i < fields.length; i++) {
+                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                    formGroup.hide();
+                                                }
+                                            } else {
+                                                for (let i = 0; i < fields.length; i++) {
+                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                    formGroup.show();
+                                                }
+                                            }
+                                        }
+
+                                        //? Condition field checked and contain attribute checked-show-field
+                                        if (field[i].type === 'checkbox' && $(field[i]).attr('checked-show-field')) {
+                                            fields = $(field[i]).attr('checked-show-field').split(',').map(element => element.trim());
+
+                                            if (field[i].checked) {
+                                                for (let i = 0; i < fields.length; i++) {
+                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                    formGroup.show();
+                                                }
+                                            } else {
+                                                for (let i = 0; i < fields.length; i++) {
+                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                    formGroup.hide();
+                                                }
                                             }
                                         }
                                     }
@@ -1175,11 +1219,51 @@ $('.new_form').click(function (evt) {
                     const field = parent.find('input, textarea, select');
 
                     for (let i = 0; i < field.length; i++) {
+                        let fields = [];
+
                         if (field[i].name !== '') {
 
                             // set field is readonly or disabled by default
                             if (field[i].readOnly || field[i].disabled)
-                                fieldReadOnly.push(field[i].name)
+                                fieldReadOnly.push(field[i].name);
+
+                            // set field is checked by default from set attribute on the field
+                            if (field[i].type == 'checkbox' && fieldChecked.includes(field[i].name))
+                                form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', true);
+
+                            //? Condition field checked and contain attribute checked-hide-field
+                            if ($(field[i]).attr('checked-hide-field')) {
+                                fields = $(field[i]).attr('checked-hide-field').split(',').map(element => element.trim());
+
+                                if (field[i].checked) {
+                                    for (let i = 0; i < fields.length; i++) {
+                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                        formGroup.hide();
+                                    }
+                                } else {
+                                    for (let i = 0; i < fields.length; i++) {
+                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                        formGroup.show();
+                                    }
+                                }
+                            }
+
+                            //? Condition field checked and contain attribute checked-show-field
+                            if ($(field[i]).attr('checked-show-field')) {
+                                fields = $(field[i]).attr('checked-show-field').split(',').map(element => element.trim());
+
+                                if (field[i].checked) {
+                                    for (let i = 0; i < fields.length; i++) {
+                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                        formGroup.show();
+                                    }
+                                } else {
+                                    for (let i = 0; i < fields.length; i++) {
+                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                        formGroup.hide();
+                                    }
+                                }
+                            }
                         }
                     }
                 }
