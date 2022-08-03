@@ -410,7 +410,7 @@ class Receipt extends BaseController
 
                 for ($i = 1; $i <= $row->qtyentered; $i++) {
                     $table[] = [
-                        $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', 'required', null, null, null, $row->assetcode, 150),
+                        $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', null, 'readonly', null, null, null, 150),
                         $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                         $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, 'readonly', null, null, 1, 50),
                         $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowSupp->getName() === 'SAS' ? 'readonly' : null, null, null, $row->unitprice, 125),
@@ -443,7 +443,7 @@ class Receipt extends BaseController
                         ->findAll();
 
                 $table[] = [
-                    $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', 'required', null, null, null, $row->assetcode, 150),
+                    $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', null, 'readonly', null, null, $row->assetcode, 150),
                     $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, 'readonly', null, null, 1, 50),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowSupp->getName() === 'SAS' ? 'readonly' : null, null, null, $row->unitprice, 125),
