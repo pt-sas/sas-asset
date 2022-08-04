@@ -10,12 +10,12 @@ use App\Models\M_Status;
 use App\Models\M_Supplier;
 use App\Models\M_Product;
 use App\Models\M_Employee;
-use App\Models\M_Receipt;
 use Config\Services;
 
 class Quotation extends BaseController
 {
     private $model;
+    private $model_detail;
     private $entity;
     protected $validation;
     protected $request;
@@ -25,6 +25,7 @@ class Quotation extends BaseController
         $this->request = Services::request();
         $this->validation = Services::validation();
         $this->model = new M_Quotation($this->request);
+        $this->model_detail = new M_QuotationDetail();
         $this->entity = new \App\Entities\Quotation();
     }
 
@@ -131,13 +132,12 @@ class Quotation extends BaseController
 
     public function show($id)
     {
-        $quotationDetail = new M_QuotationDetail();
         $supplier = new M_Supplier($this->request);
 
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
-                $detail = $quotationDetail->where($this->model->primaryKey, $id)->findAll();
+                $detail = $this->model_detail->where($this->model->primaryKey, $id)->findAll();
 
                 $rowSupplier = $supplier->find($list[0]->getSupplierId());
 
@@ -209,11 +209,11 @@ class Quotation extends BaseController
 
     public function processIt()
     {
-        $quotationDetail = new M_QuotationDetail();
-
         if ($this->request->isAJAX()) {
-            $_ID = $this->request->getGet('id');
-            $_DocAction = $this->request->getGet('docaction');
+            $post = $this->request->getVar();
+
+            $_ID = $post['id'];
+            $_DocAction = $post['docaction'];
 
             $row = $this->model->find($_ID);
 
@@ -221,17 +221,17 @@ class Quotation extends BaseController
 
             try {
                 if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
-                    $this->entity->setQuotationId($_ID);
-                    $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
+                    $line = $this->model_detail->where($this->model->primaryKey, $_ID)->first();
 
-                    $line = $quotationDetail->where($this->model->primaryKey, $_ID)->first();
-
-                    if (!empty($line) || (empty($line) && $_DocAction !== $this->DOCSTATUS_Completed)) {
+                    if ($line || (!$line && $_DocAction !== $this->DOCSTATUS_Completed)) {
                         $this->entity->setDocStatus($_DocAction);
-                    } else if (empty($line) && $_DocAction === $this->DOCSTATUS_Completed) {
+                    } else if (!$line && $_DocAction === $this->DOCSTATUS_Completed) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
                         $msg = 'Document cannot be processed';
                     }
+
+                    $this->entity->setQuotationId($_ID);
+                    $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                     $result = $this->model->save($this->entity);
 
@@ -253,11 +253,9 @@ class Quotation extends BaseController
 
     public function destroyLine($id)
     {
-        $quotationDetail = new M_QuotationDetail();
-
         if ($this->request->isAJAX()) {
             try {
-                $row = $this->model->getDetail($quotationDetail->primaryKey, $id)->getRow();
+                $row = $this->model->getDetail($this->model_detail->primaryKey, $id)->getRow();
 
                 $grandTotal = ($row->grandtotal - $row->lineamt);
 
@@ -268,7 +266,7 @@ class Quotation extends BaseController
                 $this->model->save($this->entity);
 
                 //* Delete row quotation detail
-                $delete = $quotationDetail->delete($id);
+                $delete = $this->model_detail->delete($id);
 
                 $result = $delete ? $grandTotal : false;
 
