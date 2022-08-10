@@ -50,20 +50,24 @@ _tableLine.on('keyup', 'input[name="qtyentered"], input[name="unitprice"]', func
     let value = this.value;
     let lineamt, qty, unitprice = 0;
 
-    if ($(this).attr('name') == 'unitprice') {
-        qty = replaceRupiah(tr.find('input[name="qtyentered"]').val());
-        value = replaceRupiah(this.value);
+    const referenceField = tr.find('input[name="qtyentered"], input[name="unitprice"]');
 
-        lineamt = (value * qty);
+    if (referenceField.length > 1) {
+        if ($(this).attr('name') == 'unitprice') {
+            qty = replaceRupiah(tr.find('input[name="qtyentered"]').val());
+            value = replaceRupiah(this.value);
+
+            lineamt = (value * qty);
+        }
+
+        if ($(this).attr('name') == 'qtyentered') {
+            unitprice = replaceRupiah(tr.find('input[name="unitprice"]').val());
+
+            lineamt = (value * unitprice);
+        }
+
+        tr.find('input[name="lineamt"]').val(formatRupiah(lineamt));
     }
-
-    if ($(this).attr('name') == 'qtyentered') {
-        unitprice = replaceRupiah(tr.find('input[name="unitprice"]').val());
-
-        lineamt = (value * unitprice);
-    }
-
-    tr.find('input[name="lineamt"]').val(formatRupiah(lineamt));
 });
 
 $('#form_quotation').on('click', '#isinternaluse', function (evt) {
@@ -382,7 +386,7 @@ $('#form_employee').on('change', '#md_branch_id', function (evt) {
 _tableLine.on('change', 'select[name="assetcode"]', function (evt) {
     const tr = _tableLine.$(this).closest('tr');
 
-    let url = SITE_URL + '/getAssetDetail';
+    let url = ADMIN_URL + 'inventory' + '/getAssetDetail';
     let value = this.value;
 
     $.ajax({
