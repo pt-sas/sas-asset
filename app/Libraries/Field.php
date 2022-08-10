@@ -241,7 +241,7 @@ class Field
 
                 foreach ($list as $row) :
                     // Check default value is not null and default value equal $field
-                    if (!empty($defaultValue) && ((is_string($defaultValue) && $defaultValue == strtoupper($row->$field2)) || ($defaultValue == $row->$field)))
+                    if (!empty($defaultValue) && ((is_string($defaultValue) && strtoupper($defaultValue) == strtoupper($row->$field2)) || ($defaultValue == $row->$field)))
                         $element .= '<option value="' . $row->$field . '" selected>' . $row->$field2 . '</option>';
                     else
                         $element .= '<option value="' . $row->$field . '">' . $row->$field2 . '</option>';
