@@ -205,4 +205,20 @@ class Inventory extends BaseController
             return $this->response->setJSON($response);
         }
     }
+
+    public function getAssetDetail()
+    {
+        if ($this->request->getMethod(true) === 'POST') {
+            $post = $this->request->getVar();
+
+            try {
+                $list = $this->model->where('assetcode', $post['assetcode'])->findAll();
+                $response = message('success', true, $list);
+            } catch (\Exception $e) {
+                $response = message('error', false, $e->getMessage());
+            }
+
+            return $this->response->setJSON($response);
+        }
+    }
 }

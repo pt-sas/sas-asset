@@ -187,7 +187,7 @@ class Movement extends BaseController
                 $result = $this->model->delete($id);
                 $response = message('success', true, $result);
             } catch (\Exception $e) {
-                $response = message('error', false, $e->getTrace());
+                $response = message('error', false, $e->getMessage());
             }
 
             return $this->response->setJSON($response);
@@ -387,23 +387,5 @@ class Movement extends BaseController
         }
 
         return json_encode($table);
-    }
-
-    public function getAssetDetail()
-    {
-        $inventory = new M_Inventory($this->request);
-
-        if ($this->request->getMethod(true) === 'POST') {
-            $post = $this->request->getVar();
-
-            try {
-                $list = $inventory->where('assetcode', $post['assetcode'])->findAll();
-                $response = message('success', true, $list);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
     }
 }
