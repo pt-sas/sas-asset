@@ -1074,14 +1074,15 @@ function docProcess(id, status) {
                                 reloadTable();
                             }
 
-                            if (result[0].error) {
+                            if ((typeof result[0].error !== 'undefined' && result[0].error) || (typeof result[0].error !== 'undefined' && !result[0].error)) {
                                 Swal.showValidationMessage(result[0].message);
                                 resolve(false);
                             }
                         })
                         .fail(function (jqXHR, textStatus, errorThrown) {
-                            console.info(errorThrown)
-                            reloadTable()
+                            Swal.showValidationMessage(errorThrown);
+                            resolve(false);
+                            reloadTable();
                         });
                 });
             },
