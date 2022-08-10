@@ -30,7 +30,9 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_room_id">Room <span class="required">*</span></label>
-                    <select class="form-control select2" id="md_room_id" name="md_room_id"></select>
+                    <select class="form-control select2" id="md_room_id" name="md_room_id">
+                        <option value="">Select Room</option>
+                    </select>
                     <small class="form-text text-danger" id="error_md_room_id"></small>
                 </div>
             </div>
