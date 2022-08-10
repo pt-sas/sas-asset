@@ -402,64 +402,65 @@ class Validation
 
     public $status = [
         'value'             => [
-            'label'            =>    'Status Code',
-            'rules'         =>    'required|min_length[7]|max_length[7]|is_unique[md_status.value,md_status_id,{id}]',
-            'errors'         => [
+            'label'         => 'Status Code',
+            'rules'         => 'required|min_length[7]|max_length[7]|is_unique[md_status.value,md_status_id,{id}]',
+            'errors'        => [
                 'is_unique' => 'This {field} already exists.',
-                'required'    => 'Please Insert the {field} first'
+                'required'  => 'Please Insert the {field} first'
             ]
         ],
-        'name'                => [
-            'label'            => 'Status Name',
-            'rules'         =>    'required',
-            'errors'         => [
-                'required'    => 'Please Insert the {field} first.'
+        'name'              => [
+            'label'         => 'Status Name',
+            'rules'         => 'required|is_unique[md_status.name,md_status_id,{id}]',
+            'errors'        => [
+                'required'  => 'Please Insert the {field} first.',
+                'is_unique' => 'The {field} already exists.'
             ]
         ],
-        'menu_id'            => [
-            'label'            => 'Menu',
-            'rules'         =>    'required',
-            'errors'         => [
-                'required'    => 'Please Insert the {field} first.'
+        'menu_id'           => [
+            'label'         => 'Menu',
+            'rules'         => 'required',
+            'errors'        => [
+                'required'  => 'Please Insert the {field} first.'
             ]
         ]
     ];
 
     public $service = [
-        'documentno'    => [
-            'label'        => 'Document No',
-            'rules'     => 'required|is_unique[trx_service.documentno,trx_service_id,{id}]',
-            'errors'     => [
+        'documentno'        => [
+            'label'         => 'Document No',
+            'rules'         => 'required|is_unique[trx_service.documentno,trx_service_id,{id}]',
+            'errors'        => [
                 'is_unique' => 'This {field} already exists.',
-                'required'    => 'Please Insert the {field} first.'
+                'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'md_supplier_id' => [
-            'label'        => 'Supplier',
-            'rules'     => 'required',
-            'errors'     => [
-                'required'    => 'Please Insert the {field} first.'
+        'md_supplier_id'    => [
+            'label'         => 'Supplier',
+            'rules'         => 'required',
+            'errors'        => [
+                'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'servicedate'     => [
-            'label'        => 'Date Service',
-            'rules'     => 'required',
-            'errors'     => [
-                'required'    => 'Please Insert the {field} first.'
+        'servicedate'       => [
+            'label'         => 'Date Service',
+            'rules'         => 'required',
+            'errors'        => [
+                'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'md_status_id'     => [
-            'label'        => 'Status',
-            'rules'     => 'required',
-            'errors'     => [
-                'required'    => 'Please Insert the {field} first.'
+        'md_status_id'      => [
+            'label'         => 'Status',
+            'rules'         => 'required',
+            'errors'        => [
+                'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'line'        => [
-            'label'        => 'Service Detail',
-            'rules'        => 'required',
-            'errors'    => [
-                'required'    => 'Please Insert the {field} first.'
+        'line'              => [
+            'label'         => 'Service Detail',
+            'rules'         => 'required',
+            'errors'        => [
+                'required'  => 'Please Insert the {field} first.'
             ]
         ],
         'detail.table.*.assetcode'  => [
@@ -597,6 +598,13 @@ class Validation
                 'required'  => 'Please Choose the {field} first.'
             ]
         ],
+        'expenseno'                 => [
+            'label'                 => 'Expense No',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required'  => 'Please Insert the {field} first.'
+            ]
+        ],
         'invoiceno'                 => [
             'label'                 => 'Invoice No',
             'rules'                 => 'required',
@@ -626,15 +634,15 @@ class Validation
                 'required' => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.assetcode'  => [
-            'label'                 => 'Asset Code',
-            'rules'                 => 'required|is_exists|is_unique[trx_inventory.assetcode]',
-            'errors'                => [
-                'required' => 'Please Insert the {field} Line',
-                'is_exists' => 'The {field} duplicate value',
-                'is_unique' => '{value}|The {field} ({value}) already exists'
-            ]
-        ],
+        // 'detail.table.*.assetcode'  => [
+        //     'label'                 => 'Asset Code',
+        //     'rules'                 => 'required|is_exists|is_unique[trx_inventory.assetcode]',
+        //     'errors'                => [
+        //         'required' => 'Please Insert the {field} Line',
+        //         'is_exists' => 'The {field} duplicate value',
+        //         'is_unique' => '{value}|The {field} ({value}) already exists'
+        //     ]
+        // ],
         'detail.table.*.unitprice' => [
             'label'                 => 'Unitprice',
             'rules'                 => 'required',
@@ -769,9 +777,10 @@ class Validation
         ],
         'name' => [
             'label'                 => 'Name',
-            'rules'                 => 'required',
+            'rules'                 => 'required|is_unique[md_groupasset.name,md_groupasset_id,{id}]',
             'errors'                => [
-                'required' => 'Please Insert the {field}'
+                'required' => 'Please Insert the {field}',
+                'is_unique' => 'This {field} already exists.'
             ]
         ],
         'initialcode' => [
@@ -786,6 +795,66 @@ class Validation
             'rules'                 => 'required|is_natural_no_zero',
             'errors'                => [
                 'required' => 'Please Insert the {field}'
+            ]
+        ],
+        'md_sequence_id' => [
+            'label'                 => 'Document Sequence',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Choose the {field}'
+            ]
+        ]
+    ];
+
+    public $sequence = [
+        'incrementno'               => [
+            'label'                 => 'Increment',
+            'rules'                 => 'required_with[isautosequence]',
+            'errors'                => [
+                'required_with'     => 'Please Insert the {field}'
+            ]
+        ],
+        'maxvalue'                  => [
+            'label'                 => 'Max Value',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required'          => 'Please Insert the {field}'
+            ]
+        ],
+        'currentnext'               => [
+            'label'                 => 'Current Next',
+            'rules'                 => 'required_with[isautosequence]',
+            'errors'                => [
+                'required_with'     => 'Please Insert the {field}'
+            ]
+        ],
+        'startno'                   => [
+            'label'                 => 'Start No',
+            'rules'                 => 'required_with[isautosequence]',
+            'errors'                => [
+                'required_with'     => 'Please Insert the {field}'
+            ]
+        ],
+        'datecolumn'                => [
+            'label'                 => 'Date Column',
+            'rules'                 => 'required_with[startnewyear]',
+            'errors'                => [
+                'required_with'     => 'Please Insert the {field}'
+            ]
+        ],
+        'name'                      => [
+            'label'                 => 'Name',
+            'rules'                 => 'required|is_unique[md_sequence.name,md_sequence_id,{id}]',
+            'errors'                => [
+                'required'          => 'Please Insert the {field}',
+                'is_unique'         => 'This {field} already exists.'
+            ]
+        ],
+        'isgassetlevelsequence'     => [
+            'label'                 => 'Group Asset Level',
+            'rules'                 => 'required_with[iscategorylevelsequence]',
+            'errors'                => [
+                'required_with'     => 'Please Checked the {field}'
             ]
         ]
     ];

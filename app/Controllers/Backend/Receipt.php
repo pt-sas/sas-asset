@@ -83,6 +83,7 @@ class Receipt extends BaseController
                 $row[] = format_dmy($value->receiptdate, '-');
                 $row[] = $value->supplier;
                 $row[] = $value->status;
+                $row[] = $value->expenseno;
                 $row[] = $value->invoiceno;
                 $row[] = formatRupiah($value->grandtotal);
                 $row[] = docStatus($value->docstatus);
@@ -229,8 +230,10 @@ class Receipt extends BaseController
         $transaction = new M_Transaction();
 
         if ($this->request->isAJAX()) {
-            $_ID = $this->request->getGet('id');
-            $_DocAction = $this->request->getGet('docaction');
+            $post = $this->request->getVar();
+
+            $_ID = $post['id'];
+            $_DocAction = $post['docaction'];
 
             $row = $this->model->find($_ID);
 
@@ -284,7 +287,7 @@ class Receipt extends BaseController
                     $response = message('error', true, 'Please reload the Document');
                 }
             } catch (\Exception $e) {
-                $response = message('error', false, $e->getTrace());
+                $response = message('error', false, $e->getMessage());
             }
 
             return $this->response->setJSON($response);

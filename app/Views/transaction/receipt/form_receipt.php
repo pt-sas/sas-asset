@@ -14,9 +14,9 @@
                     <small class="form-text text-danger" id="error_receiptdate"></small>
                 </div>
                 <div class="form-group">
-                    <label for="invoiceno">Invoice No <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="invoiceno" name="invoiceno" placeholder="Invoice No">
-                    <small class="form-text text-danger" id="error_invoiceno"></small>
+                    <label for="expenseno">Expense No <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="expenseno" name="expenseno" placeholder="Expense No">
+                    <small class="form-text text-danger" id="error_expenseno"></small>
                 </div>
             </div>
             <div class="col-md-6">
@@ -50,14 +50,21 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="description">Description </label>
-                    <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
+                    <label for="invoiceno">Invoice No <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="invoiceno" name="invoiceno" placeholder="Invoice No">
+                    <small class="form-text text-danger" id="error_invoiceno"></small>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="grandtotal">Grand Total </label>
                     <input type="text" class="form-control rupiah" id="grandtotal" name="grandtotal" readonly>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="description">Description </label>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
                 </div>
             </div>
             <div class="col-md-12">

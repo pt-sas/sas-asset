@@ -5,6 +5,7 @@ namespace App\Models;
 use CodeIgniter\Model;
 use CodeIgniter\HTTP\RequestInterface;
 use App\Models\M_ReceiptDetail;
+use App\Models\M_Sequence;
 
 class M_Receipt extends Model
 {
@@ -21,14 +22,15 @@ class M_Receipt extends Model
 		'md_status_id',
 		'trx_quotation_id',
 		'created_by',
-		'updated_by'
+		'updated_by',
+		'expenseno'
 	];
 	protected $useTimestamps        = true;
 	protected $returnType 			= 'App\Entities\Receipt';
 	protected $allowCallbacks		= true;
 	protected $beforeInsert			= [];
 	protected $afterInsert			= ['createDetail'];
-	protected $beforeUpdate			= [];
+	protected $beforeUpdate			= ['createCodeAsset'];
 	protected $afterUpdate			= ['createDetail'];
 	protected $beforeDelete			= ['beforeDelete'];
 	protected $afterDelete			= ['deleteDetail'];
@@ -39,6 +41,7 @@ class M_Receipt extends Model
 		'trx_receipt.receiptdate',
 		'supplier.name',
 		'md_status.name',
+		'trx_receipt.expenseno',
 		'trx_receipt.invoiceno',
 		'trx_receipt.grandtotal',
 		'trx_receipt.docstatus',
@@ -47,16 +50,15 @@ class M_Receipt extends Model
 	];
 	protected $column_search = [
 		'trx_receipt.documentno',
-		'trx_receipt.description',
 		'trx_receipt.receiptdate',
-		'trx_receipt.description',
-		'trx_receipt.docstatus',
-		'trx_receipt.invoiceno',
-		'trx_receipt.grandtotal',
-		'trx_receipt.isactive',
 		'md_supplier.name',
 		'md_status.name',
-		'sys_user.name'
+		'trx_receipt.expenseno',
+		'trx_receipt.invoiceno',
+		'trx_receipt.grandtotal',
+		'trx_receipt.docstatus',
+		'sys_user.name',
+		'trx_receipt.description'
 
 	];
 	protected $order = ['created_at' => 'DESC'];
@@ -157,7 +159,7 @@ class M_Receipt extends Model
 		return $this->builder->get();
 	}
 
-	public function createDetail(array $rows)
+	public function createDetail($rows)
 	{
 		$receiptDetail = new M_ReceiptDetail();
 
@@ -167,6 +169,8 @@ class M_Receipt extends Model
 			$post['trx_receipt_id'] = $rows['id'];
 			$receiptDetail->create($post);
 		}
+
+		return $rows;
 	}
 
 	public function beforeDelete(array $rows)
@@ -205,5 +209,25 @@ class M_Receipt extends Model
 	{
 		$receiptDetail = new M_ReceiptDetail();
 		$receiptDetail->where($this->primaryKey, $rows['id'])->delete();
+	}
+
+	public function createCodeAsset($rows)
+	{
+		$sequence = new M_Sequence($this->request);
+		$receiptDetail = new M_ReceiptDetail();
+
+		$post = $this->request->getVar();
+
+		if (isset($post['docaction'])) {
+			$header = $this->find($post['id']);
+			$line = $receiptDetail->where($this->primaryKey, $post['id'])->findAll();
+
+			if (count($line) > 0) {
+				$result = $sequence->getDocumentNoFromSeq($header, $line);
+				$receiptDetail->edit($result);
+			}
+		}
+
+		return $rows;
 	}
 }

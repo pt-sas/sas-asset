@@ -12,7 +12,8 @@
                 <th>Doc No</th>
                 <th>Date</th>
                 <th>Supplier</th>
-                <th>Active</th>
+                <th>Status</th>
+                <th>Expense No</th>
                 <th>Invoice No</th>
                 <th>Grand Total</th>
                 <th>Doc Status</th>

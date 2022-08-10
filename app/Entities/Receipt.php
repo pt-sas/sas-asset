@@ -12,11 +12,13 @@ class Receipt extends Entity
 	protected $grandtotal;
 	protected $docstatus;
 	protected $trx_quotation_id;
-	protected $md_suppliere_id;
+	protected $md_supplier_id;
 	protected $md_status_id;
 	protected $description;
 	protected $created_by;
 	protected $updated_by;
+	protected $expenseno;
+	protected $invoiceno;
 
 	protected $dates   = [
 		'created_at',
@@ -85,14 +87,14 @@ class Receipt extends Entity
 	}
 
 	public function getStatusId()
-    {
-        return $this->attributes['md_status_id'];
-    }
+	{
+		return $this->attributes['md_status_id'];
+	}
 
-    public function setStatusId($md_status_id)
-    {
-        $this->attributes['md_status_id'] = $md_status_id;
-    }
+	public function setStatusId($md_status_id)
+	{
+		$this->attributes['md_status_id'] = $md_status_id;
+	}
 
 	public function getDocStatus()
 	{
@@ -102,6 +104,16 @@ class Receipt extends Entity
 	public function setDocStatus($docstatus)
 	{
 		$this->attributes['docstatus'] = $docstatus;
+	}
+
+	public function getExpenseNo()
+	{
+		return $this->attributes['expenseno'];
+	}
+
+	public function setExpenseNo($expenseno)
+	{
+		$this->attributes['expenseno'] = $expenseno;
 	}
 
 	public function getInvoiceNo()
