@@ -4,8 +4,6 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-use CodeIgniter\HTTP\RequestInterface;
-
 class M_ServiceDetail extends Model
 {
     protected $table      = 'trx_service_detail';
@@ -20,7 +18,7 @@ class M_ServiceDetail extends Model
         'md_status_id'
     ];
     protected $useTimestamps = true;
-    protected $returnType = 'App\Entities\Servicedetail';
+    protected $returnType = 'App\Entities\ServiceDetail';
     protected $db;
     protected $builder;
 
@@ -34,6 +32,10 @@ class M_ServiceDetail extends Model
     public function create($post)
     {
         $table = json_decode($post['table']);
+
+        $result = false;
+
+        $sumPrice = 0;
 
         foreach ($table as $row) :
             $data = [
@@ -50,6 +52,19 @@ class M_ServiceDetail extends Model
                 $result = $this->builder->where($this->primaryKey, $row[5]->delete)->update($data);
             } else {
                 $result = $this->builder->insert($data);
+            }
+
+            $sumPrice += replaceFormat($row[2]->unitprice);
+
+            // Update grand total service header
+            if ($result) {
+                $tableHeader = $this->db->table('trx_service');
+
+                $arrData = [
+                    'grandtotal' => $sumPrice
+                ];
+
+                $tableHeader->where('trx_service_id', $post['trx_service_id'])->update($arrData);
             }
         endforeach;
 

@@ -5,33 +5,36 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="documentno">Document No <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="documentno" name="documentno">
+                    <input type="text" class="form-control code" id="documentno" name="documentno" readonly>
                     <small class="form-text text-danger" id="error_documentno"></small>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_supplier_id">Supplier <span class="required">*</span></label>
-                    <select class="form-control select2" id="md_supplier_id" name="md_supplier_id" style="width: 100%">
+                    <select class="form-control select-data" id="md_supplier_id" name="md_supplier_id" data-url="supplier/getList">
                         <option value="">Select Supplier</option>
-                        <?php foreach ($supplier as $row) : ?>
-                            <option value="<?= $row->md_supplier_id ?>"><?= $row->name ?></option>
-                        <?php endforeach; ?>
                     </select>
                     <small class="form-text text-danger" id="error_md_supplier_id"></small>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="description">Description </label>
-                    <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
+                    <label for="servicedate">Date Service <span class="required">*</span></label>
+                    <input type="text" class="form-control datepicker" id="servicedate" name="servicedate" value="<?= $today ?>">
+                    <small class="form-text text-danger" id="error_servicedate"></small>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="servicedate">Date Service <span class="required">*</span></label>
-                    <input type="text" class="form-control datepicker col-md-4" id="servicedate" name="servicedate" value="<?= $today ?>">
-                    <small class="form-text text-danger" id="error_servicedate"></small>
+                    <label for="grandtotal">Grand Total </label>
+                    <input type="text" class="form-control rupiah" id="grandtotal" name="grandtotal" readonly>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="description">Description </label>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
                 </div>
             </div>
         </div>
@@ -48,12 +51,12 @@
                     <table class="table table-striped table-hover table-pointer tb_displayline" style="width: 100%">
                         <thead>
                             <tr>
-                                <th>Code Asset</th>
-                                <th>Product</th>
-                                <th>Unit Price</th>
-                                <th>Status</th>
-                                <th>Description</th>
-                                <th>Action</th>
+                                <th class="text-center">Asset Code</th>
+                                <th class="text-center">Product</th>
+                                <th class="text-center">Unit Price</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Description</th>
+                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                     </table>

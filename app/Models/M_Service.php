@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
-
 use CodeIgniter\HTTP\RequestInterface;
+use App\Models\M_ServiceDetail;
 
 class M_Service extends Model
 {
@@ -13,24 +13,43 @@ class M_Service extends Model
     protected $allowedFields = [
         'documentno',
         'servicedate',
+        'md_supplier_id',
+        'docstatus',
+        'grandtotal',
         'description',
-        'md_supplier_id'
+        'created_by',
+        'updated_by'
     ];
-    protected $useTimestamps = true;
-    protected $returnType = 'App\Entities\Service';
+    protected $useTimestamps    = true;
+    protected $returnType       = 'App\Entities\Service';
+    protected $allowCallbacks   = true;
+    protected $beforeInsert     = [];
+    protected $afterInsert      = ['createDetail'];
+    protected $beforeUpdate     = [];
+    protected $afterUpdate      = ['createDetail'];
+    protected $beforeDelete     = [];
+    protected $afterDelete      = ['deleteDetail'];
     protected $column_order = [
-        'documentno',
-        'servicedate',
-        'description',
-        'md_supplier_id'
+        '', // Hide column
+        '', // Number column
+        'trx_service.documentno',
+        'trx_service.servicedate',
+        'md_supplier.name',
+        'trx_service.grandtotal',
+        'trx_service.docstatus',
+        'sys_user.name',
+        'trx_service.description'
     ];
     protected $column_search = [
         'trx_service.documentno',
         'trx_service.servicedate',
         'md_supplier.name',
+        'trx_service.grandtotal',
+        'trx_service.docstatus',
+        'sys_user.name',
         'trx_service.description'
     ];
-    protected $order = ['servicedate' => 'DESC'];
+    protected $order = ['created_at' => 'DESC'];
     protected $request;
     protected $db;
     protected $builder;
@@ -43,77 +62,72 @@ class M_Service extends Model
         $this->builder = $this->db->table($this->table);
     }
 
-    private function getAll($field = null, $where = null)
+    public function getSelect()
     {
-        $this->builder->select(
-            $this->table . '.*,' .
-                'md_supplier.name as supplier'
-        );
+        $sql = $this->table . '.*,' .
+            'md_supplier.name as supplier,
+            sys_user.name as createdby';
 
-        $this->builder->join('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left');
+        return $sql;
     }
 
-    private function getDatatablesQuery()
+    public function getJoin()
     {
+        $sql = [
+            $this->setDataJoin('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left'),
+            $this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left')
+        ];
+
+        return $sql;
+    }
+
+    private function setDataJoin($tableJoin, $columnJoin, $typeJoin = "inner")
+    {
+        return [
+            "tableJoin" => $tableJoin,
+            "columnJoin" => $columnJoin,
+            "typeJoin" => $typeJoin
+        ];
+    }
+
+    public function getInvNumber()
+    {
+        $month = date('m');
+
+        $this->builder->select('MAX(RIGHT(documentno,4)) AS documentno');
+        $this->builder->where("DATE_FORMAT(servicedate, '%m')", $month);
+        $sql = $this->builder->get();
+
+        $code = "";
+        if ($sql->getNumRows() > 0) {
+            foreach ($sql->getResult() as $row) {
+                $doc = ((int)$row->documentno + 1);
+                $code = sprintf("%04s", $doc);
+            }
+        } else {
+            $code = "0001";
+        }
+
+        $prefix = "SR" . date('ym') . $code;
+
+        return $prefix;
+    }
+
+    public function createDetail(array $rows)
+    {
+        $serviceDetail = new M_ServiceDetail();
+
         $post = $this->request->getVar();
 
-        $this->getAll();
-
-        if (isset($post['form'])) {
-            $this->filterDatatable($post);
-        }
-
-        $i = 0;
-        foreach ($this->column_search as $item) :
-            if ($this->request->getPost('search')['value']) {
-                if ($i === 0) {
-                    $this->builder->groupStart();
-                    $this->builder->like($item, $this->request->getPost('search')['value']);
-                } else {
-                    $this->builder->orLike($item, $this->request->getPost('search')['value']);
-                }
-                if (count($this->column_search) - 1 == $i)
-                    $this->builder->groupEnd();
-            }
-            $i++;
-        endforeach;
-
-        if ($this->request->getPost('order')) {
-            $this->builder->orderBy($this->column_order[$this->request->getPost('order')['0']['column']], $this->request->getPost('order')['0']['dir']);
-        } else if (isset($this->order)) {
-            $order = $this->order;
-            $this->builder->orderBy(key($order), $order[key($order)]);
+        if (isset($post['table'])) {
+            $post['trx_service_id'] = $rows['id'];
+            $serviceDetail->create($post);
         }
     }
 
-    public function getDatatables()
+    public function deleteDetail(array $rows)
     {
-        $this->getDatatablesQuery();
-        if ($this->request->getPost('length') != -1)
-            $this->builder->limit($this->request->getPost('length'), $this->request->getPost('start'));
-        $query = $this->builder->get();
-        return $query->getResult();
-    }
-
-    public function countAll()
-    {
-        $sql = $this->db->table($this->table);
-        return $sql->countAllResults();
-    }
-
-    public function countFiltered()
-    {
-        $this->getDatatablesQuery();
-        return $this->builder->countAllResults();
-    }
-
-    public function filterDatatable($post)
-    {
-        foreach ($post['form'] as $value) :
-            if (!empty($value['value'])) {
-                if ($value['name'] === 'isactive')
-                    $this->builder->where($this->table . '.isactive', $value['value']);
-            }
-        endforeach;
+        $serviceDetail = new M_ServiceDetail();
+        $serviceDetail->where($this->primaryKey, $rows['id'])->delete();
     }
 }

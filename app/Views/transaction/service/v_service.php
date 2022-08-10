@@ -10,8 +10,11 @@
                 <th>ID</th>
                 <th>No</th>
                 <th>Document No</th>
-                <th>Date Service</th>
+                <th>Date</th>
                 <th>Supplier</th>
+                <th>Grand Total</th>
+                <th>Doc Status</th>
+                <th>Createdby</th>
                 <th>Description</th>
                 <th>Actions</th>
             </tr>
