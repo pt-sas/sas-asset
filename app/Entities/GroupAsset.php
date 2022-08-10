@@ -15,6 +15,7 @@ class GroupAsset extends Entity
     protected $isactive;
     protected $created_by;
     protected $updated_by;
+    protected $md_sequence_id;
 
     protected $dates   = [
         'created_at',
@@ -120,5 +121,15 @@ class GroupAsset extends Entity
     public function setUpdatedBy($updated_by)
     {
         $this->attributes['updated_by'] = $updated_by;
+    }
+
+    public function getSequenceId()
+    {
+        return $this->attributes['md_sequence_id'];
+    }
+
+    public function setSequenceId($md_sequence_id)
+    {
+        $this->attributes['md_sequence_id'] = $md_sequence_id;
     }
 }

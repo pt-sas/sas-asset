@@ -17,7 +17,8 @@ class M_GroupAsset extends Model
         'usefullife',
         'isactive',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'md_sequence_id'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\GroupAsset';

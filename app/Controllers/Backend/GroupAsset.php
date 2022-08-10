@@ -5,6 +5,7 @@ namespace App\Controllers\Backend;
 use App\Controllers\BaseController;
 use App\Models\M_Datatable;
 use App\Models\M_GroupAsset;
+use App\Models\M_Sequence;
 use Config\Services;
 
 class GroupAsset extends BaseController
@@ -102,9 +103,15 @@ class GroupAsset extends BaseController
 
     public function show($id)
     {
+        $sequence = new M_Sequence($this->request);
+
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
+
+                $rowSeq = $sequence->find($list[0]->getSequenceId());
+
+                $list = $this->field->setDataSelect($sequence->table, $list, $sequence->primaryKey, $rowSeq->getSequenceId(), $rowSeq->getName());
 
                 $result = [
                     'header'   => $this->field->store($this->model->table, $list)

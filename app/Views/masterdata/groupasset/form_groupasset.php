@@ -22,9 +22,18 @@
                     <input type="text" class="form-control" id="initialcode" name="initialcode">
                     <small class="form-text text-danger" id="error_initialcode"></small>
                 </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="usefullife">Useful Life <span class="required">*</span></label>
+                    <input type="text" class="form-control number" id="usefullife" name="usefullife">
+                    <small class="form-text text-danger" id="error_usefullife"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
                 <div class="form-group">
                     <label for="description">Description </label>
-                    <textarea type="text" class="form-control" id="description" name="description" rows="6"></textarea>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
                 </div>
                 <div class="form-check">
                     <label class="form-check-label">
@@ -35,9 +44,11 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="usefullife">Useful Life <span class="required">*</span></label>
-                    <input type="text" class="form-control number" id="usefullife" name="usefullife">
-                    <small class="form-text text-danger" id="error_usefullife"></small>
+                    <label for="md_sequence_id">Document Sequence <span class="required">*</span></label>
+                    <select class="form-control select-data" id="md_sequence_id" name="md_sequence_id" data-url="sequence/getList">
+                        <option value="">Select Document Sequence</option>
+                    </select>
+                    <small class="form-text text-danger" id="error_md_sequence_id"></small>
                 </div>
             </div>
         </div>
