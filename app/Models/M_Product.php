@@ -90,4 +90,23 @@ class M_Product extends Model
             "typeJoin" => $typeJoin
         ];
     }
+
+    public function getProductAsset($id)
+    {
+        $this->builder->select($this->table . '.md_product_id,' .
+            'md_category.md_category_id,
+            md_category.initialcode as category_code,
+            md_groupasset.md_groupasset_id,
+            md_groupasset.initialcode as groupasset_code,
+            md_sequence.*');
+
+        $this->builder->join('md_category', 'md_category.md_category_id = ' . $this->table . '.md_category_id', 'left');
+        $this->builder->join('md_groupasset', 'md_groupasset.md_groupasset_id = md_category.md_groupasset_id', 'left');
+        $this->builder->join('md_sequence', 'md_sequence.md_sequence_id = md_groupasset.md_sequence_id', 'left');
+
+        // if (count($id) > 0)
+        $this->builder->where($this->table . '.md_product_id', $id);
+
+        return $this->builder->get();
+    }
 }
