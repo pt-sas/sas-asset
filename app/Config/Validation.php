@@ -449,13 +449,6 @@ class Validation
                 'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'md_status_id'      => [
-            'label'         => 'Status',
-            'rules'         => 'required',
-            'errors'        => [
-                'required'  => 'Please Insert the {field} first.'
-            ]
-        ],
         'line'              => [
             'label'         => 'Service Detail',
             'rules'         => 'required',
@@ -464,10 +457,11 @@ class Validation
             ]
         ],
         'detail.table.*.assetcode'  => [
-            'label'             => 'Asset Code',
-            'rules'             => 'required',
-            'errors'            => [
-                'required'      => 'Please Insert the {field} Line'
+            'label'                 => 'Asset Code',
+            'rules'                 => 'required|is_exists',
+            'errors'                => [
+                'required' => 'Please Insert the {field} Line',
+                'is_exists' => 'The {field} duplicate value'
             ]
         ],
         'detail.table.*.product_id'  => [
@@ -476,28 +470,14 @@ class Validation
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
+            // ],
+            // 'detail.table.*.unitprice'  => [
+            //     'label'             => 'Unit Price',
+            //     'rules'             => 'required',
+            //     'errors'            => [
+            //         'required'      => 'Please Insert the {field} Line'
+            //     ]
         ],
-        'detail.table.*.qtyentered'  => [
-            'label'             => 'Qty',
-            'rules'             => 'required',
-            'errors'            => [
-                'required'      => 'Please Insert the {field} Line'
-            ]
-        ],
-        'detail.table.*.unitprice'  => [
-            'label'             => 'Unit Price',
-            'rules'             => 'required',
-            'errors'            => [
-                'required'      => 'Please Insert the {field} Line'
-            ]
-        ],
-        'detail.table.*.lineamt'  => [
-            'label'             => 'Line Amount',
-            'rules'             => 'required',
-            'errors'            => [
-                'required'      => 'Please Insert the {field} Line'
-            ]
-        ]
     ];
 
     public $quotation = [
