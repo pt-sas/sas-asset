@@ -22,7 +22,7 @@ class M_ReceiptDetail extends Model
 		'updated_by'
 	];
 	protected $useTimestamps = true;
-	protected $returnType = 'App\Entities\Receiptdetail';
+	protected $returnType = 'App\Entities\ReceiptDetail';
 	protected $db;
 	protected $builder;
 
@@ -43,7 +43,7 @@ class M_ReceiptDetail extends Model
 
 		foreach ($table as $row) :
 			$data = [
-				'assetcode'			=> strtoupper($row[0]->assetcode),
+				// 'assetcode'			=> strtoupper($row[0]->assetcode),
 				'md_product_id'     => $row[1]->product_id,
 				'qtyentered'        => $row[2]->qtyentered,
 				'unitprice'         => replaceFormat($row[3]->unitprice),
@@ -96,5 +96,17 @@ class M_ReceiptDetail extends Model
 		$this->builder->groupBy('trx_quotation_detail_id');
 
 		return $this->builder->get();
+	}
+
+	public function edit($arrData)
+	{
+		foreach ($arrData as $row) :
+			$data['assetcode'] = $row['sequence'];
+			$data['updated_at'] = date('Y-m-d H:i:s');
+			$data['updated_by'] = session()->get('sys_user_id');
+
+			$result = $this->builder->where($this->primaryKey, $row['line_id'])->update($data);
+		endforeach;
+		return $result;
 	}
 }
