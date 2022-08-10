@@ -272,7 +272,7 @@ class Quotation extends BaseController
 
                 $response = message('success', true, $result);
             } catch (\Exception $e) {
-                $response = message('error', false, $e->getTrace());
+                $response = message('error', false, $e->getMessage());
             }
 
             return $this->response->setJSON($response);
