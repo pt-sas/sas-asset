@@ -105,11 +105,16 @@ class M_Sequence extends Model
 
             $row = $product->getProductAsset($val->getProductId())->getRow();
 
+            $groupasset_code = $row->groupasset_code;
             $date_column = $row->datecolumn;
+
+            //* Set status transaction Biaya
+            if (isset($po->md_status_id) && $po->getStatusId() == 100001)
+                $groupasset_code = 'BY';
 
             $obj->md_sequence_id = $row->md_sequence_id;
             $obj->MD_GroupAsset_ID = 0;
-            $obj->MD_Category_ID = 0;
+            $obj->categorycode = '';
             $obj->calendaryearmonth = $NoYearNoMonth;
 
             if ($row->isgassetlevelsequence === 'Y' && $row->gassetcolumn === 'MD_GroupAsset_ID') {
@@ -117,12 +122,11 @@ class M_Sequence extends Model
                 $obj->$columnName = $row->md_groupasset_id;
             }
 
-            if ($row->iscategorylevelsequence === 'Y' && $row->categorycolumn === 'MD_Category_ID') {
-                $columnName = $row->categorycolumn;
-                $obj->$columnName = $row->md_category_id;
+            if ($row->iscategorylevelsequence === 'Y') {
+                $obj->categorycode = $row->category_code;
             }
 
-            $obj->prefix = $row->groupasset_code . '/' . $row->category_code . '/';
+            $obj->prefix = $groupasset_code . '/' . $row->category_code . '/';
 
             if ($row->startnewyear === 'Y') {
 
@@ -139,7 +143,7 @@ class M_Sequence extends Model
                     $obj->calendaryearmonth = date($format);
                 }
 
-                $obj->prefix = $row->groupasset_code . '/' . $row->category_code . '/' . $obj->calendaryearmonth . '/';
+                $obj->prefix = $groupasset_code . '/' . $row->category_code . '/' . $obj->calendaryearmonth . '/';
             }
 
             $obj->line_id = $val->getReceiptDetailId();
@@ -151,7 +155,7 @@ class M_Sequence extends Model
         foreach ($arrData as $key => $val) :
             $md_sequence_id = $val['md_sequence_id'];
             $md_groupasset_id = $val['MD_GroupAsset_ID'];
-            $md_category_id = $val['MD_Category_ID'];
+            $categorycode = $val['categorycode'];
             $calendaryearmonth = $val['calendaryearmonth'];
 
             $seq = $this->find($md_sequence_id);
@@ -167,11 +171,11 @@ class M_Sequence extends Model
             $prefix = $val['prefix'];
             $line_id = $val['line_id'];
 
-            //* string length
+            //* \string length
             $str_length = strlen($decimal_pattern);
 
 
-            if (empty($md_groupasset_id) && empty($md_category_id) && $calendaryearmonth === $NoYearNoMonth) {
+            if (empty($md_groupasset_id) && empty($categorycode) && $calendaryearmonth === $NoYearNoMonth) {
                 //* increment variable str_length
                 if (strlen($current_next) > $str_length)
                     $str_length += 1;
@@ -204,7 +208,7 @@ class M_Sequence extends Model
                     $current_next = $seqNo->getCurrentNext();
                     $max_value = $seqNo->getMaxValue();
 
-                    if (($seqNo->getGroupAssetId() == $md_groupasset_id) && ($seqNo->getCategoryId() == $md_category_id)) {
+                    if (($seqNo->getGroupAssetId() == $md_groupasset_id) && ($seqNo->getCategoryCode() === $categorycode)) {
                         //* increment variable str_length
                         if (strlen($current_next) > $str_length)
                             $str_length += 1;
@@ -230,8 +234,9 @@ class M_Sequence extends Model
                             $arrWhere = [
                                 'md_sequence_id'    => $md_sequence_id,
                                 'md_groupasset_id'  => $md_groupasset_id,
-                                'md_category_id'    => $md_category_id,
+                                'categorycode'      => $categorycode,
                                 'calendaryearmonth' => $calendaryearmonth,
+                                'updated_by'        => session()->get('sys_user_id')
                             ];
 
                             $sequenceNo->create($arrData, $arrWhere);
@@ -255,10 +260,12 @@ class M_Sequence extends Model
                     $arrData = [
                         'md_sequence_id'    => $md_sequence_id,
                         'md_groupasset_id'  => $md_groupasset_id,
-                        'md_category_id'    => $md_category_id,
+                        'categorycode'      => $categorycode,
                         'calendaryearmonth' => $calendaryearmonth,
                         'currentnext'       => $start_no,
-                        'maxvalue'          => $max_value
+                        'maxvalue'          => $max_value,
+                        'created_by'        => session()->get('sys_user_id'),
+                        'updated_by'        => session()->get('sys_user_id')
                     ];
 
                     $sequenceNo->create($arrData);

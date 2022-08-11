@@ -9,7 +9,7 @@ class SequenceNo extends Entity
     protected $md_sequence_id;
     protected $calendaryearmonth;
     protected $md_groupasset_id;
-    protected $md_category_id;
+    protected $categorycode;
     protected $isactive;
     protected $currentnext;
     protected $maxvalue;
@@ -52,14 +52,14 @@ class SequenceNo extends Entity
         $this->attributes['md_groupasset_id'] = $md_groupasset_id;
     }
 
-    public function getCategoryId()
+    public function getCategoryCode()
     {
-        return $this->attributes['md_category_id'];
+        return $this->attributes['categorycode'];
     }
 
-    public function setCategoryId($md_category_id)
+    public function setCategoryCode($categorycode)
     {
-        $this->attributes['md_category_id'] = $md_category_id;
+        $this->attributes['categorycode'] = $categorycode;
     }
 
     public function getIsActive()

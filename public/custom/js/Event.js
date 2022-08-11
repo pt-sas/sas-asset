@@ -741,6 +741,45 @@ $('#filter_inventory').on('change', '[name="md_branch_id"]', function (evt) {
     }
 });
 
+$('#form_sequence').on('click', '#isautosequence, #isgassetlevelsequence, #iscategorylevelsequence, #startnewyear', function (evt) {
+    const target = $(evt.target);
+    const form = target.closest('form');
+
+    //? Condition field checked and contain attribute checked-hide-field
+    if ($(this).attr('checked-hide-field')) {
+        let fields = $(this).attr('checked-hide-field').split(',').map(element => element.trim());
+
+        if ($(this).is(':checked')) {
+            for (let i = 0; i < fields.length; i++) {
+                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                formGroup.hide();
+            }
+        } else {
+            for (let i = 0; i < fields.length; i++) {
+                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                formGroup.show();
+            }
+        }
+    }
+
+    //? Condition field checked and contain attribute checked-show-field
+    if ($(this).attr('checked-show-field')) {
+        let fields = $(this).attr('checked-show-field').split(',').map(element => element.trim());
+
+        if ($(this).is(':checked')) {
+            for (let i = 0; i < fields.length; i++) {
+                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                formGroup.show();
+            }
+        } else {
+            for (let i = 0; i < fields.length; i++) {
+                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                formGroup.hide();
+            }
+        }
+    }
+});
+
 $('.upload_form').click(function (evt) {
     console.log(evt)
     $('.modal_upload').modal({
