@@ -6,6 +6,10 @@ use CodeIgniter\Model;
 use CodeIgniter\HTTP\RequestInterface;
 use App\Models\M_ReceiptDetail;
 use App\Models\M_Sequence;
+use App\Models\M_QuotationDetail;
+use App\Models\M_Inventory;
+use App\Models\M_Transaction;
+use App\Libraries\Field;
 
 class M_Receipt extends Model
 {
@@ -65,6 +69,25 @@ class M_Receipt extends Model
 	protected $request;
 	protected $db;
 	protected $builder;
+	protected $field;
+	/** Drafted = DR */
+	protected $DOCSTATUS_Drafted = "DR";
+	/** Completed = CO */
+	protected $DOCSTATUS_Completed = "CO";
+	/** Approved = AP */
+	protected $DOCSTATUS_Approved = "AP";
+	/** Not Approved = NA */
+	protected $DOCSTATUS_NotApproved = "NA";
+	/** Voided = VO */
+	protected $DOCSTATUS_Voided = "VO";
+	/** Invalid = IN */
+	protected $DOCSTATUS_Invalid = "IN";
+	/** In Progress = IP */
+	protected $DOCSTATUS_Inprogress = "IP";
+	/** Inventory In */
+	protected $Inventory_In = 'I+';
+	/** Inventory Out */
+	protected $Inventory_Out = 'I-';
 
 	public function __construct(RequestInterface $request)
 	{
@@ -72,6 +95,7 @@ class M_Receipt extends Model
 		$this->db = db_connect();
 		$this->request = $request;
 		$this->builder = $this->db->table($this->table);
+		$this->field = new Field();
 	}
 
 	public function getSelect()
@@ -162,12 +186,42 @@ class M_Receipt extends Model
 	public function createDetail($rows)
 	{
 		$receiptDetail = new M_ReceiptDetail();
+		$quotationDetail = new M_QuotationDetail();
+		$inventory = new M_Inventory($this->request);
+		$transaction = new M_Transaction();
 
 		$post = $this->request->getVar();
 
 		if (isset($post['table'])) {
 			$post['trx_receipt_id'] = $rows['id'];
 			$receiptDetail->create($post);
+		}
+
+		if (isset($post['docaction'])) {
+			$row = $this->find($post['id']);
+			$line = $receiptDetail->where($this->primaryKey, $post['id'])->findAll();
+
+			// //? Exists data line and docstatus Completed
+			if (count($line) > 0 && $post['docaction'] === $this->DOCSTATUS_Completed) {
+				//* Update qtyreceipt table trx_quotation_detail
+				$arrQuoDetail = $receiptDetail->getSumQtyGroup($post['id'])->getResult();
+				$quotationDetail->updateQty($arrQuoDetail, 'qtyreceipt');
+
+				//* Passing data to table inventory
+				$line = $this->field->mergeArrObject($line, [
+					'md_status_id'      => $row->getStatusId()
+				]);
+
+				$inventory->create($line);
+
+				//* Passing data to table transaction
+				$line = $this->field->mergeArrObject($line, [
+					'transactiontype'   => $this->Inventory_In,
+					'transactiondate'   => $row->getReceiptDate()
+				]);
+
+				$transaction->create($line);
+			}
 		}
 
 		return $rows;

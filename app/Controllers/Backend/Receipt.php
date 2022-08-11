@@ -15,13 +15,12 @@ use App\Models\M_Branch;
 use App\Models\M_Room;
 use App\Models\M_Quotation;
 use App\Models\M_QuotationDetail;
-use App\Models\M_Inventory;
-use App\Models\M_Transaction;
 use Config\Services;
 
 class Receipt extends BaseController
 {
     private $model;
+    private $model_detail;
     private $entity;
     protected $validation;
     protected $request;
@@ -32,6 +31,7 @@ class Receipt extends BaseController
         $this->validation = Services::validation();
         $this->model = new M_Receipt($this->request);
         $this->entity = new \App\Entities\Receipt();
+        $this->model_detail = new M_ReceiptDetail();
     }
 
     public function index()
@@ -142,13 +142,12 @@ class Receipt extends BaseController
 
     public function show($id)
     {
-        $receiptDetail = new M_ReceiptDetail();
         $quotation = new M_Quotation($this->request);
 
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
-                $detail = $receiptDetail->where($this->model->primaryKey, $id)->findAll();
+                $detail = $this->model_detail->where($this->model->primaryKey, $id)->findAll();
 
                 $rowQuotation = $quotation->checkExistQuotation($id)->getRow();
                 $textQuot = $rowQuotation->documentno . ' - ' . $rowQuotation->supplier . ' - ' . format_dmy($rowQuotation->quotationdate, '/') . ' - ' . $rowQuotation->grandtotal;
@@ -224,11 +223,6 @@ class Receipt extends BaseController
 
     public function processIt()
     {
-        $receiptDetail = new M_ReceiptDetail();
-        $quotationDetail = new M_QuotationDetail();
-        $inventory = new M_Inventory($this->request);
-        $transaction = new M_Transaction();
-
         if ($this->request->isAJAX()) {
             $post = $this->request->getVar();
 
@@ -241,42 +235,20 @@ class Receipt extends BaseController
 
             try {
                 if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
-                    $this->entity->setReceiptId($_ID);
-                    $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                    $line = $receiptDetail->where($this->model->primaryKey, $_ID)->findAll();
+                    $line = $this->model_detail->where($this->model->primaryKey, $_ID)->first();
 
                     //? Exists data line or not exist data line and docstatus not Completed
-                    if (count($line) > 0 || (count($line) == 0 && $_DocAction !== $this->DOCSTATUS_Completed)) {
+                    if ($line || (!$line && $_DocAction !== $this->DOCSTATUS_Completed)) {
                         $this->entity->setDocStatus($_DocAction);
-                    } else if (count($line) == 0 && $_DocAction === $this->DOCSTATUS_Completed) {
+                    } else if (!$line && $_DocAction === $this->DOCSTATUS_Completed) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
                         $msg = 'Document cannot be processed';
                     }
 
+                    $this->entity->setReceiptId($_ID);
+                    $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
+
                     $result = $this->model->save($this->entity);
-
-                    //? Exists data line and docstatus Completed
-                    if (count($line) > 0 && $_DocAction === $this->DOCSTATUS_Completed) {
-                        //* Update qtyreceipt table trx_quotation_detail
-                        $arrQuoDetail = $receiptDetail->getSumQtyGroup($_ID)->getResult();
-                        $quotationDetail->updateQty($arrQuoDetail, 'qtyreceipt');
-
-                        //* Passing data to table inventory
-                        $line = $this->field->mergeArrObject($line, [
-                            'md_status_id'      => $row->getStatusId()
-                        ]);
-
-                        $inventory->create($line);
-
-                        //* Passing data to table transaction
-                        $line = $this->field->mergeArrObject($line, [
-                            'transactiontype'   => $this->Inventory_In,
-                            'transactiondate'   => $row->getReceiptDate()
-                        ]);
-
-                        $transaction->create($line);
-                    }
 
                     $msg = $result ? $msg : $result;
 
@@ -296,11 +268,9 @@ class Receipt extends BaseController
 
     public function destroyLine($id)
     {
-        $receiptDetail = new M_ReceiptDetail();
-
         if ($this->request->isAJAX()) {
             try {
-                $row = $this->model->getDetail($receiptDetail->primaryKey, $id)->getRow();
+                $row = $this->model->getDetail($this->model_detail->primaryKey, $id)->getRow();
                 $grandTotal = ($row->grandtotal - $row->unitprice);
 
                 //* Update table receipt
@@ -310,7 +280,7 @@ class Receipt extends BaseController
                 $this->model->save($this->entity);
 
                 //* Delete row receipt detail
-                $delete = $receiptDetail->delete($id);
+                $delete = $this->model_detail->delete($id);
 
                 $result = $delete ? $grandTotal : false;
 
@@ -339,7 +309,6 @@ class Receipt extends BaseController
 
     public function getDetailQuotation()
     {
-        $receiptDetail = new M_ReceiptDetail();
         $quotation = new M_Quotation($this->request);
         $quotationDetail = new M_QuotationDetail();
 
@@ -348,11 +317,11 @@ class Receipt extends BaseController
 
             try {
                 if (!empty($post['receipt_id'])) {
-                    $checkData = $receiptDetail->where($this->model->primaryKey, $post['receipt_id'])->first();
+                    $checkData = $this->model_detail->where($this->model->primaryKey, $post['receipt_id'])->first();
 
                     //? Exists data receipt detail
                     if ($checkData)
-                        $receiptDetail->where($this->model->primaryKey, $post['receipt_id'])->delete();
+                        $this->model_detail->where($this->model->primaryKey, $post['receipt_id'])->delete();
                 }
 
                 $list = $quotation->where($quotation->primaryKey, $post['id'])->findAll();
