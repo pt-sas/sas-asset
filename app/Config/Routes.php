@@ -62,6 +62,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->add('inventory', 'Backend\Inventory::index');
     $routes->add('groupasset', 'Backend\GroupAsset::index');
     $routes->add('sequence', 'Backend\Sequence::index');
+    $routes->add('opname', 'Backend\Opname::index');
 });
 
 /*

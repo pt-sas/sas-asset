@@ -277,7 +277,9 @@ class Service extends BaseController
         $product = new M_Product($this->request);
         $status = new M_Status($this->request);
 
-        $dataInventory = $inventory->where('isactive', 'Y')->findAll();
+        $dataInventory = $inventory->where('isactive', 'Y')
+            ->orderBy('assetcode', 'ASC')
+            ->findAll();
         $dataProduct = $product->where('isactive', 'Y')->findAll();
         $dataStatus = $status->where([
             'isactive'  => 'Y',
@@ -307,7 +309,7 @@ class Service extends BaseController
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
                     $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', null, null, null, null, $row->unitprice, 125),
-                    $this->field->fieldTable('select', null, 'status_id', null, null, null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
+                    $this->field->fieldTable('select', null, 'status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row->description, 250),
                     $this->field->fieldTable('button', 'button', 'delete', null, null, null, null, null, $row->trx_service_detail_id)
                 ];

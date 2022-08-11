@@ -327,7 +327,11 @@ class Movement extends BaseController
         /**
          * Inventory room bukan RUANG IT - BARANG RUSAK
          */
-        $dataInventory = $inventory->where('md_room_id <>', 100041)->findAll();
+        $dataInventory = $inventory->where([
+            'isactive'  => 'Y',
+            'md_room_id <>' => 100041
+        ])->orderBy('assetcode', 'ASC')
+            ->findAll();
         $dataProduct = $product->where('isactive', 'Y')->findAll();
         $dataEmployee = $employee->where('isactive', 'Y')->findAll();
         $dataDivision = $division->where('isactive', 'Y')->findAll();

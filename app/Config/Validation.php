@@ -470,6 +470,13 @@ class Validation
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
+        ],
+        'detail.table.*.status_id'  => [
+            'label'             => 'Status',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} Line'
+            ]
             // ],
             // 'detail.table.*.unitprice'  => [
             //     'label'             => 'Unit Price',
