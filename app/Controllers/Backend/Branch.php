@@ -221,7 +221,7 @@ class Branch extends BaseController
                     $response[$key]['text'] = $row->getName();
 
                     if (!empty($post['reference']))
-                        $response[$key]['key'] = $value->getName();
+                        $response[$key]['key'] = $value->getBranchId();
                 endforeach;
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
