@@ -344,13 +344,13 @@ class Validation
                 'is_exist'      => 'This {field} already exists.',
                 'required'      => 'Please Insert the {field} first'
             ]
-            // ],
-            // 'md_subcategory_id'     => [
-            //     'label'             => 'Sub-Category',
-            //     'rules'             => 'required',
-            //     'errors'            => [
-            //         'required'      => 'Please Choose the {field} first'
-            //     ]
+        ],
+        'md_subcategory_id'     => [
+            'label'             => 'Subcategory',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
         ]
     ];
 
@@ -383,21 +383,21 @@ class Validation
             'errors'        => [
                 'required'    => 'Please Choose the {field} first'
             ]
-            // ],
-            // 'md_subcategory_id'    => [
-            //     'label'            => 'Sub-Category',
-            //     'rules'            =>    'required',
-            //     'errors'        => [
-            //         'required'    => 'Please Choose the {field} first'
-            //     ]
         ],
-        // 'md_type_id'        => [
-        //     'label'            => 'Type',
-        //     'rules'            =>    'required',
-        //     'errors'        => [
-        //         'required'    => 'Please Choose the {field} first'
-        //     ]
-        // ]
+        'md_subcategory_id'    => [
+            'label'            => 'Subcategory',
+            'rules'            => 'required',
+            'errors'        => [
+                'required'    => 'Please Choose the {field} first'
+            ]
+        ],
+        'md_type_id'        => [
+            'label'            => 'Type',
+            'rules'            => 'required',
+            'errors'        => [
+                'required'    => 'Please Choose the {field} first'
+            ]
+        ]
     ];
 
     public $status = [

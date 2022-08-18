@@ -724,7 +724,7 @@ _table.on('click', '.edit', function (evt) {
                                             let fieldName = field[i].name;
                                             let value = label;
 
-                                            if (typeof label === 'object') {
+                                            if (typeof value === 'object') {
                                                 value = label.id;
                                                 let text = label.name;
                                                 option.push({
@@ -742,7 +742,8 @@ _table.on('click', '.edit', function (evt) {
                                                     value
                                                 });
 
-                                                form.find('select[name=' + field[i].name + ']').val(label).change();
+                                                if (label != 0)
+                                                    form.find('select[name=' + field[i].name + ']').val(label).change();
                                             }
 
                                             // // Logic for set value null select if not exist data
@@ -1052,6 +1053,7 @@ function docProcess(id, status) {
                     let url = SITE_URL + '/processIt?id=' + id + '&docaction=' + docAction;
 
                     $.getJSON(url, function (result) {
+                            console.log(result)
                             if (result[0].success) {
                                 if (result[0].message == true) {
                                     Swal.fire({
@@ -2189,8 +2191,10 @@ function replaceRupiah(numeric) {
 function initSelectData(select) {
     $.each(select, function (i, item) {
         let url = $(item).attr('data-url');
+        let defaultID = $(item).attr('default-id');
+        let defaultText = $(item).attr('default-text');
 
-        if (typeof url !== 'undefined') {
+        if (typeof url !== 'undefined' && url !== '') {
             $(this).select2({
                 placeholder: 'Select an option',
                 width: '100%',
@@ -2216,7 +2220,13 @@ function initSelectData(select) {
                     cache: true
                 }
             });
+
+            if ((typeof defaultID !== 'undefined' && defaultID !== '') && (typeof defaultText !== 'undefined' && defaultText !== '')) {
+                let optionSelected = $("<option selected='selected'></option>").val(defaultID).text(defaultText);
+                $(this).append(optionSelected).change();
+            }
         }
+
     });
 }
 

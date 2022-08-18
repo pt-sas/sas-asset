@@ -18,10 +18,11 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="md_subcategory_id">Sub-Category </label>
+                    <label for="md_subcategory_id">Subcategory <span class="required">*</span></label>
                     <select class="form-control select-data" id="md_subcategory_id" name="md_subcategory_id" data-url="subcategory/getList">
                         <option value="">Select Sub-Category</option>
                     </select>
+                    <small class="form-text text-danger" id="error_md_subcategory_id"></small>
                 </div>
                 <div class="form-check">
                     <label class="form-check-label">
