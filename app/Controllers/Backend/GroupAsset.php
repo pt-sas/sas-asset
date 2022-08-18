@@ -25,7 +25,13 @@ class GroupAsset extends BaseController
 
     public function index()
     {
-        return $this->template->render('masterdata/groupasset/v_groupasset');
+        $sequence = new M_Sequence($this->request);
+
+        $data = [
+            'sequence' => $sequence->find(100000)
+        ];
+
+        return $this->template->render('masterdata/groupasset/v_groupasset', $data);
     }
 
     public function showAll()
