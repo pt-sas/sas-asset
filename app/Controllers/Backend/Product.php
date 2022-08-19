@@ -261,6 +261,11 @@ class Product extends BaseController
                         ->like('name', $post['search'])
                         ->orderBy('name', 'ASC')
                         ->findAll();
+                } else if (isset($post['name'])) {
+                    $list = $this->model->where('isactive', 'Y')
+                        ->like('name', $post['name'], 'both')
+                        ->orderBy('name', 'ASC')
+                        ->findAll();
                 } else {
                     $list = $this->model->where('isactive', 'Y')
                         ->orderBy('name', 'ASC')
