@@ -741,6 +741,9 @@ $('#filter_inventory').on('change', '[name="md_branch_id"]', function (evt) {
     }
 });
 
+/**
+ * Event Listener Sequence
+ */
 $('#form_sequence').on('click', '#isautosequence, #isgassetlevelsequence, #iscategorylevelsequence, #startnewyear', function (evt) {
     const target = $(evt.target);
     const form = target.closest('form');
