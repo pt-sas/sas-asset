@@ -42,6 +42,8 @@ class Template
         $view_data['email'] = $this->access->getUser('email');
         $view_data['level'] = $this->access->getRole();
 
+        $view_data['menu_action'] = $this->access->getMenu($uri, 'action');
+
         return view($template, $view_data);
     }
 
@@ -117,9 +119,15 @@ class Template
     private function actionButton()
     {
         $uri = $this->request->uri->getSegment(2);
-        $allBtn = '';
+        $menu_action = $this->access->getMenu($uri, 'action');
 
-        $btnBottom = '<div class="card-action card-button">
+        $allBtn = '';
+        $class = '';
+
+        if ($menu_action != 1)
+            $class = 'card-button';
+
+        $btnBottom = '<div class="card-action ' . $class . '">
                         <button type="button" class="btn btn-outline-danger btn-round ml-auto close_form">Close</button>
                         <button type="button" class="btn btn-primary btn-round ml-auto save_form">Save changes</button>
                     </div>';

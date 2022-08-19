@@ -1,5 +1,8 @@
 <!--   Core JS Files   -->
-<script src="<?= base_url('atlantis-pro/js/core/jquery.3.2.1.min.js') ?>"></script>
+<!-- <script src="<? //= base_url('atlantis-pro/js/core/jquery.3.2.1.min.js') 
+                    ?>"></script> -->
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 <script src="<?= base_url('atlantis-pro/js/core/popper.min.js') ?>"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <!-- jQuery UI -->

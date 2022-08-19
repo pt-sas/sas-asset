@@ -22,6 +22,7 @@
 	</script>
 
 	<!-- Custom styles for this template-->
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="<?= base_url('atlantis-pro/css/atlantis.css') ?>">
