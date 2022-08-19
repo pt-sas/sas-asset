@@ -24,10 +24,10 @@
                 </div>
                 <div class="form-group">
                     <label for="md_status_id">Status <span class="required">*</span></label>
-                    <select class="form-control select2" id="md_status_id" name="md_status_id" style="width: 100%;">
+                    <select class="form-control select2" id="md_status_id" name="md_status_id" style="width: 100%;" default-id="<?= $default_status->getStatusId() ?>" <?= !$role ? "disabled" : "" ?>>
                         <option value="">Select Status</option>
                         <?php foreach ($status as $row) : ?>
-                            <option value="<?= $row->getStatusId() ?>"><?= $row->getName() ?></option>
+                            <option value="<?= $row->getStatusId() ?>" <?= $default_status->getStatusId() == $row->getStatusId() && !$role ? "selected" : "" ?>><?= $row->getName() ?></option>
                         <?php endforeach; ?>
                     </select>
                     <small class="form-text text-danger" id="error_md_status_id"></small>

@@ -40,6 +40,8 @@ class Quotation extends BaseController
                 ->like('menu_id', $uri)
                 ->orderBy('name', 'ASC')
                 ->findAll(),
+            'default_status' => $status->find(100000), //! Default value ASET
+            'role' => $this->access->getUserRoleName(session()->get('sys_user_id'), 'W_Not_Default_Status')
         ];
 
         return $this->template->render('transaction/quotation/v_quotation', $data);

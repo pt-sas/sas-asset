@@ -1787,7 +1787,7 @@ function clearForm(evt) {
     // clear data, attribute readonly, attribute disabled on the field and remove class invalid
     for (let i = 0; i < field.length; i++) {
         if (field[i].name !== '') {
-            let option = $(field[i]).find('option:selected');
+            let defaultOption = $('select[name=' + field[i].name + ']').attr('default-id')
 
             if (fieldReadOnly.length == 0) {
                 form.find('input[name=' + field[i].name + '], textarea[name=' + field[i].name + ']')
@@ -1811,21 +1811,21 @@ function clearForm(evt) {
                 .removeAttr('disabled');
 
             //logic clear data dropdown if not selected from the beginning
-            if (option.length > 0 && option.val() !== '' && setSave == 'add') {
+            if (typeof defaultOption !== 'undefined' && defaultOption !== '') {
                 if (fieldReadOnly.length == 0) {
                     form.find('select[name=' + field[i].name + ']')
-                        .val(option.val()).change()
+                        .val(defaultOption).change()
                         .removeAttr('disabled')
                         .closest('.form-group').removeClass('has-error');
                 } else if (fieldReadOnly.length > 0) { // field is not readonly by default
                     if (!fieldReadOnly.includes(field[i].name)) {
                         form.find('select[name=' + field[i].name + ']')
-                            .val(option.val()).change()
+                            .val(defaultOption).change()
                             .removeAttr('disabled')
                             .closest('.form-group').removeClass('has-error');
                     } else {
                         form.find('select[name=' + field[i].name + ']')
-                            .val(option.val()).change()
+                            .val(defaultOption).change()
                             .closest('.form-group').removeClass('has-error');
                     }
                 }
