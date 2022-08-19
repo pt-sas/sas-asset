@@ -254,4 +254,17 @@ class Access
     {
         return "N";
     }
+
+    public function getUserRoleName($user_id, $role_name)
+    {
+        $user = new M_User($this->request);
+
+        $role = $user->detail([
+            'sr.isactive'           => $this->active(),
+            'sys_user.sys_user_id'  => $user_id,
+            'sr.name'               => $role_name
+        ])->getRow();
+
+        return $role;
+    }
 }
