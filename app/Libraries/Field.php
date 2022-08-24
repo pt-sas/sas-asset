@@ -203,8 +203,10 @@ class Field
                 if (!empty($defaultValue)) {
                     if ($defaultValue === 'Y')
                         $element .= '<input type="' . $type . '" class="form-check-input line ' . $class . '" name="' . $name . '" checked ' . $disabled . '>';
-                    else
+                    else if ($defaultValue === 'N')
                         $element .= '<input type="' . $type . '" class="form-check-input line ' . $class . '" name="' . $name . '" ' . $disabled . '>';
+                    else
+                        $element .= '<input type="' . $type . '" class="form-check-input line ' . $class . '" name="' . $name . '" value="' . $defaultValue . '">';
                 } else {
                     $element .= '<input type="' . $type . '" class="form-check-input line ' . $class . '" name="' . $name . '" ' . $checked . ' ' . $disabled . '>';
                 }
