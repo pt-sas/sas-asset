@@ -19,7 +19,7 @@ class M_Datatable extends Model
         $this->request = $request;
     }
 
-    private function getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join = [])
+    private function getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join = [], $where = [])
     {
         $post = $this->request->getVar();
         $this->builder = $this->db->table($table);
@@ -31,6 +31,9 @@ class M_Datatable extends Model
 
         if (count($join) > 0)
             $this->setJoin($join);
+
+        if (count($where) > 0)
+            $this->builder->where($where);
 
         if (isset($post['form']))
             $this->filterDatatable($table, $post);
@@ -57,9 +60,9 @@ class M_Datatable extends Model
         }
     }
 
-    public function getDatatables($table, $select, $column_order, $order, $column_search, $join = [])
+    public function getDatatables($table, $select, $column_order, $order, $column_search, $join = [], $where = [])
     {
-        $this->getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join);
+        $this->getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join, $where);
 
         if ($this->request->getPost('length') != -1)
             $this->builder->limit($this->request->getPost('length'), $this->request->getPost('start'));
@@ -73,9 +76,9 @@ class M_Datatable extends Model
         return $this->builder->countAllResults();
     }
 
-    public function countFiltered($table, $select, $column_order, $order, $column_search, $join = [])
+    public function countFiltered($table, $select, $column_order, $order, $column_search, $join = [], $where = [])
     {
-        $this->getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join);
+        $this->getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join, $where);
         return $this->builder->countAllResults();
     }
 
