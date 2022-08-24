@@ -303,7 +303,7 @@ class Internal extends BaseController
                     $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, $row[1]->qtyentered, 70),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', 'readonly', null, null, 0, 125),
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, 0, 125),
-                    $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, $row[3]->isspare ?? 'checked'),
+                    $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, $row[3]->isspare ? 'checked' : null),
                     $this->field->fieldTable('select', null, 'employee_id', null, 'required', $row[3]->isspare ?? 'readonly', null, $dataEmployee, !empty($row[4]->employee_id) ? $row[4]->employee_id : null, 200, 'md_employee_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'spek', null, null, null, null, null, $row[5]->spek, 250),
                     $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row[6]->desc, 250),
