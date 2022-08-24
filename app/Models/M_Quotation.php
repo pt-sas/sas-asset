@@ -179,7 +179,7 @@ class M_Quotation extends Model
 
 	public function createDetail(array $rows)
 	{
-		$quotationDetail = new M_QuotationDetail();
+		$quotationDetail = new M_QuotationDetail($this->request);
 
 		$post = $this->request->getVar();
 
@@ -191,7 +191,7 @@ class M_Quotation extends Model
 
 	public function deleteDetail(array $rows)
 	{
-		$quotationDetail = new M_QuotationDetail();
+		$quotationDetail = new M_QuotationDetail($this->request);
 		$quotationDetail->where($this->primaryKey, $rows['id'])->delete();
 	}
 }

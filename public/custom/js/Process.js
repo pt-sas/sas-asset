@@ -17,7 +17,8 @@ let ID,
     _tableLine,
     setSave,
     ul,
-    formTable;
+    formTable,
+    _tableInfo;
 
 // Data array from option
 let option = [];
@@ -126,6 +127,49 @@ $('.tb_tree').treeFy({
 });
 
 /**
+ * Table Info on the modal
+ */
+_tableInfo = $('.table_info').DataTable({
+    'processing': true,
+    'drawCallback': function (settings) {
+        $(this).find('.number').on('keypress keyup blur', function (evt) {
+            $(this).val($(this).val().replace(/[^\d].+/, ""));
+            if ((evt.which < 48 || evt.which > 57)) {
+                evt.preventDefault();
+            }
+        });
+        $(this).find('.select2').select2({
+            placeholder: 'Select an option',
+            theme: "bootstrap",
+            allowClear: true
+        });
+        $(this).find('.rupiah').autoNumeric('init', {
+            aSep: '.',
+            aDec: ',',
+            mDec: '0'
+        });
+    },
+    'columnDefs': [{
+            'targets': [0, 1],
+            'orderable': false,
+            'width': 2
+        },
+        {
+            'targets': 0,
+            'visible': false //hide column
+        }
+    ],
+    'displayLength': -1,
+    'lengthChange': false,
+    'searching': false,
+    'paging': false,
+    'autoWidth': false,
+    'scrollX': true,
+    'scrollY': '350px',
+    'scrollCollapse': true
+});
+
+/**
  * 
  * @returns check fixed column datatable
  */
@@ -168,8 +212,8 @@ function reloadTable() {
  */
 $('.save_form').click(function (evt) {
     const parent = $(evt.target).closest('.row');
-    const form = parent.find('form');
     cardForm = parent.find('.card-form');
+    const form = cardForm.find('form');
     const container = $(evt.target).closest('.container');
 
     let _this = $(this);
@@ -495,7 +539,8 @@ $('.save_form').click(function (evt) {
 _table.on('click', '.edit', function (evt) {
     const parent = $(evt.target).closest('.container');
     const cardBody = parent.find('.card-body');
-    const form = parent.find('form');
+    const cardForm = parent.find('.card-form');
+    const form = cardForm.find('form');
     const row = _table.row(this).data();
 
     ID = $(this).attr('id');
@@ -1053,7 +1098,6 @@ function docProcess(id, status) {
                     let url = SITE_URL + '/processIt?id=' + id + '&docaction=' + docAction;
 
                     $.getJSON(url, function (result) {
-                            console.log(result)
                             if (result[0].success) {
                                 if (result[0].message == true) {
                                     Swal.fire({
@@ -1351,6 +1395,9 @@ $('.btn_filter').click(function (evt) {
     reloadTable();
 });
 
+/**
+ * Event add row table line
+ */
 $('.add_row').click(function (evt) {
     let form = $(evt.target).closest('form');
 
@@ -1399,6 +1446,181 @@ $('.add_row').click(function (evt) {
         });
     }
 });
+
+/**
+ * Event create table line
+ */
+$('.create_line').click(function (evt) {
+    let action = 'create';
+    let checkAccess = isAccess(action, LAST_URL);
+
+    if (checkAccess[0].success && checkAccess[0].message == 'Y') {
+        let _this = $(this);
+        let oriElement = _this.html();
+
+        $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+
+        setTimeout(function () {
+            $(_this).html(oriElement).prop('disabled', false);
+
+            $('#modal_product_info').modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            loadingForm('product_info', 'ios');
+
+            $("#modal_product_info").on('shown.bs.modal', function (e) {
+                const target = $(e.target);
+                const form = target.find('form');
+
+                let url = ADMIN_URL + 'product' + '/showProductInfo/?data=null';
+
+                form[0].reset();
+
+                setTimeout(function () {
+                    hideLoadingForm('product_info');
+
+                    if (form.find('select.select-data').length > 0) {
+                        let select = form.find('select.select-data');
+                        initSelectData(select);
+                    }
+
+                    _tableInfo.ajax.url(url).load().columns.adjust();
+
+                }, 50);
+            });
+        }, 100);
+
+
+    } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
+        Toast.fire({
+            type: 'warning',
+            title: "You are role don't have permission !!"
+        });
+    } else {
+        Toast.fire({
+            type: 'error',
+            title: checkAccess[0].message
+        });
+    }
+});
+
+/**
+ * Clear content modal product info
+ */
+$("#modal_product_info").on('hidden.bs.modal', function (evt) {
+    const target = $(evt.target);
+    const form = target.find('form');
+
+    //TODO: Clear form content
+    form[0].reset();
+
+    //TODO: Clear datatable
+    _tableInfo.clear().draw();
+});
+
+/**
+ * Refresh data table info
+ */
+$('.btn_requery_info').click(function (evt) {
+    const target = $(evt.target);
+    const modalContent = target.closest('.modal-content');
+    const form = modalContent.find('form');
+
+    let url = ADMIN_URL + 'product' + '/showProductInfo/?';
+    let formData = form.serialize();
+
+    _tableInfo.ajax.url(url + formData).load().columns.adjust();
+});
+
+/**
+ * Btn save info for set data from table info to table line
+ */
+$('.btn_save_info').click(function (evt) {
+    const modal = $(this).closest('.modal');
+    const modalBody = modal.find('.modal-body');
+
+    const checkbox = _tableInfo.rows().nodes().to$().find('input:checkbox[name="check_data"]:checked');
+
+    let _this = $(this);
+    let oriElement = _this.html();
+
+    if (checkbox.length > 0) {
+        let url = SITE_URL + TABLE_LINE + '/create';
+        let output = [];
+
+        $.each(checkbox, function (i) {
+            let tr = $(this).closest('tr');
+            let tag = tr.find('input, select');
+
+            let data = [];
+
+            $.each(tag, function (index, element) {
+                let row = [];
+                let name = $(element).attr('name');
+                let value = $(element).val();
+
+                if ($(element).attr('type') !== 'checkbox') {
+                    row = {
+                        [name]: value
+                    };
+                } else {
+                    if (name === 'check_data')
+                        row = {
+                            product_id: value
+                        };
+                    else
+                        row = {
+                            [name]: $(element).is(':checked')
+                        }
+                }
+
+                data.push(row);
+            });
+
+            output[i] = data;
+        });
+
+        let jsonString = JSON.stringify(output);
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                data: jsonString
+            },
+            cache: false,
+            dataType: 'JSON',
+            beforeSend: function () {
+                $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
+                $('.btn_requery_info').attr('disabled', true);
+                $('.btn_close_info').attr('disabled', true);
+                loadingForm(modalBody.attr('id'), 'ios');
+            },
+            complete: function () {
+                $(_this).html(oriElement).prop('disabled', false);
+                $('.btn_requery_info').removeAttr('disabled');
+                $('.btn_close_info').removeAttr('disabled');
+                hideLoadingForm(modalBody.attr('id'));
+            },
+            success: function (result) {
+                $('#' + modal.attr('id')).modal('hide');
+                _tableLine.rows.add(result).draw(false);
+            },
+            error: function (jqXHR, exception) {
+                showError(jqXHR, exception);
+            }
+        });
+    } else {
+        Toast.fire({
+            type: 'warning',
+            title: 'Please selected data !!'
+        });
+    }
+
+});
+
 
 /**
  * Process login

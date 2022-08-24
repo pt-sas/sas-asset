@@ -2,6 +2,7 @@
 
 <?= $this->section('content'); ?>
 
+<?= $this->include('backend/modal/product_info'); ?>
 <?= $this->include('transaction/quotation/form_quotation'); ?>
 <div class="card-body card-main">
     <table class="table table-striped table-hover tb_display" style="width: 100%">

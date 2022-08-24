@@ -70,45 +70,6 @@ _tableLine.on('keyup', 'input[name="qtyentered"], input[name="unitprice"]', func
     }
 });
 
-$('#form_quotation').on('click', '#isinternaluse', function (evt) {
-    const field = _tableLine.rows().nodes().to$().find('input');
-
-    if ($(this).is(':checked')) {
-        let listSup = getList('supplier/getList', 'name', 'SAS');
-        let supOption = $("<option selected='selected'></option>").val(listSup[0].id).text(listSup[0].text);
-
-        //! Set field md_supplier_id disabled
-        $('#md_supplier_id').append(supOption)
-            .change()
-            .prop('disabled', true);
-        fieldReadOnly.push('md_supplier_id');
-
-        $.each(field, function (index, item) {
-            const tr = $(this).closest('tr');
-
-            //! Set value is zero and readonly
-            tr.find('input:text[name="unitprice"]').val(0)
-                .prop('readonly', true);
-
-            tr.find('input:text[name="lineamt"]').val(0);
-        });
-    } else {
-        //! Set field md_supplier_id remove attribute disabled
-        $('#md_supplier_id').val(null)
-            .change()
-            .removeAttr('disabled');
-        removeItems(fieldReadOnly, 'md_supplier_id');
-
-        $.each(field, function (index, item) {
-            const tr = $(this).closest('tr');
-
-            //! Set value unitprice is null and remove attribute readonly
-            tr.find('input:text[name="unitprice"]').val(null)
-                .removeAttr('readonly');
-        });
-    }
-});
-
 /**
  * Event Listener Receipt Detail
  */
@@ -816,3 +777,19 @@ $('.save_upload').click(function (evt) {
 
     // console.log(fd)
 })
+
+/**
+ * Event change field Employee in Table Info
+ */
+_tableInfo.on('change', 'input[name="isspare"]', function (evt) {
+    const tr = _tableInfo.$(this).closest('tr');
+
+    if ($(this).is(':checked'))
+        tr.find('select[name="employee_id"]')
+        .val(100130).change()
+        .attr('disabled', true);
+    else
+        tr.find('select[name="employee_id"]')
+        .val(null).change()
+        .removeAttr('disabled');
+});

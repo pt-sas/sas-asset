@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
-
 use CodeIgniter\HTTP\RequestInterface;
+use App\Models\M_Product;
 
 class M_QuotationDetail extends Model
 {
@@ -25,16 +25,20 @@ class M_QuotationDetail extends Model
 	protected $returnType = 'App\Entities\Quotationdetail';
 	protected $db;
 	protected $builder;
+	protected $request;
 
-	public function __construct()
+	public function __construct(RequestInterface $request)
 	{
 		parent::__construct();
 		$this->db = db_connect();
 		$this->builder = $this->db->table($this->table);
+		$this->request = $request;
 	}
 
 	public function create($post)
 	{
+		$product = new M_Product($this->request);
+
 		$table = json_decode($post['table']);
 
 		$result = false;
@@ -42,9 +46,11 @@ class M_QuotationDetail extends Model
 		$sumLineAmt = 0;
 
 		foreach ($table as $row) :
+			$valPro = $product->where('name', $row[0]->product_id)->first();
+
 			$data = [
-				'md_product_id'     => $row[0]->product_id,
-				'qtyentered'        => replaceFormat($row[1]->qtyentered),
+				'md_product_id'     => $valPro->getProductId(),
+				'qtyentered'        => $row[1]->qtyentered,
 				'unitprice'         => replaceFormat($row[2]->unitprice),
 				'lineamt'         	=> replaceFormat($row[3]->lineamt),
 				'isspare'			=> setCheckbox($row[4]->isspare),

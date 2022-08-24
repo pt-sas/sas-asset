@@ -38,12 +38,6 @@
                     <label for="description">Description </label>
                     <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
                 </div>
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" id="isinternaluse" name="isinternaluse">
-                        <span class="form-check-sign">Internal Use</span>
-                    </label>
-                </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
@@ -56,13 +50,13 @@
             <div class="col-md-12">
                 <div class="form-group">
                     <div class="text-right">
-                        <button type="button" name="button" class="btn btn-primary btn-sm btn-round ml-auto add_row" title="Add New"><i class="fa fa-plus"> Add New</i></button>
+                        <button type="button" name="button" class="btn btn-primary btn-sm btn-round ml-auto create_line" title="Create Line"><i class="fa fa-plus"> Create Line</i></button>
                     </div>
                 </div>
             </div>
             <div class="col-md-12">
                 <div class="form-group table-responsive">
-                    <table class="table-line table-light table-hover tb_displayline" style="width: 100%">
+                    <table class="table-line table-light table-hover tb_displayline" id="table_quotation" style="width: 100%">
                         <thead>
                             <tr>
                                 <th class="text-center">Product</th>

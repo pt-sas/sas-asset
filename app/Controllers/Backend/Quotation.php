@@ -25,7 +25,7 @@ class Quotation extends BaseController
         $this->request = Services::request();
         $this->validation = Services::validation();
         $this->model = new M_Quotation($this->request);
-        $this->model_detail = new M_QuotationDetail();
+        $this->model_detail = new M_QuotationDetail($this->request);
         $this->entity = new \App\Entities\Quotation();
     }
 
@@ -111,7 +111,6 @@ class Quotation extends BaseController
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-                $this->entity->setIsInternalUse(setCheckbox(isset($post['isinternaluse'])));
                 $this->entity->setCreatedBy($this->session->get('sys_user_id'));
                 $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
@@ -175,7 +174,6 @@ class Quotation extends BaseController
             try {
                 $this->entity->fill($post);
                 $this->entity->setQuotationId($post['id']);
-                $this->entity->setIsInternalUse(setCheckbox(isset($post['isinternaluse'])));
                 $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                 if (!$this->validation->run($post, 'quotation')) {
@@ -298,29 +296,40 @@ class Quotation extends BaseController
         $table = [];
 
         //? Create
-        if (empty($set)) {
-            $table = [
-                $this->field->fieldTable('select', null, 'product_id', null, 'required', null, null, $dataProduct, null, 300, 'md_product_id', 'name'),
-                $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, null, 70),
-                $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', isset($post['isinternaluse']) ? 'readonly' : null, null, null, isset($post['isinternaluse']) ? 0 : null, 125),
-                $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, 0, 125),
-                $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, 'checked'),
-                $this->field->fieldTable('select', null, 'employee_id', null, 'required', 'readonly', null, $dataEmployee, 'IT', 200, 'md_employee_id', 'name'),
-                $this->field->fieldTable('input', 'text', 'spek', null, null, null, null, null, null, 250),
-                $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, null, 250),
-                $this->field->fieldTable('button', 'button', 'delete')
-            ];
+        $data = $this->request->getPost('data');
+        $arrData = json_decode($data);
+
+        if ($set === 'create' && count($arrData) > 0) {
+            foreach ($arrData as $row) :
+                $valPro = $product->find($row[0]->product_id);
+
+                $lineamt = 0;
+                if (!empty($row[1]->qtyentered) && !empty($row[2]->unitprice))
+                    $lineamt = $row[1]->qtyentered * replaceFormat($row[2]->unitprice);
+
+                $table[] = [
+                    $this->field->fieldTable('input', 'text', 'product_id', 'text-uppercase', 'required', 'readonly', null, null, $valPro->getName(), 300),
+                    $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, $row[1]->qtyentered, 70),
+                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, replaceFormat($row[2]->unitprice), 125),
+                    $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $lineamt, 125),
+                    $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, $row[3]->isspare ? 'checked' : null),
+                    $this->field->fieldTable('select', null, 'employee_id', null, 'required', $row[3]->isspare ? 'readonly' : null, null, $dataEmployee, !empty($row[4]->employee_id) ? $row[4]->employee_id : null, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('input', 'text', 'spek', null, null, null, null, null, $row[5]->spek, 250),
+                    $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row[6]->desc, 250),
+                    $this->field->fieldTable('button', 'button', 'delete')
+                ];
+            endforeach;
         }
 
         //? Update
         if (!empty($set) && count($detail) > 0) {
             foreach ($detail as $row) :
-                $quotation = $this->model->where($this->model->primaryKey, $row->trx_quotation_id)->first();
+                $valPro = $product->find($row->md_product_id);
 
                 $table[] = [
-                    $this->field->fieldTable('select', null, 'product_id', null, 'required', null, null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'qtyentered', 'rupiah', 'required', null, null, null, $row->qtyentered, 70),
-                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $quotation->isinternaluse == 'Y' ? 'readonly' : null, null, null, $row->unitprice, 125),
+                    $this->field->fieldTable('input', 'text', 'product_id', 'text-uppercase', 'required', 'readonly', null, null, $valPro->getName(), 300),
+                    $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, $row->qtyentered, 70),
+                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, $row->unitprice, 125),
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row->lineamt, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
                     $this->field->fieldTable('select', 'text', 'employee_id', null, 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
