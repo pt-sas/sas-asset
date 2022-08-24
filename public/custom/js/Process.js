@@ -667,7 +667,7 @@ _table.on('click', '.edit', function (evt) {
                                     readonly(form, true);
 
                                     // Button add row table line
-                                    $('.add_row').css('display', 'none');
+                                    $('.add_row, .create_line').css('display', 'none');
 
                                     btnAction.css('display', 'none');
 
@@ -682,7 +682,7 @@ _table.on('click', '.edit', function (evt) {
                                     });
                                 } else {
                                     // Button add row table line
-                                    $('.add_row').css('display', 'block');
+                                    $('.add_row, .create_line').css('display', 'block');
 
                                     btnAction.css('display', 'block');
                                 }
