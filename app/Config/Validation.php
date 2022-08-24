@@ -845,4 +845,79 @@ class Validation
             ]
         ]
     ];
+
+    public $internal = [
+        'documentno'            => [
+            'label'             => 'Document No',
+            'rules'             => 'required|min_length[10]|max_length[10]|is_unique[trx_quotation.documentno,trx_quotation_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'quotationdate'         => [
+            'label'             => 'Date',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'md_status_id'          => [
+            'label'             => 'Status',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'md_employee_id'        => [
+            'label'             => 'Employee',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'line'                  => [
+            'label'             => 'Quotation Detail',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'detail.table.*.product_id'  => [
+            'label'             => 'Product',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} Line'
+            ]
+        ],
+        'detail.table.*.qtyentered'  => [
+            'label'             => 'Qty',
+            'rules'             => 'required|is_natural_no_zero',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line',
+                'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
+            ]
+        ],
+        'detail.table.*.unitprice'  => [
+            'label'             => 'Unit Price',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line'
+            ]
+        ],
+        'detail.table.*.lineamt'  => [
+            'label'             => 'Line Amount',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line'
+            ]
+        ],
+        'detail.table.*.employee_id'  => [
+            'label'             => 'Employee',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} Line'
+            ]
+        ]
+    ];
 }

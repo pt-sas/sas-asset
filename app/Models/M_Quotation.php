@@ -19,7 +19,8 @@ class M_Quotation extends Model
 		'created_by',
 		'updated_by',
 		'grandtotal',
-		'isinternaluse'
+		'isinternaluse',
+		'md_employee_id'
 	];
 	protected $useTimestamps        = true;
 	protected $returnType 			= 'App\Entities\Quotation';
@@ -35,7 +36,7 @@ class M_Quotation extends Model
 		'', // Number column
 		'trx_quotation.documentno',
 		'trx_quotation.quotationdate',
-		'md_supplier.name',
+		'md_supplier.name' || 'md_employee.name',
 		'md_status.name',
 		'trx_quotation.grandtotal',
 		'trx_quotation.docstatus',
@@ -48,9 +49,10 @@ class M_Quotation extends Model
 		'trx_quotation.quotationdate',
 		'trx_quotation.docstatus',
 		'trx_quotation.grandtotal',
-		'md_supplier.name',
+		'md_supplier.name' || 'md_employee.name',
 		'md_status.name',
-		'sys_user.name'
+		'sys_user.name',
+		'md_employee.name'
 	];
 	protected $order = ['created_at' => 'DESC'];
 	protected $request;
@@ -70,7 +72,8 @@ class M_Quotation extends Model
 		$sql = $this->table . '.*,' .
 			'md_supplier.name as supplier,
 			md_status.name as status,
-			sys_user.name as createdby';
+			sys_user.name as createdby,
+			md_employee.name as employee';
 
 		return $sql;
 	}
@@ -79,6 +82,7 @@ class M_Quotation extends Model
 	{
 		$sql = [
 			$this->setDataJoin('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left'),
+			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left'),
 			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
 			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left')
 		];
@@ -95,12 +99,13 @@ class M_Quotation extends Model
 		];
 	}
 
-	public function getInvNumber()
+	public function getInvNumber($field, $where)
 	{
 		$month = date('m');
 
 		$this->builder->select('MAX(RIGHT(documentno,4)) AS documentno');
 		$this->builder->where("DATE_FORMAT(quotationdate, '%m')", $month);
+		$this->builder->where($field, $where);
 		$sql = $this->builder->get();
 
 		$code = "";
@@ -113,7 +118,12 @@ class M_Quotation extends Model
 			$code = "0001";
 		}
 
-		$prefix = "QU" . date('ym') . $code;
+		$first = "IU";
+
+		if ($where === 'N')
+			$first = "QU";
+
+		$prefix = $first . date('ym') . $code;
 
 		return $prefix;
 	}
@@ -151,9 +161,11 @@ class M_Quotation extends Model
 	{
 
 		$sql = "SELECT q.*,
-			p.name as supplier
+			p.name as supplier,
+			e.name as employee
 		FROM trx_quotation q
 		LEFT JOIN md_supplier p ON p.md_supplier_id = q.md_supplier_id
+		LEFT JOIN md_employee e ON e.md_employee_id = q.md_employee_id
 		WHERE q.docstatus = 'CO' ";
 
 		if (!empty($where)) {
