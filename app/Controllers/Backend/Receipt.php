@@ -310,7 +310,7 @@ class Receipt extends BaseController
     public function getDetailQuotation()
     {
         $quotation = new M_Quotation($this->request);
-        $quotationDetail = new M_QuotationDetail();
+        $quotationDetail = new M_QuotationDetail($this->request);
 
         if ($this->request->isAjax()) {
             $post = $this->request->getVar();
