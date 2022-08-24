@@ -17,6 +17,7 @@ class Quotation extends Entity
 	protected $created_by;
 	protected $updated_by;
 	protected $isinternaluse;
+	protected $md_employee_id;
 
 	protected $dates   = [
 		'created_at',
@@ -142,5 +143,15 @@ class Quotation extends Entity
 	public function setIsInternalUse($isinternaluse)
 	{
 		$this->attributes['isinternaluse'] = $isinternaluse;
+	}
+
+	public function getEmployeeId()
+	{
+		return $this->attributes['md_employee_id'];
+	}
+
+	public function setEmployeeId($md_employee_id)
+	{
+		$this->attributes['md_employee_id'] = $md_employee_id;
 	}
 }
