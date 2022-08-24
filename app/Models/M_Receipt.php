@@ -186,7 +186,7 @@ class M_Receipt extends Model
 	public function createDetail($rows)
 	{
 		$receiptDetail = new M_ReceiptDetail();
-		$quotationDetail = new M_QuotationDetail();
+		$quotationDetail = new M_QuotationDetail($this->request);
 		$inventory = new M_Inventory($this->request);
 		$transaction = new M_Transaction();
 
@@ -231,7 +231,7 @@ class M_Receipt extends Model
 	{
 		$receiptDetail = new M_ReceiptDetail();
 		$inventory = new M_Inventory($this->request);
-		$quotationDetail = new M_QuotationDetail();
+		$quotationDetail = new M_QuotationDetail($this->request);
 
 		$this->builder->where($this->primaryKey, $rows['id']);
 		$sql = $this->builder->get();
