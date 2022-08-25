@@ -25,7 +25,7 @@ class CreateTrxReceiptTable extends Migration
             'invoiceno'             => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => false],
             'description'           => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
             'md_status_id'          => ['type' => 'INT', 'constraint' => 6, 'null' => false],
-            'md_supplier_id'        => ['type' => 'INT', 'constraint' => 6, 'null' => false],
+            'md_supplier_id'        => ['type' => 'INT', 'constraint' => 6, 'null' => true],
         ]);
         $this->forge->addKey('trx_receipt_id', true);
         $this->forge->createTable('trx_receipt', true);

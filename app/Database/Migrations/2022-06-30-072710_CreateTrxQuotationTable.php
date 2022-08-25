@@ -23,7 +23,7 @@ class CreateTrxQuotationTable extends Migration
             'docstatus'             => ['type' => 'CHAR', 'constraint' => 2, 'null' => false],
             'description'           => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
             'md_status_id'          => ['type' => 'INT', 'constraint' => 6, 'null' => false],
-            'md_supplier_id'        => ['type' => 'INT', 'constraint' => 6, 'null' => false],
+            'md_supplier_id'        => ['type' => 'INT', 'constraint' => 6, 'null' => true],
         ]);
         $this->forge->addKey('trx_quotation_id', true);
         $this->forge->createTable('trx_quotation', true);

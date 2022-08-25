@@ -15,7 +15,7 @@ class AddColumnIsInternalUseAndEmployee extends Migration
                 'type'          => 'INT',
                 'after'         => 'md_supplier_id',
                 'constraint'    => 6,
-                'null'          => false
+                'null'          => true
             ]
         ];
 
@@ -26,7 +26,7 @@ class AddColumnIsInternalUseAndEmployee extends Migration
                 'type'          => 'INT',
                 'after'         => 'md_supplier_id',
                 'constraint'    => 6,
-                'null'          => false
+                'null'          => true
             ],
             'isinternaluse'     => [
                 'type'          => 'CHAR',
