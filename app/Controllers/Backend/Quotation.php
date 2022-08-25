@@ -328,7 +328,7 @@ class Quotation extends BaseController
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row->lineamt, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
                     $this->field->fieldTable('select', 'text', 'employee_id', null, 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'spek', null, null, null, null, null, $row->spesification, 250),
+                    $this->field->fieldTable('input', 'text', 'spek', null, null, null, null, null, $row->specification, 250),
                     $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row->description, 250),
                     $this->field->fieldTable('button', 'button', 'delete', null, null, null, null, null, $row->trx_quotation_detail_id)
                 ];
