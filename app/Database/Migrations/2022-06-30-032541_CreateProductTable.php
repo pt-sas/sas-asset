@@ -25,7 +25,6 @@ class CreateProductTable extends Migration
             'md_category_id'        => ['type' => 'INT', 'constraint' => 6, 'null' => false],
             'md_subcategory_id'     => ['type' => 'INT', 'constraint' => 6, 'null' => true],
             'md_type_id'            => ['type' => 'INT', 'constraint' => 6, 'null' => true],
-            'md_sequence_id'        => ['type' => 'INT', 'constraint' => 6, 'null' => false]
         ]);
         $this->forge->addKey('md_product_id', true);
         $this->forge->createTable('md_product', true);
