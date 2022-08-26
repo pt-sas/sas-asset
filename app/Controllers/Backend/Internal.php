@@ -39,8 +39,7 @@ class Internal extends BaseController
                 ->like('menu_id', $uri)
                 ->orderBy('name', 'ASC')
                 ->findAll(),
-            'default_status' => $status->find(100000), //! Default value ASET
-            'role' => $this->access->getUserRoleName(session()->get('sys_user_id'), 'W_Not_Default_Status')
+            'default_logic' => json_decode($this->defaultLogic())
         ];
 
         return $this->template->render('transaction/internaluse/v_internaluse', $data);
@@ -346,5 +345,23 @@ class Internal extends BaseController
 
             return $this->response->setJSON($response);
         }
+    }
+
+    public function defaultLogic()
+    {
+        $result = [];
+
+        //! default logic for dropdown md_status_id
+        $role = $this->access->getUserRoleName($this->session->get('sys_user_id'), 'W_Not_Default_Status');
+
+        if (!$role) {
+            $result = [
+                'field'         => 'md_status_id',
+                'id'            => 100000, //Aset
+                'condition'     => true
+            ];
+        }
+
+        return json_encode($result);
     }
 }
