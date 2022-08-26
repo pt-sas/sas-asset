@@ -2006,6 +2006,11 @@ function clearForm(evt) {
     // clear field data on the form
     form[0].reset();
 
+    // Get data default logic
+    let urlDefault = '/quotation/defaultLogic';
+
+    let defaultLogic = getLogic(urlDefault);
+
     // clear data, attribute readonly, attribute disabled on the field and remove class invalid
     for (let i = 0; i < field.length; i++) {
         if (field[i].name !== '') {
@@ -2033,21 +2038,21 @@ function clearForm(evt) {
                 .removeAttr('disabled');
 
             //logic clear data dropdown if not selected from the beginning
-            if (typeof defaultOption !== 'undefined' && defaultOption !== '') {
+            if (defaultLogic.length > 0 && field[i].name === defaultLogic[0].field && defaultLogic[0].condition) {
                 if (fieldReadOnly.length == 0) {
                     form.find('select[name=' + field[i].name + ']')
-                        .val(defaultOption).change()
+                        .val(defaultLogic[0].id).change()
                         .removeAttr('disabled')
                         .closest('.form-group').removeClass('has-error');
                 } else if (fieldReadOnly.length > 0) { // field is not readonly by default
                     if (!fieldReadOnly.includes(field[i].name)) {
                         form.find('select[name=' + field[i].name + ']')
-                            .val(defaultOption).change()
+                            .val(defaultLogic[0].id).change()
                             .removeAttr('disabled')
                             .closest('.form-group').removeClass('has-error');
                     } else {
                         form.find('select[name=' + field[i].name + ']')
-                            .val(defaultOption).change()
+                            .val(defaultLogic[0].id).change()
                             .closest('.form-group').removeClass('has-error');
                     }
                 }
@@ -2490,6 +2495,27 @@ function removeItems(array, itemsToRemove) {
 
     if (index > -1)
         return array.splice(index, 1);
+}
+
+/**
+ * Function for get logic from controller
+ * @param {*} url
+ * @returns 
+ */
+function getLogic(url) {
+    let value = [];
+
+    $.ajax({
+        url: ADMIN_URL + url,
+        type: 'POST',
+        async: false,
+        dataType: 'JSON',
+        success: function (response) {
+            value.push(response);
+        }
+    });
+
+    return value;
 }
 
 $(document).ready(function (e) {
