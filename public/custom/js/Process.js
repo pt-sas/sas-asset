@@ -859,35 +859,49 @@ _table.on('click', '.edit', function (evt) {
 
                                     if (field[i].name !== '') {
                                         //? Condition field and contain attribute hide-field
-                                        if (field[i].type === 'checkbox' && $(field[i]).attr('hide-field')) {
+                                        if ($(field[i]).attr('hide-field')) {
                                             fields = $(field[i]).attr('hide-field').split(',').map(element => element.trim());
 
-                                            if (field[i].checked) {
-                                                for (let i = 0; i < fields.length; i++) {
-                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                                    formGroup.hide();
+                                            if (field[i].type === 'checkbox') {
+                                                if (field[i].checked) {
+                                                    for (let i = 0; i < fields.length; i++) {
+                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                        formGroup.hide();
+                                                    }
+                                                } else {
+                                                    for (let i = 0; i < fields.length; i++) {
+                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                        formGroup.show();
+                                                    }
                                                 }
                                             } else {
                                                 for (let i = 0; i < fields.length; i++) {
                                                     let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                                    formGroup.show();
+                                                    formGroup.hide();
                                                 }
                                             }
                                         }
 
-                                        //? Condition field and contain attribute checked-show-field
-                                        if (field[i].type === 'checkbox' && $(field[i]).attr('show-field')) {
+                                        //? Condition field and contain attribute show-field
+                                        if ($(field[i]).attr('show-field')) {
                                             fields = $(field[i]).attr('show-field').split(',').map(element => element.trim());
 
-                                            if (field[i].checked) {
-                                                for (let i = 0; i < fields.length; i++) {
-                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                                    formGroup.show();
+                                            if (field[i].type === 'checkbox') {
+                                                if (field[i].checked) {
+                                                    for (let i = 0; i < fields.length; i++) {
+                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                        formGroup.show();
+                                                    }
+                                                } else if (field[i].type === 'checkbox') {
+                                                    for (let i = 0; i < fields.length; i++) {
+                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                        formGroup.hide();
+                                                    }
                                                 }
                                             } else {
                                                 for (let i = 0; i < fields.length; i++) {
                                                     let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                                    formGroup.hide();
+                                                    formGroup.show();
                                                 }
                                             }
                                         }
@@ -1282,15 +1296,22 @@ $('.new_form').click(function (evt) {
                             if ($(field[i]).attr('hide-field')) {
                                 fields = $(field[i]).attr('hide-field').split(',').map(element => element.trim());
 
-                                if (field[i].checked) {
-                                    for (let i = 0; i < fields.length; i++) {
-                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                        formGroup.hide();
+                                if (field[i].type === 'checkbox') {
+                                    if (field[i].checked) {
+                                        for (let i = 0; i < fields.length; i++) {
+                                            let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                            formGroup.hide();
+                                        }
+                                    } else {
+                                        for (let i = 0; i < fields.length; i++) {
+                                            let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                            formGroup.show();
+                                        }
                                     }
                                 } else {
                                     for (let i = 0; i < fields.length; i++) {
                                         let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                        formGroup.show();
+                                        formGroup.hide();
                                     }
                                 }
                             }
@@ -1299,15 +1320,22 @@ $('.new_form').click(function (evt) {
                             if ($(field[i]).attr('show-field')) {
                                 fields = $(field[i]).attr('show-field').split(',').map(element => element.trim());
 
-                                if (field[i].checked) {
-                                    for (let i = 0; i < fields.length; i++) {
-                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                        formGroup.show();
+                                if (field[i].type === 'checkbox') {
+                                    if (field[i].checked) {
+                                        for (let i = 0; i < fields.length; i++) {
+                                            let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                            formGroup.show();
+                                        }
+                                    } else if (field[i].type === 'checkbox') {
+                                        for (let i = 0; i < fields.length; i++) {
+                                            let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                            formGroup.hide();
+                                        }
                                     }
                                 } else {
                                     for (let i = 0; i < fields.length; i++) {
                                         let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                        formGroup.hide();
+                                        formGroup.show();
                                     }
                                 }
                             }
