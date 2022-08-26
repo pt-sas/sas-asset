@@ -709,9 +709,9 @@ $('#form_sequence').on('click', '#isautosequence, #isgassetlevelsequence, #iscat
     const target = $(evt.target);
     const form = target.closest('form');
 
-    //? Condition field checked and contain attribute checked-hide-field
-    if ($(this).attr('checked-hide-field')) {
-        let fields = $(this).attr('checked-hide-field').split(',').map(element => element.trim());
+    //? Condition field and contain attribute hide-field
+    if ($(this).attr('hide-field')) {
+        let fields = $(this).attr('hide-field').split(',').map(element => element.trim());
 
         if ($(this).is(':checked')) {
             for (let i = 0; i < fields.length; i++) {
@@ -726,9 +726,9 @@ $('#form_sequence').on('click', '#isautosequence, #isgassetlevelsequence, #iscat
         }
     }
 
-    //? Condition field checked and contain attribute checked-show-field
-    if ($(this).attr('checked-show-field')) {
-        let fields = $(this).attr('checked-show-field').split(',').map(element => element.trim());
+    //? Condition field and contain attribute show-field
+    if ($(this).attr('show-field')) {
+        let fields = $(this).attr('show-field').split(',').map(element => element.trim());
 
         if ($(this).is(':checked')) {
             for (let i = 0; i < fields.length; i++) {

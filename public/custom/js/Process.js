@@ -858,9 +858,9 @@ _table.on('click', '.edit', function (evt) {
                                     }
 
                                     if (field[i].name !== '') {
-                                        //? Condition field checked and contain attribute checked-hide-field
-                                        if (field[i].type === 'checkbox' && $(field[i]).attr('checked-hide-field')) {
-                                            fields = $(field[i]).attr('checked-hide-field').split(',').map(element => element.trim());
+                                        //? Condition field and contain attribute hide-field
+                                        if (field[i].type === 'checkbox' && $(field[i]).attr('hide-field')) {
+                                            fields = $(field[i]).attr('hide-field').split(',').map(element => element.trim());
 
                                             if (field[i].checked) {
                                                 for (let i = 0; i < fields.length; i++) {
@@ -875,9 +875,9 @@ _table.on('click', '.edit', function (evt) {
                                             }
                                         }
 
-                                        //? Condition field checked and contain attribute checked-show-field
-                                        if (field[i].type === 'checkbox' && $(field[i]).attr('checked-show-field')) {
-                                            fields = $(field[i]).attr('checked-show-field').split(',').map(element => element.trim());
+                                        //? Condition field and contain attribute checked-show-field
+                                        if (field[i].type === 'checkbox' && $(field[i]).attr('show-field')) {
+                                            fields = $(field[i]).attr('show-field').split(',').map(element => element.trim());
 
                                             if (field[i].checked) {
                                                 for (let i = 0; i < fields.length; i++) {
@@ -1278,9 +1278,9 @@ $('.new_form').click(function (evt) {
                             if (field[i].type == 'checkbox' && fieldChecked.includes(field[i].name))
                                 form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', true);
 
-                            //? Condition field checked and contain attribute checked-hide-field
-                            if ($(field[i]).attr('checked-hide-field')) {
-                                fields = $(field[i]).attr('checked-hide-field').split(',').map(element => element.trim());
+                            //? Condition field and contain attribute hide-field
+                            if ($(field[i]).attr('hide-field')) {
+                                fields = $(field[i]).attr('hide-field').split(',').map(element => element.trim());
 
                                 if (field[i].checked) {
                                     for (let i = 0; i < fields.length; i++) {
@@ -1295,9 +1295,9 @@ $('.new_form').click(function (evt) {
                                 }
                             }
 
-                            //? Condition field checked and contain attribute checked-show-field
-                            if ($(field[i]).attr('checked-show-field')) {
-                                fields = $(field[i]).attr('checked-show-field').split(',').map(element => element.trim());
+                            //? Condition field and contain attribute show-field
+                            if ($(field[i]).attr('show-field')) {
+                                fields = $(field[i]).attr('show-field').split(',').map(element => element.trim());
 
                                 if (field[i].checked) {
                                     for (let i = 0; i < fields.length; i++) {
