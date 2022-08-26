@@ -108,7 +108,7 @@ class Quotation extends BaseController
             // Mandatory property for detail validation
             $post['line'] = countLine(count($table));
             $post['detail'] = [
-                'table' => arrTableLine($this->model->mandatoryLogic($table))
+                'table' => arrTableLine($this->mandatoryLogic($table))
             ];
 
             try {
@@ -171,7 +171,7 @@ class Quotation extends BaseController
             // Mandatory property for detail validation
             $post['line'] = countLine(count($table));
             $post['detail'] = [
-                'table' => arrTableLine($this->model->mandatoryLogic($table))
+                'table' => arrTableLine($this->mandatoryLogic($table))
             ];
 
             try {
@@ -386,5 +386,21 @@ class Quotation extends BaseController
 
             return $this->response->setJSON($response);
         }
+    }
+
+    public function mandatoryLogic($table)
+    {
+        $result = [];
+
+        foreach ($table as $row) :
+
+            // Condition to check isspare
+            if ($row[4]->isspare)
+                $row[5]->employee_id = 0;
+
+            $result[] = $row;
+        endforeach;
+
+        return $result;
     }
 }

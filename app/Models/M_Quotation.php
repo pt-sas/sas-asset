@@ -128,22 +128,6 @@ class M_Quotation extends Model
 		return $prefix;
 	}
 
-	public function mandatoryLogic($table)
-	{
-		$result = [];
-
-		foreach ($table as $row) :
-
-			// Condition to check isspare
-			if ($row[4]->isspare)
-				$row[5]->employee_id = 0;
-
-			$result[] = $row;
-		endforeach;
-
-		return $result;
-	}
-
 	public function getDetail($field = null, $where = null)
 	{
 		$this->builder->join('trx_quotation_detail', 'trx_quotation_detail.trx_quotation_id = ' . $this->table . '.trx_quotation_id', 'left');
