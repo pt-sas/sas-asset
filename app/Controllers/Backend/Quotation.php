@@ -58,11 +58,14 @@ class Quotation extends BaseController
             $order = $this->model->column_order;
             $sort = $this->model->order;
             $search = $this->model->column_search;
+            $where = [
+                'trx_quotation.isinternaluse' => 'N'
+            ];
 
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $datatable->getDatatables($table, $select, $order, $sort, $search, $join);
+            $list = $datatable->getDatatables($table, $select, $order, $sort, $search, $join, $where);
 
             foreach ($list as $value) :
                 $row = [];
@@ -87,7 +90,7 @@ class Quotation extends BaseController
             $result = [
                 'draw'              => $this->request->getPost('draw'),
                 'recordsTotal'      => $datatable->countAll($table),
-                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search, $join),
+                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search, $join, $where),
                 'data'              => $data
             ];
 
