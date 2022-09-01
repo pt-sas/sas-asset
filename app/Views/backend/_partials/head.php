@@ -32,6 +32,7 @@
 	<!-- DataTables -->
 	<link rel="stylesheet" href="<?= base_url('atlantis-pro/js/plugin/datatables-bs4/css/dataTables.bootstrap4.css') ?>">
 	<link rel="stylesheet" href="<?= base_url('atlantis-pro/js/plugin/datatables-fixedcolumns/css/fixedColumns.bootstrap4.min.css') ?>">
+	<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
 	<!-- Custom Style -->
 	<link rel="stylesheet" href="<?= base_url('custom/css/custom.css') ?>">
 	<!-- Table Treefy -->
