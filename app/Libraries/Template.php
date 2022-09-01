@@ -40,7 +40,7 @@ class Template
         $view_data['username'] = $this->access->getUser('username');
         $view_data['name'] = $this->access->getUser('name');
         $view_data['email'] = $this->access->getUser('email');
-        $view_data['level'] = $this->access->getRole();
+        $view_data['level'] = $this->access->getRole()->getName();
 
         return view($template, $view_data);
     }
@@ -106,7 +106,13 @@ class Template
                         <i class="fa fa-plus fa-fw"></i> Add New
                       </button>';
 
+        $btnExport = '<a id="dt-button"></a>';
+
         $check = $this->access->checkCrud($uri, $this->isCreate);
+        $role = $this->access->getRole();
+
+        if ($role->getIsCanExport() === 'Y')
+            $allBtn .= $btnExport;
 
         if ($check === 'Y')
             $allBtn .= $btnNew;
