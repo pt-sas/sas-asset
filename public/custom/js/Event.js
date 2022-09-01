@@ -94,7 +94,7 @@ $(document).ready(function (evt) {
         $.each(option, function (idx, elem) {
             if (elem.fieldName === attrName && setSave !== 'add') {
                 // Logic quotation_id is not null and current value not same value from database and datatable is not empty
-                if (quotation_id !== '' && quotation_id != elem.value && _tableLine.data().any()) {
+                if (quotation_id !== '' && quotation_id != elem.option_ID && _tableLine.data().any()) {
                     Swal.fire({
                         title: 'Delete?',
                         text: "Are you sure you want to change all data ? ",
@@ -109,18 +109,18 @@ $(document).ready(function (evt) {
                             _tableLine.clear().draw(false);
                             setReceiptDetail(form, attrName, quotation_id, ID);
                         } else {
-                            form.find('select[name=' + attrName + ']').val(elem.value).change();
+                            form.find('select[name=' + attrName + ']').val(elem.option_ID).change();
                         }
                     });
                 }
 
                 // Logic quotation_id is not null and not same value from database and datatable is empty
-                if (quotation_id !== '' && quotation_id != elem.value && !_tableLine.data().any()) {
+                if (quotation_id !== '' && quotation_id != elem.option_ID && !_tableLine.data().any()) {
                     setReceiptDetail(form, attrName, quotation_id);
                 }
 
                 // Logic prev data not same currentvalue and value from database and datatable is empty
-                if (typeof prev !== 'undefined' && prev !== '' && quotation_id !== '' && prev != quotation_id && prev != elem.value && !_tableLine.data().any()) {
+                if (typeof prev !== 'undefined' && prev !== '' && quotation_id !== '' && prev != quotation_id && prev != elem.option_ID && !_tableLine.data().any()) {
                     _tableLine.clear().draw(false);
                     setReceiptDetail(form, attrName, quotation_id);
                 }
@@ -154,7 +154,7 @@ _tableLine.on('change', 'select[name="employee_id"]', function (evt) {
 
 // Function for getter datatable from quotation
 function setReceiptDetail(form, fieldName, id, receipt_id = 0) {
-    const field = form.find('select, textarea');
+    const field = form.find('input, select, textarea');
     let url = SITE_URL + '/getDetailQuotation';
 
     $.ajax({
@@ -182,6 +182,7 @@ function setReceiptDetail(form, fieldName, id, receipt_id = 0) {
 
                 if (arrMsg.header) {
                     let header = arrMsg.header;
+                    let fields = [];
 
                     for (let i = 0; i < header.length; i++) {
                         let fieldInput = header[i].field;
@@ -190,11 +191,36 @@ function setReceiptDetail(form, fieldName, id, receipt_id = 0) {
                         for (let i = 0; i < field.length; i++) {
                             // To set value on the field from quotation
                             if (field[i].name !== '' && field[i].name === fieldInput) {
+                                const select = form.find('select[name=' + field[i].name + ']');
+
+                                if ($(field[i]).attr('hide-field'))
+                                    fields = $(field[i]).attr('hide-field').split(',').map(element => element.trim());
+
                                 if (field[i].type === 'select-one' && fieldName !== fieldInput) {
-                                    form.find('select[name=' + field[i].name + ']').val(label).change();
+                                    if (typeof label === 'object' && label !== null && fields.includes(field[i].name)) {
+                                        let newOption = $("<option selected='selected'></option>").val(label.id).text(label.name);
+                                        select.append(newOption).change();
+
+                                        let formGroup = select.closest('.form-group, .form-check');
+                                        formGroup.show();
+                                    } else if (typeof label === 'string' && label !== null) {
+                                        select.val(label).change();
+                                    } else {
+                                        select.val(null).change();
+
+                                        let formGroup = select.closest('.form-group, .form-check');
+                                        formGroup.hide();
+                                    }
                                 }
 
-                                form.find('textarea[name=' + field[i].name + ']').val(label);
+                                if (field[i].type === 'textarea' && label !== '')
+                                    form.find('textarea[name=' + field[i].name + ']').val(label);
+
+                                if (field[i].type === 'checkbox' && label === 'Y')
+                                    form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', true);
+                                else
+                                    form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', false);
+
                             }
                         }
                     }
