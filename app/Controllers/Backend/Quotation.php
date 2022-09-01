@@ -366,6 +366,8 @@ class Quotation extends BaseController
                     $list = $this->model->checkExistQuotation(null, [
                         'q.documentno'  => $post['search']
                     ])->getResult();
+                } else if (isset($post['trx_receipt_id'])) {
+                    $list = $this->model->checkExistQuotation($post['trx_receipt_id'])->getResult();
                 } else {
                     $list = $this->model->checkExistQuotation()->getResult();
                 }
