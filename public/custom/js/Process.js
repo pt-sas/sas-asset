@@ -2047,7 +2047,8 @@ function findArrDuplicate(array) {
 function clearForm(evt) {
     const container = $(evt.target).closest('.container');
     let parent = $(evt.target).closest('.row').length > 0 ? $(evt.target).closest('.row') : $(evt.target).closest('.modal');
-    const form = parent.find('form');
+    const cardForm = parent.find('.card-form');
+    const form = cardForm.find('form');
     const field = form.find('input, textarea, select');
     const errorText = form.find('small');
 
@@ -2141,7 +2142,7 @@ function clearForm(evt) {
 
                 const btnAction = _tableLine.rows().to$().find('button');
                 // Button add row table line
-                $('.add_row').css('display', 'block');
+                $('.add_row, .create_line').css('display', 'block');
 
                 // button remove data line
                 btnAction.css('display', 'block');
