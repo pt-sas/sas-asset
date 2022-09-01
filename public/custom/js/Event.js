@@ -340,7 +340,7 @@ $('#form_employee').on('change', '#md_branch_id', function (evt) {
 
                 $.each(option, function (i, item) {
                     if (item.fieldName == 'md_room_id')
-                        md_room_id = item.value;
+                        md_room_id = item.label;
                 });
 
                 if (!result[0].error) {
