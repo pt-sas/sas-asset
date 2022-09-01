@@ -609,9 +609,16 @@ class Validation
         ],
         'md_supplier_id'            => [
             'label'                 => 'Suplier',
-            'rules'                 => 'required',
+            'rules'                 => 'required_without[md_employee_id]',
             'errors'                => [
-                'required'  => 'Please Choose the {field} first.'
+                'required_without'  => 'Please Choose the {field} first.'
+            ]
+        ],
+        'md_employee_id'            => [
+            'label'                 => 'Suplier',
+            'rules'                 => 'required_without[md_supplier_id]',
+            'errors'                => [
+                'required_without'  => 'Please Choose the {field} first.'
             ]
         ],
         'line'                      => [

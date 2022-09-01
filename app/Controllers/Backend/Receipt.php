@@ -38,15 +38,11 @@ class Receipt extends BaseController
     {
         $uri = $this->request->uri->getSegment(2);
         $status = new M_Status($this->request);
-        $supplier = new M_Supplier($this->request);
 
         $data = [
             'today'     => date('Y-m-d'),
             'status'    => $status->where('isactive', 'Y')
                 ->like('menu_id', $uri)
-                ->orderBy('name', 'ASC')
-                ->findAll(),
-            'supplier'  => $supplier->where('isactive', 'Y')
                 ->orderBy('name', 'ASC')
                 ->findAll()
         ];
@@ -81,7 +77,7 @@ class Receipt extends BaseController
                 $row[] = $number;
                 $row[] = $value->documentno;
                 $row[] = format_dmy($value->receiptdate, '-');
-                $row[] = $value->supplier;
+                $row[] = !empty($value->md_supplier_id) ? $value->supplier : $value->employee;
                 $row[] = $value->status;
                 $row[] = $value->expenseno;
                 $row[] = $value->invoiceno;
@@ -114,12 +110,13 @@ class Receipt extends BaseController
             //* Mandatory property for detail validation
             $post['line'] = countLine(count($table));
             $post['detail'] = [
-                'table' => arrTableLine($this->model->mandatoryLogic($table))
+                'table' => arrTableLine($this->mandatoryLogic($table))
             ];
 
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+                $this->entity->setIsInternalUse(setCheckbox(isset($post['isinternaluse'])));
                 $this->entity->setCreatedBy($this->session->get('sys_user_id'));
                 $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
@@ -143,16 +140,36 @@ class Receipt extends BaseController
     public function show($id)
     {
         $quotation = new M_Quotation($this->request);
+        $supplier = new M_Supplier($this->request);
+        $employee = new M_Employee($this->request);
 
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
                 $detail = $this->model_detail->where($this->model->primaryKey, $id)->findAll();
 
-                $rowQuotation = $quotation->checkExistQuotation($id)->getRow();
-                $textQuot = $rowQuotation->documentno . ' - ' . $rowQuotation->supplier . ' - ' . format_dmy($rowQuotation->quotationdate, '/') . ' - ' . $rowQuotation->grandtotal;
+                $rowQuotation = $this->model->getQuotationReceipt('trx_receipt.trx_receipt_id', $id)->getRow();
 
-                $list = $this->field->setDataSelect($quotation->table, $list, $quotation->primaryKey, $rowQuotation->trx_quotation_id, $textQuot);
+                if (!empty($list[0]->getSupplierId())) {
+                    $rowSupplier = $supplier->find($list[0]->getSupplierId());
+
+                    //* Field Quotation
+                    $textQuot = $rowQuotation->documentno . ' - ' . $rowQuotation->supplier . ' - ' . format_dmy($rowQuotation->quotationdate, '/') . ' - ' . $rowQuotation->grandtotal;
+                    $list = $this->field->setDataSelect($quotation->table, $list, $quotation->primaryKey, $rowQuotation->trx_quotation_id, $textQuot);
+
+                    //* Field Supplier
+                    $list = $this->field->setDataSelect($supplier->table, $list, $supplier->primaryKey, $rowSupplier->getSupplierId(), $rowSupplier->getName());
+                }
+
+                if (!empty($list[0]->getEmployeeId())) {
+                    $rowEmployee = $employee->find($list[0]->getEmployeeId());
+
+                    //* Field Quotation
+                    $textQuot = $rowQuotation->documentno . ' - ' . $rowQuotation->employee . ' - ' . format_dmy($rowQuotation->quotationdate, '/') . ' - ' . $rowQuotation->grandtotal;
+                    $list = $this->field->setDataSelect($quotation->table, $list, $quotation->primaryKey, $rowQuotation->trx_quotation_id, $textQuot);
+
+                    $list = $this->field->setDataSelect($employee->table, $list, $employee->primaryKey, $rowEmployee->getEmployeeId(), $rowEmployee->getName());
+                }
 
                 $result = [
                     'header'    => $this->field->store($this->model->table, $list),
@@ -178,7 +195,7 @@ class Receipt extends BaseController
             //* Mandatory property for detail validation
             $post['line'] = countLine(count($table));
             $post['detail'] = [
-                'table' => arrTableLine($this->model->mandatoryLogic($table))
+                'table' => arrTableLine($this->mandatoryLogic($table))
             ];
 
             //? Set value trx_quotation_id null
@@ -188,6 +205,7 @@ class Receipt extends BaseController
             try {
                 $this->entity->fill($post);
                 $this->entity->setReceiptId($post['id']);
+                $this->entity->setIsInternalUse(setCheckbox(isset($post['isinternaluse'])));
                 $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                 if (!$this->validation->run($post, 'receipt')) {
@@ -311,6 +329,8 @@ class Receipt extends BaseController
     {
         $quotation = new M_Quotation($this->request);
         $quotationDetail = new M_QuotationDetail($this->request);
+        $supplier = new M_Supplier($this->request);
+        $employee = new M_Employee($this->request);
 
         if ($this->request->isAjax()) {
             $post = $this->request->getVar();
@@ -325,6 +345,17 @@ class Receipt extends BaseController
                 }
 
                 $list = $quotation->where($quotation->primaryKey, $post['id'])->findAll();
+
+                if (!empty($list[0]->getSupplierId())) {
+                    $rowSupplier = $supplier->find($list[0]->getSupplierId());
+                    $list = $this->field->setDataSelect($supplier->table, $list, $supplier->primaryKey, $rowSupplier->getSupplierId(), $rowSupplier->getName());
+                }
+
+                if (!empty($list[0]->getEmployeeId())) {
+                    $rowEmployee = $employee->find($list[0]->getEmployeeId());
+                    $list = $this->field->setDataSelect($employee->table, $list, $employee->primaryKey, $rowEmployee->getEmployeeId(), $rowEmployee->getName());
+                }
+
                 $detail = $quotationDetail->where($quotation->primaryKey, $post['id'])->findAll();
 
                 $result = [
@@ -349,7 +380,6 @@ class Receipt extends BaseController
         $branch = new M_Branch($this->request);
         $room = new M_Room($this->request);
         $quotation = new M_Quotation($this->request);
-        $supplier = new M_Supplier($this->request);
 
         /**
          * RM00039 => IT
@@ -378,14 +408,13 @@ class Receipt extends BaseController
         if (empty($set) && count($detail) > 0) {
             foreach ($detail as $row) :
                 $rowQuo = $quotation->where($quotation->primaryKey, $row->trx_quotation_id)->first();
-                $rowSupp = $supplier->find($rowQuo->getSupplierId());
 
                 for ($i = 1; $i <= $row->qtyentered; $i++) {
                     $table[] = [
                         $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', null, 'readonly', null, null, null, 150),
                         $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                         $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, 'readonly', null, null, 1, 50),
-                        $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowSupp->getName() === 'SAS' ? 'readonly' : null, null, null, $row->unitprice, 125),
+                        $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowQuo->getIsInternalUse() === 'N' ?: 'readonly', null, null, $row->unitprice, 125),
                         $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
                         $this->field->fieldTable('select', 'text', 'employee_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
                         $this->field->fieldTable('select', 'text', 'branch_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, null, null, 200),
@@ -400,8 +429,7 @@ class Receipt extends BaseController
 
         //? Update
         if (!empty($set) && count($detail) > 0) {
-            $receipt = $this->model->where($this->model->primaryKey, $set)->first();
-            $rowSupp = $supplier->find($receipt->getSupplierId());
+            $rowReceipt = $this->model->where($this->model->primaryKey, $set)->first();
 
             foreach ($detail as $row) :
                 if ($row->isspare == 'Y')
@@ -418,7 +446,7 @@ class Receipt extends BaseController
                     $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', null, 'readonly', null, null, $row->assetcode, 150),
                     $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, 'readonly', null, null, 1, 50),
-                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowSupp->getName() === 'SAS' ? 'readonly' : null, null, null, $row->unitprice, 125),
+                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowReceipt->getIsInternalUse() === 'N' ?: 'readonly', null, null, $row->unitprice, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
                     $this->field->fieldTable('select', 'text', 'employee_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
                     $this->field->fieldTable('select', 'text', 'branch_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataBranch, $row->md_branch_id, 200, 'md_branch_id', 'name'),
@@ -431,5 +459,24 @@ class Receipt extends BaseController
         }
 
         return json_encode($table);
+    }
+
+    public function mandatoryLogic($table)
+    {
+        $result = [];
+
+        foreach ($table as $row) :
+            // Condition to check isspare
+            if ($row[4]->isspare)
+                $row[5]->employee_id = 0;
+
+            // convert format rupiah on the field unitprice
+            if (isset($row[3]->unitprice))
+                $row[3]->unitprice = replaceFormat($row[3]->unitprice);
+
+            $result[] = $row;
+        endforeach;
+
+        return $result;
     }
 }

@@ -11,7 +11,7 @@
                 <th>No</th>
                 <th>Doc No</th>
                 <th>Date</th>
-                <th>Supplier</th>
+                <th>From</th>
                 <th>Status</th>
                 <th>Expense No</th>
                 <th>Invoice No</th>

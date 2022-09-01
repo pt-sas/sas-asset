@@ -27,7 +27,9 @@ class M_Receipt extends Model
 		'trx_quotation_id',
 		'created_by',
 		'updated_by',
-		'expenseno'
+		'expenseno',
+		'isinternaluse',
+		'md_employee_id'
 	];
 	protected $useTimestamps        = true;
 	protected $returnType 			= 'App\Entities\Receipt';
@@ -43,7 +45,7 @@ class M_Receipt extends Model
 		'', // Number column
 		'trx_receipt.documentno',
 		'trx_receipt.receiptdate',
-		'supplier.name',
+		'md_supplier.name' || 'md_employee.name',
 		'md_status.name',
 		'trx_receipt.expenseno',
 		'trx_receipt.invoiceno',
@@ -103,7 +105,8 @@ class M_Receipt extends Model
 		$sql = $this->table . '.*,' .
 			'md_supplier.name as supplier,
             md_status.name as status,
-			sys_user.name as createdby';
+			sys_user.name as createdby,
+			md_employee.name as employee';
 
 		return $sql;
 	}
@@ -113,7 +116,8 @@ class M_Receipt extends Model
 		$sql = [
 			$this->setDataJoin('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left'),
 			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
-			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left')
+			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left'),
+			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left')
 		];
 
 		return $sql;
@@ -149,25 +153,6 @@ class M_Receipt extends Model
 		$prefix = "RC" . date('ym') . $code;
 
 		return $prefix;
-	}
-
-	public function mandatoryLogic($table)
-	{
-		$result = [];
-
-		foreach ($table as $row) :
-			// Condition to check isspare
-			if ($row[4]->isspare)
-				$row[5]->employee_id = 0;
-
-			// convert format rupiah on the field unitprice
-			if (isset($row[3]->unitprice))
-				$row[3]->unitprice = replaceFormat($row[3]->unitprice);
-
-			$result[] = $row;
-		endforeach;
-
-		return $result;
 	}
 
 	public function getDetail($field = null, $where = null)
@@ -283,5 +268,22 @@ class M_Receipt extends Model
 		}
 
 		return $rows;
+	}
+
+	public function getQuotationReceipt($field = null, $where = null)
+	{
+		$this->builder->select('trx_quotation.*,
+			md_supplier.name as supplier,
+			md_employee.name as employee');
+
+		$this->builder->join('trx_quotation', 'trx_quotation.trx_quotation_id = ' . $this->table . '.trx_quotation_id', 'left');
+		$this->builder->join('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left');
+		$this->builder->join('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left');
+
+		if (!empty($field) && !empty($where)) {
+			$this->builder->where($field, $where);
+		}
+
+		return $this->builder->get();
 	}
 }
