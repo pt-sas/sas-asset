@@ -3,7 +3,7 @@
 <?= $this->include('backend/_partials/head') ?>
 
 <body>
-  <div class="wrapper">
+  <div class="wrapper" id="wrapper">
     <div class="main-header">
       <?= $this->include('backend/_partials/logo') ?>
       <?= $this->include('backend/_partials/navbar') ?>
