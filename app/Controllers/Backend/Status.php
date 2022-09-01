@@ -62,7 +62,7 @@ class Status extends BaseController
                 $row[] = $value->name;
                 $row[] = $value->description;
                 $row[] = $value->menu_id;
-                $row[] = status($value->isline);
+                $row[] = active($value->isline);
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;

@@ -68,10 +68,10 @@ class Role extends BaseController
 				$row[] = $number;
 				$row[] = $value->name;
 				$row[] = $value->description;
-				$row[] = status($value->ismanual);
-				$row[] = status($value->iscanexport);
-				$row[] = status($value->iscanreport);
-				$row[] = status($value->isallowmultipleprint);
+				$row[] = active($value->ismanual);
+				$row[] = active($value->iscanexport);
+				$row[] = active($value->iscanreport);
+				$row[] = active($value->isallowmultipleprint);
 				$row[] = active($value->isactive);
 				$row[] = $this->template->tableButton($ID);
 				$data[] = $row;

@@ -60,7 +60,7 @@ class Sequence extends BaseController
                 $row[] = $number;
                 $row[] = $value->name;
                 $row[] = $value->description;
-                $row[] = status($value->isautosequence);
+                $row[] = active($value->isautosequence);
                 $row[] = $value->vformat;
                 $row[] = $value->incrementno;
                 $row[] = $value->maxvalue;
@@ -68,13 +68,13 @@ class Sequence extends BaseController
                 $row[] = $value->decimalpattern;
                 // $row[] = $value->prefix;
                 // $row[] = $value->suffix;
-                $row[] = status($value->isgassetlevelsequence);
+                $row[] = active($value->isgassetlevelsequence);
                 $row[] = $value->gassetcolumn;
-                $row[] = status($value->iscategorylevelsequence);
+                $row[] = active($value->iscategorylevelsequence);
                 $row[] = $value->categorycolumn;
-                $row[] = status($value->startnewyear);
+                $row[] = active($value->startnewyear);
                 $row[] = $value->datecolumn;
-                $row[] = status($value->startnewmonth);
+                $row[] = active($value->startnewmonth);
                 $row[] = $value->startno;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);

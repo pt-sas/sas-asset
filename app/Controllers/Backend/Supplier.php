@@ -57,8 +57,8 @@ class Supplier extends BaseController
                 $row[] = $value->address;
                 $row[] = $value->owner;
                 $row[] = $value->phone;
-                $row[] = status($value->isvendor);
-                $row[] = status($value->isservice);
+                $row[] = active($value->isvendor);
+                $row[] = active($value->isservice);
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
