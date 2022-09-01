@@ -28,20 +28,6 @@ function message($param, $value, $message)
 
 function active($string)
 {
-    $isChecked = $string === 'Y' ? ' checked ' : '';
-
-    $html = '<center><div class="form-check">
-        <label class="form-check-label">
-            <input type="checkbox" class="form-check-input"' . $isChecked  . 'disabled>
-            <span class="form-check-sign"></span>
-        </label>
-    </div></center>';
-
-    return $html;
-}
-
-function status($string)
-{
     return $string === 'Y' ? '<center><span class="badge badge-success">Yes</span></center>' :
         '<center><span class="badge badge-danger">No</span></center>';
 }
