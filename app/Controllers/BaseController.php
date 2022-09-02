@@ -9,6 +9,8 @@ use Psr\Log\LoggerInterface;
 use App\Libraries\Template;
 use App\Libraries\Field;
 use App\Libraries\Access;
+use Config\Services;
+use App\Models\M_Datatable;
 
 /**
  * Class BaseController
@@ -32,6 +34,45 @@ class BaseController extends Controller
 	 */
 	protected $helpers = ['action_helper', 'url', 'date_helper'];
 
+	protected $session;
+	protected $language;
+	protected $validation;
+
+	//TODO: LIBRARY
+	protected $template;
+	protected $field;
+	protected $access;
+
+	//TODO: EVENT
+	/** Insert = I */
+	protected $EVENTCHANGELOG_Insert = "I";
+	/** Update = U */
+	protected $EVENTCHANGELOG_Update = "U";
+	/** Delete = D */
+	protected $EVENTCHANGELOG_Delete = "D";
+	/** Drafted = DR */
+	protected $DOCSTATUS_Drafted = "DR";
+	/** Completed = CO */
+	protected $DOCSTATUS_Completed = "CO";
+	/** Approved = AP */
+	protected $DOCSTATUS_Approved = "AP";
+	/** Not Approved = NA */
+	protected $DOCSTATUS_NotApproved = "NA";
+	/** Voided = VO */
+	protected $DOCSTATUS_Voided = "VO";
+	/** Invalid = IN */
+	protected $DOCSTATUS_Invalid = "IN";
+	/** In Progress = IP */
+	protected $DOCSTATUS_Inprogress = "IP";
+	/** Inventory In */
+	protected $Inventory_In = 'I+';
+	/** Inventory Out */
+	protected $Inventory_Out = 'I-';
+	/** Movement In */
+	protected $Movement_In = 'M+';
+	/** Movement Out */
+	protected $Movement_Out = 'M-';
+
 	/**
 	 * Constructor.
 	 *
@@ -51,9 +92,10 @@ class BaseController extends Controller
 		$this->template = new Template();
 		$this->field = new Field();
 		$this->access = new Access();
-
-		$this->session = \Config\Services::session();
-		$this->language = \Config\Services::language();
+		$this->session = Services::session();
+		$this->language = Services::language();
+		$this->validation = Services::validation();
+		$this->datatable = new M_Datatable($request);
 
 		if (!empty($this->session->lang)) {
 			$this->session->lang;
@@ -62,30 +104,5 @@ class BaseController extends Controller
 		}
 
 		$this->language->setLocale($this->session->lang);
-
-		/** Drafted = DR */
-		$this->DOCSTATUS_Drafted = "DR";
-		/** Completed = CO */
-		$this->DOCSTATUS_Completed = "CO";
-		/** Approved = AP */
-		$this->DOCSTATUS_Approved = "AP";
-		/** Not Approved = NA */
-		$this->DOCSTATUS_NotApproved = "NA";
-		/** Voided = VO */
-		$this->DOCSTATUS_Voided = "VO";
-		/** Invalid = IN */
-		$this->DOCSTATUS_Invalid = "IN";
-		/** In Progress = IP */
-		$this->DOCSTATUS_Inprogress = "IP";
-
-
-		/** Inventory In */
-		$this->Inventory_In = 'I+';
-		/** Inventory Out */
-		$this->Inventory_Out = 'I-';
-		/** Movement In */
-		$this->Movement_In = 'M+';
-		/** Movement Out */
-		$this->Movement_Out = 'M-';
 	}
 }

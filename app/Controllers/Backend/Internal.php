@@ -3,7 +3,6 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_Quotation;
 use App\Models\M_QuotationDetail;
 use App\Models\M_Status;
@@ -16,13 +15,10 @@ class Internal extends BaseController
     private $model;
     private $model_detail;
     private $entity;
-    protected $validation;
-    protected $request;
 
     public function __construct()
     {
         $this->request = Services::request();
-        $this->validation = Services::validation();
         $this->model = new M_Quotation($this->request);
         $this->model_detail = new M_QuotationDetail($this->request);
         $this->entity = new \App\Entities\Quotation();
@@ -47,8 +43,6 @@ class Internal extends BaseController
 
     public function showAll()
     {
-        $datatable = new M_Datatable($this->request);
-
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
             $select = $this->model->getSelect();
@@ -61,7 +55,7 @@ class Internal extends BaseController
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $datatable->getDatatables($table, $select, $order, $sort, $search, $join, $where);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join, $where);
 
             foreach ($list as $value) :
                 $row = [];
@@ -85,8 +79,8 @@ class Internal extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $datatable->countAll($table),
-                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search, $join, $where),
+                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join, $where),
                 'data'              => $data
             ];
 

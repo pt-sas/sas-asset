@@ -3,7 +3,6 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_Submenu;
 use App\Models\M_Menu;
 use Config\Services;
@@ -12,13 +11,10 @@ class Submenu extends BaseController
 {
 	private $model;
 	private $entity;
-	protected $validation;
-	protected $request;
 
 	public function __construct()
 	{
 		$this->request = Services::request();
-		$this->validation = Services::validation();
 		$this->model = new M_Submenu($this->request);
 		$this->entity = new \App\Entities\Submenu();
 	}
@@ -43,7 +39,7 @@ class Submenu extends BaseController
 			$data = [];
 
 			$number = $this->request->getPost('start');
-			$list = $datatable->getDatatables($table, $select, $order, $sort, $search, $join);
+			$list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join);
 
 			foreach ($list as $value) :
 				$row = [];
@@ -64,8 +60,8 @@ class Submenu extends BaseController
 
 			$result = [
 				'draw'              => $this->request->getPost('draw'),
-				'recordsTotal'      => $datatable->countAll($table),
-				'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search, $join),
+				'recordsTotal'      => $this->datatable->countAll($table),
+				'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join),
 				'data'              => $data
 			];
 
@@ -110,10 +106,10 @@ class Submenu extends BaseController
 				$list = $this->model->where($this->model->primaryKey, $id)->findAll();
 
 				if (!empty($list[0]->getMenuId())) {
-                    $rowMenu = $menu->find($list[0]->getMenuId());
+					$rowMenu = $menu->find($list[0]->getMenuId());
 
-                    $list = $this->field->setDataSelect($menu->table, $list, $menu->primaryKey, $rowMenu->getMenuId(), $rowMenu->getName());
-                }
+					$list = $this->field->setDataSelect($menu->table, $list, $menu->primaryKey, $rowMenu->getMenuId(), $rowMenu->getName());
+				}
 
 				$result = [
 					'header'    => $this->field->store($this->model->table, $list)

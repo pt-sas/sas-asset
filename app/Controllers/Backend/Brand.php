@@ -3,7 +3,6 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_Brand;
 use Config\Services;
 
@@ -11,13 +10,10 @@ class Brand extends BaseController
 {
     private $model;
     private $entity;
-    protected $validation;
-    protected $request;
 
     public function __construct()
     {
         $this->request = Services::request();
-        $this->validation = Services::validation();
         $this->model = new M_Brand($this->request);
         $this->entity = new \App\Entities\Brand();
     }
@@ -29,8 +25,6 @@ class Brand extends BaseController
 
     public function showAll()
     {
-        $datatable = new M_Datatable($this->request);
-
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
             $select = $this->model->findAll();
@@ -41,7 +35,7 @@ class Brand extends BaseController
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $datatable->getDatatables($table, $select, $order, $sort, $search);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search);
 
             foreach ($list as $value) :
                 $row = [];
@@ -60,8 +54,8 @@ class Brand extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $datatable->countAll($table),
-                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search),
+                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search),
                 'data'              => $data
             ];
 

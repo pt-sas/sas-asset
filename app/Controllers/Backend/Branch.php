@@ -3,7 +3,6 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_Branch;
 use App\Models\M_Employee;
 use Config\Services;
@@ -12,13 +11,10 @@ class Branch extends BaseController
 {
     private $model;
     private $entity;
-    protected $validation;
-    protected $request;
 
     public function __construct()
     {
         $this->request = Services::request();
-        $this->validation = Services::validation();
         $this->model = new M_Branch($this->request);
         $this->entity = new \App\Entities\Branch();
     }
@@ -38,8 +34,6 @@ class Branch extends BaseController
 
     public function showAll()
     {
-        $datatable = new M_Datatable($this->request);
-
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
             $select = $this->model->getSelect();
@@ -51,7 +45,7 @@ class Branch extends BaseController
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $datatable->getDatatables($table, $select, $order, $sort, $search, $join);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join);
 
             foreach ($list as $value) :
                 $row = [];
@@ -73,8 +67,8 @@ class Branch extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $datatable->countAll($table),
-                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search, $join),
+                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join),
                 'data'              => $data
             ];
 

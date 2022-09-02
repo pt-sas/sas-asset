@@ -3,7 +3,6 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_User;
 use App\Models\M_Role;
 use Config\Services;
@@ -38,8 +37,6 @@ class User extends BaseController
 
 	public function showAll()
 	{
-		$datatable = new M_Datatable($this->request);
-
 		if ($this->request->getMethod(true) === 'POST') {
 			$table = $this->model->table;
 			$select = $this->model->findAll();
@@ -50,7 +47,7 @@ class User extends BaseController
 			$data = [];
 
 			$number = $this->request->getPost('start');
-			$list = $datatable->getDatatables($table, $select, $order, $sort, $search);
+			$list = $this->datatable->getDatatables($table, $select, $order, $sort, $search);
 
 			foreach ($list as $value) :
 				$row = [];
@@ -71,8 +68,8 @@ class User extends BaseController
 
 			$result = [
 				'draw'              => $this->request->getPost('draw'),
-				'recordsTotal'      => $datatable->countAll($table),
-				'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search),
+				'recordsTotal'      => $this->datatable->countAll($table),
+				'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search),
 				'data'              => $data
 			];
 
