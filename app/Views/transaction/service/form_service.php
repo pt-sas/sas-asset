@@ -42,7 +42,7 @@
             <div class="col-md-12">
                 <div class="form-group">
                     <div class="text-right">
-                        <button type="button" name="button" class="btn btn-primary btn-sm btn-round ml-auto add_row" title="Add New"><i class="fa fa-plus"> Add New</i></button>
+                        <button type="button" name="button" class="btn btn-primary btn-sm btn-round ml-auto add_row" title="Add New"><i class="fa fa-plus fa-fw"></i> Add New</button>
                     </div>
                 </div>
             </div>

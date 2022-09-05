@@ -50,7 +50,7 @@
             <div class="col-md-12">
                 <div class="form-group">
                     <div class="text-right">
-                        <button type="button" name="button" class="btn btn-primary btn-sm btn-round ml-auto create_line" title="Create Line"><i class="fa fa-plus"> Create Line</i></button>
+                        <button type="button" name="button" class="btn btn-primary btn-sm btn-round ml-auto create_line" title="Create Line"><i class="fa fa-plus fa-fw"></i> Create Line</button>
                     </div>
                 </div>
             </div>

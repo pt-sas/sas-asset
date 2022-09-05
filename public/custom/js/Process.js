@@ -426,7 +426,7 @@ $('.save_form').click(function (evt) {
             cache: false,
             dataType: 'JSON',
             beforeSend: function () {
-                $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+                $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
                 $('.x_form').prop('disabled', true);
                 $('.close_form').prop('disabled', true);
                 loadingForm(form.prop('id'), 'facebook');
@@ -568,7 +568,7 @@ _table.on('click', '.edit', function (evt) {
         status = $(this).attr('data-status');
 
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
-        $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+        $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
         loadingForm('wrapper', 'facebook');
 
         setTimeout(function () {
@@ -1245,9 +1245,10 @@ $('.new_form').click(function (evt) {
     let checkAccess = isAccess(action, LAST_URL);
     let _this = $(this);
     let oriElement = _this.html();
+    let textElement = _this.text().trim();
 
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
-        $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+        $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
         loadingForm('wrapper', 'facebook');
 
         setTimeout(function () {
@@ -1417,7 +1418,7 @@ $('.btn_export').click(function (evt) {
     // form submit to export data
     form.submit();
 
-    $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+    $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
 
     setTimeout(function () {
         $(_this).html(oriElement).prop('disabled', false);
@@ -1434,7 +1435,7 @@ $('.btn_filter').click(function (evt) {
 
     formTable = form.serializeArray();
 
-    $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+    $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
 
     setTimeout(function () {
         $(_this).html(oriElement).prop('disabled', false);
@@ -1458,6 +1459,7 @@ $('.add_row').click(function (evt) {
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
         let _this = $(this);
         let oriElement = _this.html();
+        let textElement = _this.text().trim();
 
         let formData = new FormData(form[0]);
 
@@ -1470,9 +1472,13 @@ $('.add_row').click(function (evt) {
             cache: false,
             dataType: 'JSON',
             beforeSend: function () {
-                $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+                $('.close_form').attr('disabled', true);
+                $('.save_form').attr('disabled', true);
+                $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
             },
             complete: function () {
+                $('.close_form').removeAttr('disabled');
+                $('.save_form').removeAttr('disabled');
                 $(_this).html(oriElement).prop('disabled', false);
             },
             success: function (result) {
@@ -1505,8 +1511,9 @@ $('.create_line').click(function (evt) {
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
         let _this = $(this);
         let oriElement = _this.html();
+        let textElement = _this.text().trim();
 
-        $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+        $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
 
         setTimeout(function () {
             $(_this).html(oriElement).prop('disabled', false);
@@ -1689,7 +1696,7 @@ $('.btn_login').click(function () {
         dataType: 'JSON',
         beforeSend: function () {
             $(this).prop('disabled', true);
-            $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+            $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
         },
         complete: function () {
             $(this).removeAttr('disabled');
@@ -1761,7 +1768,7 @@ $('.save_form_pass').click(function (evt) {
         beforeSend: function () {
             $('.close').prop('disabled', true);
             loadingForm(form.prop('id'), 'facebook');
-            $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+            $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
         },
         complete: function () {
             $('.close').prop('disabled', false);
@@ -2657,7 +2664,7 @@ $(document).ready(function (e) {
             buttons: [{
                 extend: 'collection',
                 className: 'btn btn-warning btn-sm btn-round ml-auto text-white',
-                text: '<i class="fas fa-download"></i> Export',
+                text: '<i class="fas fa-download fa-fw"></i> Export',
                 autoClose: true,
                 buttons: [{
                         extend: 'pdfHtml5',
