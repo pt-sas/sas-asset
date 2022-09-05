@@ -236,8 +236,7 @@ class M_Sequence extends Model
                                 'md_sequence_id'    => $md_sequence_id,
                                 'md_groupasset_id'  => $md_groupasset_id,
                                 'categorycode'      => $categorycode,
-                                'calendaryearmonth' => $calendaryearmonth,
-                                'updated_by'        => session()->get('sys_user_id')
+                                'calendaryearmonth' => $calendaryearmonth
                             ];
 
                             $sequenceNo->create($arrData, $arrWhere);
