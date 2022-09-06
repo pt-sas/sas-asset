@@ -37,4 +37,6 @@
 	<link rel="stylesheet" href="<?= base_url('custom/css/custom.css') ?>">
 	<!-- Table Treefy -->
 	<link rel="stylesheet" href="<?= base_url('atlantis-pro/js/plugin/bootstrap-treefy/css/bootstrap-treefy.min.css') ?>">
+	<!-- DateRangePicker -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 </head>

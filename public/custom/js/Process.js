@@ -61,9 +61,23 @@ _table = $('.tb_display').DataTable({
     'ajax': {
         'url': SITE_URL + SHOWALL,
         'type': 'POST',
-        'data': function (d) {
+        'data': function (d, setting) {
+            const container = $(setting.nTable).closest('.container');
+            const filter_page = container.find('.filter_page');
+            const form = filter_page.find('form');
+            const disabled = form.find('[disabled]');
+
+            //! Remove attribute disabled field
+            disabled.removeAttr('disabled');
+
+            //* Serialize form array
+            formTable = form.serializeArray();
+
+            //! Set attribute disabled field
+            disabled.prop('disabled', true);
+
             return $.extend({}, d, {
-                'form': formTable
+                form: formTable
             });
         }
     },
@@ -87,7 +101,7 @@ _table = $('.tb_display').DataTable({
     'scrollX': checkScrollX(),
     'scrollY': checkScrollY(),
     'scrollCollapse': checkScrollX(),
-    'fixedColumns': checkFixedColumns()
+    'fixedColumns': checkFixedColumns(),
 });
 
 /**
@@ -1432,10 +1446,11 @@ $('.btn_filter').click(function (evt) {
     const form = $(evt.target).closest('form');
     let _this = $(this);
     let oriElement = _this.html();
+    let textElement = _this.text().trim();
 
     formTable = form.serializeArray();
 
-    $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
+    $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
 
     setTimeout(function () {
         $(_this).html(oriElement).prop('disabled', false);
@@ -2701,6 +2716,18 @@ $(document).ready(function (e) {
         _table.buttons().container()
             .appendTo($('#dt-button'));
     }
+
+    $('.daterange').daterangepicker({
+        autoUpdateInput: false,
+        locale: {
+            format: 'YYYY-MM-DD',
+            cancelLabel: 'Clear'
+        }
+    });
+
+    $('.daterange').on('apply.daterangepicker', function (ev, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+    });
 });
 
 
