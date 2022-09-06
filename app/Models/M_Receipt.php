@@ -194,7 +194,8 @@ class M_Receipt extends Model
 
 				//* Passing data to table inventory
 				$line = $this->field->mergeArrObject($line, [
-					'md_status_id'      => $row->getStatusId()
+					'md_status_id'      => $row->getStatusId(),
+					'receiptdate'		=> $row->getReceiptDate()
 				]);
 
 				$inventory->create($line);

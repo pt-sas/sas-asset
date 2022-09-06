@@ -120,6 +120,7 @@ class M_Inventory extends Model
 		foreach ($arrData as $row) :
 			$data = [
 				'assetcode'					=> $row->assetcode,
+				'inventorydate'				=> $row->receiptdate,
 				'md_product_id'     		=> $row->md_product_id,
 				'isspare'		     		=> $row->isspare,
 				'qtyentered'        		=> $row->qtyentered,
