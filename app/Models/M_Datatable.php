@@ -84,9 +84,22 @@ class M_Datatable extends Model
 
     public function filterDatatable($table, $post)
     {
+        $fields = $this->db->getFieldData($table);
+
         foreach ($post['form'] as $value) :
-            if (!empty($value['value']) && $this->db->fieldExists($value['name'], $table))
-                $this->builder->where($table . '.' . $value['name'] . '', $value['value']);
+            if (!empty($value['value']) && $this->db->fieldExists($value['name'], $table)) {
+                foreach ($fields as $field) :
+                    if ($field->name === $value['name'] && $field->type === 'timestamp') {
+                        $datetime =  urldecode($value['value']);
+                        $date = explode(" - ", $datetime);
+
+                        $this->builder->where($table . '.' . $value['name'] . ' >= "' . $date[0] . '" AND ' . $table . '.' . $value['name'] . ' <= "' . $date[1] . '"');
+                    }
+
+                    if ($field->name === $value['name'] && $field->type !== 'timestamp')
+                        $this->builder->where($table . '.' . $value['name'] . '', $value['value']);
+                endforeach;
+            }
         endforeach;
     }
 
