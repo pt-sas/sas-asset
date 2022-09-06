@@ -41,7 +41,7 @@
 <!-- DateTimePicker -->
 <script src="<?= base_url('atlantis-pro/js/plugin/datepicker/bootstrap-datetimepicker.min.js') ?>"></script>
 <!-- DateRangePicker -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <!-- Bootstrap Tagsinput -->
 <script src="<?= base_url('atlantis-pro/js/plugin/bootstrap-tagsinput/bootstrap-tagsinput.min.js') ?>"></script>
 <!-- Bootstrap Wizard -->
