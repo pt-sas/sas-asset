@@ -37,7 +37,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <button type="button" class="btn btn-primary btn-sm btn-round ml-auto btn_filter" title="Filter">
-                                    <i class="fas fa-search"></i> Filter<img alt="" class="spinning" />
+                                    <i class="fas fa-search fa-fw"></i> Filter
                                 </button>
                             </div>
                         </div>
