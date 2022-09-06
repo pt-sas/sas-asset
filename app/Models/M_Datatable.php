@@ -70,9 +70,13 @@ class M_Datatable extends Model
         return $query->getResult();
     }
 
-    public function countAll($table)
+    public function countAll($table, $where = [])
     {
         $this->builder = $this->db->table($table);
+
+        if (count($where) > 0)
+            $this->builder->where($where);
+
         return $this->builder->countAllResults();
     }
 
