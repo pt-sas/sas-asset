@@ -2728,6 +2728,10 @@ $(document).ready(function (e) {
     $('.daterange').on('apply.daterangepicker', function (ev, picker) {
         $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
     });
+
+    $('.daterange').on('cancel.daterangepicker', function (ev, picker) {
+        $(this).val('');
+    });
 });
 
 
