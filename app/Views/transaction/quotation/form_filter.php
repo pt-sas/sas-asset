@@ -14,7 +14,7 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <div class="input-icon">
-                                    <input type="text" class="form-control daterange" name="quotationdate" value="<?= $date_range ?>" placeholder="Quotation Date">
+                                    <input type="text" class="form-control daterange" name="quotationdate" value="<?= $date_range ?>" placeholder="Date">
                                     <span class="input-icon-addon">
                                         <i class="fas fa-calendar-alt"></i>
                                     </span>
