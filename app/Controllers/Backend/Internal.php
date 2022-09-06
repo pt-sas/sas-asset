@@ -29,13 +29,17 @@ class Internal extends BaseController
         $uri = $this->request->uri->getSegment(2);
         $status = new M_Status($this->request);
 
+        $start_date = date('Y-m-d', strtotime('- 1 days'));
+        $end_date = date('Y-m-d');
+
         $data = [
             'today'     => date('Y-m-d'),
             'status'    => $status->where('isactive', 'Y')
                 ->like('menu_id', $uri)
                 ->orderBy('name', 'ASC')
                 ->findAll(),
-            'default_logic' => json_decode($this->defaultLogic())
+            'default_logic' => json_decode($this->defaultLogic()),
+            'date_range' => $start_date . ' - ' . $end_date
         ];
 
         return $this->template->render('transaction/internaluse/v_internaluse', $data);
