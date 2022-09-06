@@ -50,7 +50,11 @@ class Internal extends BaseController
             $order = $this->model->column_order;
             $sort = $this->model->order;
             $search = $this->model->column_search;
-            $where = ['trx_quotation.isinternaluse' => 'Y'];
+            $where['trx_quotation.isinternaluse'] = 'Y';
+
+            //? Check is use exist role W_Not_Default_Status 
+            if (!$this->access->getUserRoleName($this->session->get('sys_user_id'), 'W_Not_Default_Status'))
+                $where['trx_quotation.md_status_id'] = 100000;
 
             $data = [];
 
@@ -79,7 +83,7 @@ class Internal extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsTotal'      => $this->datatable->countAll($table, $where),
                 'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join, $where),
                 'data'              => $data
             ];
@@ -98,7 +102,7 @@ class Internal extends BaseController
             // Mandatory property for detail validation
             $post['line'] = countLine(count($table));
             $post['detail'] = [
-                'table' => arrTableLine($this->model->mandatoryLogic($table))
+                'table' => arrTableLine($this->mandatoryLogic($table))
             ];
 
             try {
@@ -162,7 +166,7 @@ class Internal extends BaseController
             // Mandatory property for detail validation
             $post['line'] = countLine(count($table));
             $post['detail'] = [
-                'table' => arrTableLine($this->model->mandatoryLogic($table))
+                'table' => arrTableLine($this->mandatoryLogic($table))
             ];
 
             try {
@@ -339,6 +343,22 @@ class Internal extends BaseController
 
             return $this->response->setJSON($response);
         }
+    }
+
+    public function mandatoryLogic($table)
+    {
+        $result = [];
+
+        foreach ($table as $row) :
+
+            // Condition to check isspare
+            if ($row[4]->isspare)
+                $row[5]->employee_id = 0;
+
+            $result[] = $row;
+        endforeach;
+
+        return $result;
     }
 
     public function defaultLogic()

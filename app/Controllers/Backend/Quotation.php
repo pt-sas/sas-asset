@@ -55,9 +55,11 @@ class Quotation extends BaseController
             $order = $this->model->column_order;
             $sort = $this->model->order;
             $search = $this->model->column_search;
-            $where = [
-                'trx_quotation.isinternaluse' => 'N'
-            ];
+            $where['trx_quotation.isinternaluse'] = 'N';
+
+            //? Check is use exist role W_Not_Default_Status 
+            if (!$this->access->getUserRoleName($this->session->get('sys_user_id'), 'W_Not_Default_Status'))
+                $where['trx_quotation.md_status_id'] = 100000;
 
             $data = [];
 
@@ -86,7 +88,7 @@ class Quotation extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsTotal'      => $this->datatable->countAll($table, $where),
                 'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join, $where),
                 'data'              => $data
             ];
