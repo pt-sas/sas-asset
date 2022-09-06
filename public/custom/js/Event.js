@@ -686,6 +686,29 @@ $(document).ready(function (e) {
             cache: true
         }
     });
+
+    $('.select-supplier').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        allowClear: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'supplier/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
 });
 
 $('#filter_inventory').on('change', '[name="md_branch_id"]', function (evt) {
