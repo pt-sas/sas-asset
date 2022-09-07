@@ -26,8 +26,6 @@ class Submenu extends BaseController
 
 	public function showAll()
 	{
-		$datatable = new M_Datatable($this->request);
-
 		if ($this->request->getMethod(true) === 'POST') {
 			$table = $this->model->table;
 			$select = $this->model->getSelect();
