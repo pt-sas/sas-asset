@@ -102,20 +102,21 @@ class Template
         $uri = $this->request->uri->getSegment(2);
         $allBtn = '';
 
-        $btnNew = '<button type="button" class="btn btn-primary btn-sm btn-round ml-auto new_form">
-                        <i class="fa fa-plus fa-fw"></i> Add New
-                      </button>';
+        $btnNew = '<button type="button" class="btn btn-primary btn-sm btn-round ml-auto new_form" data-toggle="tooltip" data-placement="top" title="New Record"><i class="fas fa-plus fa-fw"></i> Add New</button>';
+        $btnExport = '<a id="dt-button" data-toggle="tooltip" data-placement="top" title="Export"></a> ';
 
-        $btnExport = '<a id="dt-button"></a>';
+        $btnReQuery = '<button type="button" class="btn btn-success btn-sm btn-round ml-auto btn_requery" data-toggle="tooltip" data-placement="top" title="ReQuery"><i class="fas fa-sync fa-fw"></i> ReQuery </button>';
 
         $check = $this->access->checkCrud($uri, $this->isCreate);
         $role = $this->access->getRole();
 
-        if ($role->getIsCanExport() === 'Y')
-            $allBtn .= $btnExport;
+        $allBtn .= $btnReQuery . ' ';
 
         if ($check === 'Y')
             $allBtn .= $btnNew;
+
+        if ($role->getIsCanExport() === 'Y')
+            $allBtn .= $btnExport;
 
         return $allBtn;
     }

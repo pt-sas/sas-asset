@@ -56,7 +56,7 @@ const modalDialog = $('.modal-dialog'),
  * Table Display
  */
 _table = $('.tb_display').DataTable({
-    'processing': true,
+    // 'processing': true,
     'serverSide': true,
     'ajax': {
         'url': SITE_URL + SHOWALL,
@@ -1445,20 +1445,38 @@ $('.btn_export').click(function (evt) {
  * Process for filter datatable form filter
  */
 $('.btn_filter').click(function (evt) {
-    const form = $(evt.target).closest('form');
     let _this = $(this);
+    const container = _this.parents('.container');
+    const main_page = container.find('.main_page');
+    const form = container.find('form');
     let oriElement = _this.html();
     let textElement = _this.text().trim();
+    let s = main_page.find('.card');
 
     formTable = form.serializeArray();
 
     $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
 
-    setTimeout(function () {
-        $(_this).html(oriElement).prop('disabled', false);
-    }, 700);
+    s.length && (s.addClass("is-loading"),
+        reloadTable(),
+        setTimeout(function () {
+            s.removeClass("is-loading");
+            $(_this).html(oriElement).prop('disabled', false);
+        }, 700));
+});
 
-    reloadTable();
+/**
+ * Button ReQuery DataTable
+ */
+$('.btn_requery').click(function () {
+    let _this = $(this);
+    let s = _this.parents(".card");
+
+    s.length && (s.addClass("is-loading"),
+        reloadTable(),
+        setTimeout(function () {
+            s.removeClass("is-loading");
+        }, 500));
 });
 
 /**
