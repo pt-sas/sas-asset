@@ -110,13 +110,13 @@ class Template
         $check = $this->access->checkCrud($uri, $this->isCreate);
         $role = $this->access->getRole();
 
+        if ($role->getIsCanExport() === 'Y')
+            $allBtn .= $btnExport;
+
         $allBtn .= $btnReQuery . ' ';
 
         if ($check === 'Y')
             $allBtn .= $btnNew;
-
-        if ($role->getIsCanExport() === 'Y')
-            $allBtn .= $btnExport;
 
         return $allBtn;
     }
