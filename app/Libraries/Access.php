@@ -255,6 +255,13 @@ class Access
         return "N";
     }
 
+    /**
+     * Get data user role based on role and user
+     *
+     * @param [type] $user_id
+     * @param [type] $role_name
+     * @return void
+     */
     public function getUserRoleName($user_id, $role_name)
     {
         $user = new M_User($this->request);
