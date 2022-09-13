@@ -18,9 +18,7 @@ use Config\Services;
 
 class Receipt extends BaseController
 {
-    private $model;
     private $model_detail;
-    private $entity;
 
     public function __construct()
     {
@@ -115,18 +113,11 @@ class Receipt extends BaseController
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-                $this->entity->setIsInternalUse(setCheckbox(isset($post['isinternaluse'])));
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                 if (!$this->validation->run($post, 'receipt')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -184,46 +175,6 @@ class Receipt extends BaseController
         }
     }
 
-    public function edit()
-    {
-        if ($this->request->getMethod(true) === 'POST') {
-            $post = $this->request->getVar();
-
-            $table = json_decode($post['table']);
-
-            //* Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
-            $post['detail'] = [
-                'table' => arrTableLine($this->mandatoryLogic($table))
-            ];
-
-            //? Set value trx_quotation_id null
-            if (!isset($post['trx_quotation_id']))
-                $post['trx_quotation_id'] = "";
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setReceiptId($post['id']);
-                $this->entity->setIsInternalUse(setCheckbox(isset($post['isinternaluse'])));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'receipt')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
     public function destroy($id)
     {
         if ($this->request->isAJAX()) {
@@ -248,8 +199,6 @@ class Receipt extends BaseController
 
             $row = $this->model->find($_ID);
 
-            $msg = true;
-
             try {
                 if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
                     $line = $this->model_detail->where($this->model->primaryKey, $_ID)->first();
@@ -259,17 +208,9 @@ class Receipt extends BaseController
                         $this->entity->setDocStatus($_DocAction);
                     } else if (!$line && $_DocAction === $this->DOCSTATUS_Completed) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
-                        $msg = 'Document cannot be processed';
                     }
 
-                    $this->entity->setReceiptId($_ID);
-                    $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? $msg : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 } else if (empty($_DocAction)) {
                     $response = message('error', true, 'Please Choose the Document Action first');
                 } else {

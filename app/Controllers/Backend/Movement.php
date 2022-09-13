@@ -18,9 +18,6 @@ use stdClass;
 
 class Movement extends BaseController
 {
-    private $model;
-    private $entity;
-
     public function __construct()
     {
         $this->request = Services::request();
@@ -96,17 +93,11 @@ class Movement extends BaseController
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                 if (!$this->validation->run($post, 'movement')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -131,41 +122,6 @@ class Movement extends BaseController
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        if ($this->request->getMethod(true) === 'POST') {
-            $post = $this->request->getVar();
-
-            $table = json_decode($post['table']);
-
-            //* Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
-            $post['detail'] = [
-                'table' => arrTableLine($table)
-            ];
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setMovementId($post['id']);
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'movement')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
@@ -204,20 +160,14 @@ class Movement extends BaseController
 
             try {
                 if (!empty($_DocAction) && $row->docstatus !== $_DocAction) {
-                    $this->entity->setMovementId($_ID);
-                    $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                    $msg = true;
-
                     //* condition exist data line or not exist data line and docstatus not Completed
                     if (count($line) > 0 || (count($line) == 0 && $_DocAction !== $this->DOCSTATUS_Completed)) {
                         $this->entity->setDocStatus($_DocAction);
                     } else if (count($line) == 0 && $_DocAction === $this->DOCSTATUS_Completed) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
-                        $msg = 'Document cannot be processed';
                     }
 
-                    $result = $this->model->save($this->entity);
+                    $response = $this->save();
 
                     //* condition exist data line and docstatus Completed
                     if (count($line) > 0 && $_DocAction === $this->DOCSTATUS_Completed) {
@@ -258,12 +208,8 @@ class Movement extends BaseController
                             (array) $arrMoveOut
                         );
 
-                        $result = $transaction->create($arrData);
+                        $transaction->create($arrData);
                     }
-
-                    $msg = $result ? $msg : $result;
-
-                    $response = message('success', true, $msg);
                 } else if (empty($_DocAction)) {
                     $response = message('error', true, 'Please Choose the Document Action first');
                 } else {

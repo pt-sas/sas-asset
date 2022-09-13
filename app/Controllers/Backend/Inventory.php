@@ -12,9 +12,6 @@ use Config\Services;
 
 class Inventory extends BaseController
 {
-    private $model;
-    private $entity;
-
     public function __construct()
     {
         $this->request = Services::request();
@@ -82,7 +79,9 @@ class Inventory extends BaseController
 
             try {
                 $this->entity->fill($post);
-                $this->entity->setQtyEntered(1);
+
+                if (!isset($post['id']))
+                    $this->entity->setQtyEntered(1);
 
                 // ROOM RUANG IT - BARANG BAGUS
                 if ($post['md_room_id'] == 100040)
@@ -92,21 +91,13 @@ class Inventory extends BaseController
                 else
                     $this->entity->setIsSpare('N');
 
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
                 if (!$this->validation->run($post, 'inventory')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
                     $row = $employee->find($post['md_employee_id']);
                     $this->entity->setDivisionId($row->getDivisionId());
 
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -136,48 +127,6 @@ class Inventory extends BaseController
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        $employee = new M_Employee($this->request);
-
-        if ($this->request->getMethod(true) === 'POST') {
-            $post = $this->request->getVar();
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setInventoryId($post['id']);
-
-                // ROOM RUANG IT - BARANG BAGUS
-                if ($post['md_room_id'] == 100040)
-                    $this->entity->setIsSpare('Y');
-                else if ($post['md_room_id'] == 100041) // ROOM RUANG IT - BARANG RUSAK
-                    $this->entity->setIsSpare('N');
-                else
-                    $this->entity->setIsSpare('N');
-
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'inventory')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $emp = $employee->find($post['md_employee_id']);
-                    $this->entity->setDivisionId($emp->md_division_id);
-
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }

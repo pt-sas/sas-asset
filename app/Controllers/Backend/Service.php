@@ -14,11 +14,7 @@ use Config\Services;
 
 class Service extends BaseController
 {
-    private $model;
     private $model_detail;
-    private $entity;
-    protected $validation;
-    protected $request;
 
     public function __construct()
     {
@@ -98,17 +94,11 @@ class Service extends BaseController
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                 if (!$this->validation->run($post, 'service')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -137,41 +127,6 @@ class Service extends BaseController
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        if ($this->request->isAJAX()) {
-            $post = $this->request->getVar();
-
-            $table = json_decode($post['table']);
-
-            // Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
-            $post['detail'] = [
-                'table' => arrTableLine($table)
-            ];
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setServiceId($post['id']);
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'service')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
@@ -232,8 +187,6 @@ class Service extends BaseController
 
             $row = $this->model->find($_ID);
 
-            $msg = true;
-
             try {
                 if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
                     $line = $this->model_detail->where($this->model->primaryKey, $_ID)->first();
@@ -242,17 +195,9 @@ class Service extends BaseController
                         $this->entity->setDocStatus($_DocAction);
                     } else if (!$line && $_DocAction === $this->DOCSTATUS_Completed) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
-                        $msg = 'Document cannot be processed';
                     }
 
-                    $this->entity->setServiceId($_ID);
-                    $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? $msg : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 } else if (empty($_DocAction)) {
                     $response = message('error', true, 'Please Choose the Document Action first');
                 } else {

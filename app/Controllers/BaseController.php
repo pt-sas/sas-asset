@@ -91,6 +91,12 @@ class BaseController extends Controller
 	 * @var int
 	 */
 	protected $updatedByField = 'updated_by';
+	/**
+	 * The message used for return value string
+	 *
+	 * @var string
+	 */
+	protected $message = '';
 
 	/**
 	 * Constructor.
@@ -149,8 +155,6 @@ class BaseController extends Controller
 		$modelTable = $this->model->table;
 
 		$newRecord = $this->isNew();
-		$withValue = true;
-		$msg = '';
 
 		$data = $this->entity;
 
@@ -186,27 +190,32 @@ class BaseController extends Controller
 						if ($this->updatedByField && !array_key_exists($this->updatedByField, $data))
 							$newV->{$this->updatedByField} = $this->access->getSessionUser();
 
-						if ($columnPK && !array_key_exists($columnPK, $data))
-							$newV->{$columnPK} = $this->getID();
+						$newV->{$columnPK} = $this->getID();
 					}
 				}
 			endforeach;
 
-			$ok = $withValue ? $this->model->save($newV) : $withValue;
+			$ok = $this->model->save($newV);
 
 			if ($ok) {
 				if ($newRecord) {
 					//TODO: Insert Change Log
 					$changeLog->insertLog($modelTable, $columnPK, $this->getID(), null, $this->getID(), $this->EVENTCHANGELOG_Insert);
 
-					$msg = notification("insert");
+					$this->message = notification("insert");
 				} else {
-					$msg = notification("updated");
+
+					if (isset($newV->docstatus) && $newV->docstatus === $this->DOCSTATUS_Completed)
+						$this->message = true;
+					else if (isset($newV->docstatus) && $newV->docstatus === $this->DOCSTATUS_Invalid)
+						$this->message = 'Document cannot be processed';
+					else
+						$this->message = notification("updated");
 				}
 
-				$ok = message('success', true, $msg);
+				$ok = message('success', true, $this->message);
 			} else {
-				$ok = message('error', true, $msg);
+				$ok = message('error', true, $this->message);
 			}
 		} catch (\Exception $e) {
 			throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
@@ -316,7 +325,7 @@ class BaseController extends Controller
 	 * 	Is new record
 	 *	@return true if new
 	 */
-	public function isNew()
+	protected function isNew()
 	{
 		//* Get Request POST From View 
 		$post = $this->request->getVar();
@@ -331,7 +340,7 @@ class BaseController extends Controller
 	 *  Return Single Key Record ID
 	 *  @return ID or 0
 	 */
-	public function getID()
+	protected function getID()
 	{
 		//* Get Request POST From View 
 		$post = $this->request->getVar();

@@ -5,7 +5,6 @@ namespace App\Models;
 use CodeIgniter\Model;
 
 use App\Models\M_Transaction;
-
 use CodeIgniter\HTTP\RequestInterface;
 use stdClass;
 
@@ -192,19 +191,20 @@ class M_Inventory extends Model
 	{
 		$transaction = new M_Transaction();
 
-		$this->builder->where('trx_inventory_id', $rows['id']);
-		$field = $this->builder->get()->getRow();
+		$post = $this->request->getVar();
 
-		if ($field->md_room_id != $rows['data']['md_room_id'] && $field->md_employee_id !=  $rows['data']['md_employee_id']) {
+		$field = $this->find($rows['id'][0]);
+
+		if ($field->md_room_id != $post['md_room_id'] && $field->md_employee_id != $post['md_employee_id']) {
 			$in = new stdClass();
-			$in->assetcode = $rows['data']['assetcode'];
-			$in->md_product_id = $rows['data']['md_product_id'];
+			$in->assetcode = $post['assetcode'];
+			$in->md_product_id = $post['md_product_id'];
 			$in->transactiontype = $this->Inventory_In;
 			$in->transactiondate = date('Y-m-d');
-			$in->md_room_id = $rows['data']['md_room_id'];
-			$in->md_employee_id = $rows['data']['md_employee_id'];
+			$in->md_room_id = $post['md_room_id'];
+			$in->md_employee_id = $post['md_employee_id'];
 			$in->qtyentered = 1;
-			$in->trx_inventory_id = $rows['id'];
+			$in->trx_inventory_id = $rows['id'][0];
 			$arrInvIn[] = $in;
 
 			$out = new stdClass();
@@ -215,7 +215,7 @@ class M_Inventory extends Model
 			$out->md_room_id = $field->md_room_id;
 			$out->md_employee_id = $field->md_employee_id;
 			$out->qtyentered = - ($field->qtyentered);
-			$out->trx_inventory_id = $rows['id'];
+			$out->trx_inventory_id = $rows['id'][0];
 			$arrInvOut[] = $out;
 
 			$arrData = (array) array_merge(
