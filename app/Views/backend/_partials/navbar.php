@@ -24,7 +24,7 @@
               <!-- <a class="dropdown-item" href="#">My Profile</a>
               <a class="dropdown-item" href="#">Inbox</a>
               <div class="dropdown-divider"></div> -->
-              <a class="dropdown-item change-password" href="javascript:void(0)"><i class="fas fa-cog"></i> Change Password</a>
+              <a class="dropdown-item change-password" id="<?= session()->get('sys_user_id') ?>" href="javascript:void(0)"><i class="fas fa-cog"></i> Change Password</a>
               <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="<?= site_url('logout') ?>"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </li>
