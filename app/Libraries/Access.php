@@ -90,7 +90,7 @@ class Access
                     // Check submenu is set in menu access
                     $access = $role->detail([
                         'am.sys_submenu_id'     => $sub->getSubId(),
-                        'am.sys_role_id'        => session()->get('sys_role_id')
+                        'am.sys_role_id'        => $this->getSessionRole()
                     ])->getRow();
 
                     // submenu set in role and role isactive Y
@@ -102,7 +102,7 @@ class Access
                     // Check menu is set in menu access
                     $access = $role->detail([
                         'am.sys_menu_id'        => $parent->getMenuId(),
-                        'am.sys_role_id'        => session()->get('sys_role_id')
+                        'am.sys_role_id'        => $this->getSessionRole()
                     ])->getRow();
 
                     // menu set in role and role isactive Y
@@ -118,7 +118,7 @@ class Access
                 if ($setmenu === 'parent') {
                     $access = $role->detail([
                         'am.sys_menu_id'        => $menu_id,
-                        'am.sys_role_id'        => session()->get('sys_role_id')
+                        'am.sys_role_id'        => $this->getSessionRole()
                     ])->getRow();
 
                     if ($access && $access->isactive === 'Y')
@@ -128,7 +128,7 @@ class Access
                 } else {
                     $access = $role->detail([
                         'am.sys_submenu_id'     => $menu_id,
-                        'am.sys_role_id'        => session()->get('sys_role_id')
+                        'am.sys_role_id'        => $this->getSessionRole()
                     ])->getRow();
 
                     // submenu set in role
@@ -148,14 +148,14 @@ class Access
     public function getUser($field)
     {
         $user = new M_User($this->request);
-        $row = $user->find(session()->get('sys_user_id'));
+        $row = $user->find($this->getSessionUser());
         return $row->$field;
     }
 
     public function getRole()
     {
         $role = new M_Role($this->request);
-        $row = $role->find(session()->get('sys_role_id'));
+        $row = $role->find($this->getSessionRole());
         return $row ? $row : 'No Role';
     }
 
@@ -181,6 +181,26 @@ class Access
         }
 
         return $field;
+    }
+
+    /**
+     * Get session user
+     *
+     * @return sys_user_id or null
+     */
+    public function getSessionUser()
+    {
+        return !empty($this->session->get('sys_user_id')) ? $this->session->get('sys_user_id') : null;
+    }
+
+    /**
+     * Get session role
+     *
+     * @return sys_role_id or null
+     */
+    public function getSessionRole()
+    {
+        return !empty($this->session->get('sys_role_id')) ? $this->session->get('sys_role_id') : null;
     }
 
     /**
