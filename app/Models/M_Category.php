@@ -13,6 +13,7 @@ class M_Category extends Model
         'value',
         'name',
         'initialcode',
+        'md_groupasset_id',
         'isactive',
         'created_by',
         'updated_by'
