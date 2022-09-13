@@ -12,7 +12,7 @@
                     <div class="form-group row">
                         <label for="password" class="col-sm-5 col-form-label">Old Password</label>
                         <div class="col-sm-7">
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Input your old password">
+                            <input type="password" class="form-control" id="old_password" name="password" placeholder="Input your old password">
                             <small class="form-text text-danger" id="error_password"></small>
                         </div>
                     </div>
