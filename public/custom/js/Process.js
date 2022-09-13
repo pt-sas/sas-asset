@@ -268,6 +268,7 @@ $('.save_form').click(function (evt) {
 
         for (let i = 0; i < field.length; i++) {
             if (field[i].name !== '') {
+                let className = field[i].className.split(/\s+/);
 
                 // input type radio button to set into the formData
                 if (field[i].type == 'radio') {
@@ -314,6 +315,14 @@ $('.save_form').click(function (evt) {
                     } else {
                         formData.append(field[i].name, 'N');
                     }
+                }
+
+                if (className.includes('datepicker')) {
+                    let date = field[i].value;
+                    let time = "00:00:00";
+
+                    let timeAndDate = moment(date + ' ' + time);
+                    formData.append(field[i].name, timeAndDate._i);
                 }
             }
         }
