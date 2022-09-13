@@ -8,11 +8,6 @@ use Config\Services;
 
 class Auth extends BaseController
 {
-	protected $request;
-	protected $validation;
-	protected $model;
-	protected $entity;
-
 	public function __construct()
 	{
 		$this->request = Services::request();
@@ -36,7 +31,7 @@ class Auth extends BaseController
 	{
 		if ($this->request->getMethod(true) === 'POST') {
 			$post = $this->request->getVar();
-			
+
 			try {
 				if (!$this->validation->run($post, 'login')) {
 					$response =	$this->field->errorValidation($this->model->table, $post);
@@ -83,8 +78,6 @@ class Auth extends BaseController
 
 			try {
 				$this->entity->setPassword($post['new_password']);
-				$this->entity->setDatePasswordChange(date('Y-m-d H:i:s'));
-				$this->entity->setUserId($this->session->get('sys_user_id'));
 
 				if (!$this->validation->run($post, 'change_password')) {
 					$errors = [
@@ -95,9 +88,7 @@ class Auth extends BaseController
 
 					$response = message('error', true, $errors);
 				} else {
-					$result = $this->model->save($this->entity);
-
-					$response = message('success', true, $result);
+					$response = $this->save();
 				}
 			} catch (\Exception $e) {
 				$response = message('error', false, $e->getMessage());

@@ -261,12 +261,10 @@ $('.save_form').click(function (evt) {
 
         let formData = new FormData(form[0]);
 
-        if (setSave === 'add') {
-            url = SITE_URL + CREATE;
-        } else if (setSave === 'update') {
+        url = SITE_URL + CREATE;
+
+        if (setSave === 'update')
             formData.append('id', ID);
-            url = SITE_URL + EDIT;
-        }
 
         for (let i = 0; i < field.length; i++) {
             if (field[i].name !== '') {
@@ -307,6 +305,15 @@ $('.save_form').click(function (evt) {
                 // Multiple select populate array data
                 if (field[i].type === 'select-multiple') {
                     formData.append(field[i].name, $('[name = ' + field[i].name + ']').val())
+                }
+
+                // input type radio button to set into the formData
+                if (field[i].type == 'checkbox') {
+                    if (field[i].checked) {
+                        formData.append(field[i].name, 'Y');
+                    } else {
+                        formData.append(field[i].name, 'N');
+                    }
                 }
             }
         }
@@ -1775,6 +1782,7 @@ $('.login-form input').keypress(function (evt) {
  * Anchor change password on the navbar admin
  */
 $('.change-password').click(function (evt) {
+    ID = $(this).attr('id');
     openModalForm();
 });
 
@@ -1791,6 +1799,9 @@ $('.save_form_pass').click(function (evt) {
     let url = ADMIN_URL + 'auth/' + 'changePassword';
 
     let formData = new FormData(form[0]);
+
+    if (typeof ID !== 'undefined' && ID !== '')
+        formData.append('id', ID);
 
     $.ajax({
         url: url,
@@ -2088,9 +2099,15 @@ function findArrDuplicate(array) {
  */
 function clearForm(evt) {
     const container = $(evt.target).closest('.container');
-    let parent = $(evt.target).closest('.row').length > 0 ? $(evt.target).closest('.row') : $(evt.target).closest('.modal');
+    let parent = $(evt.target).closest('.row');
     const cardForm = parent.find('.card-form');
-    const form = cardForm.find('form');
+    let form = cardForm.find('form');
+
+    if ($(evt.target).closest('.row').length == 0) {
+        parent = $(evt.target).closest('.modal');
+        form = parent.find('form');
+    }
+
     const field = form.find('input, textarea, select');
     const errorText = form.find('small');
 

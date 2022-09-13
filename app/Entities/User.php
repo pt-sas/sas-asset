@@ -3,6 +3,8 @@
 namespace App\Entities;
 
 use CodeIgniter\Entity;
+use App\Models\M_User;
+use Config\Services;
 
 class User extends Entity
 {
@@ -61,7 +63,17 @@ class User extends Entity
 
 	public function setPassword(string $password)
 	{
-		$this->attributes['password'] = password_hash($password, PASSWORD_BCRYPT);
+		$request = Services::request();
+		$user = new M_User($request);
+
+		$row = $user->where('password', $password)->first();
+
+		if ($row && $row->getPassword() === $password) {
+			$this->attributes['password'] = $password;
+		} else {
+			$this->attributes['password'] = password_hash($password, PASSWORD_BCRYPT);
+			$this->setDatePasswordChange(date('Y-m-d H:i:s'));
+		}
 	}
 
 	public function getDescription()
@@ -106,7 +118,7 @@ class User extends Entity
 
 	public function getDatePasswordChange()
 	{
-		return $this->attributes['isactive'];
+		return $this->attributes['datepasswordchange'];
 	}
 
 	public function setDatePasswordChange($datepasswordchange)

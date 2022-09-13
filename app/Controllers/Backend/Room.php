@@ -10,9 +10,6 @@ use Config\Services;
 
 class Room extends BaseController
 {
-    private $model;
-    private $entity;
-
     public function __construct()
     {
         $this->request = Services::request();
@@ -74,18 +71,11 @@ class Room extends BaseController
 
             try {
                 $this->entity->fill($post);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                 if (!$this->validation->run($post, 'room')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -106,34 +96,6 @@ class Room extends BaseController
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        if ($this->request->getMethod(true) === 'POST') {
-            $post = $this->request->getVar();
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setRoomId($post['id']);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'room')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }

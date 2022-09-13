@@ -8,9 +8,6 @@ use Config\Services;
 
 class Sequence extends BaseController
 {
-    private $model;
-    private $entity;
-
     public function __construct()
     {
         $this->request = Services::request();
@@ -93,25 +90,18 @@ class Sequence extends BaseController
 
             try {
                 $this->entity->fill($post);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setIsAutoSequence(setCheckbox(isset($post['isautosequence'])));
-                $this->entity->setIsGAssetLevelSequence(setCheckbox(isset($post['isgassetlevelsequence'])));
-                $this->entity->setIsCategoryLevelSequence(setCheckbox(isset($post['iscategorylevelsequence'])));
-                $this->entity->setStartNewYear(setCheckbox(isset($post['startnewyear'])));
-                $this->entity->setStartNewMonth(setCheckbox(isset($post['startnewmonth'])));
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
+                // Unset property
+                $arrUnset = ['isautosequence', 'isgassetlevelsequence', 'iscategorylevelsequence', 'startnewyear', 'startnewmonth'];
+                $post = $this->unsetData($post, 'N', $arrUnset);
+
+                // Set null value
                 $post['isgassetlevelsequence'] = isset($post['isgassetlevelsequence']) ?: '';
 
                 if (!$this->validation->run($post, 'sequence')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -132,46 +122,6 @@ class Sequence extends BaseController
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        if ($this->request->getMethod(true) === 'POST') {
-            $post = $this->request->getVar();
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setSequenceId($post['id']);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setIsAutoSequence(setCheckbox(isset($post['isautosequence'])));
-                $this->entity->setIsGAssetLevelSequence(setCheckbox(isset($post['isgassetlevelsequence'])));
-                $this->entity->setIsCategoryLevelSequence(setCheckbox(isset($post['iscategorylevelsequence'])));
-                $this->entity->setStartNewYear(setCheckbox(isset($post['startnewyear'])));
-
-                $post['isgassetlevelsequence'] = isset($post['isgassetlevelsequence']) ?: '';
-
-                if (isset($post['startnewyear']))
-                    $this->entity->setStartNewMonth(setCheckbox(isset($post['startnewmonth'])));
-                else
-                    $this->entity->setStartNewMonth('N');
-
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'sequence')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('updated') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
@@ -223,5 +173,23 @@ class Sequence extends BaseController
 
             return $this->response->setJSON($response);
         }
+    }
+
+    /**
+     * Function for remove property array
+     *
+     * @param [type] $arrOri
+     * @param [type] $value
+     * @param array $arr
+     * @return void
+     */
+    public function unsetData($arrOri, $value, $arr = [])
+    {
+        foreach ($arr as $val) :
+            if ($arrOri[$val] == $value)
+                unset($arrOri[$val]);
+        endforeach;
+
+        return $arrOri;
     }
 }

@@ -9,11 +9,6 @@ use Config\Services;
 
 class User extends BaseController
 {
-	private $model;
-	private $entity;
-	protected $validation;
-	protected $request;
-
 	public function __construct()
 	{
 		$this->request = Services::request();
@@ -84,18 +79,11 @@ class User extends BaseController
 
 			try {
 				$this->entity->fill($post);
-				$this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-				$this->entity->setCreatedBy($this->session->get('sys_user_id'));
-				$this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
 				if (!$this->validation->run($post, 'user')) {
 					$response =	$this->field->errorValidation($this->model->table, $post);
 				} else {
-					$result = $this->model->save($this->entity);
-
-					$msg = $result ? notification('insert') : $result;
-
-					$response = message('success', true, $msg);
+					$response = $this->save();
 				}
 			} catch (\Exception $e) {
 				$response = message('error', false, $e->getMessage());
@@ -116,49 +104,6 @@ class User extends BaseController
 				];
 
 				$response = message('success', true, $result);
-			} catch (\Exception $e) {
-				$response = message('error', false, $e->getMessage());
-			}
-
-			return $this->response->setJSON($response);
-		}
-	}
-
-	public function edit()
-	{
-		if ($this->request->getMethod(true) === 'POST') {
-			$post = $this->request->getVar();
-
-			$row = $this->model->find($post['id']);
-
-			if ($row->password !== $post['password'])
-				$row->password = $post['password'];
-
-			try {
-				$this->entity->setUserName($post['username']);
-				$this->entity->setName($post['name']);
-				$this->entity->setEmail($post['email']);
-				$this->entity->setDescription($post['description']);
-				$this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-				// Check password has change true
-				if ($row->hasChanged('password')) {
-					$this->entity->setPassword($post['password']);
-					$this->entity->setDatePasswordChange(date('Y-m-d H:i:s'));
-				}
-
-				$this->entity->setUserId($post['id']);
-				$this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-
-				if (!$this->validation->run($post, 'user')) {
-					$response =	$this->field->errorValidation($this->model->table, $post);
-				} else {
-					$result = $this->model->save($this->entity);
-
-					$msg = $result ? notification('update') : $result;
-
-					$response = message('success', true, $msg);
-				}
 			} catch (\Exception $e) {
 				$response = message('error', false, $e->getMessage());
 			}
