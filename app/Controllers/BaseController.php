@@ -204,8 +204,7 @@ class BaseController extends Controller
 
 					$this->message = notification("insert");
 				} else {
-
-					if (isset($newV->docstatus) && $newV->docstatus === $this->DOCSTATUS_Completed)
+					if (isset($newV->docstatus) && $newV->docstatus !== $this->DOCSTATUS_Invalid)
 						$this->message = true;
 					else if (isset($newV->docstatus) && $newV->docstatus === $this->DOCSTATUS_Invalid)
 						$this->message = 'Document cannot be processed';

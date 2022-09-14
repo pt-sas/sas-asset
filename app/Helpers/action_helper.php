@@ -134,7 +134,7 @@ function docStatus(string $str)
     else if ($str === "IP")
         $msg .= '<center><span class="badge badge-info">In Progress</span></center>';
     else if ($str === "VO")
-        $msg .= '<center><span class="badge badge-default">Voided</span></center>';
+        $msg .= '<center><span class="badge badge-primary">Voided</span></center>';
     else if ($str === "IN")
         $msg .= '<center><span class="badge badge-danger">Invalid</span></center>';
     else
