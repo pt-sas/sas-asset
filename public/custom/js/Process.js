@@ -1279,6 +1279,8 @@ $('.new_form').click(function (evt) {
     let oriElement = _this.html();
     let textElement = _this.text().trim();
 
+    $(this).tooltip('hide');
+
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
         $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
 
@@ -1488,6 +1490,8 @@ $('.btn_requery').click(function () {
     let _this = $(this);
     let s = _this.parents(".card");
 
+    $(this).tooltip('hide');
+
     s.length && (s.addClass("is-loading"),
         reloadTable(),
         setTimeout(function () {
@@ -1636,6 +1640,8 @@ $('.btn_requery_info').click(function (evt) {
 
     let url = ADMIN_URL + 'product' + '/showProductInfo/?';
     let formData = form.serialize();
+
+    $(this).tooltip('hide');
 
     _tableInfo.ajax.url(url + formData).load().columns.adjust();
 });
