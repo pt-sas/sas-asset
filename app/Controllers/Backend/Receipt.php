@@ -11,6 +11,9 @@ use App\Models\M_Product;
 use App\Models\M_Employee;
 use App\Models\M_Division;
 use App\Models\M_Branch;
+use App\Models\M_Depreciation;
+use App\Models\M_GroupAsset;
+use App\Models\M_Inventory;
 use App\Models\M_Room;
 use App\Models\M_Quotation;
 use App\Models\M_QuotationDetail;
@@ -197,9 +200,9 @@ class Receipt extends BaseController
             $_ID = $post['id'];
             $_DocAction = $post['docaction'];
 
-            $row = $this->model->find($_ID);
-
             try {
+                $row = $this->model->find($_ID);
+
                 if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
                     $line = $this->model_detail->where($this->model->primaryKey, $_ID)->first();
 
@@ -211,6 +214,9 @@ class Receipt extends BaseController
                     }
 
                     $response = $this->save();
+
+                    if ($response)
+                        $this->createDepreciation($row);
                 } else if (empty($_DocAction)) {
                     $response = message('error', true, 'Please Choose the Document Action first');
                 } else {
@@ -436,5 +442,149 @@ class Receipt extends BaseController
         }
 
         return json_encode($result);
+    }
+
+    /**
+     * Process Create data on the table Depreciation
+     *
+     * @param [type] $data
+     * @return void
+     */
+    protected function createDepreciation($data)
+    {
+        $inventory = new M_Inventory($this->request);
+        $groupasset = new M_GroupAsset($this->request);
+        $depreciation = new M_Depreciation($this->request);
+
+        if (is_object($data) && $data) {
+            $receiptID = $data->getReceiptId();
+            $rowAsset = $inventory->where('trx_receipt_id', $receiptID)->findAll();
+
+
+            $result = [];
+            foreach ($rowAsset as $key => $val) :
+                $group = $groupasset->find($val->getGroupAssetId());
+
+                //* Transaction Date 
+                $dateTrx = $val->getInventoryDate();
+
+                $strDate = strtotime($dateTrx);
+                $currDate = date('d', $strDate);
+                $currMonth = date('m', $strDate);
+
+                //* Full month in one year 
+                $fullMonth = 12;
+
+                //* Cut off date
+                $dateCO = 15;
+
+                //* Use Full Life from group asset
+                $useFulLife = $group->getUsefulLife();
+
+                //? Check the date less than equal cut off date 
+                if ($currDate <= $dateCO) {
+                    //? Check this month of january
+                    $notFullMonth = $currMonth == 01 ? $fullMonth : ($fullMonth - $currMonth) + 1;
+
+                    $remainMonth = ($fullMonth - $notFullMonth);
+
+                    $useLength = $useFulLife;
+
+                    if (!empty($remainMonth))
+                        $useLength = $useFulLife + 1;
+                }
+
+                //? Check month and date
+                if (($currMonth == 01 || $currMonth != 01) && $currDate > $dateCO) {
+                    $addMonth = strtotime("+1 months", strtotime($dateTrx));
+                    $nextMonth = date('m', $addMonth);
+
+                    //* Total month substract next month plus current month to calculate 
+                    $notFullMonth = ($fullMonth - $nextMonth) + 1;
+                    $remainMonth = ($fullMonth - $notFullMonth);
+
+                    $useLength = $useFulLife + 1;
+                }
+
+                //* book value **Unitprice inventory 
+                $bookValue = $val->getUnitPrice();
+
+                //* accumulated depreciation 
+                $accumulation = 0;
+
+                //TODO: Method Straight Line 
+                $straightLine = ($bookValue / $useFulLife);
+
+                for ($i = 0; $i <= $useLength; $i++) {
+                    $row = [];
+                    $cost = 0;
+                    $currentMonth = 0;
+
+                    $year = date('Y', $strDate);
+
+                    //TODO: Method Double Decline
+                    $doubleLine = (($bookValue / $useFulLife) * 2);
+
+                    $isType = $group->getDepreciationType();
+
+                    //? Check method calculate depreciation
+                    $calculate = $isType === 'SL' ? $straightLine : $doubleLine;
+
+                    //* Index 1
+                    if ($i == 1) {
+                        $calculate *= ($notFullMonth / $fullMonth);
+
+                        //? Set to check is not full month
+                        $currentMonth = $notFullMonth;
+
+                        $cost += $calculate;
+                        $accumulation += $cost;
+                        $bookValue -= $cost;
+                    }
+
+                    //* Index greather than 1
+                    if ($i > 1) {
+                        $increment = $i - 1;
+                        $addYear = addYear($dateTrx, $increment);
+                        $year = date('Y', $addYear);
+
+                        //? Check current month if available remaining month
+                        if (!empty($remainMonth) && $i == $useLength) {
+                            $calculate *= ($remainMonth / $fullMonth);
+
+                            //* Set remaining month 
+                            $currentMonth = $remainMonth;
+                        } else {
+                            $calculate *= ($fullMonth / $fullMonth);
+
+                            //* Set full month
+                            $currentMonth = $fullMonth;
+                        }
+
+                        $cost += round($calculate, 2, PHP_ROUND_HALF_UP);
+                        $accumulation += $cost;
+                        $bookValue -= $cost;
+                    }
+
+                    $row['assetcode'] = $val->getAssetCode();
+                    $row['transactiondate'] = $dateTrx;
+                    $row['totalyear'] = $useFulLife;
+                    $row['startyear'] = $year;
+                    $row['costdepreciation'] = round($cost, 2, PHP_ROUND_HALF_UP);
+                    $row['accumulateddepreciation'] = round($accumulation, 2, PHP_ROUND_HALF_UP);
+                    $row['bookvalue'] = round($bookValue, 2, PHP_ROUND_HALF_UP);
+                    $row['currentmonth'] = $currentMonth;
+                    $row['depreciationtype'] = $isType;
+                    $row['created_by'] = $this->access->getSessionUser();
+                    $row['updated_by'] = $this->access->getSessionUser();
+
+                    $result[] = $row;
+                }
+            endforeach;
+
+            $result = $depreciation->doInsert($result);
+
+            return $result;
+        }
     }
 }
