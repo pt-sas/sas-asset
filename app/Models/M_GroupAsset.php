@@ -18,7 +18,8 @@ class M_GroupAsset extends Model
         'isactive',
         'created_by',
         'updated_by',
-        'md_sequence_id'
+        'md_sequence_id',
+        'depreciationtype'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\GroupAsset';

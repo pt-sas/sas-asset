@@ -797,6 +797,13 @@ class Validation
             'errors'                => [
                 'required' => 'Please Choose the {field}'
             ]
+        ],
+        'depreciationtype' => [
+            'label'                 => 'Depreciation Type',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Choose the {field}'
+            ]
         ]
     ];
 

@@ -35,6 +35,17 @@
                     <label for="description">Description </label>
                     <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
                 </div>
+                <div class="form-group">
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="straight" name="depreciationtype" class="custom-control-input" value="SL">
+                        <label class="custom-control-label" for="straight">Straight Line</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="double" name="depreciationtype" class="custom-control-input" value="DB">
+                        <label class="custom-control-label" for="double">Declining Balance</label>
+                    </div>
+                    <small class="form-text text-danger" id="error_depreciationtype"></small>
+                </div>
                 <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">

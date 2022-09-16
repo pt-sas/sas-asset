@@ -116,10 +116,15 @@ class M_Inventory extends Model
 
 	public function create($arrData)
 	{
+		$product = new M_Product($this->request);
+
 		foreach ($arrData as $row) :
+			$rowProd = $product->getProductAsset($row->md_product_id)->getRow();
+
 			$data = [
 				'assetcode'					=> $row->assetcode,
 				'inventorydate'				=> $row->receiptdate,
+				'md_groupasset_id'     		=> $rowProd->md_groupasset_id,
 				'md_product_id'     		=> $row->md_product_id,
 				'isspare'		     		=> $row->isspare,
 				'qtyentered'        		=> $row->qtyentered,

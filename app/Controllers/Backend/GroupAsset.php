@@ -78,6 +78,10 @@ class GroupAsset extends BaseController
             try {
                 $this->entity->fill($post);
 
+                // Set null data for depreciation type combobox not choose
+                if (!isset($post['depreciationtype']))
+                    $post['depreciationtype'] = "";
+
                 if (!$this->validation->run($post, 'groupasset')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
