@@ -142,3 +142,8 @@ function docStatus(string $str)
 
     return $msg;
 }
+
+function addYear($date, string $value)
+{
+    return strtotime("+" . $value . " years", strtotime($date));
+}
