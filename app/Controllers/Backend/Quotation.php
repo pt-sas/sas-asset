@@ -55,8 +55,8 @@ class Quotation extends BaseController
             $search = $this->model->column_search;
             $where['trx_quotation.isinternaluse'] = 'N';
 
-            //? Check is use exist role W_Not_Default_Status 
-            if (!$this->access->getUserRoleName($this->session->get('sys_user_id'), 'W_Not_Default_Status'))
+            //? Check is user exist role W_Not_Default_Status 
+            if (!$this->access->getUserRoleName($this->access->getSessionUser(), 'W_Not_Default_Status'))
                 $where['trx_quotation.md_status_id'] = 100000;
 
             $data = [];
@@ -356,8 +356,8 @@ class Quotation extends BaseController
     {
         $result = [];
 
-        //! default logic for dropdown md_status_id
-        $role = $this->access->getUserRoleName($this->session->get('sys_user_id'), 'W_Not_Default_Status');
+        //? default logic for dropdown md_status_id
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_Not_Default_Status');
 
         if (!$role) {
             $result = [
