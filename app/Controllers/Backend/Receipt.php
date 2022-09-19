@@ -215,7 +215,8 @@ class Receipt extends BaseController
 
                     $response = $this->save();
 
-                    if ($response)
+                    //? True and Not From internal 
+                    if ($response && $row->getIsInternalUse() === 'N')
                         $this->createDepreciation($row);
                 } else if (empty($_DocAction)) {
                     $response = message('error', true, 'Please Choose the Document Action first');
