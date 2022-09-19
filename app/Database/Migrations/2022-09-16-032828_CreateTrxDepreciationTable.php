@@ -18,7 +18,7 @@ class CreateTrxDepreciationTable extends Migration
             'updated_at'            => ['type' => 'timestamp default current_timestamp'],
             'updated_by'            => ['type' => 'INT', 'constraint' => 6, 'null' => false],
             'assetcode'             => ['type' => 'VARCHAR', 'constraint' => 40, 'null' => false],
-            'transactiondate'       => ['type' => 'timestamp', 'null' => false],
+            'transactiondate'       => ['type' => 'timestamp', 'null' => true],
             'totalyear'             => ['type' => 'NUMERIC', 'constraint' => 5, 'null' => false],
             'startyear'             => ['type' => 'INT', 'constraint' => 6, 'null' => false],
             'residualvalue'         => ['type' => 'DOUBLE', 'null' => false],
