@@ -292,6 +292,11 @@ class Field
                     'id' => $value,
                     'name' => $text
                 ]);
+            else
+                $row->$field = ([
+                    'id' => $value,
+                    'name' => $text
+                ]);
         endforeach;
 
         return $data;
