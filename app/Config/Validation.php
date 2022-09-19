@@ -456,14 +456,6 @@ class Validation
                 'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.assetcode'  => [
-            'label'                 => 'Asset Code',
-            'rules'                 => 'required|is_exists',
-            'errors'                => [
-                'required' => 'Please Insert the {field} Line',
-                'is_exists' => 'The {field} duplicate value'
-            ]
-        ],
         'detail.table.*.product_id'  => [
             'label'             => 'Product',
             'rules'             => 'required',
@@ -477,13 +469,6 @@ class Validation
             'errors'            => [
                 'required'      => 'Please Choose the {field} Line'
             ]
-            // ],
-            // 'detail.table.*.unitprice'  => [
-            //     'label'             => 'Unit Price',
-            //     'rules'             => 'required',
-            //     'errors'            => [
-            //         'required'      => 'Please Insert the {field} Line'
-            //     ]
         ],
     ];
 
