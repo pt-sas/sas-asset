@@ -43,11 +43,17 @@ class Movement extends BaseController
             $order = $this->model->column_order;
             $sort = $this->model->order;
             $search = $this->model->column_search;
+            $where = [];
+
+            //? Check is user exist role W_View_All_Movement 
+            if (!$this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Movement')) {
+                $where['trx_movement.created_by'] = $this->access->getSessionUser();
+            }
 
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join, $where);
 
             foreach ($list as $value) :
                 $row = [];
@@ -68,8 +74,8 @@ class Movement extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $this->datatable->countAll($table),
-                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join),
+                'recordsTotal'      => $this->datatable->countAll($table, $where),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join, $where),
                 'data'              => $data
             ];
 
@@ -264,19 +270,50 @@ class Movement extends BaseController
         $inventory = new M_Inventory($this->request);
         $status = new M_Status($this->request);
 
-        /**
-         * Inventory room bukan RUANG IT - BARANG RUSAK
-         */
-        $dataInventory = $inventory->where([
-            'isactive'  => 'Y',
-            'md_room_id <>' => 100041
-        ])->orderBy('assetcode', 'ASC')
-            ->findAll();
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Movement');
+
+        //TODO:  Check Data Employee based on sys_user_id
+        $rowEmp = $employee->where('sys_user_id', $this->access->getSessionUser())->first();
+
+        //? Not Exists Role W_View_All_Movement and exists data employee
+        if (!$role && $rowEmp) {
+            //? Where clause inventory 
+            $invWhere['md_employee_id'] = $rowEmp->getEmployeeId();
+
+            //? Where clause employee to 
+            $empWhere['md_employee_id <>'] = $rowEmp->getEmployeeId();
+            $empWhere['md_division_id'] = $rowEmp->getDivisionId();
+        }
+
+        //? Where Clause Inventory room bukan RUANG IT - BARANG RUSAK
+        $invWhere['isactive'] = 'Y';
+        $invWhere['md_room_id <>'] = 100041;
+
+        //* Data Inventory 
+        $dataInventory = $inventory->where($invWhere)->orderBy('assetcode', 'ASC')->findAll();
+
+        //* Data Product 
         $dataProduct = $product->where('isactive', 'Y')->findAll();
+
+        //* Data Employee From 
         $dataEmployee = $employee->where('isactive', 'Y')->findAll();
+
+        //? Where Clause Employee 
+        $empWhere['isactive'] = 'Y';
+
+        //* Data Employee To 
+        $dataEmployeeTo = $employee->where($empWhere)->findAll();
+
+        //* Data Division
         $dataDivision = $division->where('isactive', 'Y')->findAll();
+
+        //* Data Branch
         $dataBranch = $branch->where('isactive', 'Y')->findAll();
+
+        //* Data Room
         $dataRoom = $room->where('isactive', 'Y')->findAll();
+
+        //* Data Status
         $dataStatus = $status->where([
             'isactive'  => 'Y',
             'isline'    => 'Y'
@@ -293,7 +330,7 @@ class Movement extends BaseController
                 $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
                 $this->field->fieldTable('select', null, 'status_id', null, 'required', null, null, $dataStatus, 'BAGUS', 150, 'md_status_id', 'name'),
                 $this->field->fieldTable('select', null, 'employee_from', null, null, 'readonly', null, $dataEmployee, null, 200, 'md_employee_id', 'name'),
-                $this->field->fieldTable('select', null, 'employee_to', null, 'required', null, null, $dataEmployee, null, 200, 'md_employee_id', 'name'),
+                $this->field->fieldTable('select', null, 'employee_to', null, 'required', null, null, $dataEmployeeTo, null, 200, 'md_employee_id', 'name'),
                 $this->field->fieldTable('select', null, 'branch_from', null, null, 'readonly', null, $dataBranch, null, 200, 'md_branch_id', 'name'),
                 $this->field->fieldTable('select', null, 'branch_to', null, null, 'readonly', null, null, null, 200),
                 $this->field->fieldTable('select', null, 'division_from', null, null, 'readonly', null, $dataDivision, null, 200, 'md_division_id', 'name'),
@@ -317,7 +354,7 @@ class Movement extends BaseController
                     $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                     $this->field->fieldTable('select', null, 'status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
                     $this->field->fieldTable('select', null, 'employee_from', null, null, 'readonly', null, $dataEmployee, $row->employee_from, 200, 'md_employee_id', 'name'),
-                    $this->field->fieldTable('select', null, 'employee_to', null, 'required', $row->status === 'RUSAK' ? 'readonly' : null, null, $dataEmployee, $row->employee_to, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('select', null, 'employee_to', null, 'required', $row->status === 'RUSAK' ? 'readonly' : null, null, $dataEmployeeTo, $row->employee_to, 200, 'md_employee_id', 'name'),
                     $this->field->fieldTable('select', null, 'branch_from', null, null, 'readonly', null, $dataBranch, $row->branch_from, 200, 'md_branch_id', 'name'),
                     $this->field->fieldTable('select', null, 'branch_to', null, null, 'readonly', null, $dataBranch, $row->branch_to, 200, 'md_branch_id', 'name'),
                     $this->field->fieldTable('select', null, 'division_from', null, null, 'readonly', null, $dataDivision, $row->division_from, 200, 'md_division_id', 'name'),
