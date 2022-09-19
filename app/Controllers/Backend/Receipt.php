@@ -540,6 +540,8 @@ class Receipt extends BaseController
                         $cost += $calculate;
                         $accumulation += $cost;
                         $bookValue -= $cost;
+                        $row['bookvalue'] = round($bookValue, 2, PHP_ROUND_HALF_UP);
+                        $row['costdepreciation'] = round($cost, 2, PHP_ROUND_HALF_UP);
                     }
 
                     //* Index greather than 1
@@ -561,7 +563,7 @@ class Receipt extends BaseController
                             $currentMonth = $fullMonth;
                         }
 
-                        $cost += round($calculate, 2, PHP_ROUND_HALF_UP);
+                        $cost += $calculate;
                         $accumulation += $cost;
                         $bookValue -= $cost;
                     }
