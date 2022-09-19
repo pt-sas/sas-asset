@@ -88,6 +88,7 @@
                                 <th class="text-center">Product</th>
                                 <th class="text-center">Qty</th>
                                 <th class="text-center">Unit Price</th>
+                                <th class="text-center">Price After Tax</th>
                                 <th>Spare</th>
                                 <th class="text-center">Employee</th>
                                 <th class="text-center">Branch</th>

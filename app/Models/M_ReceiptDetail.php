@@ -47,22 +47,23 @@ class M_ReceiptDetail extends Model
 				'md_product_id'     => $row[1]->product_id,
 				'qtyentered'        => $row[2]->qtyentered,
 				'unitprice'         => replaceFormat($row[3]->unitprice),
-				'isspare'		    => setCheckbox($row[4]->isspare),
-				'md_employee_id'    => $row[5]->employee_id,
-				'md_branch_id'     	=> $row[6]->branch_id,
-				'md_division_id'    => $row[7]->division_id,
-				'md_room_id'     	=> $row[8]->room_id,
-				'description'       => $row[9]->desc,
+				'priceaftertax'     => replaceFormat($row[4]->priceaftertax),
+				'isspare'		    => setCheckbox($row[5]->isspare),
+				'md_employee_id'    => $row[6]->employee_id,
+				'md_branch_id'     	=> $row[7]->branch_id,
+				'md_division_id'    => $row[8]->division_id,
+				'md_room_id'     	=> $row[9]->room_id,
+				'description'       => $row[10]->desc,
 				'trx_receipt_id'    => $post['trx_receipt_id']
 			];
 
-			if (!empty($row[10]->delete)) {
+			if (!empty($row[11]->delete)) {
 				$data['updated_at'] = date('Y-m-d H:i:s');
 				$data['updated_by'] = session()->get('sys_user_id');
 
-				$result = $this->builder->where($this->primaryKey, $row[10]->delete)->update($data);
+				$result = $this->builder->where($this->primaryKey, $row[11]->delete)->update($data);
 			} else {
-				$data['trx_quotation_detail_id'] = $row[10]->ref_id;
+				$data['trx_quotation_detail_id'] = $row[11]->ref_id;
 				$data['created_at'] = date('Y-m-d H:i:s');
 				$data['created_by'] = session()->get('sys_user_id');
 				$data['updated_at'] = date('Y-m-d H:i:s');
