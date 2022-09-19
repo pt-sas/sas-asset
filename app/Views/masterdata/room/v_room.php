@@ -12,6 +12,7 @@
                 <th>Room Code</th>
                 <th>Name</th>
                 <th>Branch</th>
+                <th>Room Agent</th>
                 <th>Active</th>
                 <th>Actions</th>
             </tr>

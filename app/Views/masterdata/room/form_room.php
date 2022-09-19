@@ -21,12 +21,6 @@
                     <label for="description">Description </label>
                     <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
                 </div>
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">
-                        <span class="form-check-sign">Active</span>
-                    </label>
-                </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
@@ -35,6 +29,20 @@
                         <option value="">Select Branch</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_branch_id"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="userrep_id">Room Agent </label>
+                    <select class="form-control select-data" id="userrep_id" name="userrep_id" data-url="user/getList">
+                        <option value="">Select Room Agent</option>
+                    </select>
+                </div>
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">
+                        <span class="form-check-sign">Active</span>
+                    </label>
                 </div>
             </div>
         </div>

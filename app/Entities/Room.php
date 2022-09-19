@@ -14,6 +14,7 @@ class Room extends Entity
 	protected $isactive;
 	protected $created_by;
 	protected $updated_by;
+	protected $userrep_id;
 
 	protected $dates   = [
 		'created_at',
@@ -109,5 +110,15 @@ class Room extends Entity
 	public function setUpdatedBy($updated_by)
 	{
 		$this->attributes['updated_by'] = $updated_by;
+	}
+
+	public function getUserRepId()
+	{
+		return $this->attributes['userrep_id'];
+	}
+
+	public function setUserRepId($userrep_id)
+	{
+		$this->attributes['userrep_id'] = $userrep_id;
 	}
 }

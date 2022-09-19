@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\M_Room;
 use App\Models\M_Branch;
 use App\Models\M_Employee;
+use App\Models\M_User;
 use Config\Services;
 
 class Room extends BaseController
@@ -48,6 +49,7 @@ class Room extends BaseController
                 $row[] = $value->value;
                 $row[] = $value->name;
                 $row[] = $value->branch;
+                $row[] = $value->userrep;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
@@ -87,9 +89,24 @@ class Room extends BaseController
 
     public function show($id)
     {
+        $branch = new M_Branch($this->request);
+        $user = new M_User($this->request);
+
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
+
+                if (!empty($list[0]->getBranchId())) {
+                    $rowBranch = $branch->find($list[0]->getBranchId());
+
+                    $list = $this->field->setDataSelect($branch->table, $list, $branch->primaryKey, $rowBranch->getBranchId(), $rowBranch->getName());
+                }
+
+                if (!empty($list[0]->getUserRepId())) {
+                    $rowUser = $user->find($list[0]->getUserRepId());
+
+                    $list = $this->field->setDataSelect($user->table, $list, 'userrep_id', $rowUser->getUserId(), $rowUser->getName());
+                }
 
                 $result = [
                     'header'   => $this->field->store($this->model->table, $list)
