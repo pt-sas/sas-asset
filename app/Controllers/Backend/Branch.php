@@ -18,15 +18,7 @@ class Branch extends BaseController
 
     public function index()
     {
-        $employee = new M_Employee($this->request);
-
-        $data = [
-            'leader'    => $employee->where('isactive', 'Y')
-                ->orderBy('name', 'ASC')
-                ->findAll()
-        ];
-
-        return $this->template->render('masterdata/branch/v_branch', $data);
+        return $this->template->render('masterdata/branch/v_branch');
     }
 
     public function showAll()
@@ -96,9 +88,17 @@ class Branch extends BaseController
 
     public function show($id)
     {
+        $employee = new M_Employee($this->request);
+
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
+
+                if (!empty($list[0]->getLeaderId())) {
+                    $rowEmp = $employee->find($list[0]->getLeaderId());
+
+                    $list = $this->field->setDataSelect($employee->table, $list, 'leader_id', $rowEmp->getEmployeeId(), $rowEmp->getName());
+                }
 
                 $result = [
                     'header'   => $this->field->store($this->model->table, $list)

@@ -15,6 +15,7 @@ class Branch extends Entity
 	protected $isactive;
 	protected $created_by;
 	protected $updated_by;
+	protected $leader_id;
 
 	protected $dates   = [
 		'created_at',
@@ -120,5 +121,15 @@ class Branch extends Entity
 	public function setUpdatedBy($updated_by)
 	{
 		$this->attributes['updated_by'] = $updated_by;
+	}
+
+	public function getLeaderId()
+	{
+		return $this->attributes['leader_id'];
+	}
+
+	public function setLeaderId($leader_id)
+	{
+		$this->attributes['leader_id'] = $leader_id;
 	}
 }
