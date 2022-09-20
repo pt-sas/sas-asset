@@ -3039,3 +3039,33 @@ $(document).on('click', 'input:checkbox', function () {
         }
     }
 });
+
+/**
+ * Function check exist role on the user based on session user
+ * 
+ * @param {*} role name
+ * @returns 
+ */
+function checkExistUserRole(role) {
+    let url = ADMIN_URL + 'role/' + 'getUserRoleName';
+    let value;
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            role_name: role
+        },
+        async: false,
+        cache: false,
+        dataType: 'JSON',
+        success: function (result) {
+            value = result;
+        },
+        error: function (jqXHR, exception) {
+            showError(jqXHR, exception);
+        }
+    });
+
+    return value;
+}
