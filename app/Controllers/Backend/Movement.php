@@ -283,6 +283,7 @@ class Movement extends BaseController
             //? Where clause employee to 
             $empWhere['md_employee_id <>'] = $rowEmp->getEmployeeId();
             $empWhere['md_division_id'] = $rowEmp->getDivisionId();
+            $empWhere['md_branch_id'] = $rowEmp->getBranchId();
         }
 
         //? Where Clause Inventory room bukan RUANG IT - BARANG RUSAK
@@ -302,16 +303,16 @@ class Movement extends BaseController
         $empWhere['isactive'] = 'Y';
 
         //* Data Employee To 
-        $dataEmployeeTo = $employee->where($empWhere)->findAll();
+        $dataEmployeeTo = $employee->where($empWhere)->orderBy('name', 'ASC')->findAll();
 
         //* Data Division
-        $dataDivision = $division->where('isactive', 'Y')->findAll();
+        $dataDivision = $division->where('isactive', 'Y')->orderBy('name', 'ASC')->findAll();
 
         //* Data Branch
-        $dataBranch = $branch->where('isactive', 'Y')->findAll();
+        $dataBranch = $branch->where('isactive', 'Y')->orderBy('name', 'ASC')->findAll();
 
         //* Data Room
-        $dataRoom = $room->where('isactive', 'Y')->findAll();
+        $dataRoom = $room->where('isactive', 'Y')->orderBy('name', 'ASC')->findAll();
 
         //* Data Status
         $dataStatus = $status->where([

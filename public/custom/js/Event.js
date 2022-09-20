@@ -426,13 +426,29 @@ _tableLine.on('change', 'select[name="status_id"]', function (evt) {
     let value = $(this).find('option:selected').text();
 
     if (value === 'RUSAK') {
-        tr.find('select[name="employee_to"]')
-            .val(100130).change()
-            .attr('disabled', true);
+        getOption('employee', 'employee_to', tr, 100130); // Selected Employee IT
+        tr.find('select[name="employee_to"]').attr('disabled', true);
+        // Column Branch
+        getOption('branch', 'branch_to', tr, 100001); // Selected Branch Sunter
+        // Column Division
+        getOption('division', 'division_to', tr, 100006); // Selected Division IT
+        // Column Room
+        getOption('room', 'room_to', tr, 100041); // Selected Room To BARANG RUSAK
+        tr.find('select[name="room_to"]').attr('disabled', true);
     } else {
-        tr.find('select[name="employee_to"]')
-            .val(null).change()
-            .removeAttr('disabled');
+        if (checkExistUserRole('W_View_All_Movement')) {
+            tr.find('select[name="employee_to"]')
+                .val(null).change()
+                .removeAttr('disabled');
+        } else {
+            getOption('employee', 'employee_to', tr, null, value);
+            tr.find('select[name="employee_to"]').removeAttr('disabled');
+        }
+
+        //* Set null value on the field dropdown change status 
+        tr.find('select[name="branch_to"]').val(null).change();
+        tr.find('select[name="division_to"]').val(null).change();
+        tr.find('select[name="room_to"]').val(null).change();
     }
 });
 
@@ -468,7 +484,6 @@ _tableLine.on('change', 'select[name="employee_to"]', function (evt) {
         // Column Room
         getOption('room', 'room_to', tr, null, employee_id);
         tr.find('select[name="room_to"]').removeAttr('disabled');
-        // tr.find('select[name="room_to"]').attr('disabled', true);
     }
 
     if (value === '') {
