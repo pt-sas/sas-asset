@@ -175,23 +175,44 @@ class Employee extends BaseController
                         ->orderBy('name', 'ASC')
                         ->findAll();
                 } else if (!empty($post['reference'])) {
-                    if ($post['reference'] == 100040 || $post['reference'] == 100040) {
-                        $list = $this->model->where([
-                            'isactive'          => 'Y',
-                            'md_employee_id'    => 100130
-                        ])->orderBy('name', 'ASC')->findAll();
-                    } else {
-                        $list = $this->model->where([
-                            'isactive'      => 'Y',
-                            'md_room_id'  => $post['reference']
-                        ])->orderBy('name', 'ASC')->findAll();
-
-                        // Employee not exist in the room
-                        if (count($list) == 0 && !empty($post['branch'])) {
+                    if (preg_match('~[0-9]+~', $post['reference'])) {
+                        if ($post['reference'] == 100040 || $post['reference'] == 100041) {
+                            $list = $this->model->where([
+                                'isactive'          => 'Y',
+                                'md_employee_id'    => 100130
+                            ])->orderBy('name', 'ASC')->findAll();
+                        } else {
                             $list = $this->model->where([
                                 'isactive'      => 'Y',
-                                'md_branch_id'  => $post['branch']
+                                'md_room_id'  => $post['reference']
                             ])->orderBy('name', 'ASC')->findAll();
+
+                            // Employee not exist in the room
+                            if (count($list) == 0 && !empty($post['branch'])) {
+                                $list = $this->model->where([
+                                    'isactive'      => 'Y',
+                                    'md_branch_id'  => $post['branch']
+                                ])->orderBy('name', 'ASC')->findAll();
+                            }
+                        }
+                    } else {
+                        //? Reference by value is BAGUS get data Employee based on the Employee 
+                        if ($post['reference'] === 'BAGUS') {
+                            //TODO:  Check Data Employee based on sys_user_id
+                            $rowEmp = $this->model->where('sys_user_id', $this->access->getSessionUser())->first();
+
+                            //? Exists data employee
+                            if ($rowEmp) {
+                                //? Where clause employee to 
+                                $empWhere['md_employee_id <>'] = $rowEmp->getEmployeeId();
+                                $empWhere['md_division_id'] = $rowEmp->getDivisionId();
+                                $empWhere['md_branch_id'] = $rowEmp->getBranchId();
+                            }
+
+                            $list = $this->model->where('isactive', 'Y')
+                                ->where($empWhere)
+                                ->orderBy('name', 'ASC')
+                                ->findAll();
                         }
                     }
                 } else {
