@@ -7,6 +7,7 @@ use App\Models\M_Role;
 use App\Models\M_Menu;
 use App\Models\M_Submenu;
 use App\Models\M_AccessMenu;
+use App\Models\M_User;
 use Config\Services;
 
 class Role extends BaseController
@@ -129,6 +130,32 @@ class Role extends BaseController
 			try {
 				$result = $this->model->delete($id);
 				$response = message('success', true, $result);
+			} catch (\Exception $e) {
+				$response = message('error', false, $e->getMessage());
+			}
+
+			return $this->response->setJSON($response);
+		}
+	}
+
+	public function getUserRoleName()
+	{
+		$user = new M_User($this->request);
+
+		if ($this->request->isAJAX()) {
+			$post = $this->request->getVar();
+
+			$response = true;
+
+			try {
+				$role = $user->detail([
+					'sr.isactive'           => $this->access->active(),
+					'sys_user.sys_user_id'  => $this->access->getSessionUser(),
+					'sr.name'               => $post['role_name']
+				])->getRow();
+
+				if (!$role)
+					$response = false;
 			} catch (\Exception $e) {
 				$response = message('error', false, $e->getMessage());
 			}
