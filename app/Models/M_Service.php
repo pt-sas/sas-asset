@@ -24,9 +24,9 @@ class M_Service extends Model
     protected $returnType       = 'App\Entities\Service';
     protected $allowCallbacks   = true;
     protected $beforeInsert     = [];
-    protected $afterInsert      = ['createDetail'];
+    protected $afterInsert      = [];
     protected $beforeUpdate     = [];
-    protected $afterUpdate      = ['createDetail'];
+    protected $afterUpdate      = [];
     protected $beforeDelete     = [];
     protected $afterDelete      = ['deleteDetail'];
     protected $column_order = [
@@ -113,21 +113,9 @@ class M_Service extends Model
         return $prefix;
     }
 
-    public function createDetail(array $rows)
-    {
-        $serviceDetail = new M_ServiceDetail();
-
-        $post = $this->request->getVar();
-
-        if (isset($post['table'])) {
-            $post['trx_service_id'] = $rows['id'];
-            $serviceDetail->create($post);
-        }
-    }
-
     public function deleteDetail(array $rows)
     {
-        $serviceDetail = new M_ServiceDetail();
+        $serviceDetail = new M_ServiceDetail($this->request);
         $serviceDetail->where($this->primaryKey, $rows['id'])->delete();
     }
 }

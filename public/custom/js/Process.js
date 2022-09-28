@@ -232,7 +232,8 @@ function reloadTable() {
 }
 
 /**
- * Save
+ * Button Save Form Data
+ * 
  */
 $('.save_form').click(function (evt) {
     const parent = $(evt.target).closest('.row');
@@ -240,46 +241,50 @@ $('.save_form').click(function (evt) {
     const form = cardForm.find('form');
     const container = $(evt.target).closest('.container');
 
+    let field;
+
     let _this = $(this);
     let oriElement = _this.html();
-
-    let url;
-    let action = 'create';
     let oriTitle = container.find('.page-title').text();
 
+    let action = 'create';
     let checkAccess = isAccess(action, LAST_URL);
 
-    if (checkAccess[0].success && checkAccess[0].message == 'Y') {
-        const field = form.find('input, select, textarea');
+    let formData = new FormData();
+    let url = SITE_URL + CREATE;
 
-        // remove attribute disabled when field disabled
+    if (checkAccess[0].success && checkAccess[0].message == 'Y') {
+        //* Populate field form header
+        $.each(form, function () {
+            const formHeader = $(this).find('.row')[0];
+            field = $(formHeader).find('input, select, textarea').not('.line');
+        });
+
+        //? Remove attribute disabled when submit data
         for (let i = 0; i < field.length; i++) {
             if (field[i].name !== '') {
-                form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']:not(.line)').removeAttr('disabled');
+                form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').not('.line').removeAttr('disabled');
             }
         }
 
-        let formData = new FormData(form[0]);
-
-        url = SITE_URL + CREATE;
-
-        if (setSave === 'update')
-            formData.append('id', ID);
-
+        //* Form Header
         for (let i = 0; i < field.length; i++) {
             if (field[i].name !== '') {
                 let className = field[i].className.split(/\s+/);
 
-                // input type radio button to set into the formData
+                //* Set field and value to formData 
+                formData.append(field[i].name, field[i].value);
+
+                //* Field type input radio
                 if (field[i].type == 'radio') {
                     if (field[i].checked) {
                         formData.append(field[i].name, field[i].value);
                     }
                 }
 
-                // input type file whom contain class control-upload-image to set into the formData
-                if (field[i].type == 'file' && field[i].className.includes('control-upload-image')) {
-                    // Check condition upload add new image or not upload
+                //* Field type input file and containing class control-upload-image
+                if (field[i].type == 'file' && className.includes('control-upload-image')) {
+                    //? Check condition upload add new image or not upload
                     if (field[i].files.length > 0) {
                         formData.append(field[i].name, field[i].files[0]);
                     } else {
@@ -296,19 +301,19 @@ $('.save_form').click(function (evt) {
                     }
                 }
 
-                // Check textarea summernote isEmpty to set value null
+                //* Field type textarea class summernote isEmpty to set value null
                 if ((form.find('textarea.summernote[name=' + field[i].name + ']').length > 0 ||
                         form.find('textarea.summernote-product[name=' + field[i].name + ']').length > 0) &&
                     $('[name =' + field[i].name + ']').summernote('isEmpty')) {
                     formData.append(field[i].name, '');
                 }
 
-                // Multiple select populate array data
+                //* Field type Multiple select
                 if (field[i].type === 'select-multiple') {
                     formData.append(field[i].name, $('[name = ' + field[i].name + ']').val())
                 }
 
-                // input type radio button to set into the formData
+                //* Field type input checkbox
                 if (field[i].type == 'checkbox') {
                     if (field[i].checked) {
                         formData.append(field[i].name, 'Y');
@@ -317,6 +322,7 @@ $('.save_form').click(function (evt) {
                     }
                 }
 
+                //* Field containing class datepicker 
                 if (className.includes('datepicker')) {
                     let date = field[i].value;
                     let time = "00:00:00";
@@ -324,10 +330,15 @@ $('.save_form').click(function (evt) {
                     let timeAndDate = moment(date + ' ' + time);
                     formData.append(field[i].name, timeAndDate._i);
                 }
+
+                //* Field containing class rupiah
+                if (className.includes('rupiah')) {
+                    formData.append(field[i].name, replaceRupiah(field[i].value))
+                }
             }
         }
 
-        // Table role
+        //? Check in form exists Table role
         if (form.find('table.tb_tree').length > 0) {
             const table = form.find('table.tb_tree');
             const input = table.find('td input:checkbox');
@@ -398,6 +409,7 @@ $('.save_form').click(function (evt) {
             formData.append('roles', JSON.stringify(arrRole));
         }
 
+        //? Check in form exists Table Line
         if (form.find('table.tb_displayline').length > 0) {
             const rows = _tableLine.rows().nodes().to$();
 
@@ -405,46 +417,44 @@ $('.save_form').click(function (evt) {
             $.each(rows, function (i) {
                 let tag = $(this).find('input, select, button');
 
-                let data = [];
-                $.each(tag, function (index, element) {
-                    let row = [];
-                    let name = $(element).attr('name');
-                    let value = $(element).val();
-                    let id = $(element).attr('id');
+                let row = {};
+                $.each(tag, function () {
+                    let className = this.className.split(/\s+/);
+                    let name = $(this).attr('name');
+                    let value = this.value;
+                    let id = $(this).attr('id');
 
-                    // Check tag element name is delete
-                    if (name !== 'delete') {
-                        if ($(element).attr('type') !== 'checkbox') {
-                            row = {
-                                [name]: value
-                            };
+                    //* Field containing class rupiah
+                    if (className.includes('rupiah'))
+                        value = replaceRupiah(this.value);
+
+                    if ($(this).attr('type') !== 'button') {
+                        if ($(this).attr('type') !== 'checkbox') {
+                            row[name] = value;
                         } else {
-                            row = {
-                                [name]: $(element).is(':checked')
-                            };
+                            row[name] = $(this).is(':checked') ? 'Y' : 'N';
                         }
 
                     } else {
                         if (id !== '')
-                            row = {
-                                [name]: id
-                            };
+                            row[name] = id;
                         else
-                            // Get id for ref_id
-                            row = {
-                                [name]: "",
-                                ['ref_id']: value
-                            };
-                    }
+                            row[name] = '';
 
-                    data.push(row);
+                        if (className.includes('reference-key'))
+                            row[name] = value; // Get value reference key
+                    }
                 });
 
-                output[i] = data;
+                output[i] = row;
             });
 
             formData.append('table', JSON.stringify(output));
         }
+
+        //* Set primary key on the property "id" 
+        if (setSave === 'update')
+            formData.append('id', ID);
 
         $.ajax({
             url: url,
@@ -652,8 +662,6 @@ _table.on('click', '.edit', function (evt) {
                     }
                 });
 
-                const field = form.find('input, textarea, select');
-
                 let url = SITE_URL + SHOW + ID;
 
                 setSave = ((typeof status === 'undefined' || status === '') || status === 'DR') ? 'update' : 'detail';
@@ -771,6 +779,8 @@ _table.on('click', '.edit', function (evt) {
                             if (arrMsg.header) {
                                 let header = arrMsg.header;
 
+                                const field = form.find('input, textarea, select').not('.line');
+
                                 if (form.find('select.select-data').length > 0) {
                                     let select = form.find('select.select-data');
                                     initSelectData(select, header[1].field, header[1].label);
@@ -794,18 +804,18 @@ _table.on('click', '.edit', function (evt) {
                                             let className = field[i].className.split(/\s+/);
 
                                             if (className.includes('datepicker')) {
-                                                form.find('input:text[name=' + fieldName + ']').val(moment(label).format('Y-MM-DD'));
+                                                form.find('input:text[name=' + fieldName + ']').not('.line').val(moment(label).format('Y-MM-DD'));
                                             } else if (className.includes('rupiah')) {
-                                                form.find('input:text[name=' + fieldName + ']').val(formatRupiah(label));
+                                                form.find('input:text[name=' + fieldName + ']').not('.line').val(formatRupiah(label));
                                             } else {
-                                                form.find('input:text[name=' + fieldName + ']').val(label);
+                                                form.find('input:text[name=' + fieldName + ']').not('.line').val(label);
                                             }
 
-                                            form.find('textarea[name=' + fieldName + '], input:password[name=' + fieldName + ']').val(label);
+                                            form.find('textarea[name=' + fieldName + '], input:password[name=' + fieldName + ']').not('.line').val(label);
 
                                             if (form.find('textarea.summernote[name=' + fieldName + ']').length > 0 ||
                                                 form.find('textarea.summernote-product[name=' + fieldName + ']').length > 0) {
-                                                $('[name =' + fieldName + ']').summernote('code', label);
+                                                $('[name =' + fieldName + ']').not('.line').summernote('code', label);
                                             }
 
                                             if (field[i].type === 'select-one') {
@@ -820,14 +830,14 @@ _table.on('click', '.edit', function (evt) {
                                                     });
 
                                                     let newOption = $("<option selected='selected'></option>").val(option_ID).text(option_Txt);
-                                                    form.find('select[name=' + fieldName + ']').append(newOption).change();
+                                                    form.find('select[name=' + fieldName + ']').not('.line').append(newOption).change();
                                                 } else if (typeof label === 'string' && (label !== null || label != 0)) {
                                                     option.push({
                                                         fieldName,
                                                         label
                                                     });
 
-                                                    form.find('select[name=' + fieldName + ']').val(label).change();
+                                                    form.find('select[name=' + fieldName + ']').not('.line').val(label).change();
                                                 }
                                             }
 
@@ -837,10 +847,10 @@ _table.on('click', '.edit', function (evt) {
 
                                                 // Condition data length more than 1
                                                 if (arrLabel.length > 1) {
-                                                    form.find('select[name=' + fieldName + ']').val(arrLabel).change();
+                                                    form.find('select[name=' + fieldName + ']').not('.line').val(arrLabel).change();
                                                 } else {
                                                     arrMultiSelect.push(label);
-                                                    form.find('select[name=' + fieldName + ']').val(arrMultiSelect).change();
+                                                    form.find('select[name=' + fieldName + ']').not('.line').val(arrMultiSelect).change();
                                                 }
                                             }
 
@@ -850,7 +860,7 @@ _table.on('click', '.edit', function (evt) {
 
                                             // Set condition value checked for field type Checkbox based on database
                                             if (field[i].type === 'checkbox' && label === 'Y') {
-                                                form.find('input:checkbox[name=' + fieldName + ']').prop('checked', true);
+                                                form.find('input:checkbox[name=' + fieldName + ']').not('.line').prop('checked', true);
 
                                                 if (className.includes('active'))
                                                     readonly(form, false);
@@ -859,7 +869,7 @@ _table.on('click', '.edit', function (evt) {
                                                 if (field[i].disabled)
                                                     fieldReadOnly.push(fieldName);
                                             } else {
-                                                form.find('input:checkbox[name=' + fieldName + ']').removeAttr('checked');
+                                                form.find('input:checkbox[name=' + fieldName + ']').not('.line').removeAttr('checked');
 
                                                 if (className.includes('active'))
                                                     readonly(form, true);
@@ -873,6 +883,7 @@ _table.on('click', '.edit', function (evt) {
 
                                                 if ($(field[i]).attr('edit-disabled')) {
                                                     form.find('input:checkbox[name=' + fieldName + '], select[name=' + fieldName + '], input:radio[name=' + fieldName + ']')
+                                                        .not('.line')
                                                         .prop('disabled', true);
                                                 }
                                             }
@@ -899,12 +910,12 @@ _table.on('click', '.edit', function (evt) {
                                             if (field[i].type === 'checkbox') {
                                                 if (field[i].checked) {
                                                     for (let i = 0; i < fields.length; i++) {
-                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').not('.line').closest('.form-group, .form-check');
                                                         formGroup.hide();
                                                     }
                                                 } else {
                                                     for (let i = 0; i < fields.length; i++) {
-                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').not('.line').closest('.form-group, .form-check');
                                                         formGroup.show();
                                                     }
                                                 }
@@ -913,7 +924,7 @@ _table.on('click', '.edit', function (evt) {
                                             //TODO: Dropdown select
                                             if (field[i].type === 'select-one') {
                                                 for (let i = 0; i < fields.length; i++) {
-                                                    const select = form.find('select[name=' + fields[i] + ']');
+                                                    const select = form.find('select[name=' + fields[i] + ']').not('.line');
                                                     let formGroup = [];
 
                                                     if ($(select).val() === null) {
@@ -935,12 +946,12 @@ _table.on('click', '.edit', function (evt) {
                                             if (field[i].type === 'checkbox') {
                                                 if (field[i].checked) {
                                                     for (let i = 0; i < fields.length; i++) {
-                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').not('.line').closest('.form-group, .form-check');
                                                         formGroup.show();
                                                     }
                                                 } else if (field[i].type === 'checkbox') {
                                                     for (let i = 0; i < fields.length; i++) {
-                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').not('.line').closest('.form-group, .form-check');
                                                         formGroup.hide();
                                                     }
                                                 }
@@ -2247,7 +2258,7 @@ function clearForm(evt) {
  * @param {*} value based on passing data (true/false)
  */
 function readonly(parent, value) {
-    const field = parent.find('input, textarea, select');
+    const field = parent.find('input, textarea, select').not('.line');
 
     for (let i = 0; i < field.length; i++) {
         if (field[i].name !== '') {

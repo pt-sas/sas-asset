@@ -12,13 +12,11 @@ use Config\Services;
 
 class Internal extends BaseController
 {
-    private $model_detail;
-
     public function __construct()
     {
         $this->request = Services::request();
         $this->model = new M_Quotation($this->request);
-        $this->model_detail = new M_QuotationDetail($this->request);
+        $this->modelDetail = new M_QuotationDetail($this->request);
         $this->entity = new \App\Entities\Quotation();
     }
 
@@ -101,16 +99,17 @@ class Internal extends BaseController
 
             $table = json_decode($post['table']);
 
-            // Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
+            //! Mandatory property for detail validation
+            $post['line'] = countLine($table);
             $post['detail'] = [
-                'table' => arrTableLine($this->mandatoryLogic($table))
+                'table' => arrTableLine($table)
             ];
 
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
                 $this->entity->setIsInternalUse('Y');
+                $this->entity->setGrandTotal(arrSumField('lineamt', $table));
 
                 if (!$this->validation->run($post, 'internal')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
@@ -132,7 +131,7 @@ class Internal extends BaseController
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
-                $detail = $this->model_detail->where($this->model->primaryKey, $id)->findAll();
+                $detail = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
 
                 $rowEmployee = $employee->find($list[0]->getEmployeeId());
 
@@ -178,7 +177,7 @@ class Internal extends BaseController
 
             try {
                 if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
-                    $line = $this->model_detail->where($this->model->primaryKey, $_ID)->first();
+                    $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->first();
 
                     if ($line || (!$line && $_DocAction !== $this->DOCSTATUS_Completed)) {
                         $this->entity->setDocStatus($_DocAction);
@@ -204,7 +203,7 @@ class Internal extends BaseController
     {
         if ($this->request->isAJAX()) {
             try {
-                $row = $this->model->getDetail($this->model_detail->primaryKey, $id)->getRow();
+                $row = $this->model->getDetail($this->modelDetail->primaryKey, $id)->getRow();
 
                 $grandTotal = ($row->grandtotal - $row->lineamt);
 
@@ -215,7 +214,7 @@ class Internal extends BaseController
                 $this->model->save($this->entity);
 
                 //* Delete row quotation detail
-                $delete = $this->model_detail->delete($id);
+                $delete = $this->modelDetail->delete($id);
 
                 $result = $delete ? $grandTotal : false;
 
@@ -247,15 +246,15 @@ class Internal extends BaseController
             foreach ($arrData as $row) :
                 $valPro = $product->find($row[0]->product_id);
                 $table[] = [
-                    $this->field->fieldTable('input', 'text', 'product_id', 'text-uppercase', 'required', 'readonly', null, null, $valPro->getName(), 300),
+                    $this->field->fieldTable('input', 'text', 'md_product_id', 'text-uppercase', 'required', 'readonly', null, null, $valPro->getName(), 300),
                     $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, $row[1]->qtyentered, 70),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', 'readonly', null, null, 0, 125),
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, 0, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, $row[3]->isspare ? 'checked' : null),
-                    $this->field->fieldTable('select', null, 'employee_id', null, 'required', $row[3]->isspare ?? 'readonly', null, $dataEmployee, !empty($row[4]->employee_id) ? $row[4]->employee_id : null, 200, 'md_employee_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'spek', null, null, null, null, null, $row[5]->spek, 250),
-                    $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row[6]->desc, 250),
-                    $this->field->fieldTable('button', 'button', 'delete')
+                    $this->field->fieldTable('select', null, 'md_employee_id', null, 'required', $row[3]->isspare ?? 'readonly', null, $dataEmployee, !empty($row[4]->employee_id) ? $row[4]->employee_id : null, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('input', 'text', 'specification', null, null, null, null, null, $row[5]->spek, 250),
+                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row[6]->desc, 250),
+                    $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id')
                 ];
             endforeach;
         }
@@ -266,15 +265,15 @@ class Internal extends BaseController
                 $valPro = $product->find($row->md_product_id);
 
                 $table[] = [
-                    $this->field->fieldTable('input', 'text', 'product_id', 'text-uppercase', 'required', 'readonly', null, null, $valPro->getName(), 300),
+                    $this->field->fieldTable('input', 'text', 'md_product_id', 'text-uppercase', 'required', 'readonly', null, null, $valPro->getName(), 300),
                     $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, $row->qtyentered, 70),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', 'readonly', null, null, $row->unitprice, 125),
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row->lineamt, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
-                    $this->field->fieldTable('select', 'text', 'employee_id', null, 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'spek', null, null, null, null, null, $row->specification, 250),
-                    $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row->description, 250),
-                    $this->field->fieldTable('button', 'button', 'delete', null, null, null, null, null, $row->trx_quotation_detail_id)
+                    $this->field->fieldTable('select', 'text', 'md_employee_id', null, 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('input', 'text', 'specification', null, null, null, null, null, $row->specification, 250),
+                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
+                    $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id', null, null, null, null, null, $row->trx_quotation_detail_id)
                 ];
             endforeach;
         }
@@ -294,22 +293,6 @@ class Internal extends BaseController
 
             return $this->response->setJSON($response);
         }
-    }
-
-    public function mandatoryLogic($table)
-    {
-        $result = [];
-
-        foreach ($table as $row) :
-
-            // Condition to check isspare
-            if ($row[4]->isspare)
-                $row[5]->employee_id = 0;
-
-            $result[] = $row;
-        endforeach;
-
-        return $result;
     }
 
     public function defaultLogic()

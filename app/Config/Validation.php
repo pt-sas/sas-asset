@@ -456,14 +456,14 @@ class Validation
                 'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.product_id'  => [
+        'detail.table.*.md_product_id'  => [
             'label'             => 'Product',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.status_id'  => [
+        'detail.table.*.md_status_id'  => [
             'label'             => 'Status',
             'rules'             => 'required',
             'errors'            => [
@@ -509,7 +509,7 @@ class Validation
                 'required'      => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.product_id'  => [
+        'detail.table.*.md_product_id'  => [
             'label'             => 'Product',
             'rules'             => 'required',
             'errors'            => [
@@ -538,7 +538,7 @@ class Validation
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.employee_id'  => [
+        'detail.table.*.md_employee_id'  => [
             'label'             => 'Employee',
             'rules'             => 'required',
             'errors'            => [
@@ -613,44 +613,36 @@ class Validation
                 'required' => 'Please Insert the {field} first.'
             ]
         ],
-        // 'detail.table.*.assetcode'  => [
-        //     'label'                 => 'Asset Code',
-        //     'rules'                 => 'required|is_exists|is_unique[trx_inventory.assetcode]',
-        //     'errors'                => [
-        //         'required' => 'Please Insert the {field} Line',
-        //         'is_exists' => 'The {field} duplicate value',
-        //         'is_unique' => '{value}|The {field} ({value}) already exists'
-        //     ]
-        // ],
         'detail.table.*.unitprice' => [
             'label'                 => 'Unitprice',
-            'rules'                 => 'required',
+            'rules'                 => 'required|is_natural_no_zero',
             'errors'                => [
-                'required' => 'Please Insert the {field} Line'
+                'required' => 'Please Insert the {field} Line',
+                'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
             ]
         ],
-        'detail.table.*.employee_id' => [
+        'detail.table.*.md_employee_id' => [
             'label'                 => 'Employee',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.branch_id'  => [
+        'detail.table.*.md_branch_id'  => [
             'label'                 => 'Branch',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.division_id' => [
+        'detail.table.*.md_division_id' => [
             'label'                 => 'Division',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.room_id'  => [
+        'detail.table.*.md_room_id'  => [
             'label'                 => 'Room',
             'rules'                 => 'required',
             'errors'                => [
@@ -683,7 +675,7 @@ class Validation
                 'is_exists' => 'The {field} duplicate value'
             ]
         ],
-        'detail.table.*.status_id' => [
+        'detail.table.*.md_status_id' => [
             'label'                 => 'Status',
             'rules'                 => 'required',
             'errors'                => [
@@ -882,7 +874,7 @@ class Validation
                 'required'      => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.product_id'  => [
+        'detail.table.*.md_product_id'  => [
             'label'             => 'Product',
             'rules'             => 'required',
             'errors'            => [
@@ -911,7 +903,7 @@ class Validation
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.employee_id'  => [
+        'detail.table.*.md_employee_id'  => [
             'label'             => 'Employee',
             'rules'             => 'required',
             'errors'            => [

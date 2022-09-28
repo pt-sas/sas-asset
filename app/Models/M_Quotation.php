@@ -26,9 +26,9 @@ class M_Quotation extends Model
 	protected $returnType 			= 'App\Entities\Quotation';
 	protected $allowCallbacks		= true;
 	protected $beforeInsert			= [];
-	protected $afterInsert			= ['createDetail'];
+	protected $afterInsert			= [];
 	protected $beforeUpdate			= [];
-	protected $afterUpdate			= ['createDetail'];
+	protected $afterUpdate			= [];
 	protected $beforeDelete			= [];
 	protected $afterDelete			= ['deleteDetail'];
 	protected $column_order = [
@@ -171,18 +171,6 @@ class M_Quotation extends Model
 
 		$sql .= "ORDER BY q.created_at DESC";
 		return $this->db->query($sql, $where);
-	}
-
-	public function createDetail(array $rows)
-	{
-		$quotationDetail = new M_QuotationDetail($this->request);
-
-		$post = $this->request->getVar();
-
-		if (isset($post['table'])) {
-			$post['trx_quotation_id'] = $rows['id'];
-			$quotationDetail->create($post);
-		}
 	}
 
 	public function deleteDetail(array $rows)

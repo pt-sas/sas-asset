@@ -14,13 +14,11 @@ use Config\Services;
 
 class Service extends BaseController
 {
-    private $model_detail;
-
     public function __construct()
     {
         $this->request = Services::request();
         $this->model = new M_Service($this->request);
-        $this->model_detail = new M_ServiceDetail();
+        $this->modelDetail = new M_ServiceDetail($this->request);
         $this->entity = new \App\Entities\Service();
     }
 
@@ -85,8 +83,8 @@ class Service extends BaseController
 
             $table = json_decode($post['table']);
 
-            // Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
+            //! Mandatory property for detail validation
+            $post['line'] = countLine($table);
             $post['detail'] = [
                 'table' => arrTableLine($table)
             ];
@@ -94,6 +92,7 @@ class Service extends BaseController
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+                $this->entity->setGrandTotal(arrSumField('unitprice', $table));
 
                 if (!$this->validation->run($post, 'service')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
@@ -115,7 +114,7 @@ class Service extends BaseController
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
-                $detail = $this->model_detail->where($this->model->primaryKey, $id)->findAll();
+                $detail = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
 
                 $rowSupplier = $supplier->find($list[0]->getSupplierId());
 
@@ -153,7 +152,7 @@ class Service extends BaseController
     {
         if ($this->request->isAJAX()) {
             try {
-                $row = $this->model->getDetail($this->model_detail->primaryKey, $id)->getRow();
+                $row = $this->model->getDetail($this->modelDetail->primaryKey, $id)->getRow();
 
                 $grandTotal = ($row->grandtotal - $row->unitprice);
 
@@ -164,7 +163,7 @@ class Service extends BaseController
                 $this->model->save($this->entity);
 
                 //* Delete row quotation detail
-                $delete = $this->model_detail->delete($id);
+                $delete = $this->modelDetail->delete($id);
 
                 $result = $delete ? $grandTotal : false;
 
@@ -189,7 +188,7 @@ class Service extends BaseController
 
             try {
                 if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
-                    $line = $this->model_detail->where($this->model->primaryKey, $_ID)->first();
+                    $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->first();
 
                     if ($line || (!$line && $_DocAction !== $this->DOCSTATUS_Completed)) {
                         $this->entity->setDocStatus($_DocAction);
@@ -235,11 +234,11 @@ class Service extends BaseController
         if (empty($set)) {
             $table = [
                 $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, null, 170, 'assetcode', 'assetcode'),
-                $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
+                $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
                 $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, null, 125),
-                $this->field->fieldTable('select', null, 'status_id', null, 'required', null, null, $dataStatus, 'On Service', 150, 'md_status_id', 'name'),
-                $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, null, 250),
-                $this->field->fieldTable('button', 'button', 'delete')
+                $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, 'On Service', 150, 'md_status_id', 'name'),
+                $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250),
+                $this->field->fieldTable('button', 'button', 'trx_service_detail_id')
             ];
         }
 
@@ -248,11 +247,11 @@ class Service extends BaseController
             foreach ($detail as $row) :
                 $table[] = [
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
-                    $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', null, null, null, null, $row->unitprice, 125),
-                    $this->field->fieldTable('select', null, 'status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row->description, 250),
-                    $this->field->fieldTable('button', 'button', 'delete', null, null, null, null, null, $row->trx_service_detail_id)
+                    $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
+                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
+                    $this->field->fieldTable('button', 'button', 'trx_service_detail_id', null, null, null, null, null, $row->trx_service_detail_id)
                 ];
             endforeach;
         }

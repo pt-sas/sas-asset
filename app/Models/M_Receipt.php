@@ -35,7 +35,7 @@ class M_Receipt extends Model
 	protected $returnType 			= 'App\Entities\Receipt';
 	protected $allowCallbacks		= true;
 	protected $beforeInsert			= [];
-	protected $afterInsert			= ['createDetail'];
+	protected $afterInsert			= [];
 	protected $beforeUpdate			= ['createCodeAsset'];
 	protected $afterUpdate			= ['createDetail'];
 	protected $beforeDelete			= ['beforeDelete'];
@@ -170,26 +170,36 @@ class M_Receipt extends Model
 
 	public function createDetail($rows)
 	{
-		$receiptDetail = new M_ReceiptDetail();
+		$receiptDetail = new M_ReceiptDetail($this->request);
 		$quotationDetail = new M_QuotationDetail($this->request);
 		$inventory = new M_Inventory($this->request);
 		$transaction = new M_Transaction();
+		$changelog = new M_ChangeLog($this->request);
 
 		$post = $this->request->getVar();
-
-		if (isset($post['table'])) {
-			$post['trx_receipt_id'] = $rows['id'];
-			$receiptDetail->create($post);
-		}
 
 		if (isset($post['docaction'])) {
 			$row = $this->find($post['id']);
 			$line = $receiptDetail->where($this->primaryKey, $post['id'])->findAll();
 
-			// //? Exists data line and docstatus Completed
+			//? Exists data line and docstatus Completed
 			if (count($line) > 0 && $post['docaction'] === $this->DOCSTATUS_Completed) {
-				//* Update qtyreceipt table trx_quotation_detail
 				$arrQuoDetail = $receiptDetail->getSumQtyGroup($post['id'])->getResult();
+
+				//TODO: Insert Change Log 
+				foreach ($arrQuoDetail as $value) :
+					$primaryID = $value->trx_quotation_detail_id;
+					$old = $quotationDetail->find($primaryID);
+
+					$data = (array) $value;
+
+					foreach (array_keys($data) as $key) :
+						if ($key !== $quotationDetail->primaryKey)
+							$changelog->insertLog($quotationDetail->table, $key, $primaryID, $old->{$key}, $value->$key, 'U');
+					endforeach;
+				endforeach;
+
+				//* Update qtyreceipt table trx_quotation_detail
 				$quotationDetail->updateQty($arrQuoDetail, 'qtyreceipt');
 
 				//* Passing data to table inventory
@@ -215,7 +225,7 @@ class M_Receipt extends Model
 
 	public function beforeDelete(array $rows)
 	{
-		$receiptDetail = new M_ReceiptDetail();
+		$receiptDetail = new M_ReceiptDetail($this->request);
 		$inventory = new M_Inventory($this->request);
 		$quotationDetail = new M_QuotationDetail($this->request);
 
@@ -247,14 +257,15 @@ class M_Receipt extends Model
 
 	public function deleteDetail(array $rows)
 	{
-		$receiptDetail = new M_ReceiptDetail();
+		$receiptDetail = new M_ReceiptDetail($this->request);
 		$receiptDetail->where($this->primaryKey, $rows['id'])->delete();
 	}
 
 	public function createCodeAsset($rows)
 	{
 		$sequence = new M_Sequence($this->request);
-		$receiptDetail = new M_ReceiptDetail();
+		$receiptDetail = new M_ReceiptDetail($this->request);
+		$changelog = new M_ChangeLog($this->request);
 
 		$post = $this->request->getVar();
 
@@ -263,8 +274,23 @@ class M_Receipt extends Model
 			$line = $receiptDetail->where($this->primaryKey, $post['id'])->findAll();
 
 			if (count($line) > 0) {
-				$result = $sequence->getDocumentNoFromSeq($header, $line);
-				$receiptDetail->edit($result);
+				$data = $sequence->getDocumentNoFromSeq($header, $line);
+
+				//TODO: Insert Change Log 
+				foreach ($data as $value) :
+					$primaryID = $value['line_id'];
+					$old = $receiptDetail->find($primaryID);
+
+					$data = (array) $value;
+
+					foreach (array_keys($data) as $key) :
+						if ($key !== 'line_id')
+							$changelog->insertLog($receiptDetail->table, 'assetcode', $primaryID, $old->{$key}, $value[$key], 'U');
+					endforeach;
+				endforeach;
+
+				//TODO: Update Field Assetcode Receipt Detail 
+				$receiptDetail->edit($data);
 			}
 		}
 

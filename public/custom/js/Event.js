@@ -5,40 +5,40 @@ _tableLine.on('change', 'input[name="isspare"]', function (evt) {
     const tr = _tableLine.$(this).closest('tr');
 
     if ($(this).is(':checked')) {
-        tr.find('select[name="employee_id"]')
+        tr.find('select[name="md_employee_id"]')
             .val(100130).change()
             .attr('disabled', true);
 
-        if (tr.find('select[name="branch_id"]').length > 0) {
-            tr.find('select[name="branch_id"]')
+        if (tr.find('select[name="md_branch_id"]').length > 0) {
+            tr.find('select[name="md_branch_id"]')
                 .val(100001).change()
                 .attr('disabled', true);
         }
 
-        if (tr.find('select[name="division_id"]').length > 0) {
-            tr.find('select[name="division_id"]')
+        if (tr.find('select[name="md_division_id"]').length > 0) {
+            tr.find('select[name="md_division_id"]')
                 .val(100006).change()
                 .attr('disabled', true);
         }
     } else {
-        tr.find('select[name="employee_id"]')
+        tr.find('select[name="md_employee_id"]')
             .val(null).change()
             .removeAttr('disabled');
 
-        if (tr.find('select[name="branch_id"]').length > 0) {
-            tr.find('select[name="branch_id"]')
+        if (tr.find('select[name="md_branch_id"]').length > 0) {
+            tr.find('select[name="md_branch_id"]')
                 .val(null).change()
                 .removeAttr('disabled');
         }
 
-        if (tr.find('select[name="division_id"]').length > 0) {
-            tr.find('select[name="division_id"]')
+        if (tr.find('select[name="md_division_id"]').length > 0) {
+            tr.find('select[name="md_division_id"]')
                 .val(null).change()
                 .removeAttr('disabled');
         }
 
-        if (tr.find('select[name="room_id"]').length > 0) {
-            tr.find('select[name="room_id"]').empty();
+        if (tr.find('select[name="md_room_id"]').length > 0) {
+            tr.find('select[name="md_room_id"]').empty();
         }
     }
 });
@@ -67,6 +67,13 @@ _tableLine.on('keyup', 'input[name="qtyentered"], input[name="unitprice"]', func
         }
 
         tr.find('input[name="lineamt"]').val(formatRupiah(lineamt));
+    }
+
+    if (tr.find('input[name="priceaftertax"]').length > 0 && $(this).attr('name') == 'unitprice') {
+        let priceAfterTax = parseInt(value);
+        priceAfterTax += (priceAfterTax * 0.11);
+
+        tr.find('input[name="priceaftertax"]').val(formatRupiah(priceAfterTax));
     }
 });
 
@@ -132,22 +139,22 @@ $(document).ready(function (evt) {
     });
 });
 
-_tableLine.on('change', 'select[name="employee_id"]', function (evt) {
+_tableLine.on('change', 'select[name="md_employee_id"]', function (evt) {
     const tr = _tableLine.$(this).closest('tr');
     let employee_id = this.value;
     let isSpare = tr.find('input[name="isspare"]')[0];
 
     if (employee_id !== '') {
         // Column Branch
-        getOption('branch', 'branch_id', tr, null, employee_id);
+        getOption('branch', 'md_branch_id', tr, null, employee_id);
         // Column Division
-        getOption('division', 'division_id', tr, null, employee_id);
+        getOption('division', 'md_division_id', tr, null, employee_id);
 
         // Column Room
         if (isSpare.checked) {
-            getOption('room', 'room_id', tr, null, 'IT'); // Based on division IT
+            getOption('room', 'md_room_id', tr, null, 'IT'); // Based on division IT
         } else {
-            getOption('room', 'room_id', tr, null, employee_id);
+            getOption('room', 'md_room_id', tr, null, employee_id);
         }
     }
 });
@@ -213,6 +220,9 @@ function setReceiptDetail(form, fieldName, id, receipt_id = 0) {
                                     }
                                 }
 
+                                if (field[i].type === 'select-one' && fieldName === fieldInput && setSave !== 'add')
+                                    select.prop('disabled', true);
+
                                 if (field[i].type === 'textarea' && label !== '')
                                     form.find('textarea[name=' + field[i].name + ']').val(label);
 
@@ -242,19 +252,19 @@ function setReceiptDetail(form, fieldName, id, receipt_id = 0) {
                             if ($(item).attr('name') === 'isspare') {
                                 if (item.checked) {
                                     // Column Branch
-                                    getOption('branch', 'branch_id', tr, 100001);
+                                    getOption('branch', 'md_branch_id', tr, 100001);
                                     // Column Division
-                                    getOption('division', 'division_id', tr, 100006);
+                                    getOption('division', 'md_division_id', tr, 100006);
                                     // Column Room
-                                    getOption('room', 'room_id', tr, null, 'IT');
+                                    getOption('room', 'md_room_id', tr, null, 'IT');
                                 } else {
-                                    let employee_id = tr.find('select[name="employee_id"]').val();
+                                    let employee_id = tr.find('select[name="md_employee_id"]').val();
                                     // Column Branch
-                                    getOption('branch', 'branch_id', tr, null, employee_id);
+                                    getOption('branch', 'md_branch_id', tr, null, employee_id);
                                     // Column Division
-                                    getOption('division', 'division_id', tr, null, employee_id);
+                                    getOption('division', 'md_division_id', tr, null, employee_id);
                                     // Column Room
-                                    getOption('room', 'room_id', tr, null, employee_id);
+                                    getOption('room', 'md_room_id', tr, null, employee_id);
                                 }
                             }
                         });
@@ -387,8 +397,8 @@ _tableLine.on('change', 'select[name="assetcode"]', function (evt) {
         success: function (result) {
             if (result[0].success) {
                 $.each(result[0].message, function (idx, item) {
-                    if (tr.find('select[name="product_id"]').length > 0) {
-                        tr.find('select[name="product_id"]').val(item.md_product_id).change();
+                    if (tr.find('select[name="md_product_id"]').length > 0) {
+                        tr.find('select[name="md_product_id"]').val(item.md_product_id).change();
                     }
 
                     if (tr.find('select[name="employee_from"]').length > 0) {
@@ -421,7 +431,7 @@ _tableLine.on('change', 'select[name="assetcode"]', function (evt) {
 });
 
 // Event change field Status
-_tableLine.on('change', 'select[name="status_id"]', function (evt) {
+_tableLine.on('change', 'select[name="md_status_id"]', function (evt) {
     const tr = _tableLine.$(this).closest('tr');
     let value = $(this).find('option:selected').text();
 

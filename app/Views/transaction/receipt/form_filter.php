@@ -4,7 +4,7 @@
             <div class="card-body card-filter">
                 <form class="form-horizontal" id="filter_quotation">
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <div class="input-icon">
                                     <input type="text" class="form-control daterange" name="receiptdate" value="<?= $date_range ?>" placeholder="Date">
@@ -14,7 +14,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <select class="form-control select2" name="md_status_id" style="width: 100%;" <?= isset($default_logic->condition) ? "disabled" : "" ?>>
                                     <option value="">Select Status</option>

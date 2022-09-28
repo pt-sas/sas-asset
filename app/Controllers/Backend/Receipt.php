@@ -21,14 +21,12 @@ use Config\Services;
 
 class Receipt extends BaseController
 {
-    private $model_detail;
-
     public function __construct()
     {
         $this->request = Services::request();
         $this->model = new M_Receipt($this->request);
         $this->entity = new \App\Entities\Receipt();
-        $this->model_detail = new M_ReceiptDetail();
+        $this->modelDetail = new M_ReceiptDetail($this->request);
     }
 
     public function index()
@@ -107,15 +105,16 @@ class Receipt extends BaseController
 
             $table = json_decode($post['table']);
 
-            //* Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
+            //! Mandatory property for detail validation
+            $post['line'] = countLine($table);
             $post['detail'] = [
-                'table' => arrTableLine($this->mandatoryLogic($table))
+                'table' => arrTableLine($table)
             ];
 
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+                $this->entity->setGrandTotal(arrSumField('unitprice', $table));
 
                 if (!$this->validation->run($post, 'receipt')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
@@ -126,7 +125,8 @@ class Receipt extends BaseController
                 $response = message('error', false, $e->getMessage());
             }
 
-            return $this->response->setJSON($response);
+            // return $this->response->setJSON($response);
+            return json_encode($response);
         }
     }
 
@@ -139,7 +139,7 @@ class Receipt extends BaseController
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
-                $detail = $this->model_detail->where($this->model->primaryKey, $id)->findAll();
+                $detail = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
 
                 $rowQuotation = $this->model->getQuotationReceipt('trx_receipt.trx_receipt_id', $id)->getRow();
 
@@ -204,7 +204,7 @@ class Receipt extends BaseController
                 $row = $this->model->find($_ID);
 
                 if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
-                    $line = $this->model_detail->where($this->model->primaryKey, $_ID)->first();
+                    $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->first();
 
                     //? Exists data line or not exist data line and docstatus not Completed
                     if ($line || (!$line && $_DocAction !== $this->DOCSTATUS_Completed)) {
@@ -235,7 +235,7 @@ class Receipt extends BaseController
     {
         if ($this->request->isAJAX()) {
             try {
-                $row = $this->model->getDetail($this->model_detail->primaryKey, $id)->getRow();
+                $row = $this->model->getDetail($this->modelDetail->primaryKey, $id)->getRow();
                 $grandTotal = ($row->grandtotal - $row->unitprice);
 
                 //* Update table receipt
@@ -245,7 +245,7 @@ class Receipt extends BaseController
                 $this->model->save($this->entity);
 
                 //* Delete row receipt detail
-                $delete = $this->model_detail->delete($id);
+                $delete = $this->modelDetail->delete($id);
 
                 $result = $delete ? $grandTotal : false;
 
@@ -284,11 +284,11 @@ class Receipt extends BaseController
 
             try {
                 if (!empty($post['receipt_id'])) {
-                    $checkData = $this->model_detail->where($this->model->primaryKey, $post['receipt_id'])->first();
+                    $checkData = $this->modelDetail->where($this->model->primaryKey, $post['receipt_id'])->first();
 
                     //? Exists data receipt detail
                     if ($checkData)
-                        $this->model_detail->where($this->model->primaryKey, $post['receipt_id'])->delete();
+                        $this->modelDetail->where($this->model->primaryKey, $post['receipt_id'])->delete();
                 }
 
                 $list = $quotation->where($quotation->primaryKey, $post['id'])->findAll();
@@ -360,18 +360,18 @@ class Receipt extends BaseController
                     $priceAfterTax = ($row->unitprice + ($row->unitprice * 0.11));
 
                     $table[] = [
-                        $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', null, 'readonly', null, null, null, 150),
-                        $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
+                        $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', null, 'readonly', null, null, null, 170),
+                        $this->field->fieldTable('select', null, 'md_product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                         $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, 'readonly', null, null, 1, 50),
                         $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowQuo->getIsInternalUse() === 'N' ?: 'readonly', null, null, $row->unitprice, 125),
-                        $this->field->fieldTable('input', 'text', 'priceaftertax', 'rupiah', 'required', $rowQuo->getIsInternalUse() === 'N' ?: 'readonly', null, null, $priceAfterTax, 125),
+                        $this->field->fieldTable('input', 'text', 'priceaftertax', 'rupiah', 'required', 'readonly', null, null, $priceAfterTax, 125),
                         $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
-                        $this->field->fieldTable('select', 'text', 'employee_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
-                        $this->field->fieldTable('select', 'text', 'branch_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, null, null, 200),
-                        $this->field->fieldTable('select', 'text', 'division_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, null, null, 200),
-                        $this->field->fieldTable('select', 'text', 'room_id', null, 'required', null, null, null, null, 250),
-                        $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row->description, 250),
-                        $this->field->fieldTable('button', 'button', 'delete', null, null, null, null, null, $row->trx_quotation_detail_id, 0, 'value') // Manipulate Set id on the attribute value
+                        $this->field->fieldTable('select', 'text', 'md_employee_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
+                        $this->field->fieldTable('select', 'text', 'md_branch_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, null, null, 200),
+                        $this->field->fieldTable('select', 'text', 'md_division_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, null, null, 200),
+                        $this->field->fieldTable('select', 'text', 'md_room_id', null, 'required', null, null, null, null, 250),
+                        $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
+                        $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id', 'reference-key', null, null, null, null, $row->trx_quotation_detail_id, 0, 'value') // Manipulate Set id on the attribute value
                     ];
                 }
             endforeach;
@@ -393,18 +393,18 @@ class Receipt extends BaseController
                         ->findAll();
 
                 $table[] = [
-                    $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', null, 'readonly', null, null, $row->assetcode, 150),
-                    $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
+                    $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', null, 'readonly', null, null, $row->assetcode, 170),
+                    $this->field->fieldTable('select', null, 'md_product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, 'readonly', null, null, 1, 50),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowReceipt->getIsInternalUse() === 'N' ?: 'readonly', null, null, $row->unitprice, 125),
-                    $this->field->fieldTable('input', 'text', 'priceaftertax', 'rupiah', 'required', $rowReceipt->getIsInternalUse() === 'N' ?: 'readonly', null, null, $row->priceaftertax, 125),
+                    $this->field->fieldTable('input', 'text', 'priceaftertax', 'rupiah', 'required', 'readonly', null, null, $row->priceaftertax, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
-                    $this->field->fieldTable('select', 'text', 'employee_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
-                    $this->field->fieldTable('select', 'text', 'branch_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataBranch, $row->md_branch_id, 200, 'md_branch_id', 'name'),
-                    $this->field->fieldTable('select', 'text', 'division_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataDivision, $row->md_division_id, 200, 'md_division_id', 'name'),
-                    $this->field->fieldTable('select', 'text', 'room_id', null, 'required', null, null, $dataRoom, $row->md_room_id, 250, 'md_room_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row->description, 250),
-                    $this->field->fieldTable('button', 'button', 'delete', null, null, null, null, null, $row->trx_receipt_detail_id)
+                    $this->field->fieldTable('select', 'text', 'md_employee_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('select', 'text', 'md_branch_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataBranch, $row->md_branch_id, 200, 'md_branch_id', 'name'),
+                    $this->field->fieldTable('select', 'text', 'md_division_id', null, $row->isspare == 'Y' ?: 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataDivision, $row->md_division_id, 200, 'md_division_id', 'name'),
+                    $this->field->fieldTable('select', 'text', 'md_room_id', null, 'required', null, null, $dataRoom, $row->md_room_id, 250, 'md_room_id', 'name'),
+                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
+                    $this->field->fieldTable('button', 'button', 'trx_receipt_detail_id', null, null, null, null, null, $row->trx_receipt_detail_id)
                 ];
             endforeach;
         }
