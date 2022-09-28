@@ -58,7 +58,7 @@ function setCheckbox($string)
  */
 function countLine($count)
 {
-    return $count == 0 ? "" : $count;
+    return count($count) == 0 ? "" : $count;
 }
 
 /**
@@ -94,8 +94,11 @@ function arrTableLine(array $table)
     $result = [];
 
     foreach ($table as $value) :
-        foreach ($value as $row) :
-            $result[] = (array) $row;
+        foreach ($value as $key => $val) :
+            $row = [];
+            $row[$key] = $val;
+
+            $result[] = $row;
         endforeach;
     endforeach;
 
@@ -146,4 +149,22 @@ function docStatus(string $str)
 function addYear($date, string $value)
 {
     return strtotime("+" . $value . " years", strtotime($date));
+}
+
+/**
+ *  Array sum based on data
+ *
+ * @param string $field Column data
+ * @param array $data Data
+ * @return void
+ */
+function arrSumField(string $field, array $data)
+{
+    $arr = [];
+
+    foreach ($data as $value) :
+        $arr[] = $value->{$field};
+    endforeach;
+
+    return array_sum($arr);
 }
