@@ -262,7 +262,7 @@ class Field
                 $defaultValue = "";
             }
 
-            $element .= '<button type="button" title="' . ucwords($name) . '" class="btn btn-link btn-danger line btn_delete" id="' . $defaultValue . '" name="' . $name . '" value="' . $field . '">
+            $element .= '<button type="button" title="' . ucwords($name) . '" class="btn btn-link btn-danger line btn_delete ' . $class . '" id="' . $defaultValue . '" name="' . $name . '" value="' . $field . '">
                                     <i class="fa fa-times"></i>
                                 </button>';
         }
@@ -288,12 +288,12 @@ class Field
     {
         foreach ($data as $row) :
             if ($this->db->fieldExists($field, $table))
-                $row->$field = ([
+                $row->{$field} = ([
                     'id' => $value,
                     'name' => $text
                 ]);
             else
-                $row->$field = ([
+                $row->{$field} = ([
                     'id' => $value,
                     'name' => $text
                 ]);
