@@ -4,7 +4,6 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 use CodeIgniter\HTTP\RequestInterface;
-use App\Models\M_AccessMenu;
 
 class M_Role extends Model
 {
@@ -93,7 +92,10 @@ class M_Role extends Model
     public function deleteAccessRole(array $rows)
     {
         $accessMenu = new M_AccessMenu($this->request);
+        $userRole = new M_UserRole($this->request);
 
         $accessMenu->where($this->primaryKey, $rows['id'])->delete();
+
+        $userRole->where($this->primaryKey, $rows['id'])->delete();
     }
 }
