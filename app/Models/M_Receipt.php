@@ -279,13 +279,12 @@ class M_Receipt extends Model
 				//TODO: Insert Change Log 
 				foreach ($data as $value) :
 					$primaryID = $value['line_id'];
-					$old = $receiptDetail->find($primaryID);
 
-					$data = (array) $value;
+					$arrData = (array) $value;
 
-					foreach (array_keys($data) as $key) :
+					foreach (array_keys($arrData) as $key) :
 						if ($key !== 'line_id')
-							$changelog->insertLog($receiptDetail->table, 'assetcode', $primaryID, $old->{$key}, $value[$key], 'U');
+							$changelog->insertLog($receiptDetail->table, 'assetcode', $primaryID, null, $value[$key], 'U');
 					endforeach;
 				endforeach;
 
