@@ -40,7 +40,7 @@ class Template
         $view_data['username'] = $this->access->getUser('username');
         $view_data['name'] = $this->access->getUser('name');
         $view_data['email'] = $this->access->getUser('email');
-        $view_data['level'] = $this->access->getRole()->getName();
+        $view_data['level'] = $this->access->getRole() ? $this->access->getRole()->getName() : 'No Role';
 
         return view($template, $view_data);
     }
@@ -110,7 +110,7 @@ class Template
         $check = $this->access->checkCrud($uri, $this->isCreate);
         $role = $this->access->getRole();
 
-        if ($role->getIsCanExport() === 'Y')
+        if ($role && $role->getIsCanExport() === 'Y')
             $allBtn .= $btnExport;
 
         $allBtn .= $btnReQuery . ' ';

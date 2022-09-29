@@ -156,7 +156,7 @@ class Access
     {
         $role = new M_Role($this->request);
         $row = $role->find($this->getSessionRole());
-        return $row ? $row : 'No Role';
+        return $row;
     }
 
     public function getMenu($uri, $field)
