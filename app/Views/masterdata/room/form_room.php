@@ -11,7 +11,7 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="name">Name <span class="required">*</span></label>
+                    <label for="name">Room Name <span class="required">*</span></label>
                     <input type="text" class="form-control" id="name" name="name">
                     <small class="form-text text-danger" id="error_name"></small>
                 </div>
