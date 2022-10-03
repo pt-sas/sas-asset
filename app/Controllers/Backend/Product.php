@@ -261,9 +261,9 @@ class Product extends BaseController
                     $row[] = $this->field->fieldTable('input', 'checkbox', 'check_data', null, null, null, 'checked', null, $ID);
                     $row[] = $value->name;
                     $row[] = $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, null, null, null, null, 70);
-                    $row[] = $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', null, null, null, null, null, 125);
+                    $row[] = $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', null, $get['isfree'] === 'Y' ? 'readonly' : null, null, null, $get['isfree'] === 'Y' ? 0 : null, 125);
                     $row[] = $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, 'checked');
-                    $row[] = $this->field->fieldTable('select', null, 'employee_id', null, null, 'readonly', null, $dataEmployee, 'IT', 200, 'md_employee_id', 'name');
+                    $row[] = $this->field->fieldTable('select', null, 'employee_id', null, null, null, null, $dataEmployee, null, 200, 'md_employee_id', 'name');
                     $row[] = $this->field->fieldTable('input', 'text', 'spek', null, null, null, null, null, null, 250);
                     $row[] = $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, null, 250);
                     $data[] = $row;

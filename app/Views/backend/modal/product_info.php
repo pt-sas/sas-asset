@@ -68,6 +68,7 @@
                                 </div>
                             </div>
                         </div>
+                        <input type="hidden" class="form-control" id="isfree" name="isfree">
                     </div>
                 </form>
                 <div class="row">
