@@ -14,9 +14,9 @@
                     <small class="form-text text-danger" id="error_receiptdate"></small>
                 </div>
                 <div class="form-group">
-                    <label for="expenseno">Expense No <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="expenseno" name="expenseno" placeholder="Expense No">
-                    <small class="form-text text-danger" id="error_expenseno"></small>
+                    <label for="docreference">Document Reference <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="docreference" name="docreference" placeholder="Document Reference">
+                    <small class="form-text text-danger" id="error_docreference"></small>
                 </div>
             </div>
             <div class="col-md-6">
@@ -35,9 +35,9 @@
                     <small class="form-text text-danger" id="error_md_supplier_id"></small>
                 </div>
                 <div class="form-group">
-                    <label for="md_employee_id">Employee <span class="required">*</span></label>
+                    <label for="md_employee_id">From <span class="required">*</span></label>
                     <select class="form-control select-data" id="md_employee_id" name="md_employee_id" data-url="employee/getList" disabled>
-                        <option value="">Select Employee</option>
+                        <option value="">Select From</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_employee_id"></small>
                 </div>
@@ -75,7 +75,7 @@
                 <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input" id="isinternaluse" name="isinternaluse" disabled>
-                        <span class="form-check-sign">From Internal</span>
+                        <span class="form-check-sign">Free</span>
                     </label>
                 </div>
             </div>
@@ -87,8 +87,8 @@
                                 <th class="text-center">Asset Code</th>
                                 <th class="text-center">Product</th>
                                 <th class="text-center">Qty</th>
+                                <th class="text-center">Residual Value</th>
                                 <th class="text-center">Unit Price</th>
-                                <th class="text-center">Price After Tax</th>
                                 <th>Spare</th>
                                 <th class="text-center">Employee</th>
                                 <th class="text-center">Branch</th>

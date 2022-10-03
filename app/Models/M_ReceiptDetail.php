@@ -15,7 +15,7 @@ class M_ReceiptDetail extends Model
 		'md_product_id',
 		'qtyentered',
 		'unitprice',
-		'priceaftertax',
+		'residualvalue',
 		'md_branch_id',
 		'md_division_id',
 		'md_room_id',

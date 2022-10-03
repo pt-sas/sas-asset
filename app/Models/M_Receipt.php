@@ -27,7 +27,7 @@ class M_Receipt extends Model
 		'trx_quotation_id',
 		'created_by',
 		'updated_by',
-		'expenseno',
+		'docreference',
 		'isinternaluse',
 		'md_employee_id'
 	];
@@ -47,7 +47,7 @@ class M_Receipt extends Model
 		'trx_receipt.receiptdate',
 		'md_supplier.name' || 'md_employee.name',
 		'md_status.name',
-		'trx_receipt.expenseno',
+		'trx_receipt.docreference',
 		'trx_receipt.invoiceno',
 		'trx_receipt.grandtotal',
 		'trx_receipt.docstatus',
@@ -59,7 +59,7 @@ class M_Receipt extends Model
 		'trx_receipt.receiptdate',
 		'md_supplier.name',
 		'md_status.name',
-		'trx_receipt.expenseno',
+		'trx_receipt.docreference',
 		'trx_receipt.invoiceno',
 		'trx_receipt.grandtotal',
 		'trx_receipt.docstatus',
