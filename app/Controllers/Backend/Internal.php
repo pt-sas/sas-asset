@@ -245,13 +245,14 @@ class Internal extends BaseController
         if ($set === 'create' && count($arrData) > 0) {
             foreach ($arrData as $row) :
                 $valPro = $product->find($row[0]->product_id);
+
                 $table[] = [
                     $this->field->fieldTable('input', 'text', 'md_product_id', 'text-uppercase', 'required', 'readonly', null, null, $valPro->getName(), 300),
                     $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, $row[1]->qtyentered, 70),
-                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', 'readonly', null, null, 0, 125),
-                    $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, 0, 125),
+                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', 'readonly', null, null, $row[2]->unitprice, 125),
+                    $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row[2]->unitprice, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, $row[3]->isspare ? 'checked' : null),
-                    $this->field->fieldTable('select', null, 'md_employee_id', null, 'required', $row[3]->isspare ?? 'readonly', null, $dataEmployee, !empty($row[4]->employee_id) ? $row[4]->employee_id : null, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_employee_id', null, 'required', null, null, $dataEmployee, !empty($row[4]->employee_id) ? $row[4]->employee_id : null, 200, 'md_employee_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'specification', null, null, null, null, null, $row[5]->spek, 250),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row[6]->desc, 250),
                     $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id')
@@ -270,7 +271,7 @@ class Internal extends BaseController
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', 'readonly', null, null, $row->unitprice, 125),
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row->lineamt, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
-                    $this->field->fieldTable('select', 'text', 'md_employee_id', null, 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('select', 'text', 'md_employee_id', null, 'required', null, null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'specification', null, null, null, null, null, $row->specification, 250),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
                     $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id', null, null, null, null, null, $row->trx_quotation_detail_id)

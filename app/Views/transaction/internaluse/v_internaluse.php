@@ -12,7 +12,7 @@
                 <th>No</th>
                 <th>Doc No</th>
                 <th>Date</th>
-                <th>Employee</th>
+                <th>From</th>
                 <th>Status</th>
                 <th>Grand Total</th>
                 <th>Doc Status</th>

@@ -118,7 +118,8 @@ class M_Quotation extends Model
 			$code = "0001";
 		}
 
-		$first = "IU";
+		//* Menu Free Aset 
+		$first = "FA";
 
 		if ($where === 'N')
 			$first = "QU";
