@@ -17,7 +17,7 @@ class Receipt extends Entity
 	protected $description;
 	protected $created_by;
 	protected $updated_by;
-	protected $expenseno;
+	protected $docreference;
 	protected $invoiceno;
 	protected $isinternaluse;
 	protected $md_employee_id;
@@ -108,14 +108,14 @@ class Receipt extends Entity
 		$this->attributes['docstatus'] = $docstatus;
 	}
 
-	public function getExpenseNo()
+	public function getDocReference()
 	{
-		return $this->attributes['expenseno'];
+		return $this->attributes['docreference'];
 	}
 
-	public function setExpenseNo($expenseno)
+	public function setDocReference($docreference)
 	{
-		$this->attributes['expenseno'] = $expenseno;
+		$this->attributes['docreference'] = $docreference;
 	}
 
 	public function getInvoiceNo()

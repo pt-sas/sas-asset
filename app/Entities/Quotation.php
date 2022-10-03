@@ -18,6 +18,7 @@ class Quotation extends Entity
 	protected $updated_by;
 	protected $isinternaluse;
 	protected $md_employee_id;
+	protected $docreference;
 
 	protected $dates   = [
 		'created_at',
@@ -153,5 +154,15 @@ class Quotation extends Entity
 	public function setEmployeeId($md_employee_id)
 	{
 		$this->attributes['md_employee_id'] = $md_employee_id;
+	}
+
+	public function getDocReference()
+	{
+		return $this->attributes['docreference'];
+	}
+
+	public function setDocReference($docreference)
+	{
+		$this->attributes['docreference'] = $docreference;
 	}
 }

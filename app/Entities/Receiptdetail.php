@@ -21,6 +21,7 @@ class ReceiptDetail extends Entity
 	protected $trx_quotation_detail_id;
 	protected $created_by;
 	protected $updated_by;
+	protected $residualvalue;
 
 	protected $dates   = [
 		'created_at',
@@ -186,5 +187,15 @@ class ReceiptDetail extends Entity
 	public function setUpdatedBy($updated_by)
 	{
 		$this->attributes['updated_by'] = $updated_by;
+	}
+
+	public function getResidualValue()
+	{
+		return $this->attributes['residualvalue'];
+	}
+
+	public function setResidualValue($residualvalue)
+	{
+		$this->attributes['residualvalue'] = $residualvalue;
 	}
 }
