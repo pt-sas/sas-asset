@@ -848,20 +848,4 @@ $('.save_upload').click(function (evt) {
     });
 
     // console.log(fd)
-})
-
-/**
- * Event change field Employee in Table Info
- */
-_tableInfo.on('change', 'input[name="isspare"]', function (evt) {
-    const tr = _tableInfo.$(this).closest('tr');
-
-    if ($(this).is(':checked'))
-        tr.find('select[name="employee_id"]')
-        .val(100130).change()
-        .attr('disabled', true);
-    else
-        tr.find('select[name="employee_id"]')
-        .val(null).change()
-        .removeAttr('disabled');
 });
