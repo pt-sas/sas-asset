@@ -4,42 +4,24 @@
 _tableLine.on('change', 'input[name="isspare"]', function (evt) {
     const tr = _tableLine.$(this).closest('tr');
 
-    if ($(this).is(':checked')) {
-        tr.find('select[name="md_employee_id"]')
-            .val(100130).change()
-            .attr('disabled', true);
+    tr.find('select[name="md_employee_id"]')
+        .val(null).change()
+        .removeAttr('disabled');
 
-        if (tr.find('select[name="md_branch_id"]').length > 0) {
-            tr.find('select[name="md_branch_id"]')
-                .val(100001).change()
-                .attr('disabled', true);
-        }
-
-        if (tr.find('select[name="md_division_id"]').length > 0) {
-            tr.find('select[name="md_division_id"]')
-                .val(100006).change()
-                .attr('disabled', true);
-        }
-    } else {
-        tr.find('select[name="md_employee_id"]')
+    if (tr.find('select[name="md_branch_id"]').length > 0) {
+        tr.find('select[name="md_branch_id"]')
             .val(null).change()
             .removeAttr('disabled');
+    }
 
-        if (tr.find('select[name="md_branch_id"]').length > 0) {
-            tr.find('select[name="md_branch_id"]')
-                .val(null).change()
-                .removeAttr('disabled');
-        }
+    if (tr.find('select[name="md_division_id"]').length > 0) {
+        tr.find('select[name="md_division_id"]')
+            .val(null).change()
+            .removeAttr('disabled');
+    }
 
-        if (tr.find('select[name="md_division_id"]').length > 0) {
-            tr.find('select[name="md_division_id"]')
-                .val(null).change()
-                .removeAttr('disabled');
-        }
-
-        if (tr.find('select[name="md_room_id"]').length > 0) {
-            tr.find('select[name="md_room_id"]').empty();
-        }
+    if (tr.find('select[name="md_room_id"]').length > 0) {
+        tr.find('select[name="md_room_id"]').empty();
     }
 });
 
@@ -142,20 +124,14 @@ $(document).ready(function (evt) {
 _tableLine.on('change', 'select[name="md_employee_id"]', function (evt) {
     const tr = _tableLine.$(this).closest('tr');
     let employee_id = this.value;
-    let isSpare = tr.find('input[name="isspare"]')[0];
 
     if (employee_id !== '') {
         // Column Branch
         getOption('branch', 'md_branch_id', tr, null, employee_id);
         // Column Division
         getOption('division', 'md_division_id', tr, null, employee_id);
-
         // Column Room
-        if (isSpare.checked) {
-            getOption('room', 'md_room_id', tr, null, 'IT'); // Based on division IT
-        } else {
-            getOption('room', 'md_room_id', tr, null, employee_id);
-        }
+        getOption('room', 'md_room_id', tr, null, employee_id);
     }
 });
 
@@ -184,6 +160,7 @@ function setReceiptDetail(form, fieldName, id, receipt_id = 0) {
             hideLoadingForm(form.prop('id'));
         },
         success: function (result) {
+            console.log(result)
             if (result[0].success) {
                 let arrMsg = result[0].message;
 
@@ -225,12 +202,30 @@ function setReceiptDetail(form, fieldName, id, receipt_id = 0) {
 
                                 if (field[i].type === 'textarea' && label !== '')
                                     form.find('textarea[name=' + field[i].name + ']').val(label);
+                                else
+                                    form.find('textarea[name=' + field[i].name + ']').val(null);
+
 
                                 if (field[i].type === 'checkbox' && label === 'Y')
                                     form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', true);
                                 else
                                     form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', false);
 
+                                if (field[i].type === 'text') {
+                                    if (fieldInput === 'docreference') {
+                                        if (label !== '') {
+                                            form.find('input[name=' + field[i].name + ']').val(label);
+
+                                            //* Field Invoice No
+                                            form.find('input[name=invoiceno]').val('-');
+                                        } else {
+                                            form.find('input[name=' + field[i].name + ']').val(null);
+
+                                            //* Field Invoice No
+                                            form.find('input[name=invoiceno]').val(null);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -248,25 +243,17 @@ function setReceiptDetail(form, fieldName, id, receipt_id = 0) {
 
                         $.each(input, function (idx, item) {
                             const tr = $(item).closest('tr');
+                            let employee_id = tr.find('select[name="md_employee_id"]').val();
 
-                            if ($(item).attr('name') === 'isspare') {
-                                if (item.checked) {
-                                    // Column Branch
-                                    getOption('branch', 'md_branch_id', tr, 100001);
-                                    // Column Division
-                                    getOption('division', 'md_division_id', tr, 100006);
-                                    // Column Room
-                                    getOption('room', 'md_room_id', tr, null, 'IT');
-                                } else {
-                                    let employee_id = tr.find('select[name="md_employee_id"]').val();
-                                    // Column Branch
-                                    getOption('branch', 'md_branch_id', tr, null, employee_id);
-                                    // Column Division
-                                    getOption('division', 'md_division_id', tr, null, employee_id);
-                                    // Column Room
-                                    getOption('room', 'md_room_id', tr, null, employee_id);
-                                }
-                            }
+                            // Column Branch
+                            if (this.name === 'md_branch_id')
+                                getOption('branch', 'md_branch_id', tr, null, employee_id);
+                            // Column Division
+                            if (this.name === 'md_division_id')
+                                getOption('division', 'md_division_id', tr, null, employee_id);
+                            // Column Room
+                            if (this.name === 'md_room_id')
+                                getOption('room', 'md_room_id', tr, null, employee_id);
                         });
                     }
                 }
@@ -285,6 +272,7 @@ function setReceiptDetail(form, fieldName, id, receipt_id = 0) {
 
 function getOption(controller, field, tr, selected_id, ref_id = null) {
     let url = ADMIN_URL + controller + '/getList';
+    const form = tr.closest('form');
 
     tr.find('select[name =' + field + ']').empty();
 
@@ -296,6 +284,16 @@ function getOption(controller, field, tr, selected_id, ref_id = null) {
             reference: ref_id
         },
         dataType: 'JSON',
+        beforeSend: function () {
+            $('.x_form').prop('disabled', true);
+            $('.close_form').prop('disabled', true);
+            loadingForm(form.prop('id'), 'facebook');
+        },
+        complete: function () {
+            $('.x_form').removeAttr('disabled');
+            $('.close_form').removeAttr('disabled');
+            hideLoadingForm(form.prop('id'));
+        },
         success: function (result) {
             tr.find('select[name =' + field + ']').append('<option value=""></option>');
 
