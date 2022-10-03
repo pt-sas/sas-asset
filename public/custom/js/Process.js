@@ -1574,11 +1574,16 @@ $('.add_row').click(function (evt) {
 $('.create_line').click(function (evt) {
     let action = 'create';
     let checkAccess = isAccess(action, LAST_URL);
+    let formData = $(this).closest('form');
 
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
         let _this = $(this);
         let oriElement = _this.html();
         let textElement = _this.text().trim();
+
+        let isFree = 'N';
+        if (formData.find('input:checkbox[name="isinternaluse"]').is(':checked'))
+            isFree = 'Y';
 
         $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
 
@@ -1607,6 +1612,9 @@ $('.create_line').click(function (evt) {
                         let select = form.find('select.select-data');
                         initSelectData(select);
                     }
+
+                    if (form.find('input:hidden[name="isfree"]'))
+                        form.find('input:hidden[name="isfree"]').val(isFree);
 
                     _tableInfo.ajax.url(url).load().columns.adjust();
 
