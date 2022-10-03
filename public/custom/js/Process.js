@@ -561,13 +561,13 @@ $('.save_form').click(function (evt) {
                     form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').removeAttr('disabled');
                 } else {
                     if (!className.includes('active')) {
-                        form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').prop('disabled', true);
+                        form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').not('.line').prop('disabled', true);
                     }
                 }
             } else {
                 // Set attribute disabled based on default field
                 if (fieldReadOnly.includes(field[i].name))
-                    form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').prop('disabled', true);
+                    form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').not('.line').prop('disabled', true);
             }
         }
     } else if (checkAccess[0].success && checkAccess[0].message == 'N') {

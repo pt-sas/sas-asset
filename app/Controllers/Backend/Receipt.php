@@ -327,13 +327,6 @@ class Receipt extends BaseController
         $room = new M_Room($this->request);
         $quotation = new M_Quotation($this->request);
 
-        /**
-         * RM00039 => IT
-         * RM00040 => RUANG IT - BARANG BAGUS
-         * RM00041 => RUANG IT - BARANG RUSAK
-         */
-        $ROOM_IT = ['RM00039', 'RM00040'];
-
         $table = [];
 
         //* Master data
@@ -347,6 +340,9 @@ class Receipt extends BaseController
             ->orderBy('name', 'ASC')
             ->findAll();
         $dataBranch = $branch->where('isactive', 'Y')
+            ->orderBy('name', 'ASC')
+            ->findAll();
+        $dataRoom = $room->where('isactive', 'Y')
             ->orderBy('name', 'ASC')
             ->findAll();
 
@@ -379,16 +375,6 @@ class Receipt extends BaseController
             $rowReceipt = $this->model->where($this->model->primaryKey, $set)->first();
 
             foreach ($detail as $row) :
-                if ($row->isspare == 'Y')
-                    $dataRoom = $room->where('isactive', 'Y')
-                        ->whereIn('value', $ROOM_IT)
-                        ->orderBy('name', 'ASC')
-                        ->findAll();
-                else
-                    $dataRoom = $room->where('isactive', 'Y')
-                        ->orderBy('name', 'ASC')
-                        ->findAll();
-
                 $table[] = [
                     $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', null, 'readonly', null, null, $row->assetcode, 170),
                     $this->field->fieldTable('select', null, 'md_product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
