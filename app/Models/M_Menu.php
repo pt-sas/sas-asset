@@ -91,4 +91,37 @@ class M_Menu extends Model
         $access = new M_AccessMenu($this->request);
         $access->where($this->primaryKey, $rows['id'])->delete();
     }
+
+    public function getMenu()
+    {
+        $submenu = new M_Submenu($this->request);
+
+        $dataMenu = $this->where('isactive', 'Y')
+            ->orderBy('sequence', 'ASC')
+            ->findAll();
+
+        $arrMenu = [];
+
+        foreach ($dataMenu as $row) :
+            $menu_id = $row->sys_menu_id;
+
+            $data = $submenu->where([
+                'isactive'          => 'Y',
+                $this->primaryKey   => $menu_id
+            ])->orderBy('sequence', 'ASC')
+                ->findAll();
+
+            if ($data) {
+                foreach ($data as $row2) :
+                    $arrMenu[] = $row2->name;
+                endforeach;
+            } else {
+                $arrMenu[] = $row->name;
+            }
+        endforeach;
+
+        sort($arrMenu);
+
+        return $arrMenu;
+    }
 }

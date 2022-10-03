@@ -5,7 +5,6 @@ namespace App\Controllers\Backend;
 use App\Controllers\BaseController;
 use App\Models\M_Status;
 use App\Models\M_Menu;
-use App\Models\M_Submenu;
 use Config\Services;
 
 class Status extends BaseController
@@ -19,8 +18,10 @@ class Status extends BaseController
 
     public function index()
     {
+        $menu = new M_Menu($this->request);
+
         $data = [
-            'menu'      => $this->getMenu()
+            'menu'      => $menu->getMenu()
         ];
 
         return $this->template->render('masterdata/status/v_status', $data);
@@ -145,37 +146,5 @@ class Status extends BaseController
 
             return $this->response->setJSON($response);
         }
-    }
-
-    public function getMenu()
-    {
-        $menu = new M_Menu($this->request);
-        $submenu = new M_Submenu($this->request);
-
-        $dataMenu = $menu->where('isactive', 'Y')
-            ->orderBy('sequence', 'ASC')
-            ->findAll();
-
-        $arrMenu = [];
-
-        foreach ($dataMenu as $row) :
-            $menu_id = $row->sys_menu_id;
-
-            $data = $submenu->where($menu->primaryKey, $menu_id)->where('isactive', 'Y')
-                ->orderBy('sequence', 'ASC')
-                ->findAll();
-
-            if ($data) {
-                foreach ($data as $row2) :
-                    $arrMenu[] = $row2->name;
-                endforeach;
-            } else {
-                $arrMenu[] = $row->name;
-            }
-        endforeach;
-
-        sort($arrMenu);
-
-        return $arrMenu;
     }
 }
