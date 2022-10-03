@@ -570,8 +570,8 @@ class Validation
                 'required'  => 'Please Choose the {field} first.'
             ]
         ],
-        'expenseno'                 => [
-            'label'                 => 'Expense No',
+        'docreference'              => [
+            'label'                 => 'Document Reference',
             'rules'                 => 'required',
             'errors'                => [
                 'required'  => 'Please Insert the {field} first.'
@@ -593,14 +593,14 @@ class Validation
             ]
         ],
         'md_supplier_id'            => [
-            'label'                 => 'Suplier',
+            'label'                 => 'Supplier',
             'rules'                 => 'required_without[md_employee_id]',
             'errors'                => [
                 'required_without'  => 'Please Choose the {field} first.'
             ]
         ],
         'md_employee_id'            => [
-            'label'                 => 'Suplier',
+            'label'                 => 'From',
             'rules'                 => 'required_without[md_supplier_id]',
             'errors'                => [
                 'required_without'  => 'Please Choose the {field} first.'
@@ -613,8 +613,15 @@ class Validation
                 'required' => 'Please Insert the {field} first.'
             ]
         ],
+        'detail.table.*.residualvalue' => [
+            'label'                 => 'Residual Value',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Insert the {field} Line'
+            ]
+        ],
         'detail.table.*.unitprice' => [
-            'label'                 => 'Unitprice',
+            'label'                 => 'Unit Price',
             'rules'                 => 'required|is_natural_no_zero',
             'errors'                => [
                 'required' => 'Please Insert the {field} Line',
