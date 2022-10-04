@@ -242,6 +242,7 @@ class BaseController extends Controller
 					//TODO: Check old data 
 					$row = $this->model->find($this->getID());
 
+					//TODO: Convert value type integer is null to Zero
 					foreach ($fields as $field) :
 						if ($field->type === 'int' && $field->name === $key && $data[$key] === "")
 							$data[$key] = 0;
@@ -676,6 +677,8 @@ class BaseController extends Controller
 	{
 		$result = [];
 
+		$fields = $model->db->getFieldData($model->table);
+
 		if (empty($data))
 			return $result;
 
@@ -689,9 +692,15 @@ class BaseController extends Controller
 			$data = (array) $value;
 
 			foreach (array_keys($data) as $key) :
+				//TODO: Convert value type integer is null to Zero
+				foreach ($fields as $field) :
+					if ($field->type === 'int' && $field->name === $key && $value[$key] === "")
+						$value[$key] = 0;
+				endforeach;
+
 				//? New value is change 
-				if ((gettype($data[$key]) === 'integer' && $value[$key] != $oldValue->{$key}) ||
-					(gettype($data[$key]) === 'string' && $value[$key] !== $oldValue->{$key})
+				if ((gettype($value[$key]) === 'integer' && $value[$key] != $oldValue->{$key}) ||
+					(gettype($value[$key]) === 'string' && $value[$key] !== $oldValue->{$key})
 				) {
 					$newV->{$this->primaryKey} = $value[$this->primaryKey];
 					$newV->{$key} = $value[$key];
