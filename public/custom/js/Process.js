@@ -1943,10 +1943,10 @@ $('input.active:checkbox').change(function (evt) {
 
                 // field is not readonly by default
                 if (!fieldReadOnly.includes(field[i].name))
-                    parent.find('input:text[name=' + field[i].name + '], textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']').prop('readonly', true);
+                    parent.find('input:text[name=' + field[i].name + '], textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']').not('.line').prop('readonly', true);
 
                 if (field[i].type !== 'text' && !className.includes('active') && !fieldReadOnly.includes(field[i].name)) {
-                    parent.find('input[name=' + field[i].name + '], select[name=' + field[i].name + ']').prop('disabled', true);
+                    parent.find('input[name=' + field[i].name + '], select[name=' + field[i].name + ']').not('.line').prop('disabled', true);
 
                     if (field[i].type === 'file') {
                         parent.find('input[name=' + field[i].name + ']').prop('disabled', true);
@@ -2267,7 +2267,7 @@ function clearForm(evt) {
  * @param {*} value based on passing data (true/false)
  */
 function readonly(parent, value) {
-    const field = parent.find('input, textarea, select').not('.line');
+    const field = parent.find('input, textarea, select');
 
     for (let i = 0; i < field.length; i++) {
         if (field[i].name !== '') {
@@ -2279,23 +2279,24 @@ function readonly(parent, value) {
 
             // field is not readonly by default
             if (!fieldReadOnly.includes(field[i].name))
-                parent.find('input:text[name=' + field[i].name + '], textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']').prop('readonly', value);
+                parent.find('input:text[name=' + field[i].name + '], textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']').not('.line').prop('readonly', value);
 
             if (field[i].type !== 'text' && !className.includes('active') && !fieldReadOnly.includes(field[i].name)) {
                 parent.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + '], input:radio[name=' + field[i].name + ']')
+                    .not('.line')
                     .prop('disabled', value);
             }
 
             if (field[i].type === 'file') {
-                parent.find('input[name=' + field[i].name + ']').prop('disabled', value);
+                parent.find('input[name=' + field[i].name + ']').not('.line').prop('disabled', value);
             }
 
             if (parent.find('textarea.summernote[name=' + field[i].name + ']').length > 0 ||
                 parent.find('textarea.summernote-product[name=' + field[i].name + ']').length > 0) {
                 if (value) {
-                    $('[name =' + field[i].name + ']').summernote('disable');
+                    $('[name =' + field[i].name + ']').not('.line').summernote('disable');
                 } else {
-                    $('[name =' + field[i].name + ']').summernote('enable');
+                    $('[name =' + field[i].name + ']').not('.line').summernote('enable');
                 }
             }
         }
@@ -2303,12 +2304,12 @@ function readonly(parent, value) {
 
     // check button close image based on value
     if (parent.find('button.close-img').length > 0) {
-        parent.find('button.close-img').prop('disabled', value)
+        parent.find('button.close-img').not('.line').prop('disabled', value)
 
         if (value) {
-            parent.find('button.close-img').css('display', 'none');
+            parent.find('button.close-img').not('.line').css('display', 'none');
         } else {
-            parent.find('button.close-img').css('display', 'block');
+            parent.find('button.close-img').not('.line').css('display', 'block');
         }
     }
 }
@@ -3089,3 +3090,35 @@ function checkExistUserRole(role) {
 
     return value;
 }
+
+_tableLine.on('change', 'input.active:checkbox', function (evt) {
+    const tr = $(this).closest('tr');
+    const field = tr.find('input, select');
+    let className;
+
+    if ($(this).is(':checked')) {
+        for (let i = 0; i < field.length; i++) {
+            if (field[i].name !== '') {
+                className = field[i].className.split(/\s+/);
+
+                tr.find('input:text[name=' + field[i].name + ']').removeAttr('readonly');
+
+                if (field[i].type !== 'text' && !className.includes('active')) {
+                    tr.find('input[name=' + field[i].name + '], select[name=' + field[i].name + ']').removeAttr('disabled');
+                }
+            }
+        }
+    } else {
+        for (let i = 0; i < field.length; i++) {
+            if (field[i].name !== '') {
+                className = field[i].className.split(/\s+/);
+
+                tr.find('input:text[name=' + field[i].name + ']').prop('readonly', true);
+
+                if (field[i].type !== 'text' && !className.includes('active')) {
+                    tr.find('input[name=' + field[i].name + '], select[name=' + field[i].name + ']').prop('disabled', true);
+                }
+            }
+        }
+    }
+});
