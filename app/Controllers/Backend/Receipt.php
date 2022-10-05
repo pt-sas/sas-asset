@@ -360,9 +360,9 @@ class Receipt extends BaseController
                         $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowQuo->getIsInternalUse() === 'N' ?: 'readonly', null, null, $row->unitprice, 125),
                         $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
                         $this->field->fieldTable('select', 'text', 'md_employee_id', null, 'required', null, null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
-                        $this->field->fieldTable('select', 'text', 'md_branch_id', null, 'required', null, null, null, null, 200),
-                        $this->field->fieldTable('select', 'text', 'md_division_id', null, 'required', null, null, null, null, 200),
-                        $this->field->fieldTable('select', 'text', 'md_room_id', null, 'required', null, null, null, null, 250),
+                        $this->field->fieldTable('select', null, 'md_branch_id', null, 'required', null, null, null, null, 200),
+                        $this->field->fieldTable('select', null, 'md_division_id', null, 'required', null, null, null, null, 200),
+                        $this->field->fieldTable('select', null, 'md_room_id', null, 'required', null, null, null, null, 250),
                         $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
                         $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id', 'reference-key', null, null, null, null, $row->trx_quotation_detail_id, 0, 'value') // Manipulate Set id on the attribute value
                     ];
@@ -382,10 +382,10 @@ class Receipt extends BaseController
                     $this->field->fieldTable('input', 'text', 'residualvalue', 'rupiah', 'required', $rowReceipt->getIsInternalUse() === 'N' ?: 'readonly', null, null, $row->residualvalue, 125),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowReceipt->getIsInternalUse() === 'N' ?: 'readonly', null, null, $row->unitprice, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
-                    $this->field->fieldTable('select', 'text', 'md_employee_id', null, 'required', null, null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
-                    $this->field->fieldTable('select', 'text', 'md_branch_id', null, 'required', null, null, $dataBranch, $row->md_branch_id, 200, 'md_branch_id', 'name'),
-                    $this->field->fieldTable('select', 'text', 'md_division_id', null, 'required', null, null, $dataDivision, $row->md_division_id, 200, 'md_division_id', 'name'),
-                    $this->field->fieldTable('select', 'text', 'md_room_id', null, 'required', null, null, $dataRoom, $row->md_room_id, 250, 'md_room_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_employee_id', null, 'required', null, null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_branch_id', null, 'required', null, null, $dataBranch, $row->md_branch_id, 200, 'md_branch_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_division_id', null, 'required', null, null, $dataDivision, $row->md_division_id, 200, 'md_division_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_room_id', null, 'required', null, null, $dataRoom, $row->md_room_id, 250, 'md_room_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
                     $this->field->fieldTable('button', 'button', 'trx_receipt_detail_id', null, null, null, null, null, $row->trx_receipt_detail_id)
                 ];
