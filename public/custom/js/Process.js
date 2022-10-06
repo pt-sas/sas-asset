@@ -110,8 +110,8 @@ _table = $('.tb_display').DataTable({
 _tableLine = $('.tb_displayline').DataTable({
     'drawCallback': function (settings) {
         $(this).find('.number').on('keypress keyup blur', function (evt) {
-            $(this).val($(this).val().replace(/[^\d].+/, ""));
-            if ((evt.which < 48 || evt.which > 57)) {
+            $(this).val($(this).val().replace(/[^\d-].+/, ""));
+            if ((evt.which < 48 && evt.which != 45 || evt.which > 57 && evt.which != 189)) {
                 evt.preventDefault();
             }
         });
@@ -157,8 +157,8 @@ _tableInfo = $('.table_info').DataTable({
     'processing': true,
     'drawCallback': function (settings) {
         $(this).find('.number').on('keypress keyup blur', function (evt) {
-            $(this).val($(this).val().replace(/[^\d].+/, ""));
-            if ((evt.which < 48 || evt.which > 57)) {
+            $(this).val($(this).val().replace(/[^\d-].+/, ""));
+            if ((evt.which < 48 && evt.which != 45 || evt.which > 57 && evt.which != 189)) {
                 evt.preventDefault();
             }
         });
@@ -2686,8 +2686,8 @@ $(document).ready(function (e) {
     });
 
     $('.number').on('keypress keyup blur', function (evt) {
-        $(this).val($(this).val().replace(/[^\d].+/, ""));
-        if ((evt.which < 48 || evt.which > 57)) {
+        $(this).val($(this).val().replace(/[^\d-].+/, ""));
+        if ((evt.which < 48 && evt.which != 45 || evt.which > 57 && evt.which != 189)) {
             evt.preventDefault();
         }
     });
