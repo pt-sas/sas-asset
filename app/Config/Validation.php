@@ -971,4 +971,22 @@ class Validation
             ]
         ]
     ];
+
+    public $responsible = [
+        'name'                  => [
+            'label'             => 'Name',
+            'rules'             => 'required|is_unique[sys_wfresponsible.name,sys_wfresponsible_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'responsibletype'       => [
+            'label'             => 'Responsible Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first.'
+            ]
+        ]
+    ];
 }

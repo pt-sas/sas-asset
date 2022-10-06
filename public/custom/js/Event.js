@@ -849,3 +849,27 @@ $('.save_upload').click(function (evt) {
 
     // console.log(fd)
 });
+
+/**
+ * Event Listener Responsible Type
+ */
+$('#form_responsible').on('change', '#responsibletype', function (evt) {
+    const target = $(evt.target);
+    const form = target.closest('form');
+    const value = this.value;
+
+    //? Condition field and contain attribute hide-field
+    if ($(this).attr('hide-field')) {
+        if (value === 'R') {
+            form.find('select[name=sys_role_id]').closest('.form-group').show();
+        } else {
+            form.find('select[name=sys_role_id]').closest('.form-group').hide();
+        }
+
+        if (value === 'H') {
+            form.find('select[name=sys_user_id]').closest('.form-group').show();
+        } else {
+            form.find('select[name=sys_user_id]').closest('.form-group').hide();
+        }
+    }
+});
