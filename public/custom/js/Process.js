@@ -928,12 +928,15 @@ _table.on('click', '.edit', function (evt) {
                                                     const select = form.find('select[name=' + fields[i] + ']').not('.line');
                                                     let formGroup = [];
 
-                                                    if ($(select).val() === null) {
+                                                    if ($(select).val() === null && $(select).val() === '') {
                                                         formGroup = $(select).closest('.form-group');
                                                         formGroup.hide();
-                                                    } else {
+                                                    } else if ($(select).val() !== null && $(select).val() !== '') {
                                                         formGroup = $(select).closest('.form-group');
                                                         formGroup.show();
+                                                    } else if ($(select).val() === null) {
+                                                        formGroup = $(select).closest('.form-group');
+                                                        formGroup.hide();
                                                     }
                                                 }
                                             }
