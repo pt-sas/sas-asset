@@ -4,6 +4,7 @@ namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
 use App\Models\M_Menu;
+use App\Models\M_Reference;
 use Config\Services;
 
 class Menu extends BaseController
@@ -17,7 +18,20 @@ class Menu extends BaseController
 
 	public function index()
 	{
-		return $this->template->render('backend/configuration/menu/v_menu');
+		$reference = new M_Reference($this->request);
+
+		$data = [
+			'ref_list' => $reference->findBy([
+				'sys_reference.name'              => 'SYS_Menu Action',
+				'sys_reference.isactive'          => 'Y',
+				'sys_ref_detail.isactive'         => 'Y',
+			], null, [
+				'field'     => 'sys_ref_detail.name',
+				'option'    => 'ASC'
+			])->getResult()
+		];
+
+		return $this->template->render('backend/configuration/menu/v_menu', $data);
 	}
 
 	public function showAll()

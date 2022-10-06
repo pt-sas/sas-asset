@@ -25,13 +25,24 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="sys_menu_id">Parent </label>
+                    <label for="action">Action <span class="required">*</span></label>
+                    <select class="form-control select2" id="action" name="action">
+                        <option value="">Select Action</option>
+                        <?php foreach ($ref_list as $row) : ?>
+                            <option value="<?= $row->value ?>"><?= $row->name ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="form-text text-danger" id="error_action"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="sys_menu_id">Parent <span class="required">*</span></label>
                     <select class="form-control select-data" id="sys_menu_id" name="sys_menu_id" data-url="menu/getList">
                         <option value="">Select Parent</option>
                     </select>
+                    <small class="form-text text-danger" id="error_sys_menu_id"></small>
                 </div>
-            </div>
-            <div class="col-md-12">
                 <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">

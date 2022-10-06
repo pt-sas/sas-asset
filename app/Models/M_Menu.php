@@ -19,7 +19,8 @@ class M_Menu extends Model
         'status',
         'isactive',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'action'
     ];
     protected $useTimestamps        = true;
     protected $returnType           = 'App\Entities\Menu';

@@ -14,6 +14,7 @@ class Menu extends Entity
 	protected $initialcode;
 	protected $created_by;
 	protected $updated_by;
+	protected $action;
 
 	protected $dates   = [
 		'created_at',
@@ -119,5 +120,15 @@ class Menu extends Entity
 	public function setUpdatedBy($updated_by)
 	{
 		$this->attributes['updated_by'] = $updated_by;
+	}
+
+	public function getAction()
+	{
+		return $this->attributes['action'];
+	}
+
+	public function setAction($action)
+	{
+		$this->attributes['action'] = $action;
 	}
 }

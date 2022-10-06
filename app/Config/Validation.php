@@ -75,6 +75,20 @@ class Validation
         ],
         'sequence'          => [
             'rules'         =>    'required'
+        ],
+        'sys_menu_id' => [
+            'label'         => 'Parent',
+            'rules'         => 'required',
+            'errors'        => [
+                'required'  => 'Please Choose the {field} Line'
+            ]
+        ],
+        'action' => [
+            'label'         => 'Action',
+            'rules'         => 'required',
+            'errors'        => [
+                'required'  => 'Please Choose the {field} Line'
+            ]
         ]
     ];
 

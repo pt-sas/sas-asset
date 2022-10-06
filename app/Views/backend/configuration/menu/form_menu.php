@@ -25,12 +25,21 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
+                    <label for="action">Action </label>
+                    <select class="form-control select2" id="action" name="action">
+                        <option value="">Select Action</option>
+                        <?php foreach ($ref_list as $row) : ?>
+                            <option value="<?= $row->value ?>"><?= $row->name ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
                     <label for="icon">Icon <span class="required">*</span></label>
                     <input type="text" class="form-control" id="icon" name="icon" placeholder="fas fa-tachometer-alt">
                     <small class="form-text text-danger" id="error_icon"></small>
                 </div>
-            </div>
-            <div class="col-md-12">
                 <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">

@@ -5,6 +5,7 @@ namespace App\Controllers\Backend;
 use App\Controllers\BaseController;
 use App\Models\M_Submenu;
 use App\Models\M_Menu;
+use App\Models\M_Reference;
 use Config\Services;
 
 class Submenu extends BaseController
@@ -18,7 +19,20 @@ class Submenu extends BaseController
 
 	public function index()
 	{
-		return $this->template->render('backend/configuration/submenu/v_submenu');
+		$reference = new M_Reference($this->request);
+
+		$data = [
+			'ref_list' => $reference->findBy([
+				'sys_reference.name'              => 'SYS_Menu Action',
+				'sys_reference.isactive'          => 'Y',
+				'sys_ref_detail.isactive'         => 'Y',
+			], null, [
+				'field'     => 'sys_ref_detail.name',
+				'option'    => 'ASC'
+			])->getResult()
+		];
+
+		return $this->template->render('backend/configuration/submenu/v_submenu', $data);
 	}
 
 	public function showAll()
@@ -93,11 +107,8 @@ class Submenu extends BaseController
 			try {
 				$list = $this->model->where($this->model->primaryKey, $id)->findAll();
 
-				if (!empty($list[0]->getMenuId())) {
-					$rowMenu = $menu->find($list[0]->getMenuId());
-
-					$list = $this->field->setDataSelect($menu->table, $list, $menu->primaryKey, $rowMenu->getMenuId(), $rowMenu->getName());
-				}
+				$rowMenu = $menu->find($list[0]->getMenuId());
+				$list = $this->field->setDataSelect($menu->table, $list, $menu->primaryKey, $rowMenu->getMenuId(), $rowMenu->getName());
 
 				$result = [
 					'header'    => $this->field->store($this->model->table, $list)
