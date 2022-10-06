@@ -918,4 +918,43 @@ class Validation
             ]
         ]
     ];
+
+    public $reference = [
+        'name'                  => [
+            'label'             => 'Name',
+            'rules'             => 'required|is_unique[sys_reference.name,sys_reference_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'validationtype'        => [
+            'label'             => 'Validation Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'line'                  => [
+            'label'             => 'Reference List',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'detail.table.*.value'  => [
+            'label'             => 'Search Key',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line'
+            ]
+        ],
+        'detail.table.*.name'  => [
+            'label'             => 'Name',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line'
+            ]
+        ]
+    ];
 }
