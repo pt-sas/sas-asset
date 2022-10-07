@@ -1484,7 +1484,13 @@ $('.btn_filter').click(function (evt) {
     const form = container.find('form');
     let oriElement = _this.html();
     let textElement = _this.text().trim();
-    let s = main_page.find('.card');
+    let s = container.find('.card');
+
+    //? Identified card is more than 1 page 
+    if (s.length > 1)
+        s = container.find('.page-inner');
+    else
+        s = main_page.find('.card');
 
     formTable = form.serializeArray();
 
