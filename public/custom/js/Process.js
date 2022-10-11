@@ -273,7 +273,7 @@ $('.save_form').click(function (evt) {
                 let className = field[i].className.split(/\s+/);
 
                 //* Set field and value to formData 
-                if (field[i].type == 'text' || field[i].type == 'textarea' || field[i].type == 'select-one')
+                if (field[i].type == 'text' || field[i].type == 'textarea' || field[i].type == 'select-one' || field[i].type == 'password' || field[i].type == 'hidden')
                     formData.append(field[i].name, field[i].value);
 
                 //* Field type input radio
