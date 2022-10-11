@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '326ab825c141073338850ec20b40f1cb5aaf4431',
+    'reference' => '913521fcf4627e02283194ec875e3424fe37f4d7',
     'name' => 'codeigniter4/appstarter',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '326ab825c141073338850ec20b40f1cb5aaf4431',
+      'reference' => '913521fcf4627e02283194ec875e3424fe37f4d7',
     ),
     'codeigniter4/framework' => 
     array (
@@ -55,6 +55,33 @@
       array (
       ),
       'reference' => 'd7f08a622b3346766325488aa32ddc93ccdecc75',
+    ),
+    'guzzlehttp/guzzle' => 
+    array (
+      'pretty_version' => '7.5.0',
+      'version' => '7.5.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'b50a2a1251152e43f6a37f0fa053e730a67d25ba',
+    ),
+    'guzzlehttp/promises' => 
+    array (
+      'pretty_version' => '1.5.2',
+      'version' => '1.5.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'b94b2807d85443f9719887892882d0329d1e2598',
+    ),
+    'guzzlehttp/psr7' => 
+    array (
+      'pretty_version' => '2.4.1',
+      'version' => '2.4.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '69568e4293f4fa993f3b0e51c9723e1e17c41379',
     ),
     'html2text/html2text' => 
     array (
@@ -154,6 +181,24 @@
       array (
       ),
       'reference' => '210577fe3cf7badcc5814d99455df46564f3c077',
+    ),
+    'paragonie/random_compat' => 
+    array (
+      'pretty_version' => 'v9.99.100',
+      'version' => '9.99.100.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '996434e5492cb4c3edcb9168db6fbb1359ef965a',
+    ),
+    'paragonie/sodium_compat' => 
+    array (
+      'pretty_version' => 'v1.19.0',
+      'version' => '1.19.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'cb15e403ecbe6a6cc515f855c310eb6b1872a933',
     ),
     'phar-io/manifest' => 
     array (
@@ -290,6 +335,13 @@
       ),
       'reference' => '2dfb5f6c5eff0e91e20e913f8c5452ed95b86621',
     ),
+    'psr/http-client-implementation' => 
+    array (
+      'provided' => 
+      array (
+        0 => '1.0',
+      ),
+    ),
     'psr/http-factory' => 
     array (
       'pretty_version' => '1.0.1',
@@ -299,6 +351,13 @@
       ),
       'reference' => '12ac7fcd07e5b077433f5f2bee95b3a771bf61be',
     ),
+    'psr/http-factory-implementation' => 
+    array (
+      'provided' => 
+      array (
+        0 => '1.0',
+      ),
+    ),
     'psr/http-message' => 
     array (
       'pretty_version' => '1.0.1',
@@ -307,6 +366,13 @@
       array (
       ),
       'reference' => 'f6561bf28d520154e4b0ec72be95418abe6d9363',
+    ),
+    'psr/http-message-implementation' => 
+    array (
+      'provided' => 
+      array (
+        0 => '1.0',
+      ),
     ),
     'psr/log' => 
     array (
@@ -325,6 +391,24 @@
       array (
       ),
       'reference' => '408d5eafb83c57f6365a3ca330ff23aa4a5fa39b',
+    ),
+    'pusher/pusher-php-server' => 
+    array (
+      'pretty_version' => '7.2.0',
+      'version' => '7.2.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '7ed4a62956c7426814c7dc67b2bb764cd0e1a603',
+    ),
+    'ralouphie/getallheaders' => 
+    array (
+      'pretty_version' => '3.0.3',
+      'version' => '3.0.3.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '120b605dfeb996808c31b6477290a714d356e822',
     ),
     'sebastian/cli-parser' => 
     array (
