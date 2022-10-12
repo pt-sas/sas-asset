@@ -65,16 +65,16 @@ class Validation
 
     public $submenu = [
         'name'              => [
-            'rules'         =>    'required|is_unique[sys_submenu.name,sys_submenu_id,{id}]',
+            'rules'         => 'required|is_unique[sys_submenu.name,sys_submenu_id,{id}]',
             'errors'        => [
                 'is_unique' => 'This {field} already exists.'
             ]
         ],
         'url'               => [
-            'rules'         =>    'required|valid_url'
+            'rules'         => 'required'
         ],
         'sequence'          => [
-            'rules'         =>    'required'
+            'rules'         => 'required'
         ],
         'sys_menu_id' => [
             'label'         => 'Parent',
