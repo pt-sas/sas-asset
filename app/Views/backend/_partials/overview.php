@@ -11,47 +11,37 @@
     <?= $this->include('backend/_partials/sidebar') ?>
 
     <div class="main-panel">
-      <?php if ($title == 'Mailbox') : ?>
-        <div class="container container-full">
-          <div class="page-inner page-inner-fill">
-            <?= $this->renderSection('content') ?>
-          </div>
-        </div>
-      <?php else : ?>
-        <div class="container">
-          <div class="page-inner">
-            <?php if (!empty(session()->getFlashdata('error'))) : ?>
-              <div class="alert alert-danger">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <?= session()->getFlashdata('error'); ?>
-              </div>
-            <?php endif; ?>
+      <div class="container">
+        <div class="page-inner">
+          <?php if (!empty(session()->getFlashdata('error'))) : ?>
+            <div class="alert alert-danger">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <?= session()->getFlashdata('error'); ?>
+            </div>
+          <?php endif; ?>
 
-            <?= $this->include('backend/_partials/breadcrumb') ?>
-            <?= !$filter ? '' : $this->include($filter) ?>
-            <?php if ($title) : ?>
-              <div class="row main_page">
-                <div class="col-md-12">
-                  <div class="card">
-                    <div class="card-header">
-                      <div class="float-left">
-                        <h4 class="card-title"><?= $title; ?></h4>
-                      </div>
-                      <div class="float-right">
-                        <?= $toolbar_button ?>
-                      </div>
-                    </div>
-                    <?= $this->renderSection('content') ?>
-                    <?= $action_button ?>
+          <?= $this->include('backend/_partials/breadcrumb') ?>
+          <?= !$filter ? '' : $this->include($filter) ?>
+          <div class="row main_page">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-header">
+                  <div class="float-left">
+                    <h4 class="card-title"><?= $title; ?></h4>
+                  </div>
+                  <div class="float-right">
+                    <?= $toolbar_button ?>
                   </div>
                 </div>
+                <?= $this->renderSection('content') ?>
+                <?= $action_button ?>
               </div>
-            <?php endif ?>
+            </div>
           </div>
         </div>
-      <?php endif; ?>
+      </div>
       <?= $this->include('backend/_partials/footer') ?>
     </div>
 
