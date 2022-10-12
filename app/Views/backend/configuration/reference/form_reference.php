@@ -1,5 +1,5 @@
 <div class="card-body card-form">
-    <form class="form-horizontal" id="form_wscenario">
+    <form class="form-horizontal" id="form_reference">
         <?= csrf_field(); ?>
         <div class="row">
             <div class="col-md-6">
