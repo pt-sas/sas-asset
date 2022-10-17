@@ -393,11 +393,28 @@ class BaseController extends Controller
 				//* Set Updated_By Field 
 				$dataInsert = $this->doSetField($this->updatedByField, $this->access->getSessionUser(), $dataInsert);
 
+				//* Old data line 
+				$lineId = [];
+				$oldData = $model->where($foreignKey, $this->getID())->findAll();
+
+				//? Check old data is exist
+				if ($oldData)
+					foreach ($oldData as $row) :
+						$lineId[] = $row->{$this->primaryKey};
+					endforeach;
+
 				//TODO: Insert line data 
 				$result = $model->builder->insertBatch($dataInsert);
 
 				if ($result > 0) {
-					$newData = $model->where($foreignKey, $this->getID())->findAll();
+					//? Check data line
+					if (empty($lineId)) {
+						$newData = $model->where($foreignKey, $this->getID())->findAll();
+					} else {
+						$newData = $model->whereNotIn($this->primaryKey, $lineId)
+							->where($foreignKey, $this->getID())
+							->findAll();
+					}
 
 					//TODO: Insert Change Log
 					foreach ($newData as $new) :
