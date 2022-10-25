@@ -847,6 +847,29 @@ $(document).ready(function (e) {
         }
     });
 
+    $('.multiple-select-supplier').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'supplier/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
     $('.select-groupasset').select2({
         placeholder: 'Select an option',
         width: '100%',
