@@ -33,9 +33,11 @@ class Template
 
         $view_data['title'] = $this->access->getMenu($uri, 'name');
         $view_data['filter'] = $this->renderPage($template, 'form_filter');
+        $view_data['table_report'] = $this->renderPage($template, 'table_report');
         $view_data['sidebar'] = $this->menuSidebar();
         $view_data['toolbar_button'] = $this->toolbarButton();
         $view_data['action_button'] = $this->actionButton();
+        $view_data['action_menu'] = $this->access->getMenu($uri, 'action');
 
         $view_data['username'] = $this->access->getUser('username');
         $view_data['name'] = $this->access->getUser('name');
@@ -102,21 +104,26 @@ class Template
         $uri = $this->request->uri->getSegment(2);
         $allBtn = '';
 
-        $btnNew = '<button type="button" class="btn btn-primary btn-sm btn-round ml-auto new_form" data-toggle="tooltip" data-placement="top" title="New Record"><i class="fas fa-plus fa-fw"></i> Add New</button>';
-        $btnExport = '<a id="dt-button" data-toggle="tooltip" data-placement="top" title="Export"></a> ';
+        $btnNew = '<button type="button" class="btn btn-primary btn-sm btn-round ml-auto new_form" title="New Record"><i class="fas fa-plus fa-fw"></i> Add New</button>';
+        $btnExport = '<a id="dt-button"></a> ';
 
-        $btnReQuery = '<button type="button" class="btn btn-success btn-sm btn-round ml-auto btn_requery" data-toggle="tooltip" data-placement="top" title="ReQuery"><i class="fas fa-sync fa-fw"></i> ReQuery </button>';
+        $btnReQuery = '<button type="button" class="btn btn-success btn-sm btn-round ml-auto btn_requery" title="ReQuery"><i class="fas fa-sync fa-fw"></i> ReQuery </button>';
 
         $check = $this->access->checkCrud($uri, $this->isCreate);
         $role = $this->access->getRole();
 
-        if ($role && $role->getIsCanExport() === 'Y')
+        //TODO: Get field action from menu
+        $action_menu = $this->access->getMenu($uri, 'action');
+
+        if (($role && $role->getIsCanExport() === 'Y' || $action_menu === 'R') && $action_menu !== 'F')
             $allBtn .= $btnExport;
 
-        $allBtn .= $btnReQuery . ' ';
+        if ($action_menu === 'T') {
+            $allBtn .= $btnReQuery . ' ';
 
-        if ($check === 'Y')
-            $allBtn .= $btnNew;
+            if ($check === 'Y')
+                $allBtn .= $btnNew;
+        }
 
         return $allBtn;
     }
@@ -126,15 +133,32 @@ class Template
         $uri = $this->request->uri->getSegment(2);
         $allBtn = '';
 
-        $btnBottom = '<div class="card-action card-button">
+        //* Button for Table Form 
+        $btnTableForm = '<div class="card-action card-button">
                         <button type="button" class="btn btn-outline-danger btn-round ml-auto close_form">Close</button>
                         <button type="button" class="btn btn-primary btn-round ml-auto save_form">Save changes</button>
                     </div>';
 
+        //* Button for Parameter Form 
+        $btnParamForm = '<div class="card-action d-flex justify-content-center">
+                            <div>
+                                <button type="button" class="btn btn-danger btn-sm btn-round ml-auto btn_reset_form"><i class="fas fa-undo-alt fa-fw"></i> Reset</button>
+                                <button type="button" class="btn btn-success btn-sm btn-round ml-auto btn_ok_form"><i class="fas fa-check fa-fw"></i> OK</button>
+                            </div>
+                        </div>';
+
         $check = $this->access->checkCrud($uri, $this->isCreate);
 
-        if ($check === 'Y')
-            $allBtn .= $btnBottom;
+        //TODO: Get field action from menu 
+        $action_menu = $this->access->getMenu($uri, 'action');
+
+        if ($check === 'Y') {
+            if ($action_menu === 'T')
+                $allBtn .= $btnTableForm;
+
+            if ($action_menu === 'R')
+                $allBtn .= $btnParamForm;
+        }
 
         return $allBtn;
     }

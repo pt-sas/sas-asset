@@ -160,7 +160,6 @@ function setReceiptDetail(form, fieldName, id, receipt_id = 0) {
             hideLoadingForm(form.prop('id'));
         },
         success: function (result) {
-            console.log(result)
             if (result[0].success) {
                 let arrMsg = result[0].message;
 
@@ -663,7 +662,7 @@ $(document).ready(function (e) {
         }
     });
 
-    $('.select-branch').select2({
+    $('.select-branch, .multiple-select-branch').select2({
         placeholder: 'Select an option',
         width: '100%',
         theme: 'bootstrap',
@@ -671,6 +670,52 @@ $(document).ready(function (e) {
         ajax: {
             dataType: 'JSON',
             url: ADMIN_URL + 'branch/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-division, .multiple-select-division').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        allowClear: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'division/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-room, .multiple-select-room').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        allowClear: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'room/getList',
             delay: 250,
             data: function (params) {
                 return {
@@ -718,6 +763,121 @@ $(document).ready(function (e) {
         ajax: {
             dataType: 'JSON',
             url: ADMIN_URL + 'supplier/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-groupasset, .multiple-select-groupasset').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        allowClear: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'groupasset/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-brand, .multiple-select-brand').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        allowClear: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'brand/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-category, .multiple-select-category').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        allowClear: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'category/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-subcategory, .multiple-select-subcategory').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        allowClear: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'subcategory/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-type, .multiple-select-type').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        allowClear: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'type/getList',
             delay: 250,
             data: function (params) {
                 return {
@@ -871,5 +1031,45 @@ $('#form_responsible').on('change', '#responsibletype', function (evt) {
         } else {
             form.find('select[name=sys_user_id]').closest('.form-group').hide();
         }
+    }
+});
+
+$('#parameter_assetdetail').on('change', '[name="md_branch_id"]', function (evt) {
+    let url = ADMIN_URL + 'room' + '/getList';
+    let value = this.value;
+
+    $('[name="md_room_id"]').empty();
+
+    // Set condition when clear or value zero
+    if (value !== '' && value !== '0') {
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: {
+                reference: value,
+                key: 'all'
+            },
+            dataType: 'JSON',
+            success: function (result) {
+                // $('[name="md_room_id"]').append('<option value=""></option>');
+
+                if (!result[0].error) {
+                    $.each(result, function (idx, item) {
+                        $('[name="md_room_id"]').append('<option value="' + item.id + '">' + item.text + '</option>');
+                    });
+                } else {
+                    Swal.fire({
+                        type: 'error',
+                        title: result[0].message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            },
+            error: function (jqXHR, exception) {
+                showError(jqXHR, exception);
+            }
+        });
     }
 });

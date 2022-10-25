@@ -18,7 +18,11 @@ let ID,
     setSave,
     ul,
     formTable,
-    _tableInfo;
+    _tableInfo,
+    formReport,
+    _tableReport;
+
+let clear = false;
 
 // Data array from option
 let option = [];
@@ -194,6 +198,38 @@ _tableInfo = $('.table_info').DataTable({
 });
 
 /**
+ * Table Report
+ */
+_tableReport = $('.table_report').DataTable({
+    'serverSide': true,
+    'ajax': {
+        'url': SITE_URL + SHOWALL,
+        'type': 'POST',
+        'data': function (d, setting) {
+            return $.extend({}, d, {
+                form: formReport,
+                clear: clear
+            });
+        }
+    },
+    'columnDefs': [{
+        'targets': '_all',
+        'orderable': false,
+        'width': 2
+    }],
+    'order': [],
+    'displayLength': -1,
+    'lengthChange': false,
+    'info': false,
+    'searching': false,
+    'paging': false,
+    'autoWidth': false,
+    'scrollX': true,
+    'scrollY': '70vh',
+    'scrollCollapse': true
+});
+
+/**
  * 
  * @returns check fixed column datatable
  */
@@ -228,7 +264,10 @@ function checkScrollY() {
 }
 
 function reloadTable() {
-    _table.ajax.reload(null, false);
+    if ($('.tb_display').length > 0)
+        _table.ajax.reload(null, false);
+    else if ($('.table_report').length > 0)
+        _tableReport.ajax.reload(null, false).columns.adjust();
 }
 
 /**
@@ -1102,7 +1141,7 @@ _tableLine.on('click', '.btn_delete', function (evt) {
                         });
 
                         // Update field grand total
-                        if (form.find('input[name="grandtotal"]').length > 0)
+                        if (form.find('input[name="grandtotal"]').length > 0 && !result[0].message)
                             form.find('input[name="grandtotal"]').val(formatRupiah(result[0].message));
 
                         row.remove().draw(false);
@@ -1475,7 +1514,7 @@ $('.btn_export').click(function (evt) {
 });
 
 /**
- * Process for filter datatable form filter
+ * Button Filter datatable form filter
  */
 $('.btn_filter').click(function (evt) {
     let _this = $(this);
@@ -1509,9 +1548,17 @@ $('.btn_filter').click(function (evt) {
  */
 $('.btn_requery').click(function () {
     let _this = $(this);
-    let s = _this.parents(".card");
+    const container = _this.parents('.container');
+    const main_page = container.find('.main_page');
+    let s = container.find('.card');
 
-    $(this).tooltip('hide');
+    //? Identified card is more than 1 page 
+    if (s.length > 1)
+        s = container.find('.page-inner');
+    else
+        s = main_page.find('.card');
+
+    clear = false;
 
     s.length && (s.addClass("is-loading"),
         reloadTable(),
@@ -1762,6 +1809,103 @@ $('.btn_save_info').click(function (evt) {
 
 });
 
+
+/**
+ * Event Click Button OK Report
+ */
+$('.btn_ok_form').on('click', function (evt) {
+    const target = $(evt.target);
+    const pageInner = target.closest('.page-inner');
+    const card = target.closest('.card');
+    const cardTableReport = pageInner.find('.card-table-report');
+    const floatRight = cardTableReport.find('.float-right');
+    const form = card.find('form');
+    const disabled = form.find('[disabled]');
+
+    //! Remove attribute disabled field
+    disabled.removeAttr('disabled');
+
+    //TODO: Collect field array
+    let field = form.find('input, select').map(function () {
+        let row = {};
+
+        row['name'] = $(this).attr('name');
+
+        if (this.type !== 'checkbox' && this.type !== 'select-multiple')
+            row['value'] = this.value;
+        else if (this.type === 'select-multiple')
+            row['value'] = $(this).val();
+        else
+            row['value'] = this.checked ? 'Y' : 'N';
+
+        row['type'] = this.type;
+
+        return row;
+    }).get();
+
+    formReport = field;
+
+    //! Set attribute disabled field
+    disabled.prop('disabled', true);
+
+    //* Set clear to true 
+    clear = false;
+
+    //* Show Toolbar Button
+    floatRight.removeClass('d-none');
+
+    //TODO: Loading and processing
+    pageInner.length && (pageInner.addClass("is-loading"),
+        reloadTable(),
+        setTimeout(function () {
+            pageInner.removeClass("is-loading");
+        }, 500));
+
+    //* Show Toolbar Button
+    cardTableReport.addClass('d-block');
+});
+
+
+/**
+ * Event Click Button Reset Report
+ */
+$('.btn_reset_form').on('click', function (evt) {
+    const target = $(evt.target);
+    const pageInner = target.closest('.page-inner');
+    const card = target.closest('.card');
+    const cardTableReport = pageInner.find('.card-table-report');
+    const floatRight = cardTableReport.find('.float-right');
+    const form = card.find('form');
+    const field = form.find('input, select');
+
+    for (let i = 0; i < field.length; i++) {
+        if (field[i].name !== '') {
+
+            //TODO: Collect Field yang readonly atau disabled 
+            if ((field[i].readOnly || field[i].disabled))
+                fieldReadOnly.push(field[i].name);
+        }
+    }
+
+    //* Reset form parameter 
+    clearForm(evt);
+
+    //* Set clear to true 
+    clear = true;
+
+    //* Hide Toolbar Button 
+    floatRight.addClass('d-none');
+
+    //TODO: Loading and processing
+    pageInner.length && (pageInner.addClass("is-loading"),
+        reloadTable(),
+        setTimeout(function () {
+            pageInner.removeClass("is-loading");
+        }, 500));
+
+    //* Hide Table Report
+    cardTableReport.removeClass('d-block');
+});
 
 /**
  * Process login
@@ -2032,7 +2176,7 @@ function arrContains(value, arr) {
  * @param {*} data from database
  */
 function errorForm(parent, data) {
-    const errorInput = parent.find('input, select, textarea');
+    const errorInput = parent.find('input, select, textarea').not('.line');
     const errorText = parent.find('small');
 
     let arrInput = [];
@@ -2056,8 +2200,13 @@ function errorForm(parent, data) {
         let inputName = arrContains(field, arrInput);
 
         if (labelMsg !== '' && j > 0) {
-            parent.find('small[id=' + textName + ']:not(.line)').html(labelMsg);
-            parent.find('input:text[name=' + inputName + ']:not(.line), select[name=' + inputName + ']:not(.line), textarea[name=' + inputName + ']:not(.line), input:password[name=' + inputName + ']:not(.line)').closest('.form-group').addClass('has-error');
+            if (error !== 'error_table') {
+                parent.find('small[id=' + textName + ']').html(labelMsg);
+                parent.find('input:text[name=' + inputName + '], select[name=' + inputName + '], textarea[name=' + inputName + '], input:password[name=' + inputName + ']')
+                    .not('.line')
+                    .closest('.form-group')
+                    .addClass('has-error');
+            }
 
             // Check datatable line for get validation
             if (parent.find('table.tb_displayline').length > 0) {
@@ -2145,7 +2294,7 @@ function clearForm(evt) {
     const container = $(evt.target).closest('.container');
     let parent = $(evt.target).closest('.row');
     const cardForm = parent.find('.card-form');
-    let form = cardForm.find('form');
+    let form = cardForm.length > 0 ? cardForm.find('form') : parent.find('form');
 
     if ($(evt.target).closest('.row').length == 0) {
         parent = $(evt.target).closest('.modal');
@@ -2802,6 +2951,44 @@ $(document).ready(function (e) {
             .appendTo($('#dt-button'));
     }
 
+    if ($('.table_report').length > 0) {
+        /**
+         * Button Table Report
+         */
+        new $.fn.dataTable.Buttons(_tableReport, {
+            buttons: [{
+                    extend: 'colvis',
+                    className: 'btn btn-primary btn-sm btn-round ml-auto text-white',
+                    text: '<i class="fas fa-table fa-fw"></i> Visibility',
+                    attr: {
+                        title: 'Column Visibility',
+                    }
+                },
+                {
+                    extend: 'collection',
+                    className: 'btn btn-warning btn-sm btn-round ml-auto text-white',
+                    text: '<i class="fas fa-download fa-fw"></i> Export',
+                    attr: {
+                        title: 'Export',
+                    },
+                    autoClose: true,
+                    buttons: [{
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        titleAttr: 'Export to Excel',
+                        title: '',
+                        exportOptions: {
+                            columns: ':visible'
+                        }
+                    }]
+                },
+            ]
+        });
+
+        _tableReport.buttons().container()
+            .appendTo($('#dt-button'));
+    }
+
     $('.daterange').daterangepicker({
         autoUpdateInput: false,
         locale: {
@@ -3100,6 +3287,10 @@ function checkExistUserRole(role) {
     return value;
 }
 
+
+/**
+ * Event change input class active type checkbox on the _tableLine
+ */
 _tableLine.on('change', 'input.active:checkbox', function (evt) {
     const tr = $(this).closest('tr');
     const field = tr.find('input, select');

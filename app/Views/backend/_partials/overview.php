@@ -22,24 +22,51 @@
             </div>
           <?php endif; ?>
 
+          <!-- Show Breadcrumb -->
           <?= $this->include('backend/_partials/breadcrumb') ?>
-          <?= !$filter ? '' : $this->include($filter) ?>
-          <div class="row main_page">
-            <div class="col-md-12">
-              <div class="card">
-                <div class="card-header">
-                  <div class="float-left">
-                    <h4 class="card-title"><?= $title; ?></h4>
+
+          <?php if ($action_menu === 'F' || $action_menu === 'T' || $action_menu === 'R') : ?>
+            <!-- Show Page Filter -->
+            <?= $filter && $action_menu === 'T' ? $this->include($filter) : '' ?>
+
+            <!-- Section Row Main Page-->
+            <div class="row main_page">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="float-left">
+                      <h4 class="card-title"><?= $title; ?></h4>
+                    </div>
+                    <?php if ($action_menu !== 'R') : ?>
+                      <div class="float-right">
+                        <?= $toolbar_button ?>
+                      </div>
+                    <?php endif; ?>
                   </div>
-                  <div class="float-right">
-                    <?= $toolbar_button ?>
-                  </div>
+                  <?= $this->renderSection('content') ?>
+                  <?= $action_button ?>
                 </div>
-                <?= $this->renderSection('content') ?>
-                <?= $action_button ?>
               </div>
             </div>
-          </div>
+
+            <!-- View Table Report -->
+            <?php if ($action_menu === 'R') : ?>
+              <div class="row">
+                <div class="col-md-12 card-table-report">
+                  <div class="card">
+                    <div class="card-header">
+                      <div class="float-right d-none">
+                        <?= $toolbar_button ?>
+                      </div>
+                    </div>
+                    <?= $table_report ? $this->include($table_report) : '' ?>
+                  </div>
+                </div>
+              </div>
+            <?php endif; ?>
+          <?php else : ?>
+            <?= $this->renderSection('content') ?>
+          <?php endif; ?>
         </div>
       </div>
       <?= $this->include('backend/_partials/footer') ?>

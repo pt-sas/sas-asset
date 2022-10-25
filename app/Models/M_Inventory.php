@@ -254,4 +254,35 @@ class M_Inventory extends Model
 
 		$transaction->create($data);
 	}
+
+	public function getSelectDetail()
+	{
+		$sql = $this->table . '.*,
+					v_all_location.mdb_name as branch,
+					v_all_location.mdb_name as division,
+					v_all_location.mdr_name as room,
+					v_all_location.mde_name as employee,
+					v_all_product.mdg_name as groupasset,
+					v_all_product.md_brand_id,
+					v_all_product.mdbd_name as brand,
+					v_all_product.md_category_id,
+					v_all_product.mdc_name as category,
+					v_all_product.md_subcategory_id,
+					v_all_product.mds_name as subcategory,
+					v_all_product.md_type_id,
+					v_all_product.mdt_name as type,
+					v_all_product.mdp_name as product';
+
+		return $sql;
+	}
+
+	public function getJoinDetail()
+	{
+		$sql = [
+			$this->setDataJoin('v_all_location', 'v_all_location.md_employee_id = ' . $this->table . '.md_employee_id', 'left'),
+			$this->setDataJoin('v_all_product', 'v_all_product.md_product_id = ' . $this->table . '.md_product_id', 'left')
+		];
+
+		return $sql;
+	}
 }

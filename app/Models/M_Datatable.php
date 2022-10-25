@@ -55,7 +55,7 @@ class M_Datatable extends Model
 
         if ($this->request->getPost('order')) {
             $this->builder->orderBy($column_order[$this->request->getPost('order')['0']['column']], $this->request->getPost('order')['0']['dir']);
-        } else if (isset($order)) {
+        } else if (isset($order) && !empty($order)) {
             $this->builder->orderBy(key($order), $order[key($order)]);
         }
     }
@@ -88,21 +88,35 @@ class M_Datatable extends Model
 
     public function filterDatatable($table, $post)
     {
-        $fields = $this->db->getFieldData($table);
-
         foreach ($post['form'] as $value) :
-            if (!empty($value['value']) && $this->db->fieldExists($value['name'], $table)) {
-                foreach ($fields as $field) :
-                    if ($field->name === $value['name'] && $field->type === 'timestamp') {
-                        $datetime =  urldecode($value['value']);
-                        $date = explode(" - ", $datetime);
+            if (!empty($value['value'])) {
+                //? Cek kolom ditable
+                if ($this->db->fieldExists($value['name'], $table)) {
+                    $fields = $this->db->getFieldData($table);
 
-                        $this->builder->where($table . '.' . $value['name'] . ' >= "' . $date[0] . '" AND ' . $table . '.' . $value['name'] . ' <= "' . $date[1] . '"');
+                    foreach ($fields as $field) :
+                        if ($field->name === $value['name'] && $field->type === 'timestamp') {
+                            $datetime =  urldecode($value['value']);
+                            $date = explode(" - ", $datetime);
+
+                            $this->builder->where($table . '.' . $value['name'] . ' >= "' . $date[0] . '" AND ' . $table . '.' . $value['name'] . ' <= "' . $date[1] . '"');
+                        }
+
+                        if ($field->name === $value['name'] && $field->type !== 'timestamp') {
+                            if ($value['type'] === 'select-multiple') {
+                                $this->builder->whereIn($table . '.' . $value['name'] . '', $value['value']);
+                            } else {
+                                $this->builder->where($table . '.' . $value['name'] . '', $value['value']);
+                            }
+                        }
+                    endforeach;
+                } else {
+                    if ($value['type'] === 'select-multiple') {
+                        $this->builder->whereIn($value['name'], $value['value']);
+                    } else {
+                        $this->builder->where($value['name'], $value['value']);
                     }
-
-                    if ($field->name === $value['name'] && $field->type !== 'timestamp')
-                        $this->builder->where($table . '.' . $value['name'] . '', $value['value']);
-                endforeach;
+                }
             }
         endforeach;
     }
