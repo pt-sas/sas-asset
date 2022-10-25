@@ -14,7 +14,7 @@ class Reference extends BaseController
         $this->request = Services::request();
         $this->model = new M_Reference($this->request);
         $this->modelDetail = new M_ReferenceDetail($this->request);
-        $this->entity = new \App\Entities\WScenario();
+        $this->entity = new \App\Entities\Reference();
     }
 
     public function index()
