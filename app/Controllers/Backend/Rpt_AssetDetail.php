@@ -65,8 +65,8 @@ class Rpt_AssetDetail extends BaseController
                     $row[] = $value->employee;
                     $row[] = formatRupiah($value->unitprice);
                     $row[] = format_dmy($value->inventorydate, '-');
-                    $row[] = active($value->isspare);
                     $row[] = active($value->isactive);
+                    $row[] = active($value->isspare);
                     $data[] = $row;
 
                 endforeach;
