@@ -40,7 +40,7 @@ class Rpt_AssetDetail extends BaseController
                 $select = $this->model->getSelectDetail();
                 $join = $this->model->getJoinDetail();
                 $order = $this->request->getPost('columns');
-                $sort = $this->request->getPost('order');
+                $sort = $this->model->order;
                 $search = $this->request->getPost('search');
 
                 $number = $this->request->getPost('start');
