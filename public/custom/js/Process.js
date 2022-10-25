@@ -2837,7 +2837,8 @@ $(document).ready(function (e) {
     });
 
     $('.multiple-select').select2({
-        theme: "bootstrap"
+        theme: "bootstrap",
+        multiple: true
     });
 
     $('.number').on('keypress keyup blur', function (evt) {

@@ -662,7 +662,7 @@ $(document).ready(function (e) {
         }
     });
 
-    $('.select-branch, .multiple-select-branch').select2({
+    $('.select-branch').select2({
         placeholder: 'Select an option',
         width: '100%',
         theme: 'bootstrap',
@@ -685,7 +685,30 @@ $(document).ready(function (e) {
         }
     });
 
-    $('.select-division, .multiple-select-division').select2({
+    $('.multiple-select-branch').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'branch/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-division').select2({
         placeholder: 'Select an option',
         width: '100%',
         theme: 'bootstrap',
@@ -708,11 +731,57 @@ $(document).ready(function (e) {
         }
     });
 
-    $('.select-room, .multiple-select-room').select2({
+    $('.multiple-select-division').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'division/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-room').select2({
         placeholder: 'Select an option',
         width: '100%',
         theme: 'bootstrap',
         allowClear: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'room/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.multiple-select-room').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
         ajax: {
             dataType: 'JSON',
             url: ADMIN_URL + 'room/getList',
@@ -778,7 +847,7 @@ $(document).ready(function (e) {
         }
     });
 
-    $('.select-groupasset, .multiple-select-groupasset').select2({
+    $('.select-groupasset').select2({
         placeholder: 'Select an option',
         width: '100%',
         theme: 'bootstrap',
@@ -801,7 +870,30 @@ $(document).ready(function (e) {
         }
     });
 
-    $('.select-brand, .multiple-select-brand').select2({
+    $('.multiple-select-groupasset').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'groupasset/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-brand').select2({
         placeholder: 'Select an option',
         width: '100%',
         theme: 'bootstrap',
@@ -824,7 +916,30 @@ $(document).ready(function (e) {
         }
     });
 
-    $('.select-category, .multiple-select-category').select2({
+    $('.multiple-select-brand').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'brand/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-category').select2({
         placeholder: 'Select an option',
         width: '100%',
         theme: 'bootstrap',
@@ -847,7 +962,30 @@ $(document).ready(function (e) {
         }
     });
 
-    $('.select-subcategory, .multiple-select-subcategory').select2({
+    $('.multiple-select-category').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'category/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-subcategory').select2({
         placeholder: 'Select an option',
         width: '100%',
         theme: 'bootstrap',
@@ -870,11 +1008,57 @@ $(document).ready(function (e) {
         }
     });
 
-    $('.select-type, .multiple-select-type').select2({
+    $('.multiple-select-subcategory').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'subcategory/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.select-type').select2({
         placeholder: 'Select an option',
         width: '100%',
         theme: 'bootstrap',
         allowClear: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'type/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('.multiple-select-type').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
         ajax: {
             dataType: 'JSON',
             url: ADMIN_URL + 'type/getList',
