@@ -36,7 +36,7 @@ class M_Datatable extends Model
             $this->builder->where($where);
 
         if (isset($post['form']))
-            $this->filterDatatable($table, $post);
+            $this->filterDatatable($table, $post, $join);
 
         $i = 0;
         foreach ($column_search as $item) :
@@ -86,7 +86,7 @@ class M_Datatable extends Model
         return $this->builder->countAllResults();
     }
 
-    public function filterDatatable($table, $post)
+    public function filterDatatable($table, $post, $joinTable)
     {
         foreach ($post['form'] as $value) :
             if (!empty($value['value'])) {
@@ -110,12 +110,34 @@ class M_Datatable extends Model
                             }
                         }
                     endforeach;
-                } else {
-                    if ($value['type'] === 'select-multiple') {
-                        $this->builder->whereIn($value['name'], $value['value']);
-                    } else {
-                        $this->builder->where($value['name'], $value['value']);
-                    }
+                }
+
+                //? Cek kolom dari table join 
+                if (!empty($joinTable)) {
+                    foreach ($joinTable as $row) :
+                        $tableJoin = $row['tableJoin'];
+
+                        if ($this->db->fieldExists($value['name'], $tableJoin)) {
+                            $fields = $this->db->getFieldData($tableJoin);
+
+                            foreach ($fields as $field) :
+                                if ($field->name === $value['name'] && $field->type === 'timestamp') {
+                                    $datetime =  urldecode($value['value']);
+                                    $date = explode(" - ", $datetime);
+
+                                    $this->builder->where($tableJoin . '.' . $value['name'] . ' >= "' . $date[0] . '" AND ' . $tableJoin . '.' . $value['name'] . ' <= "' . $date[1] . '"');
+                                }
+
+                                if ($field->name === $value['name'] && $field->type !== 'timestamp') {
+                                    if ($value['type'] === 'select-multiple') {
+                                        $this->builder->whereIn($tableJoin . '.' . $value['name'] . '', $value['value']);
+                                    } else {
+                                        $this->builder->where($tableJoin . '.' . $value['name'] . '', $value['value']);
+                                    }
+                                }
+                            endforeach;
+                        }
+                    endforeach;
                 }
             }
         endforeach;
