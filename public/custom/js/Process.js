@@ -102,9 +102,9 @@ _table = $('.tb_display').DataTable({
     ],
     'order': [],
     'autoWidth': false,
-    'scrollX': checkScrollX(),
-    'scrollY': checkScrollY(),
-    'scrollCollapse': checkScrollX(),
+    'scrollX': true,
+    'scrollY': '50vh',
+    'scrollCollapse': true,
     'fixedColumns': checkFixedColumns(),
 });
 
@@ -3322,4 +3322,12 @@ _tableLine.on('change', 'input.active:checkbox', function (evt) {
             }
         }
     }
+});
+
+/**
+ * Event Toogle Sidebar to Resize DataTable
+ */
+$('.toggle-sidebar').click(function (evt) {
+    $('.dataTables_scrollHeadInner').addClass('stretch');
+    $('.tb_display').css('width', '100%');
 });

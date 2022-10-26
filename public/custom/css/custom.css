@@ -268,7 +268,7 @@ button.margin-right {
     width: 100% !important;
 }
 
-.dataTables_scrollHeadInner .table-md {
+.dataTables_scrollHeadInner .table-stretch {
     width: 100% !important;
 }
 
@@ -393,6 +393,7 @@ button.margin-right {
 
 .tb_display {
     white-space: pre;
+    width: 100%;
 }
 
 /* Datatable Button Collection */
