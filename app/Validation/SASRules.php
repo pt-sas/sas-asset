@@ -4,8 +4,10 @@ namespace App\Validation;
 
 use Config\Services;
 use Config\Database;
+use InvalidArgumentException;
+use CodeIgniter\Validation\Rules;
 
-class DuplicateRules
+class SASRules
 {
     public function is_exists()
     {
@@ -63,5 +65,44 @@ class DuplicateRules
         }
 
         return $row->get()->getRow() === null;
+    }
+
+    /**
+     * Check the array data to see if the first data value equal second data.
+     * keep a single record by field and value to make it useful
+     * 
+     * Example:
+     *    required_based_field_value[field,keep_value]
+     *    is_exist[isfrom,S]
+     * 
+     * @param string|null $fields
+     * @param array $data
+     * @return boolean
+     */
+    public function required_based_field_value($str = null, ?string $fields = null, array $data = []): bool
+    {
+        $rules = new Rules;
+
+        if (is_null($fields) || empty($data)) {
+            throw new InvalidArgumentException('You must supply the parameters: field, data.');
+        }
+
+        $fields  = array_map('trim', explode(',', $fields));
+        $present = $rules->required($str ?? '');
+
+        if ($present) {
+            return true;
+        }
+
+        // Index first of array 
+        $first = current($fields);
+        reset($fields); // Index first
+        // Index second of array
+        $second = next($fields);
+
+        if (!empty($data[$first]) && $data[$first] === $second)
+            return false;
+
+        return true;
     }
 }
