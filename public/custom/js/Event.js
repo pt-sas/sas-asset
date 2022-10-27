@@ -127,11 +127,14 @@ _tableLine.on('change', 'select[name="md_employee_id"]', function (evt) {
 
     if (employee_id !== '') {
         // Column Branch
-        getOption('branch', 'md_branch_id', tr, null, employee_id);
+        if (tr.find('select[name="md_branch_id"]').length > 0)
+            getOption('branch', 'md_branch_id', tr, null, employee_id);
         // Column Division
-        getOption('division', 'md_division_id', tr, null, employee_id);
+        if (tr.find('select[name="md_division_id"]').length > 0)
+            getOption('division', 'md_division_id', tr, null, employee_id);
         // Column Room
-        getOption('room', 'md_room_id', tr, null, employee_id);
+        if (tr.find('select[name="md_room_id"]').length > 0)
+            getOption('room', 'md_room_id', tr, null, employee_id);
     }
 });
 
@@ -1278,5 +1281,41 @@ $('#parameter_assetdetail').on('change', '[name="md_branch_id"]', function (evt)
                 showError(jqXHR, exception);
             }
         });
+    }
+});
+
+$('#form_internaluse').on('click', '[name="isfrom"]', function (evt) {
+    const target = $(evt.target);
+    const form = target.closest('form');
+
+    if ($(this).attr('hide-field')) {
+        let fields = $(this).attr('hide-field').split(',').map(element => element.trim());
+
+        if ($(this).is(':checked')) {
+            for (let i = 0; i < fields.length; i++) {
+                if (this.id === 'supplier') {
+                    form.find('select[name=md_supplier_id]').not('.line')
+                        .val(null).change()
+                        .closest('.form-group').show();
+                    form.find('select[name=md_employee_id]').not('.line')
+                        .val(null).change()
+                        .closest('.form-group').hide();
+                } else if (this.id === 'employee') {
+                    form.find('select[name=md_supplier_id]').not('.line')
+                        .val(null).change()
+                        .closest('.form-group').hide();
+                    form.find('select[name=md_employee_id]').not('.line')
+                        .val(null).change()
+                        .closest('.form-group').show();
+                } else if (this.id === 'other') {
+                    form.find('select[name=md_supplier_id]').not('.line')
+                        .val(null).change()
+                        .closest('.form-group').hide();
+                    form.find('select[name=md_employee_id]').not('.line')
+                        .val(null).change()
+                        .closest('.form-group').hide();
+                }
+            }
+        }
     }
 });

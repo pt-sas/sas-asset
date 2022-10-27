@@ -927,6 +927,7 @@ _table.on('click', '.edit', function (evt) {
                                                         .prop('disabled', true);
                                                 }
                                             }
+
                                             // Set value checked for field type Radio Button
                                             if (field[i].type == 'radio') {
                                                 if (field[i].value == label) {
@@ -976,6 +977,22 @@ _table.on('click', '.edit', function (evt) {
                                                     } else if ($(select).val() === null) {
                                                         formGroup = $(select).closest('.form-group');
                                                         formGroup.hide();
+                                                    }
+                                                }
+                                            }
+
+                                            //TODO: Radio Button
+                                            if (field[i].type === 'radio') {
+                                                if (field[i].checked) {
+                                                    for (let i = 0; i < fields.length; i++) {
+                                                        const input = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').not('.line');
+
+                                                        //? Condition field is not null 
+                                                        if (input.val() !== null) {
+                                                            input.closest('.form-group').show();
+                                                        } else {
+                                                            input.closest('.form-group').hide();
+                                                        }
                                                     }
                                                 }
                                             }

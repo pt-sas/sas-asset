@@ -20,7 +20,9 @@ class M_Quotation extends Model
 		'updated_by',
 		'grandtotal',
 		'isinternaluse',
-		'md_employee_id'
+		'md_employee_id',
+		'docreference',
+		'isfrom'
 	];
 	protected $useTimestamps        = true;
 	protected $returnType 			= 'App\Entities\Quotation';

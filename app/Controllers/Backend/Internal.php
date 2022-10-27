@@ -8,6 +8,8 @@ use App\Models\M_QuotationDetail;
 use App\Models\M_Status;
 use App\Models\M_Product;
 use App\Models\M_Employee;
+use App\Models\M_Reference;
+use App\Models\M_Supplier;
 use Config\Services;
 
 class Internal extends BaseController
@@ -24,6 +26,7 @@ class Internal extends BaseController
     {
         $uri = $this->request->uri->getSegment(2);
         $status = new M_Status($this->request);
+        $reference = new M_Reference($this->request);
 
         $start_date = date('Y-m-d', strtotime('- 1 days'));
         $end_date = date('Y-m-d');
@@ -35,7 +38,15 @@ class Internal extends BaseController
                 ->orderBy('name', 'ASC')
                 ->findAll(),
             'default_logic' => json_decode($this->defaultLogic()),
-            'date_range' => $start_date . ' - ' . $end_date
+            'date_range' => $start_date . ' - ' . $end_date,
+            'ref_list' => $reference->findBy([
+                'sys_reference.name'              => 'FromList',
+                'sys_reference.isactive'          => 'Y',
+                'sys_ref_detail.isactive'         => 'Y',
+            ], null, [
+                'field'     => 'sys_ref_detail.sys_ref_detail_id',
+                'option'    => 'ASC'
+            ])->getResult()
         ];
 
         return $this->template->render('transaction/internaluse/v_internaluse', $data);
@@ -71,7 +82,7 @@ class Internal extends BaseController
                 $row[] = $number;
                 $row[] = $value->documentno;
                 $row[] = format_dmy($value->quotationdate, '-');
-                $row[] = $value->employee;
+                $row[] = !empty($value->employee) ? $value->employee : $value->supplier;
                 $row[] = $value->status;
                 $row[] = formatRupiah($value->grandtotal);
                 $row[] = docStatus($value->docstatus);
@@ -99,6 +110,10 @@ class Internal extends BaseController
 
             $table = json_decode($post['table']);
 
+            //? Set null data for depreciation type combobox not choose
+            if (!isset($post['isfrom']))
+                $post['isfrom'] = "";
+
             //! Mandatory property for detail validation
             $post['line'] = countLine($table);
             $post['detail'] = [
@@ -120,22 +135,30 @@ class Internal extends BaseController
                 $response = message('error', false, $e->getMessage());
             }
 
-            return $this->response->setJSON($response);
+            // return $this->response->setJSON($response);
+            return json_encode($response);
         }
     }
 
     public function show($id)
     {
         $employee = new M_Employee($this->request);
+        $supplier = new M_Supplier($this->request);
 
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
                 $detail = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
 
-                $rowEmployee = $employee->find($list[0]->getEmployeeId());
+                if (!empty($list[0]->getEmployeeId())) {
+                    $rowEmployee = $employee->find($list[0]->getEmployeeId());
+                    $list = $this->field->setDataSelect($employee->table, $list, $employee->primaryKey, $rowEmployee->getEmployeeId(), $rowEmployee->getName());
+                }
 
-                $list = $this->field->setDataSelect($employee->table, $list, $employee->primaryKey, $rowEmployee->getEmployeeId(), $rowEmployee->getName());
+                if (!empty($list[0]->getSupplierId())) {
+                    $rowSupplier = $supplier->find($list[0]->getSupplierId());
+                    $list = $this->field->setDataSelect($supplier->table, $list, $supplier->primaryKey, $rowSupplier->getSupplierId(), $rowSupplier->getName());
+                }
 
                 $result = [
                     'header'    => $this->field->store($this->model->table, $list),
