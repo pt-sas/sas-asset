@@ -6,9 +6,8 @@ use CodeIgniter\Validation\CreditCardRules;
 use CodeIgniter\Validation\FileRules;
 use CodeIgniter\Validation\FormatRules;
 use CodeIgniter\Validation\Rules;
-
 use App\Validation\PasswordRules;
-use App\Validation\DuplicateRules;
+use App\Validation\SASRules;
 
 class Validation
 {
@@ -28,7 +27,7 @@ class Validation
         FileRules::class,
         CreditCardRules::class,
         PasswordRules::class,
-        DuplicateRules::class
+        SASRules::class
     ];
 
     /**
@@ -864,11 +863,18 @@ class Validation
             'rules'             => 'required|min_length[10]|max_length[10]|is_unique[trx_quotation.documentno,trx_quotation_id,{id}]',
             'errors'            => [
                 'is_unique'     => 'This {field} already exists.',
-                'required'      => 'Please Insert the {field} first'
+                'required'      => 'Please Insert the {field} first.'
             ]
         ],
         'quotationdate'         => [
             'label'             => 'Date',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'docreference'          => [
+            'label'             => 'Internal Use No',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} first.'
@@ -881,28 +887,42 @@ class Validation
                 'required'      => 'Please Choose the {field} first.'
             ]
         ],
+        'md_supplier_id'        => [
+            'label'             => 'From',
+            'rules'             => 'required_based_field_value[isfrom, S]',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Choose the field first.'
+            ]
+        ],
         'md_employee_id'        => [
-            'label'             => 'Employee',
+            'label'             => 'From',
+            'rules'             => 'required_based_field_value[isfrom, E]',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Choose the field first.'
+            ]
+        ],
+        'isfrom' => [
+            'label'             => 'From',
             'rules'             => 'required',
             'errors'            => [
-                'required'      => 'Please Choose the {field} first.'
+                'required'      => 'Please Choose the {field} fisrt.'
             ]
         ],
         'line'                  => [
-            'label'             => 'Quotation Detail',
+            'label'             => 'Free Asset Detail',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.md_product_id'  => [
+        'detail.table.*.md_product_id_line'  => [
             'label'             => 'Product',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.qtyentered'  => [
+        'detail.table.*.qtyentered_line'  => [
             'label'             => 'Qty',
             'rules'             => 'required|is_natural_no_zero',
             'errors'            => [
@@ -910,21 +930,21 @@ class Validation
                 'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
             ]
         ],
-        'detail.table.*.unitprice'  => [
+        'detail.table.*.unitprice_line'  => [
             'label'             => 'Unit Price',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.lineamt'  => [
+        'detail.table.*.lineamt_line'  => [
             'label'             => 'Line Amount',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.md_employee_id'  => [
+        'detail.table.*.md_employee_id_line'  => [
             'label'             => 'Employee',
             'rules'             => 'required',
             'errors'            => [

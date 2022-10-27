@@ -89,14 +89,17 @@ function formatRupiah(int $numeric)
  * @param array $table
  * @return array
  */
-function arrTableLine(array $table)
+function arrTableLine(array $table, string $str = null)
 {
     $result = [];
+
+    if (empty($str))
+        $str = "line";
 
     foreach ($table as $value) :
         foreach ($value as $key => $val) :
             $row = [];
-            $row[$key] = $val;
+            $row[$key . '_' . $str] = $val;
 
             $result[] = $row;
         endforeach;
