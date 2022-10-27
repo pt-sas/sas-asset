@@ -118,7 +118,7 @@ class M_Datatable extends Model
                         $tableJoin = $row['tableJoin'];
                         $tableJoin = explode(" ", $tableJoin);
 
-                        $tableJoin = count($tableJoin) > 1 ? $tableJoin[1] : $tableJoin[0];
+                        $tableJoin = count($tableJoin) > 1 ?: $tableJoin[0];
 
                         if ($this->db->fieldExists($value['name'], $tableJoin)) {
                             $fields = $this->db->getFieldData($tableJoin);
