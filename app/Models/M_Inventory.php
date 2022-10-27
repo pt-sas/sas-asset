@@ -259,7 +259,7 @@ class M_Inventory extends Model
 	{
 		$sql = $this->table . '.*,
 					v_all_location.mdb_name as branch,
-					v_all_location.mdb_name as division,
+					v_all_location.mdd_name as division,
 					v_all_location.mdr_name as room,
 					v_all_location.mde_name as employee,
 					v_all_product.mdg_name as groupasset,
