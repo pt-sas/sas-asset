@@ -568,7 +568,8 @@ $('.save_form').click(function (evt) {
 
                     cardTitle.html(oriTitle);
 
-                    reloadTable();
+                    //TODO: Call reloadTable();
+                    $('.btn_requery').click();
 
                 } else if (result[0].error) {
                     errorForm(form, result);
@@ -632,7 +633,8 @@ _table.on('click', '.edit', function (evt) {
     const cardForm = parent.find('.card-form');
     const form = cardForm.find('form');
     const row = _table.row(this).data();
-    let card = parent.find('.card');
+    const main_page = parent.find('.main_page');
+    let s = parent.find('.card');
 
     ID = $(this).attr('id');
 
@@ -651,7 +653,13 @@ _table.on('click', '.edit', function (evt) {
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
         $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
 
-        card.length && (card.addClass("is-loading"),
+        //? Identified card is more than 1 page 
+        if (s.length > 1)
+            s = parent.find('.page-inner');
+        else
+            s = main_page.find('.card');
+
+        s.length && (s.addClass("is-loading"),
             setTimeout(function () {
                 $.each(cardBody, function (idx, elem) {
                     let className = elem.className.split(/\s+/);
@@ -1037,7 +1045,7 @@ _table.on('click', '.edit', function (evt) {
                 });
 
                 $(_this).html(oriElement).prop('disabled', false);
-                card.removeClass("is-loading");
+                s.removeClass("is-loading");
             }, 200));
     } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
         Toast.fire({
@@ -1324,10 +1332,12 @@ $(document).on('click', '.x_form, .close_form', function (evt) {
     clearForm(evt);
     cardTitle.html(oriTitle);
 
-    // Clear button attribute disable 
-    $(this).removeAttr('disabled');
+    //! Clear button attribute disable 
     $(this).removeAttr('disabled');
     $('.save_form').removeAttr('disabled');
+
+    //TODO: Call reloadTable();
+    $('.btn_requery').click();
 
     $('html, body').animate({
         scrollTop: $('.main-panel').offset().top
@@ -1340,7 +1350,8 @@ $(document).on('click', '.x_form, .close_form', function (evt) {
 $('.new_form').click(function (evt) {
     const parent = $(evt.target).closest('.container');
     const cardBody = parent.find('.card-body');
-    let card = $(this).parents('.card');
+    const main_page = parent.find('.main_page');
+    let s = parent.find('.card');
 
     let form;
     let action = 'create';
@@ -1355,7 +1366,13 @@ $('.new_form').click(function (evt) {
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
         $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
 
-        card.length && (card.addClass("is-loading"),
+        //? Identified card is more than 1 page 
+        if (s.length > 1)
+            s = parent.find('.page-inner');
+        else
+            s = main_page.find('.card');
+
+        s.length && (s.addClass("is-loading"),
             setTimeout(function () {
                 $.each(cardBody, function (idx, elem) {
                     let className = elem.className.split(/\s+/);
@@ -1491,7 +1508,7 @@ $('.new_form').click(function (evt) {
                 setSave = 'add';
 
                 $(_this).html(oriElement).prop('disabled', false);
-                card.removeClass("is-loading");
+                s.removeClass("is-loading");
             }, 200));
     } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
         Toast.fire({
