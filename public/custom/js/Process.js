@@ -3022,6 +3022,9 @@ $(document).ready(function (e) {
     $('.daterange').on('cancel.daterangepicker', function (ev, picker) {
         $(this).val('');
     });
+
+    //* Remove class is-loading 
+    $('.main-panel').removeClass('is-loading');
 });
 
 

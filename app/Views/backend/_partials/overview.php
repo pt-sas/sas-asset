@@ -10,7 +10,7 @@
     </div>
     <?= $this->include('backend/_partials/sidebar') ?>
 
-    <div class="main-panel">
+    <div class="main-panel is-loading">
       <div class="container">
         <div class="page-inner">
           <?php if (!empty(session()->getFlashdata('error'))) : ?>
