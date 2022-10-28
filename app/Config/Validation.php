@@ -469,14 +469,14 @@ class Validation
                 'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.md_product_id'  => [
+        'detail.table.*.md_product_id_line'  => [
             'label'             => 'Product',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.md_status_id'  => [
+        'detail.table.*.md_status_id_line'  => [
             'label'             => 'Status',
             'rules'             => 'required',
             'errors'            => [
@@ -522,14 +522,14 @@ class Validation
                 'required'      => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.md_product_id'  => [
+        'detail.table.*.md_product_id_line'  => [
             'label'             => 'Product',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.qtyentered'  => [
+        'detail.table.*.qtyentered_line'  => [
             'label'             => 'Qty',
             'rules'             => 'required|is_natural_no_zero',
             'errors'            => [
@@ -537,21 +537,21 @@ class Validation
                 'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
             ]
         ],
-        'detail.table.*.unitprice'  => [
+        'detail.table.*.unitprice_line'  => [
             'label'             => 'Unit Price',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.lineamt'  => [
+        'detail.table.*.lineamt_line'  => [
             'label'             => 'Line Amount',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.md_employee_id'  => [
+        'detail.table.*.md_employee_id_line'  => [
             'label'             => 'Employee',
             'rules'             => 'required',
             'errors'            => [
@@ -626,14 +626,14 @@ class Validation
                 'required' => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.residualvalue' => [
+        'detail.table.*.residualvalue_line' => [
             'label'                 => 'Residual Value',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.unitprice' => [
+        'detail.table.*.unitprice_line' => [
             'label'                 => 'Unit Price',
             'rules'                 => 'required|is_natural_no_zero',
             'errors'                => [
@@ -641,28 +641,28 @@ class Validation
                 'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
             ]
         ],
-        'detail.table.*.md_employee_id' => [
+        'detail.table.*.md_employee_id_line' => [
             'label'                 => 'Employee',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.md_branch_id'  => [
+        'detail.table.*.md_branch_id_line'  => [
             'label'                 => 'Branch',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.md_division_id' => [
+        'detail.table.*.md_division_id_line' => [
             'label'                 => 'Division',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.md_room_id'  => [
+        'detail.table.*.md_room_id_line'  => [
             'label'                 => 'Room',
             'rules'                 => 'required',
             'errors'                => [
@@ -687,7 +687,7 @@ class Validation
                 'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.assetcode'  => [
+        'detail.table.*.assetcode_line'  => [
             'label'                 => 'Asset Code',
             'rules'                 => 'required|is_exists',
             'errors'                => [
@@ -695,21 +695,21 @@ class Validation
                 'is_exists' => 'The {field} duplicate value'
             ]
         ],
-        'detail.table.*.md_status_id' => [
+        'detail.table.*.md_status_id_line' => [
             'label'                 => 'Status',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.employee_to' => [
+        'detail.table.*.employee_to_line' => [
             'label'                 => 'Employee To',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.room_to' => [
+        'detail.table.*.room_to_line' => [
             'label'                 => 'Room To',
             'rules'                 => 'required',
             'errors'                => [
@@ -976,14 +976,14 @@ class Validation
                 'required'      => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.value'  => [
+        'detail.table.*.value_line'  => [
             'label'             => 'Search Key',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.name'  => [
+        'detail.table.*.name_line'  => [
             'label'             => 'Name',
             'rules'             => 'required',
             'errors'            => [
