@@ -616,7 +616,8 @@ class BaseController extends Controller
 		//* Get Request POST From View 
 		$post = $this->request->getVar();
 
-		if (!$post || isset($post['id']))
+		//? Check property id or object primarKey
+		if (isset($post['id']) || isset($this->entity->{$this->primaryKey}))
 			return false;
 
 		return true;
@@ -631,11 +632,14 @@ class BaseController extends Controller
 		//* Get Request POST From View 
 		$post = $this->request->getVar();
 
-		if (!$post || isset($post['id']))
+		//? Check property id 
+		if (isset($post['id'])) {
 			return $post['id'];
-
-		if (!empty($this->model->getInsertID()))
+		} else if (!empty($this->model->getInsertID())) {
 			return $this->model->getInsertID();
+		} else if (isset($this->entity->{$this->primaryKey})) {
+			return $this->entity->{$this->primaryKey};
+		}
 
 		return 0;
 	}
