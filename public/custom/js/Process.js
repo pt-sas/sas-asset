@@ -1496,6 +1496,11 @@ $('.new_form').click(function (evt) {
                     initSelectData(select);
                 }
 
+                if (form.find('.summernote').length > 0) {
+                    let summernote = form.find('.summernote');
+                    initSummerNote(summernote);
+                }
+
                 form.find('input[type="checkbox"].active').prop('checked', true);
 
                 setSave = 'add';
@@ -2412,7 +2417,7 @@ function clearForm(evt) {
             if (form.find('textarea.summernote[name=' + field[i].name + ']').length > 0 ||
                 form.find('textarea.summernote-product[name=' + field[i].name + ']').length > 0) {
                 $('[name =' + field[i].name + ']').summernote('reset');
-                $('[name =' + field[i].name + ']').summernote('enable');
+                $('[name =' + field[i].name + ']').summernote('destroy');
             }
 
             // Exist table display line
@@ -2855,6 +2860,31 @@ function getLogic(url) {
     return value;
 }
 
+/**
+ * Function to initialize summernote
+ * @param {*} selector 
+ */
+function initSummerNote(selector) {
+    $.each(selector, function () {
+        $(this).summernote({
+            fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Times New Roman'],
+            tabsize: 2,
+            height: 200,
+            toolbar: [
+                ['style', ['style', 'bold', 'italic', 'underline', 'clear']],
+                ['fontname', ['fontname']],
+                ['fontsize', ['fontsize']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['view', ['fullscreen', 'codeview', 'help']],
+                ['height', ['height']]
+            ],
+            placeholder: 'write here...'
+        });
+    });
+}
+
 $(document).ready(function (e) {
     $('.select2').select2({
         placeholder: 'Select an option',
@@ -2888,24 +2918,6 @@ $(document).ready(function (e) {
 
     $('.timepicker').datetimepicker({
         format: 'H:mm:ss',
-    });
-
-    $('.summernote').summernote({
-        fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Times New Roman'],
-        tabsize: 2,
-        height: 200,
-        toolbar: [
-            ['style', ['style', 'bold', 'italic', 'underline', 'clear']],
-            ['fontname', ['fontname']],
-            ['fontsize', ['fontsize']],
-            ['color', ['color']],
-            ['para', ['ul', 'ol', 'paragraph']],
-            ['table', ['table']],
-            // ['insert', ['link', 'picture']],
-            ['view', ['fullscreen', 'codeview', 'help']],
-            ['height', ['height']]
-        ],
-        placeholder: 'write here...'
     });
 
     $('.summernote-product').summernote({
