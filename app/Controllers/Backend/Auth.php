@@ -18,13 +18,17 @@ class Auth extends BaseController
 
 	public function index()
 	{
-		$this->new_title = 'Login';
+		if ($this->session->get('logged_in')) {
+			return redirect()->to(site_url());
+		} else {
+			$this->new_title = 'Login';
 
-		$data = [
-			'title'    	=> '' . $this->new_title . ''
-		];
+			$data = [
+				'title'    	=> '' . $this->new_title . ''
+			];
 
-		return view('backend/auth/login', $data);
+			return view('backend/auth/login', $data);
+		}
 	}
 
 	public function login()
