@@ -74,13 +74,13 @@ class Template
         $uri = $this->request->uri->getSegment(2);
         $allBtn = '';
 
-        $btnUpdate = '<a class="btn edit" id="' . $btnID . '" data-toggle="tooltip" title="Edit" data-original-title="Edit"><i class="fas fa-edit text-info"></i></a>';
+        $btnUpdate = '<a class="btn" onclick="Edit(' . "'" . $btnID . "'" . ')" id="' . $btnID . '" data-toggle="tooltip" title="Edit" data-original-title="Edit"><i class="fas fa-edit text-info"></i></a>';
 
         $btnDelete = '<a class="btn" onclick="Destroy(' . "'" . $btnID . "'" . ')" data-toggle="tooltip" title="Delete" data-original-title="Delete"><i class="fas fa-trash-alt text-danger"></i></a>';
 
         $btnProcess = '<a class="btn" onclick="docProcess(' . "'" . $btnID . "'," . "'" . $status . "'" . ')" data-toggle="tooltip" title="Document Action" data-original-title="Document Action"><i class="fas fa-cog text-primary"></i></a>';
 
-        $btnDetail = '<a class="btn edit" id="' . $btnID . '" data-status="' . $status . '" data-toggle="tooltip" title="Detail" data-original-title="Detail"><i class="fas fa-file text-info"></i></a>';
+        $btnDetail = '<a class="btn" onclick="Edit(' . "'" . $btnID . "'," . "'" . $status . "'" . ')" id="' . $btnID . '" data-status="' . $status . '" data-toggle="tooltip" title="Detail" data-original-title="Detail"><i class="fas fa-file text-info"></i></a>';
 
         $update = $this->access->checkCrud($uri, $this->isUpdate);
         $delete = $this->access->checkCrud($uri, $this->isDelete);

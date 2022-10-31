@@ -627,32 +627,26 @@ $('.save_form').click(function (evt) {
  * Button edit data
  * Show data on the form
  */
-_table.on('click', '.edit', function (evt) {
-    const parent = $(evt.target).closest('.container');
+function Edit(id, status, last_url) {
+    const parent = $('.container');
     const cardBody = parent.find('.card-body');
     const cardForm = parent.find('.card-form');
     const form = cardForm.find('form');
-    const row = _table.row(this).data();
     const main_page = parent.find('.main_page');
     let s = parent.find('.card');
 
-    ID = $(this).attr('id');
+    ID = id;
 
-    let _this = $(this);
-    let oriElement = _this.html();
-
-    let formList, status;
+    let formList;
     let arrMultiSelect = [];
     let action = 'update';
 
-    let checkAccess = isAccess(action, LAST_URL);
+    if (typeof last_url === 'undefined' || last_url === '')
+        last_url = LAST_URL;
 
-    if ($(this).attr('data-status'))
-        status = $(this).attr('data-status');
+    let checkAccess = isAccess(action, last_url);
 
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
-        $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
-
         //? Identified card is more than 1 page 
         if (s.length > 1)
             s = parent.find('.page-inner');
@@ -1044,7 +1038,6 @@ _table.on('click', '.edit', function (evt) {
                     }
                 });
 
-                $(_this).html(oriElement).prop('disabled', false);
                 s.removeClass("is-loading");
             }, 200));
     } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
@@ -1058,7 +1051,7 @@ _table.on('click', '.edit', function (evt) {
             title: checkAccess[0].message
         });
     }
-});
+}
 
 /**
  * Button delete data
