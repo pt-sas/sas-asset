@@ -1009,4 +1009,36 @@ class Validation
             ]
         ]
     ];
+
+    public $notifText = [
+        'name'                  => [
+            'label'             => 'Name',
+            'rules'             => 'required|is_unique[sys_notiftext.name,sys_notiftext_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'subject'               => [
+            'label'             => 'Subject',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'text'                  => [
+            'label'             => 'Text',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'notiftype'             => [
+            'label'             => 'Notification Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ]
+    ];
 }
