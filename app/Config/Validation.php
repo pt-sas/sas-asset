@@ -606,7 +606,7 @@ class Validation
             ]
         ],
         'md_supplier_id'            => [
-            'label'                 => 'Supplier',
+            'label'                 => 'From',
             'rules'                 => 'required_without[md_employee_id]',
             'errors'                => [
                 'required_without'  => 'Please Choose the {field} first.'
@@ -635,10 +635,9 @@ class Validation
         ],
         'detail.table.*.unitprice_line' => [
             'label'                 => 'Unit Price',
-            'rules'                 => 'required|is_natural_no_zero',
+            'rules'                 => 'required',
             'errors'                => [
-                'required' => 'Please Insert the {field} Line',
-                'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
+                'required'          => 'Please Insert the {field} Line'
             ]
         ],
         'detail.table.*.md_employee_id_line' => [

@@ -79,6 +79,7 @@ class Receipt extends BaseController
                 $row[] = $value->status;
                 $row[] = $value->docreference;
                 $row[] = $value->invoiceno;
+                $row[] = $value->expenseno;
                 $row[] = formatRupiah($value->grandtotal);
                 $row[] = docStatus($value->docstatus);
                 $row[] = $value->createdby;
@@ -447,7 +448,6 @@ class Receipt extends BaseController
         if (is_object($data) && $data) {
             $receiptID = $data->getReceiptId();
             $rowAsset = $inventory->where('trx_receipt_id', $receiptID)->findAll();
-
 
             $result = [];
             foreach ($rowAsset as $key => $val) :

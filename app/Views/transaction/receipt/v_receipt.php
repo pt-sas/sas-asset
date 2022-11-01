@@ -15,6 +15,7 @@
                 <th>Status</th>
                 <th>Document Reference</th>
                 <th>Invoice No</th>
+                <th>Expense No</th>
                 <th>Grand Total</th>
                 <th>Doc Status</th>
                 <th>Createdby</th>

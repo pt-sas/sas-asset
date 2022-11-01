@@ -29,7 +29,8 @@ class M_Receipt extends Model
 		'updated_by',
 		'docreference',
 		'isinternaluse',
-		'md_employee_id'
+		'md_employee_id',
+		'expenseno'
 	];
 	protected $useTimestamps        = true;
 	protected $returnType 			= 'App\Entities\Receipt';
@@ -49,6 +50,7 @@ class M_Receipt extends Model
 		'md_status.name',
 		'trx_receipt.docreference',
 		'trx_receipt.invoiceno',
+		'trx_receipt.expenseno',
 		'trx_receipt.grandtotal',
 		'trx_receipt.docstatus',
 		'sys_user.name',
@@ -61,6 +63,7 @@ class M_Receipt extends Model
 		'md_status.name',
 		'trx_receipt.docreference',
 		'trx_receipt.invoiceno',
+		'trx_receipt.expenseno',
 		'trx_receipt.grandtotal',
 		'trx_receipt.docstatus',
 		'sys_user.name',
