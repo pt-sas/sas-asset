@@ -32,7 +32,7 @@
             <!-- Section Row Main Page-->
             <div class="row main_page">
               <div class="col-md-12">
-                <div class="card">
+                <div class="card" data-action-menu="<?= $action_menu ?>">
                   <div class="card-header">
                     <div class="float-left">
                       <h4 class="card-title"><?= $title; ?></h4>
