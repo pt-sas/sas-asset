@@ -1006,6 +1006,20 @@ class Validation
             'errors'            => [
                 'required'      => 'Please Choose the {field} first.'
             ]
+        ],
+        'sys_role_id'           => [
+            'label'             => 'Role',
+            'rules'             => 'required_based_field_value[responsibletype, R]',
+            'errors'            => [
+                'required_based_field_value'    => 'Please Choose the {field} first.'
+            ]
+        ],
+        'sys_user_id'           => [
+            'label'             => 'User',
+            'rules'             => 'required_based_field_value[responsibletype, H]',
+            'errors'            => [
+                'required_based_field_value'    => 'Please Choose the {field} first.'
+            ]
         ]
     ];
 
