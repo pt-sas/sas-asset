@@ -522,6 +522,7 @@ $('.save_form').click(function (evt) {
                 hideLoadingForm(form.prop('id'));
             },
             success: function (result) {
+                console.log(result)
                 if (result[0].success) {
                     Toast.fire({
                         type: 'success',
@@ -595,8 +596,7 @@ $('.save_form').click(function (evt) {
                         title: result[0].message
                     });
 
-                    if (actionMenu === 'F')
-                        clearErrorForm(form);
+                    clearErrorForm(form);
                 }
             },
             error: function (jqXHR, exception) {
