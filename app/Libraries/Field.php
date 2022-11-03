@@ -78,12 +78,13 @@ class Field
          * #empty query using modeling data
          */
         if (empty($query)) {
-            $fields = $this->db->getFieldNames($table);
+            $fields = $this->db->getFieldData($table);
             foreach ($fields as $field) :
                 foreach ($data as $row) :
                     $result[] = [
-                        'field' =>  $field,
-                        'label' =>  $row->$field
+                        'field' => $field->name,
+                        'label' => $row->{$field->name},
+                        'primarykey' => $field->primary_key == 1 ? true : false
                     ];
                 endforeach;
             endforeach;
@@ -92,8 +93,8 @@ class Field
             foreach ($fields as $field) :
                 foreach ($data as $row) :
                     $result[] = [
-                        'field' =>  $field,
-                        'label' =>  $row->$field
+                        'field' => $field,
+                        'label' => $row->$field
                     ];
                 endforeach;
             endforeach;
