@@ -68,6 +68,8 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->add('rpt_assetdetail', 'Backend\Rpt_AssetDetail::index');
     $routes->add('notificationtext', 'Backend\NotificationText::index');
     $routes->add('mail', 'Backend\Mail::index');
+    $routes->add('wscenario', 'Backend\WScenario::index');
+    $routes->add('responsible', 'Backend\Responsible::index');
 });
 
 /*

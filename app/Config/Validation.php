@@ -1099,4 +1099,43 @@ class Validation
             ]
         ]
     ];
+
+    public $wscenario = [
+        'name'                  => [
+            'label'             => 'Name',
+            'rules'             => 'required|is_unique[sys_wfscenario.name,sys_wfscenario_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'menu'                  => [
+            'label'             => 'Menu',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'line'                  => [
+            'label'             => 'Workflow Scenario List',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'detail.table.*.sys_wfresponsible_id_line'  => [
+            'label'             => 'Workflow Responsible',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'detail.table.*.sys_notiftext_id_line'  => [
+            'label'             => 'Notification Template',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ]
+    ];
 }
