@@ -18,12 +18,12 @@ class CreateMailTable extends Migration
             'updated_at'            => ['type' => 'timestamp default current_timestamp'],
             'updated_by'            => ['type' => 'INT', 'constraint' => 6, 'null' => false],
             'protocol'              => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => false],
-            'smtphost'              => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => true],
+            'smtphost'              => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => false],
             'smtpport'              => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => true],
             'smtpcrypto'            => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => true],
-            'smtpuser'              => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => true],
-            'smtppassword'          => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => true],
-            'requestemail'          => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => true],
+            'smtpuser'              => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => false],
+            'smtppassword'          => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => false],
+            'requestemail'          => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => false],
         ]);
 
         $this->forge->addKey('sys_email_id', true);
