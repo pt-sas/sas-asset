@@ -147,17 +147,25 @@ class Template
                             </div>
                         </div>';
 
+        //* Button for Single Form 
+        $btnForm = '<div class="card-action">
+                        <button type="button" class="btn btn-outline-danger btn-round ml-auto reset_form">Reset</button>
+                        <button type="button" class="btn btn-primary btn-round ml-auto save_form">Save changes</button>
+                    </div>';
+
         $check = $this->access->checkCrud($uri, $this->isCreate);
 
         //TODO: Get field action from menu 
         $action_menu = $this->access->getMenu($uri, 'action');
 
         if ($check === 'Y') {
-            if ($action_menu === 'T')
+            if ($action_menu === 'F') {
+                $allBtn .= $btnForm;
+            } else if ($action_menu === 'T') {
                 $allBtn .= $btnTableForm;
-
-            if ($action_menu === 'R')
+            } else if ($action_menu === 'R') {
                 $allBtn .= $btnParamForm;
+            }
         }
 
         return $allBtn;
