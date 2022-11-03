@@ -8,8 +8,6 @@ use Config\Services;
 
 class Mail extends BaseController
 {
-    protected $email;
-
     public function __construct()
     {
         $this->request = Services::request();
@@ -81,17 +79,12 @@ class Mail extends BaseController
                         $content = 'Aset EMail Test';
 
                         if ($row->getIsActive() === $this->access->active()) {
-                            $email = $this->initializeEmail();
+                            $email = $this->sendEmail($row->getRequestEmail(), $content, $content);
 
-                            $email->setFrom($row->getSmtpUser(), $row->getSmtpUser());
-                            $email->setTo($row->getRequestEmail());
-                            $email->setSubject($content);
-                            $email->setMessage($content);
-
-                            if ($email->send()) {
+                            if ($email) {
                                 $response = message('success', true, 'Process completed successfully');
                             } else {
-                                $response = message('error', true, $email->printDebugger(['header']));
+                                $response = message('error', true, $this->email->printDebugger(['header']));
                             }
                         } else {
                             $response = message('error', true, 'Please Active data first');
@@ -108,7 +101,27 @@ class Mail extends BaseController
         }
     }
 
-    public function initializeEmail()
+    public function sendEmail($to, $subject, $message, $from = null, $yourName = null)
+    {
+        $row = $this->model->first();
+
+        $email = $this->initializeEmail();
+
+        if (is_null($from))
+            $from = $row->getSmtpUser();
+
+        if (is_null($yourName))
+            $yourName = $row->getSmtpUser();
+
+        $email->setFrom($from, $yourName);
+        $email->setTo($to);
+        $email->setSubject($subject);
+        $email->setMessage($message);
+
+        return $email->send();
+    }
+
+    private function initializeEmail()
     {
         $row = $this->model->first();
 

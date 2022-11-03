@@ -50,6 +50,7 @@ class BaseController extends Controller
 	protected $model;
 	protected $modelDetail;
 	protected $entity;
+	protected $email;
 
 	//TODO: LIBRARY
 	protected $template;
