@@ -110,40 +110,39 @@ class M_Datatable extends Model
                             }
                         }
                     endforeach;
-                }
+                } else {
+                    if (!empty($joinTable)) {
+                        foreach ($joinTable as $row) :
+                            $tableJoin = $row['tableJoin'];
 
-                //? Cek kolom dari table join 
-                if (!empty($joinTable)) {
-                    foreach ($joinTable as $row) :
-                        $tableJoin = $row['tableJoin'];
+                            //? Cek data join exist alias
+                            if (strpos($tableJoin, " ")) {
+                                $tableJoin = explode(" ", $tableJoin);
+                                $tableJoin = $tableJoin[0];
+                            }
 
-                        //? Cek data join exist alias
-                        if (strpos($tableJoin, " ")) {
-                            $tableJoin = explode(" ", $tableJoin);
-                            $tableJoin = $tableJoin[0];
-                        }
+                            if ($this->db->fieldExists($value['name'], $tableJoin)) {
+                                $fields = $this->db->getFieldData($tableJoin);
 
-                        if ($this->db->fieldExists($value['name'], $tableJoin)) {
-                            $fields = $this->db->getFieldData($tableJoin);
+                                foreach ($fields as $field) :
+                                    if ($field->name === $value['name'] && $field->type === 'timestamp') {
+                                        $datetime =  urldecode($value['value']);
+                                        $date = explode(" - ", $datetime);
 
-                            foreach ($fields as $field) :
-                                if ($field->name === $value['name'] && $field->type === 'timestamp') {
-                                    $datetime =  urldecode($value['value']);
-                                    $date = explode(" - ", $datetime);
-
-                                    $this->builder->where($tableJoin . '.' . $value['name'] . ' >= "' . $date[0] . '" AND ' . $tableJoin . '.' . $value['name'] . ' <= "' . $date[1] . '"');
-                                }
-
-                                if ($field->name === $value['name'] && $field->type !== 'timestamp') {
-                                    if ($value['type'] === 'select-multiple') {
-                                        $this->builder->whereIn($tableJoin . '.' . $value['name'] . '', $value['value']);
-                                    } else {
-                                        $this->builder->where($tableJoin . '.' . $value['name'] . '', $value['value']);
+                                        $this->builder->where($tableJoin . '.' . $value['name'] . ' >= "' . $date[0] . '" AND ' . $tableJoin . '.' . $value['name'] . ' <= "' . $date[1] . '"');
                                     }
-                                }
-                            endforeach;
-                        }
-                    endforeach;
+
+                                    if ($field->name === $value['name'] && $field->type !== 'timestamp') {
+                                        if ($value['type'] === 'select-multiple') {
+                                            $this->builder->whereIn($tableJoin . '.' . $value['name'] . '', $value['value']);
+                                        } else {
+                                            $this->builder->where($tableJoin . '.' . $value['name'] . '', $value['value']);
+                                        }
+                                    }
+                                endforeach;
+                            }
+                        endforeach;
+                    }
                 }
             }
         endforeach;
