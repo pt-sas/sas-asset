@@ -2845,6 +2845,13 @@ $(document).ready(function (e) {
                         text: '<i class="fas fa-file-excel"></i> Excel',
                         titleAttr: 'Export to Excel',
                         title: '', //Set null value first row in file
+                        customize: function (xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            //* Bold and Border first column
+                            $('row:first c', sheet).attr('s', '27');
+                            //* Border all column except first column
+                            $('row:not(:first) c', sheet).attr('s', '25');
+                        },
                         exportOptions: {
                             columns: ':visible:not(:last-child)'
                         }
@@ -2883,6 +2890,13 @@ $(document).ready(function (e) {
                         text: '<i class="fas fa-file-excel"></i> Excel',
                         titleAttr: 'Export to Excel',
                         title: '',
+                        customize: function (xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            //* Bold and Border first column
+                            $('row:first c', sheet).attr('s', '27');
+                            //* Border all column except first column
+                            $('row:not(:first) c', sheet).attr('s', '25');
+                        },
                         exportOptions: {
                             columns: ':visible'
                         }
