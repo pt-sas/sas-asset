@@ -19,7 +19,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '913521fcf4627e02283194ec875e3424fe37f4d7',
+    'reference' => '46b9c5ae1e417426512d40ffd052f00c602f1229',
     'name' => 'codeigniter4/appstarter',
   ),
   'versions' => 
@@ -31,7 +31,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '913521fcf4627e02283194ec875e3424fe37f4d7',
+      'reference' => '46b9c5ae1e417426512d40ffd052f00c602f1229',
     ),
     'codeigniter4/framework' => 
     array (
@@ -329,6 +329,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '35ea4b7f3acabb26f4bb640f8c30866c401da807',
+    ),
+    'picqer/php-barcode-generator' => 
+    array (
+      'pretty_version' => 'v2.2.4',
+      'version' => '2.2.4.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'b98f110cc5a79f723688fb17fd90b9325300d844',
     ),
     'psr/container' => 
     array (
