@@ -1138,4 +1138,56 @@ class Validation
             ]
         ]
     ];
+
+    public $barcode = [
+        'barcodetype'           => [
+            'label'             => 'Barcode Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'generatortype'         => [
+            'label'             => 'Generator Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'widthfactor'           => [
+            'label'             => 'Width Factor',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'height'                => [
+            'label'             => 'Height',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'text'                  => [
+            'label'             => 'Example Text',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'positiontext'          => [
+            'label'             => 'Position',
+            'rules'             => 'required_based_field_value[iswithtext, Y]|',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'sizetext'              => [
+            'label'             => 'Size Font',
+            'rules'             => 'required_based_field_value[iswithtext, Y]',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Insert the {field} first.'
+            ]
+        ]
+    ];
 }

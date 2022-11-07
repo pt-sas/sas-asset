@@ -70,6 +70,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->add('mail', 'Backend\Mail::index');
     $routes->add('wscenario', 'Backend\WScenario::index');
     $routes->add('responsible', 'Backend\Responsible::index');
+    $routes->add('barcode', 'Backend\Barcode::index');
 });
 
 /*

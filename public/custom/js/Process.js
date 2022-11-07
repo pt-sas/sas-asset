@@ -191,6 +191,7 @@ _tableInfo = $('.table_info').DataTable({
     ],
     'displayLength': -1,
     'lengthChange': false,
+    'info': false,
     'searching': false,
     'paging': false,
     'autoWidth': false,
@@ -283,6 +284,7 @@ $('.save_form').click(function (evt) {
     const form = cardForm.find('form');
     const card = container.find('.card');
     const actionMenu = card.attr('data-action-menu');
+    const div = cardForm.find('div');
 
     let field;
 
@@ -506,7 +508,6 @@ $('.save_form').click(function (evt) {
             data: formData,
             processData: false,
             contentType: false,
-            // async: false,
             cache: false,
             dataType: 'JSON',
             beforeSend: function () {
@@ -522,7 +523,6 @@ $('.save_form').click(function (evt) {
                 hideLoadingForm(form.prop('id'));
             },
             success: function (result) {
-                console.log(result)
                 if (result[0].success) {
                     Toast.fire({
                         type: 'success',
@@ -577,10 +577,8 @@ $('.save_form').click(function (evt) {
                         //TODO: Call reloadTable();
                         $('.btn_requery').click();
                     } else {
-                        if (result[0].insert_id) {
-                            setSave = 'update';
-                            ID = result[0].insert_id
-                        }
+                        //TODO: Call function and set data 
+                        showFormData(form);
 
                         clearErrorForm(form);
                     }
@@ -1108,6 +1106,8 @@ $(document).on('click', '.x_form, .close_form, .reset_form', function (evt) {
     const container = target.closest('.container');
     const card = container.find('.card');
     const actionMenu = card.attr('data-action-menu');
+    const div = card.find('div');
+
     let oriTitle = container.find('.page-title').text();
 
     setSave = 'close';
@@ -1157,6 +1157,13 @@ $(document).on('click', '.x_form, .close_form, .reset_form', function (evt) {
     }
 
     clearForm(evt);
+
+    //TODO: Hide content there is attribute show-after-save 
+    $.each(div, function () {
+        if ($(this).attr('show-after-save')) {
+            $(this).addClass('d-none');
+        }
+    });
 
     //! Clear button attribute disable 
     $(this).removeAttr('disabled');
@@ -3082,6 +3089,9 @@ $('.toggle-sidebar').click(function (evt) {
  * @param {*} form 
  */
 function showFormData(form) {
+    const cardMain = form.closest('.card-main');
+    const div = cardMain.find('div');
+
     let url = SITE_URL + SHOWALL;
 
     $.ajax({
@@ -3104,17 +3114,108 @@ function showFormData(form) {
 
                 if (arrMsg.header) {
                     let data = arrMsg.header;
-                    putFieldData(form, data);
+                    let length = data.length;
 
-                    for (let i = 0; i < data.length; i++) {
-                        let label = data[i].label;
-                        let primarykey = data[i].primarykey;
+                    if (length > 1) {
+                        putFieldData(form, data);
 
-                        if (primarykey) {
-                            setSave = 'update';
-                            ID = label;
+                        for (let i = 0; i < data.length; i++) {
+                            let label = data[i].label;
+                            let primarykey = data[i].primarykey;
+
+                            if (primarykey) {
+                                setSave = 'update';
+                                ID = label;
+                            }
+                        }
+
+                        $.each(div, function () {
+                            if ($(this).attr('show-after-save')) {
+                                $(this).removeClass('d-none');
+                            }
+                        });
+                    } else {
+                        const field = form.find('input, textarea, select');
+
+                        for (let i = 0; i < field.length; i++) {
+                            let fields = [];
+
+                            if (field[i].name !== '') {
+                                //? Condition field and contain attribute hide-field
+                                if ($(field[i]).attr('hide-field')) {
+                                    fields = $(field[i]).attr('hide-field').split(',').map(element => element.trim());
+
+                                    if (field[i].type === 'checkbox') {
+                                        if (field[i].checked) {
+                                            for (let i = 0; i < fields.length; i++) {
+                                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                formGroup.hide();
+                                            }
+                                        } else {
+                                            for (let i = 0; i < fields.length; i++) {
+                                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                formGroup.show();
+                                            }
+                                        }
+                                    } else {
+                                        for (let i = 0; i < fields.length; i++) {
+                                            let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                            formGroup.hide();
+                                        }
+                                    }
+                                }
+
+                                //? Condition field and contain attribute show-field
+                                if ($(field[i]).attr('show-field')) {
+                                    fields = $(field[i]).attr('show-field').split(',').map(element => element.trim());
+
+                                    if (field[i].type === 'checkbox') {
+                                        if (field[i].checked) {
+                                            for (let i = 0; i < fields.length; i++) {
+                                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                formGroup.show();
+                                            }
+                                        } else if (field[i].type === 'checkbox') {
+                                            for (let i = 0; i < fields.length; i++) {
+                                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                formGroup.hide();
+                                            }
+                                        }
+                                    } else {
+                                        for (let i = 0; i < fields.length; i++) {
+                                            let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                            formGroup.show();
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
+                }
+
+                if (arrMsg.barcode) {
+                    let data = arrMsg.barcode;
+
+                    $.each(div, function () {
+                        let className = this.className.split(/\s+/);
+
+                        if (className.includes('card-barcode')) {
+                            const barcode = $(this).find('.barcode');
+
+                            var html = '';
+
+                            if (data.barcodetype === 'JPG' || data.barcodetype === 'PNG') {
+                                html += '<img src="data:image/png;base64,' + data.barcode + '"/>';
+                            } else {
+                                html += data.barcode;
+                            }
+
+                            if (data.position !== "" && data.size != 0)
+                                html += '<p class="' + data.position + '" style="font-size: ' + data.size + 'px">' + data.text + '</p>';
+
+                            barcode.html(html)
+                        }
+                    });
                 }
             }
         }

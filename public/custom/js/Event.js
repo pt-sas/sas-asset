@@ -1262,8 +1262,6 @@ $('#parameter_assetdetail').on('change', '[name="md_branch_id"]', function (evt)
             },
             dataType: 'JSON',
             success: function (result) {
-                // $('[name="md_room_id"]').append('<option value=""></option>');
-
                 if (!result[0].error) {
                     $.each(result, function (idx, item) {
                         $('[name="md_room_id"]').append('<option value="' + item.id + '">' + item.text + '</option>');
@@ -1315,6 +1313,35 @@ $('#form_internaluse').on('click', '[name="isfrom"]', function (evt) {
                         .val(null).change()
                         .closest('.form-group').hide();
                 }
+            }
+        }
+    }
+});
+
+/**
+ * Event Listener With Text Barcode
+ */
+$('#form_barcode').on('change', '#iswithtext', function (evt) {
+    const target = $(evt.target);
+    const form = target.closest('form');
+    const value = this.value;
+
+    //? Condition field and contain attribute show-field
+    if ($(this).attr('show-field')) {
+        let fields = $(this).attr('show-field').split(',').map(element => element.trim());
+
+        if ($(this).is(':checked')) {
+            for (let i = 0; i < fields.length; i++) {
+                form.find('input[name=' + fields[i] + '], select[name=' + fields[i] + ']')
+                    .closest('.form-group')
+                    .show();
+            }
+        } else {
+            for (let i = 0; i < fields.length; i++) {
+                form.find('input[name=' + fields[i] + '], select[name=' + fields[i] + ']')
+                    .val(null).change()
+                    .closest('.form-group')
+                    .hide();
             }
         }
     }
