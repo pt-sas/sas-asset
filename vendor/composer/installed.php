@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '46b9c5ae1e417426512d40ffd052f00c602f1229',
+    'reference' => '6139344259f24c0c21cc508cff111bea14da71e7',
     'name' => 'codeigniter4/appstarter',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '46b9c5ae1e417426512d40ffd052f00c602f1229',
+      'reference' => '6139344259f24c0c21cc508cff111bea14da71e7',
     ),
     'codeigniter4/framework' => 
     array (
@@ -155,6 +155,15 @@
       ),
       'reference' => '250c0825537d501e327df879fb3d4cd751933b85',
     ),
+    'mpdf/mpdf' => 
+    array (
+      'pretty_version' => 'v8.1.2',
+      'version' => '8.1.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'a8a22f4874157e490d41b486053a20bec42e182c',
+    ),
     'myclabs/deep-copy' => 
     array (
       'pretty_version' => '1.11.0',
@@ -217,6 +226,15 @@
       array (
       ),
       'reference' => '4f7fd7836c6f332bb2933569e566a0d6c4cbed74',
+    ),
+    'php-http/message-factory' => 
+    array (
+      'pretty_version' => 'v1.0.2',
+      'version' => '1.0.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'a478cb11f66a6ac48d8954216cfed9aa06a501a1',
     ),
     'phpdocumentor/reflection-common' => 
     array (
@@ -562,6 +580,15 @@
       array (
       ),
       'reference' => 'c6c1022351a901512170118436c764e473f6de8c',
+    ),
+    'setasign/fpdi' => 
+    array (
+      'pretty_version' => 'v2.3.6',
+      'version' => '2.3.6.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '6231e315f73e4f62d72b73f3d6d78ff0eed93c31',
     ),
     'symfony/deprecation-contracts' => 
     array (
