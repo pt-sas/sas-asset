@@ -86,11 +86,11 @@ class M_User extends Model
 
 	public function createUserRole(array $rows)
 	{
-		$userRole = new M_UserRole($this->request);
-
 		$post = $this->request->getVar();
 
 		if (isset($post['role'])) {
+			$userRole = new M_UserRole($this->request);
+
 			$post['role'] = explode(',', $post['role']);
 			$post['sys_user_id'] = $rows['id'];
 

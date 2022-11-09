@@ -144,6 +144,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->post('quotation/tableLine/(:any)', 'Backend\Quotation::tableLine/$1');
     $routes->get('quotation/destroyLine/(:any)', 'Backend\Quotation::destroyLine/$1');
     $routes->get('quotation/getSeqCode', 'Backend\Quotation::getSeqCode');
+    $routes->get('quotation/processIt', 'Backend\Quotation::processIt');
 
     $routes->add('receipt', 'Backend\Receipt::index');
     $routes->match(['get', 'post'], 'receipt/showAll', 'Backend\Receipt::showAll');
@@ -152,6 +153,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('receipt/destroy/(:any)', 'Backend\Receipt::destroy/$1');
     $routes->get('receipt/destroyLine/(:any)', 'Backend\Receipt::destroyLine/$1');
     $routes->get('receipt/getSeqCode', 'Backend\Receipt::getSeqCode');
+    $routes->get('receipt/processIt', 'Backend\Receipt::processIt');
 
     $routes->add('status', 'Backend\Status::index');
     $routes->match(['get', 'post'], 'status/showAll', 'Backend\Status::showAll');
@@ -168,6 +170,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->post('service/tableLine', 'Backend\Service::tableLine');
     $routes->get('service/destroyLine/(:any)', 'Backend\Service::destroyLine/$1');
     $routes->get('service/getSeqCode', 'Backend\Service::getSeqCode');
+    $routes->get('service/processIt', 'Backend\Service::processIt');
 
     $routes->add('movement', 'Backend\Movement::index');
     $routes->match(['get', 'post'], 'movement/showAll', 'Backend\Movement::showAll');
@@ -177,6 +180,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->post('movement/tableLine', 'Backend\Movement::tableLine');
     $routes->get('movement/destroyLine/(:any)', 'Backend\Movement::destroyLine/$1');
     $routes->get('movement/getSeqCode', 'Backend\Movement::getSeqCode');
+    $routes->get('movement/processIt', 'Backend\Movement::processIt');
 
     $routes->add('inventory', 'Backend\Inventory::index');
     $routes->match(['get', 'post'], 'inventory/showAll', 'Backend\Inventory::showAll');
@@ -208,6 +212,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->post('internal/tableLine/(:any)', 'Backend\Internal::tableLine/$1');
     $routes->get('internal/destroyLine/(:any)', 'Backend\Internal::destroyLine/$1');
     $routes->get('internal/getSeqCode', 'Backend\Internal::getSeqCode');
+    $routes->get('internal/processIt', 'Backend\Internal::processIt');
 
     $routes->add('reference', 'Backend\Reference::index');
     $routes->match(['get', 'post'], 'reference/showAll', 'Backend\Reference::showAll');
