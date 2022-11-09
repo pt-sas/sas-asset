@@ -253,6 +253,12 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->add('barcode', 'Backend\Barcode::index');
     $routes->match(['get', 'post'], 'barcode/showAll', 'Backend\Barcode::showAll');
     $routes->post('barcode/create', 'Backend\Barcode::create');
+
+    $routes->add('rpt_servicedetail', 'Backend\Rpt_ServiceDetail::index');
+    $routes->match(['get', 'post'], 'rpt_servicedetail/showAll', 'Backend\Rpt_ServiceDetail::showAll');
+
+    $routes->add('rpt_movementdetail', 'Backend\Rpt_MovementDetail::index');
+    $routes->match(['get', 'post'], 'rpt_movementdetail/showAll', 'Backend\Rpt_MovementDetail::showAll');
 });
 
 /*

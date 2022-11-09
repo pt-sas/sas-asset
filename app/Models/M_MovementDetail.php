@@ -57,4 +57,51 @@ class M_MovementDetail extends Model
 
 		return $this->builder->get();
 	}
+
+	public function getMovementDetail()
+	{
+		$sql = '
+        trx_movement.documentno,
+        trx_movement.movementdate,
+        md_product.name,
+        md_employee.name AS employeefrom,
+        et.name AS employeeto,
+        md_division.name AS divisionfrom,
+        dt.name AS divisionto,
+        md_branch.name AS branchfrom,
+        bt.name AS branchto,
+        md_room.name AS roomfrom,
+        rt.name AS roomto,
+        md_status.name AS status';
+
+		return $sql;
+	}
+
+	public function getJoinDetail()
+	{
+		$sql = [
+			$this->setDataJoin('trx_movement', 'trx_movement.trx_movement_id =' . $this->table . '.trx_movement_id', 'left'),
+			$this->setDataJoin('md_product', 'md_product.md_product_id =' . $this->table . '.md_product_id', 'left'),
+			$this->setDataJoin('md_employee', 'md_employee.md_employee_id =' . $this->table . '.employee_from', 'left'),
+			$this->setDataJoin('md_employee et', 'et.md_employee_id =' . $this->table . '.employee_to', 'left'),
+			$this->setDataJoin('md_division', 'md_division.md_division_id =' . $this->table . '.division_from', 'left'),
+			$this->setDataJoin('md_division dt', 'dt.md_division_id =' . $this->table . '.division_to', 'left'),
+			$this->setDataJoin('md_branch', 'md_branch.md_branch_id =' . $this->table . '.branch_from', 'left'),
+			$this->setDataJoin('md_branch bt', 'bt.md_branch_id =' . $this->table . '.branch_to', 'left'),
+			$this->setDataJoin('md_room', 'md_room.md_room_id =' . $this->table . '.room_from', 'left'),
+			$this->setDataJoin('md_room rt', 'md_room.md_room_id =' . $this->table . '.room_to', 'left'),
+			$this->setDataJoin('md_status', 'md_status.md_status_id =' . $this->table . '.md_status_id', 'left'),
+		];
+
+		return $sql;
+	}
+
+	private function setDataJoin($tableJoin, $columnJoin, $typeJoin = "inner")
+	{
+		return [
+			"tableJoin" => $tableJoin,
+			"columnJoin" => $columnJoin,
+			"typeJoin" => $typeJoin
+		];
+	}
 }
