@@ -65,7 +65,7 @@ const modalDialog = $('.modal-dialog'),
 _table = $('.tb_display').DataTable({
     'serverSide': true,
     'ajax': {
-        'url': SITE_URL + SHOWALL,
+        'url': CURRENT_URL + SHOWALL,
         'type': 'POST',
         'data': function (d, setting) {
             const container = $(setting.nTable).closest('.container');
@@ -206,7 +206,7 @@ _tableInfo = $('.table_info').DataTable({
 _tableReport = $('.table_report').DataTable({
     'serverSide': true,
     'ajax': {
-        'url': SITE_URL + SHOWALL,
+        'url': CURRENT_URL + SHOWALL,
         'type': 'POST',
         'data': function (d, setting) {
             return $.extend({}, d, {
@@ -1522,7 +1522,7 @@ $('.create_line').click(function (evt) {
                 const target = $(e.target);
                 const form = target.find('form');
 
-                let url = ADMIN_URL + 'product' + '/showProductInfo/?data=null';
+                let url = ADMIN_URL + 'Product' + '/showProductInfo/?data=null';
 
                 form[0].reset();
 
@@ -1579,7 +1579,7 @@ $('.btn_requery_info').click(function (evt) {
     const modalContent = target.closest('.modal-content');
     const form = modalContent.find('form');
 
-    let url = ADMIN_URL + 'product' + '/showProductInfo/?';
+    let url = ADMIN_URL + 'Product' + '/showProductInfo/?';
     let formData = form.serialize();
 
     $(this).tooltip('hide');
@@ -1778,7 +1778,7 @@ $('.btn_login').click(function () {
 
     const form = $(this).closest('form');
 
-    let url = ADMIN_URL + 'auth/login';
+    let url = ADMIN_URL + 'Auth/login';
 
     $.ajax({
         url: url,
@@ -1846,7 +1846,7 @@ $('.save_form_pass').click(function (evt) {
     let _this = $(this);
     let oriElement = _this.html();
 
-    let url = ADMIN_URL + 'auth/' + 'changePassword';
+    let url = ADMIN_URL + 'Auth/' + 'changePassword';
 
     let formData = new FormData(form[0]);
 
@@ -2465,7 +2465,7 @@ function previewImage(input, id, src) {
  * @returns 
  */
 function isAccess(input, last_url) {
-    let url = ADMIN_URL + 'accessmenu/' + 'getAccess';
+    let url = ADMIN_URL + 'AccessMenu/' + 'getAccess';
     let value;
 
     $.ajax({
@@ -3017,7 +3017,7 @@ $(document).on('click', 'input:checkbox', function () {
  * @returns 
  */
 function checkExistUserRole(role) {
-    let url = ADMIN_URL + 'role/' + 'getUserRoleName';
+    let url = ADMIN_URL + 'Role/' + 'getUserRoleName';
     let value;
 
     $.ajax({
@@ -3092,7 +3092,7 @@ function showFormData(form) {
     const cardMain = form.closest('.card-main');
     const div = cardMain.find('div');
 
-    let url = SITE_URL + SHOWALL;
+    let url = CURRENT_URL + SHOWALL;
 
     $.ajax({
         url: url,
