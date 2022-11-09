@@ -296,7 +296,7 @@ $('.save_form').click(function (evt) {
     let checkAccess = isAccess(action, LAST_URL);
 
     let formData = new FormData();
-    let url = SITE_URL + CREATE;
+    let url = CURRENT_URL + CREATE;
 
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
         //* Populate field form header
@@ -716,7 +716,7 @@ function Edit(id, status, last_url) {
                     }
                 });
 
-                let url = SITE_URL + SHOW + ID;
+                let url = CURRENT_URL + SHOW + ID;
 
                 setSave = ((typeof status === 'undefined' || status === '') || status === 'DR') ? 'update' : 'detail';
 
@@ -877,7 +877,8 @@ function Edit(id, status, last_url) {
  * Button delete data
  */
 function Destroy(id) {
-    let url = SITE_URL + DELETE + id;
+    let url = CURRENT_URL + DELETE + id;
+
     let action = 'delete';
 
     let checkAccess = isAccess(action, LAST_URL);
@@ -896,6 +897,7 @@ function Destroy(id) {
             if (data.value) //value is true
 
                 $.getJSON(url, function (result) {
+                    console.log(result)
                     if (result[0].success) {
                         Swal.fire({
                             title: 'Deleted!',
@@ -944,7 +946,7 @@ _tableLine.on('click', '.btn_delete', function (evt) {
     const row = _tableLine.row(tr);
     let id = this.id;
 
-    let url = SITE_URL + DELETE_LINE + id;
+    let url = CURRENT_URL + DELETE_LINE + id;
 
     let _this = $(this);
     let oriElement = _this.html();
@@ -1044,7 +1046,7 @@ function docProcess(id, status) {
                 return new Promise(function (resolve) {
                     let docAction = $('#docaction option:selected').val();
 
-                    let url = SITE_URL + '/processIt?id=' + id + '&docaction=' + docAction;
+                    let url = CURRENT_URL + '/processIt?id=' + id + '&docaction=' + docAction;
 
                     $.getJSON(url, function (result) {
                             if (result[0].success) {
@@ -1438,7 +1440,7 @@ $('.btn_requery').click(function () {
 $('.add_row').click(function (evt) {
     let form = $(evt.target).closest('form');
 
-    let url = SITE_URL + TABLE_LINE;
+    let url = CURRENT_URL + TABLE_LINE;
 
     let action = 'create';
 
@@ -1600,7 +1602,8 @@ $('.btn_save_info').click(function (evt) {
     let oriElement = _this.html();
 
     if (checkbox.length > 0) {
-        let url = SITE_URL + TABLE_LINE + '/create';
+        let url = CURRENT_URL + TABLE_LINE + '/create';
+
         let output = [];
 
         $.each(checkbox, function (i) {
@@ -2493,7 +2496,7 @@ function isAccess(input, last_url) {
  * @param {*} form 
  */
 function setSeqCode(form) {
-    let url = SITE_URL + '/getSeqCode';
+    let url = CURRENT_URL + '/getSeqCode';
 
     $.getJSON(url, function (result) {
         form.find('input.code').val(result[0].message);
@@ -3434,7 +3437,7 @@ function putFieldData(form, data) {
 function prosesTestEmail(identifier) {
     const form = $(identifier).closest('form');
 
-    let url = SITE_URL + TEST_EMAIL;
+    let url = CURRENT_URL + TEST_EMAIL;
     let formData = new FormData(form[0]);
 
     Swal.fire({
