@@ -89,7 +89,7 @@ class Role extends BaseController
 				$this->entity->fill($post);
 
 				if (!$this->validation->run($post, 'role')) {
-					$response =	$this->field->errorValidation($this->model->table);
+					$response =	$this->field->errorValidation($this->model->table, $post);
 				} else {
 					$response = $this->save();
 				}
