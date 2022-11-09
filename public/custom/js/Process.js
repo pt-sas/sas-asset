@@ -897,7 +897,6 @@ function Destroy(id) {
             if (data.value) //value is true
 
                 $.getJSON(url, function (result) {
-                    console.log(result)
                     if (result[0].success) {
                         Swal.fire({
                             title: 'Deleted!',
@@ -2468,7 +2467,7 @@ function previewImage(input, id, src) {
  * @returns 
  */
 function isAccess(input, last_url) {
-    let url = ADMIN_URL + 'AccessMenu/' + 'getAccess';
+    let url = CURRENT_URL + '/AccessMenu/' + 'getAccess';
     let value;
 
     $.ajax({

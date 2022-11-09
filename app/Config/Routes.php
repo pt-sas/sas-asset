@@ -40,6 +40,8 @@ $routes->get('/', 'Backend\Dashboard::index', ['filter' => 'auth']);
 $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->add('/', 'Backend\Dashboard::index');
 
+    $routes->post('(:any)/AccessMenu/getAccess', 'Backend\AccessMenu::getAccess');
+
     $routes->add('user', 'Backend\User::index');
     $routes->match(['get', 'post'], 'user/showAll', 'Backend\User::showAll');
     $routes->post('user/create', 'Backend\User::create');

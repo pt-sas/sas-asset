@@ -21,7 +21,7 @@ class M_AccessMenu extends Model
         'updated_by'
     ];
     protected $useTimestamps = true;
-    protected $returnType = 'App\Entities\Accessmenu';
+    protected $returnType = 'App\Entities\AccessMenu';
     protected $request;
     protected $db;
     protected $builder;
