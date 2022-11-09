@@ -1780,7 +1780,7 @@ $('.btn_login').click(function () {
 
     const form = $(this).closest('form');
 
-    let url = ADMIN_URL + 'Auth/login';
+    let url = ADMIN_URL + 'auth/login';
 
     $.ajax({
         url: url,
@@ -1848,7 +1848,7 @@ $('.save_form_pass').click(function (evt) {
     let _this = $(this);
     let oriElement = _this.html();
 
-    let url = ADMIN_URL + 'Auth/' + 'changePassword';
+    let url = ADMIN_URL + 'auth/' + 'changePassword';
 
     let formData = new FormData(form[0]);
 
