@@ -103,7 +103,7 @@ class M_Datatable extends Model
                         }
 
                         if ($field->name === $value['name'] && $field->type !== 'timestamp') {
-                            if ($value['type'] === 'select-multiple') {
+                            if (isset($value['type']) && $value['type'] === 'select-multiple') {
                                 $this->builder->whereIn($table . '.' . $value['name'] . '', $value['value']);
                             } else {
                                 $this->builder->where($table . '.' . $value['name'] . '', $value['value']);
@@ -133,7 +133,7 @@ class M_Datatable extends Model
                                     }
 
                                     if ($field->name === $value['name'] && $field->type !== 'timestamp') {
-                                        if ($value['type'] === 'select-multiple') {
+                                        if (isset($value['type']) && $value['type'] === 'select-multiple') {
                                             $this->builder->whereIn($tableJoin . '.' . $value['name'] . '', $value['value']);
                                         } else {
                                             $this->builder->where($tableJoin . '.' . $value['name'] . '', $value['value']);
