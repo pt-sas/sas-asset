@@ -2759,7 +2759,8 @@ function initSummerNote(selector) {
 $(document).ready(function (e) {
     const parent = $('.container');
     const card = parent.find('.card');
-    const actionMenu = card.attr('data-action-menu');
+    const cardMenu = parent.find('.card-action-menu');
+    const actionMenu = cardMenu.attr('data-action-menu');
 
     $('.select2').select2({
         placeholder: 'Select an option',
@@ -2934,7 +2935,7 @@ $(document).ready(function (e) {
         $(this).val('');
     });
 
-    if (actionMenu !== 'F') {
+    if (typeof actionMenu === 'undefined' && actionMenu !== 'F') {
         //* Remove class is-loading 
         $('.main-panel').removeClass('is-loading');
     } else {
