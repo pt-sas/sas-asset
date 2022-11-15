@@ -1102,6 +1102,29 @@ $(document).ready(function (e) {
             cache: true
         }
     });
+
+    $('.multiple-select-assetcode').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'inventory/getAssetCode',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
 });
 
 $('#filter_inventory').on('change', '[name="md_branch_id"]', function (evt) {
@@ -1344,5 +1367,126 @@ $('#form_barcode').on('change', '#iswithtext', function (evt) {
                     .hide();
             }
         }
+    }
+});
+
+/**
+ * Event Listener Product Form
+ */
+$('#form_product').on('change', '#md_category_id', function (evt) {
+    let url = ADMIN_URL + 'subcategory' + '/getList';
+    let value = this.value;
+
+    $('#md_subcategory_id').empty();
+
+    if (value !== '') {
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: {
+                reference: value
+            },
+            beforeSend: function () {
+                $('.save_form').attr('disabled', true);
+                $('.close_form').attr('disabled', true);
+                loadingForm('form_product', 'pulse');
+            },
+            complete: function () {
+                $('.save_form').removeAttr('disabled');
+                $('.close_form').removeAttr('disabled');
+                hideLoadingForm('form_product');
+            },
+            dataType: 'JSON',
+            success: function (result) {
+                $('#md_subcategory_id').append('<option value=""></option>');
+
+                let md_subcategory_id = 0;
+
+                $.each(option, function (i, item) {
+                    if (item.fieldName == 'md_subcategory_id')
+                        md_subcategory_id = item.label;
+                });
+
+                if (!result[0].error) {
+                    $.each(result, function (idx, item) {
+                        if (md_subcategory_id == item.id) {
+                            $('#md_subcategory_id').append('<option value="' + item.id + '" selected>' + item.text + '</option>');
+                        } else {
+                            $('#md_subcategory_id').append('<option value="' + item.id + '">' + item.text + '</option>');
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        type: 'error',
+                        title: result[0].message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            },
+            error: function (jqXHR, exception) {
+                showError(jqXHR, exception);
+            }
+        });
+    }
+});
+
+$('#form_product').on('change', '#md_subcategory_id', function (evt) {
+    let url = ADMIN_URL + 'type' + '/getList';
+    let value = this.value;
+
+    $('#md_type_id').empty();
+
+    if (value !== '') {
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: {
+                reference: value
+            },
+            beforeSend: function () {
+                $('.save_form').attr('disabled', true);
+                $('.close_form').attr('disabled', true);
+                loadingForm('form_product', 'pulse');
+            },
+            complete: function () {
+                $('.save_form').removeAttr('disabled');
+                $('.close_form').removeAttr('disabled');
+                hideLoadingForm('form_product');
+            },
+            dataType: 'JSON',
+            success: function (result) {
+                $('#md_type_id').append('<option value=""></option>');
+
+                let md_type_id = 0;
+
+                $.each(option, function (i, item) {
+                    if (item.fieldName == 'md_type_id')
+                        md_type_id = item.label;
+                });
+
+                if (!result[0].error) {
+                    $.each(result, function (idx, item) {
+                        if (md_type_id == item.id) {
+                            $('#md_type_id').append('<option value="' + item.id + '" selected>' + item.text + '</option>');
+                        } else {
+                            $('#md_type_id').append('<option value="' + item.id + '">' + item.text + '</option>');
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        type: 'error',
+                        title: result[0].message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            },
+            error: function (jqXHR, exception) {
+                showError(jqXHR, exception);
+            }
+        });
     }
 });
