@@ -18,18 +18,16 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="leader_id">Leader <span class="required">*</span></label>
+                    <label for="leader_id">Leader </label>
                     <select class="form-control select-data" id="leader_id" name="leader_id" data-url="employee/getList">
                         <option value="">Select Leader</option>
                     </select>
-                    <small class="form-text text-danger" id="error_leader_id"></small>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="phone">Telephone <span class="required">*</span></label>
+                    <label for="phone">Telephone </label>
                     <input type="text" class="form-control" id="phone" name="phone">
-                    <small class="form-text text-danger" id="error_phone"></small>
                 </div>
             </div>
             <div class="col-md-6">
