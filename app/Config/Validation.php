@@ -776,7 +776,7 @@ class Validation
         ],
         'initialcode' => [
             'label'                 => 'Initial Code',
-            'rules'                 => 'required|min_length[2]|max_length[2]|is_unique[md_category.initialcode,md_category_id,{id}]',
+            'rules'                 => 'required|min_length[2]|max_length[2]|is_unique[md_groupasset.initialcode,md_groupasset_id,{id}]',
             'errors'                => [
                 'required' => 'Please Insert the {field}',
                 'is_unique' => 'This {field} already exists',
