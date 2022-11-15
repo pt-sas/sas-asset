@@ -146,7 +146,7 @@ class Menu extends BaseController
 				} else {
 					$list = $this->model->where('isactive', 'Y')
 						->orderBy('name', 'ASC')
-						->findAll(5);
+						->findAll();
 				}
 
 				foreach ($list as $key => $row) :

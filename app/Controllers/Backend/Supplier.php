@@ -168,7 +168,7 @@ class Supplier extends BaseController
                         'isactive'  => 'Y',
                         'isvendor'  => 'Y'
                     ])->orderBy('name', 'ASC')
-                        ->findAll(5);
+                        ->findAll();
                 }
 
                 foreach ($list as $key => $row) :
