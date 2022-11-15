@@ -301,9 +301,10 @@ class Validation
         ],
         'initialcode' => [
             'label'                 => 'Initial Code',
-            'rules'                 => 'required|min_length[2]|max_length[2]',
+            'rules'                 => 'required|min_length[2]|max_length[2]|is_unique[md_category.initialcode,md_category_id,{id}]',
             'errors'                => [
-                'required' => 'Please Insert the {field}'
+                'required' => 'Please Insert the {field}',
+                'is_unique' => 'This {field} already exists',
             ]
         ],
         'md_groupasset_id'            => [
@@ -775,9 +776,10 @@ class Validation
         ],
         'initialcode' => [
             'label'                 => 'Initial Code',
-            'rules'                 => 'required|min_length[2]|max_length[2]',
+            'rules'                 => 'required|min_length[2]|max_length[2]|is_unique[md_category.initialcode,md_category_id,{id}]',
             'errors'                => [
-                'required' => 'Please Insert the {field}'
+                'required' => 'Please Insert the {field}',
+                'is_unique' => 'This {field} already exists',
             ]
         ],
         'usefullife' => [
