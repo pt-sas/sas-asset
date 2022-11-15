@@ -2324,6 +2324,7 @@ function clearForm(evt) {
 
     // Set to empty array option
     option = [];
+    arrMultiSelect = [];
 }
 
 /**
