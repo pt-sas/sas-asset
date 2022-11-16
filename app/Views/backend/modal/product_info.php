@@ -84,8 +84,6 @@
                                         <th class="text-center">Unit Price</th>
                                         <th class="text-center">Spare</th>
                                         <th class="text-center">Employee</th>
-                                        <th class="text-center">Specification</th>
-                                        <th class="text-center">Description</th>
                                     </tr>
                                 </thead>
                             </table>

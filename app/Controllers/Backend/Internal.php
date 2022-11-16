@@ -276,8 +276,8 @@ class Internal extends BaseController
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row[2]->unitprice, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, $row[3]->isspare ? 'checked' : null),
                     $this->field->fieldTable('select', null, 'md_employee_id', null, 'required', null, null, $dataEmployee, !empty($row[4]->employee_id) ? $row[4]->employee_id : null, 200, 'md_employee_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'specification', null, null, null, null, null, $row[5]->spek, 250),
-                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row[6]->desc, 250),
+                    $this->field->fieldTable('input', 'text', 'specification', null, null, null, null, null, null, 250),
+                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250),
                     $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id')
                 ];
             endforeach;
