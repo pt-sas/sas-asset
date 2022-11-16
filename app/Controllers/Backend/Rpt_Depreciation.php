@@ -45,9 +45,9 @@ class Rpt_Depreciation extends BaseController
                     $row[] = format_dmy($value->transactiondate, '-');
                     $row[] = $value->totalyear;
                     $row[] = $value->startyear;
-                    $row[] = formatRupiah($value->costdepreciation);
-                    $row[] = formatRupiah($value->accumulateddepreciation);
-                    $row[] = formatRupiah($value->bookvalue);
+                    $row[] = $value->costdepreciation;
+                    $row[] = $value->accumulateddepreciation;
+                    $row[] = $value->bookvalue;
                     $row[] = $value->currentmonth;
                     $row[] = $value->depreciationtype === 'DB' ? 'Declining Balance' : 'Straight Line';
 
