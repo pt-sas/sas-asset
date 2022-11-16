@@ -260,6 +260,8 @@ class BaseController extends Controller
 
 						if ($this->updatedByField && !array_key_exists($this->updatedByField, $data))
 							$newV->{$this->updatedByField} = $this->access->getSessionUser();
+						else if ($this->updatedByField && array_key_exists($this->updatedByField, $data))
+							$newV->{$this->updatedByField} = $row->{$this->updatedByField};
 
 						$isChange = true;
 					}
@@ -267,6 +269,8 @@ class BaseController extends Controller
 					if ((!empty($beforeUpdate) || !empty($afterUpdate)) && !$isChange) {
 						if ($this->updatedByField && !array_key_exists($this->updatedByField, $data))
 							$newV->{$this->updatedByField} = $this->access->getSessionUser();
+						else if ($this->updatedByField && array_key_exists($this->updatedByField, $data))
+							$newV->{$this->updatedByField} = $row->{$this->updatedByField};
 					}
 
 					$newV->{$this->primaryKey} = $this->getID();
