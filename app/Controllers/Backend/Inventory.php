@@ -164,4 +164,35 @@ class Inventory extends BaseController
             return $this->response->setJSON($response);
         }
     }
+
+    public function getAssetCode()
+    {
+        if ($this->request->isAjax()) {
+            $post = $this->request->getVar();
+
+            $response = [];
+
+            try {
+                if (isset($post['search'])) {
+                    $list = $this->model->where('isactive', 'Y')
+                        ->like('assetcode', $post['search'])
+                        ->orderBy('assetcode', 'ASC')
+                        ->findAll();
+                } else {
+                    $list = $this->model->where('isactive', 'Y')
+                        ->orderBy('assetcode', 'ASC')
+                        ->findAll();
+                }
+
+                foreach ($list as $key => $row) :
+                    $response[$key]['id'] = $row->getAssetCode();
+                    $response[$key]['text'] = $row->getAssetCode();
+                endforeach;
+            } catch (\Exception $e) {
+                $response = message('error', false, $e->getMessage());
+            }
+
+            return $this->response->setJSON($response);
+        }
+    }
 }
