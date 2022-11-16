@@ -52,7 +52,7 @@
                             <div class="form-group form-inline">
                                 <label for="md_subcategory_id" class="col-sm-3 col-form-label">Subcategory </label>
                                 <div class="col-sm-9">
-                                    <select class="form-control select-data" id="md_subcategory_id" name="md_subcategory_id" data-url="subcategory/getList">
+                                    <select class="form-control select2" id="md_subcategory_id" name="md_subcategory_id">
                                         <option value="">Select Subcategory</option>
                                     </select>
                                 </div>
@@ -62,7 +62,7 @@
                             <div class="form-group form-inline">
                                 <label for="md_type_id" class="col-sm-3 col-form-label">Type </label>
                                 <div class="col-sm-9">
-                                    <select class="form-control select-data" id="md_type_id" name="md_type_id" data-url="type/getList">
+                                    <select class="form-control select2" id="md_type_id" name="md_type_id">
                                         <option value="">Select Type</option>
                                     </select>
                                 </div>

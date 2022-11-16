@@ -1373,7 +1373,9 @@ $('#form_barcode').on('change', '#iswithtext', function (evt) {
 /**
  * Event Listener Product Form
  */
-$('#form_product').on('change', '#md_category_id', function (evt) {
+$('#form_product, #form_product_info').on('change', '#md_category_id', function (evt) {
+    const form = $(this).closest('form');
+
     let url = ADMIN_URL + 'subcategory' + '/getList';
     let value = this.value;
 
@@ -1390,12 +1392,20 @@ $('#form_product').on('change', '#md_category_id', function (evt) {
             beforeSend: function () {
                 $('.save_form').attr('disabled', true);
                 $('.close_form').attr('disabled', true);
-                loadingForm('form_product', 'pulse');
+                $('.x_form').attr('disabled', true);
+                $('.btn_requery_info').attr('disabled', true);
+                $('.btn_close_info').attr('disabled', true);
+                $('.btn_save_info').attr('disabled', true);
+                loadingForm(form.prop('id'), 'pulse');
             },
             complete: function () {
                 $('.save_form').removeAttr('disabled');
                 $('.close_form').removeAttr('disabled');
-                hideLoadingForm('form_product');
+                $('.x_form').removeAttr('disabled');
+                $('.btn_requery_info').removeAttr('disabled');
+                $('.btn_close_info').removeAttr('disabled');
+                $('.btn_save_info').removeAttr('disabled');
+                hideLoadingForm(form.prop('id'));
             },
             dataType: 'JSON',
             success: function (result) {
@@ -1432,7 +1442,9 @@ $('#form_product').on('change', '#md_category_id', function (evt) {
     }
 });
 
-$('#form_product').on('change', '#md_subcategory_id', function (evt) {
+$('#form_product, #form_product_info').on('change', '#md_subcategory_id', function (evt) {
+    const form = $(this).closest('form');
+
     let url = ADMIN_URL + 'type' + '/getList';
     let value = this.value;
 
@@ -1449,12 +1461,20 @@ $('#form_product').on('change', '#md_subcategory_id', function (evt) {
             beforeSend: function () {
                 $('.save_form').attr('disabled', true);
                 $('.close_form').attr('disabled', true);
-                loadingForm('form_product', 'pulse');
+                $('.x_form').attr('disabled', true);
+                $('.btn_requery_info').attr('disabled', true);
+                $('.btn_close_info').attr('disabled', true);
+                $('.btn_save_info').attr('disabled', true);
+                loadingForm(form.prop('id'), 'pulse');
             },
             complete: function () {
                 $('.save_form').removeAttr('disabled');
                 $('.close_form').removeAttr('disabled');
-                hideLoadingForm('form_product');
+                $('.x_form').removeAttr('disabled');
+                $('.btn_requery_info').removeAttr('disabled');
+                $('.btn_close_info').removeAttr('disabled');
+                $('.btn_save_info').removeAttr('disabled');
+                hideLoadingForm(form.prop('id'));
             },
             dataType: 'JSON',
             success: function (result) {
