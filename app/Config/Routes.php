@@ -37,6 +37,8 @@ $routes->get('logout', 'Backend\Auth::logout');
 
 $routes->get('/', 'Backend\Dashboard::index', ['filter' => 'auth']);
 
+$routes->post('(:any)/AccessMenu/getAccess', 'Backend\AccessMenu::getAccess');
+
 $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->add('/', 'Backend\Dashboard::index');
 
@@ -259,6 +261,9 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
 
     $routes->add('rpt_movementdetail', 'Backend\Rpt_MovementDetail::index');
     $routes->match(['get', 'post'], 'rpt_movementdetail/showAll', 'Backend\Rpt_MovementDetail::showAll');
+
+    $routes->add('rpt_depreciation', 'Backend\Rpt_Depreciation::index');
+    $routes->match(['get', 'post'], 'rpt_depreciation/showAll', 'Backend\Rpt_Depreciation::showAll');
 });
 
 /*
