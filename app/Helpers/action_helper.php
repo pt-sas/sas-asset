@@ -28,20 +28,6 @@ function message($param, $value, $message)
 
 function active($string)
 {
-    $isChecked = $string === 'Y' ? ' checked ' : '';
-
-    $html = '<center><div class="form-check">
-        <label class="form-check-label">
-            <input type="checkbox" class="form-check-input"' . $isChecked  . 'disabled>
-            <span class="form-check-sign"></span>
-        </label>
-    </div></center>';
-
-    return $html;
-}
-
-function status($string)
-{
     return $string === 'Y' ? '<center><span class="badge badge-success">Yes</span></center>' :
         '<center><span class="badge badge-danger">No</span></center>';
 }
@@ -72,7 +58,7 @@ function setCheckbox($string)
  */
 function countLine($count)
 {
-    return $count == 0 ? "" : $count;
+    return count($count) == 0 ? "" : $count;
 }
 
 /**
@@ -103,13 +89,19 @@ function formatRupiah(int $numeric)
  * @param array $table
  * @return array
  */
-function arrTableLine(array $table)
+function arrTableLine(array $table, string $str = null)
 {
     $result = [];
 
+    if (empty($str))
+        $str = "line";
+
     foreach ($table as $value) :
-        foreach ($value as $row) :
-            $result[] = (array) $row;
+        foreach ($value as $key => $val) :
+            $row = [];
+            $row[$key . '_' . $str] = $val;
+
+            $result[] = $row;
         endforeach;
     endforeach;
 
@@ -148,11 +140,56 @@ function docStatus(string $str)
     else if ($str === "IP")
         $msg .= '<center><span class="badge badge-info">In Progress</span></center>';
     else if ($str === "VO")
-        $msg .= '<center><span class="badge badge-default">Voided</span></center>';
+        $msg .= '<center><span class="badge badge-primary">Voided</span></center>';
     else if ($str === "IN")
         $msg .= '<center><span class="badge badge-danger">Invalid</span></center>';
     else
         $msg .= '<center><span class="badge badge-warning">Drafted</span></center>';
 
     return $msg;
+}
+
+function addYear($date, string $value)
+{
+    return strtotime("+" . $value . " years", strtotime($date));
+}
+
+/**
+ *  Array sum based on data
+ *
+ * @param string $field Column data
+ * @param array $data Data
+ * @return void
+ */
+function arrSumField(string $field, array $data)
+{
+    $arr = [];
+
+    foreach ($data as $value) :
+        $arr[] = $value->{$field};
+    endforeach;
+
+    return array_sum($arr);
+}
+
+/**
+ * Associative Array sort by
+ *
+ * @return void
+ */
+function array_orderby()
+{
+    $args = func_get_args();
+    $data = array_shift($args);
+    foreach ($args as $n => $field) {
+        if (is_string($field)) {
+            $tmp = array();
+            foreach ($data as $key => $row)
+                $tmp[$key] = $row[$field];
+            $args[$n] = $tmp;
+        }
+    }
+    $args[] = &$data;
+    call_user_func_array('array_multisort', $args);
+    return array_pop($args);
 }

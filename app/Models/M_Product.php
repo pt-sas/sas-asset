@@ -109,4 +109,42 @@ class M_Product extends Model
 
         return $this->builder->get();
     }
+
+    public function getProductDetail($get = [])
+    {
+        $this->builder->select($this->table . '.*,' .
+            'md_brand.name as brand,
+            md_category.name as category,
+            md_subcategory.name as subcategory,
+            md_type.name as type,
+            md_groupasset.name as groupasset');
+
+        $this->builder->join('md_brand', 'md_brand.md_brand_id = ' . $this->table . '.md_brand_id', 'left');
+        $this->builder->join('md_category', 'md_category.md_category_id = ' . $this->table . '.md_category_id', 'left');
+        $this->builder->join('md_subcategory', 'md_subcategory.md_subcategory_id = ' . $this->table . '.md_subcategory_id', 'left');
+        $this->builder->join('md_type', 'md_type.md_type_id = ' . $this->table . '.md_type_id', 'left');
+        $this->builder->join('md_groupasset', 'md_groupasset.md_groupasset_id = md_category.md_groupasset_id', 'left');
+
+        if (!empty($get['name']))
+            $this->builder->like($this->table . '.name', $get['name']);
+
+        if (!empty($get['md_groupasset_id']))
+            $this->builder->where('md_groupasset.md_groupasset_id', $get['md_groupasset_id']);
+
+        if (!empty($get['md_brand_id']))
+            $this->builder->where($this->table . '.md_brand_id', $get['md_brand_id']);
+
+        if (!empty($get['md_category_id']))
+            $this->builder->where($this->table . '.md_category_id', $get['md_category_id']);
+
+        if (!empty($get['md_subcategory_id']))
+            $this->builder->where($this->table . '.md_subcategory_id', $get['md_subcategory_id']);
+
+        if (!empty($get['md_type_id']))
+            $this->builder->where($this->table . '.md_type_id', $get['md_type_id']);
+
+        $this->builder->orderBy($this->table . '.name', 'ASC');
+
+        return $this->builder->get();
+    }
 }

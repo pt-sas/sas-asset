@@ -11,10 +11,11 @@
                 <th>No</th>
                 <th>Doc No</th>
                 <th>Date</th>
-                <th>Supplier</th>
+                <th>From</th>
                 <th>Status</th>
-                <th>Expense No</th>
+                <th>Document Reference</th>
                 <th>Invoice No</th>
+                <th>Expense No</th>
                 <th>Grand Total</th>
                 <th>Doc Status</th>
                 <th>Createdby</th>

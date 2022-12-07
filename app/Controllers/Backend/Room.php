@@ -3,23 +3,17 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_Room;
 use App\Models\M_Branch;
 use App\Models\M_Employee;
+use App\Models\M_User;
 use Config\Services;
 
 class Room extends BaseController
 {
-    private $model;
-    private $entity;
-    protected $validation;
-    protected $request;
-
     public function __construct()
     {
         $this->request = Services::request();
-        $this->validation = Services::validation();
         $this->model = new M_Room($this->request);
         $this->entity = new \App\Entities\Room();
     }
@@ -31,8 +25,6 @@ class Room extends BaseController
 
     public function showAll()
     {
-        $datatable = new M_Datatable($this->request);
-
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
             $select = $this->model->getSelect();
@@ -44,7 +36,7 @@ class Room extends BaseController
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $datatable->getDatatables($table, $select, $order, $sort, $search, $join);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join);
 
             foreach ($list as $value) :
                 $row = [];
@@ -57,6 +49,7 @@ class Room extends BaseController
                 $row[] = $value->value;
                 $row[] = $value->name;
                 $row[] = $value->branch;
+                $row[] = $value->userrep;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
@@ -64,8 +57,8 @@ class Room extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $datatable->countAll($table),
-                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search, $join),
+                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join),
                 'data'              => $data
             ];
 
@@ -80,18 +73,11 @@ class Room extends BaseController
 
             try {
                 $this->entity->fill($post);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                 if (!$this->validation->run($post, 'room')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -103,43 +89,30 @@ class Room extends BaseController
 
     public function show($id)
     {
+        $branch = new M_Branch($this->request);
+        $user = new M_User($this->request);
+
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
+
+                if (!empty($list[0]->getBranchId())) {
+                    $rowBranch = $branch->find($list[0]->getBranchId());
+
+                    $list = $this->field->setDataSelect($branch->table, $list, $branch->primaryKey, $rowBranch->getBranchId(), $rowBranch->getName());
+                }
+
+                if (!empty($list[0]->getUserRepId())) {
+                    $rowUser = $user->find($list[0]->getUserRepId());
+
+                    $list = $this->field->setDataSelect($user->table, $list, 'userrep_id', $rowUser->getUserId(), $rowUser->getName());
+                }
 
                 $result = [
                     'header'   => $this->field->store($this->model->table, $list)
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        if ($this->request->getMethod(true) === 'POST') {
-            $post = $this->request->getVar();
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setRoomId($post['id']);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'room')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }

@@ -18,21 +18,16 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="leader_id">Leader <span class="required">*</span></label>
-                    <select class="form-control select2" id="leader_id" name="leader_id">
+                    <label for="leader_id">Leader </label>
+                    <select class="form-control select-data" id="leader_id" name="leader_id" data-url="employee/getList">
                         <option value="">Select Leader</option>
-                        <?php foreach ($leader as $row) : ?>
-                            <option value="<?= $row->md_employee_id ?>"><?= $row->name ?></option>
-                        <?php endforeach; ?>
                     </select>
-                    <small class="form-text text-danger" id="error_leader_id"></small>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="phone">Telephone <span class="required">*</span></label>
+                    <label for="phone">Telephone </label>
                     <input type="text" class="form-control" id="phone" name="phone">
-                    <small class="form-text text-danger" id="error_phone"></small>
                 </div>
             </div>
             <div class="col-md-6">

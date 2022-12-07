@@ -3,25 +3,19 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_Product;
 use App\Models\M_Type;
 use App\Models\M_Subcategory;
 use App\Models\M_Category;
 use App\Models\M_Brand;
+use App\Models\M_Employee;
 use Config\Services;
 
 class Product extends BaseController
 {
-    private $model;
-    private $entity;
-    protected $validation;
-    protected $request;
-
     public function __construct()
     {
         $this->request = Services::request();
-        $this->validation = Services::validation();
         $this->model = new M_Product($this->request);
         $this->entity = new \App\Entities\Product();
     }
@@ -33,8 +27,6 @@ class Product extends BaseController
 
     public function showAll()
     {
-        $datatable = new M_Datatable($this->request);
-
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
             $select = $this->model->getSelect();
@@ -46,7 +38,7 @@ class Product extends BaseController
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $datatable->getDatatables($table, $select, $order, $sort, $search, $join);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join);
 
             foreach ($list as $value) :
                 $row = [];
@@ -70,8 +62,8 @@ class Product extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $datatable->countAll($table),
-                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search, $join),
+                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join),
                 'data'              => $data
             ];
 
@@ -90,18 +82,11 @@ class Product extends BaseController
 
             try {
                 $this->entity->fill($post);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                 if (!$this->validation->run($post, 'product')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -145,38 +130,6 @@ class Product extends BaseController
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        if ($this->request->getMethod(true) === 'POST') {
-            $post = $this->request->getVar();
-
-            if (!empty($post['md_brand_id']) && !empty($post['md_category_id']) && !empty($post['md_subcategory_id']) && !empty($post['md_type_id'])) {
-                $post['name'] = $this->merge_name($post['md_brand_id'], $post['md_category_id'], $post['md_subcategory_id'], $post['md_type_id']);
-            }
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setProductId($post['id']);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'product')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
@@ -261,10 +214,15 @@ class Product extends BaseController
                         ->like('name', $post['search'])
                         ->orderBy('name', 'ASC')
                         ->findAll();
+                } else if (isset($post['name'])) {
+                    $list = $this->model->where('isactive', 'Y')
+                        ->like('name', $post['name'], 'both')
+                        ->orderBy('name', 'ASC')
+                        ->findAll();
                 } else {
                     $list = $this->model->where('isactive', 'Y')
                         ->orderBy('name', 'ASC')
-                        ->findAll(5);
+                        ->findAll();
                 }
 
                 foreach ($list as $key => $row) :
@@ -276,6 +234,45 @@ class Product extends BaseController
             }
 
             return $this->response->setJSON($response);
+        }
+    }
+
+    public function showProductInfo()
+    {
+        $employee = new M_Employee($this->request);
+
+        if ($this->request->isAjax()) {
+            $get = $this->request->getGet();
+
+            $dataEmployee = $employee->where('isactive', 'Y')
+                ->orderBy('name', 'ASC')
+                ->findAll();
+
+            $data = [];
+
+            if (!isset($get['data'])) {
+                $list = $this->model->getProductDetail($get)->getResult();
+
+                foreach ($list as $value) :
+                    $row = [];
+                    $ID = $value->md_product_id;
+
+                    $row[] = $ID;
+                    $row[] = $this->field->fieldTable('input', 'checkbox', 'check_data', null, null, null, 'checked', null, $ID);
+                    $row[] = $value->name;
+                    $row[] = $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, null, null, null, null, 70);
+                    $row[] = $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', null, $get['isfree'] === 'Y' ? 'readonly' : null, null, null, $get['isfree'] === 'Y' ? 0 : null, 125);
+                    $row[] = $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, 'checked');
+                    $row[] = $this->field->fieldTable('select', null, 'employee_id', null, null, null, null, $dataEmployee, null, 200, 'md_employee_id', 'name');
+                    $data[] = $row;
+                endforeach;
+            }
+
+            $result = [
+                'data'              => $data
+            ];
+
+            return $this->response->setJSON($result);
         }
     }
 }

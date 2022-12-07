@@ -27,13 +27,16 @@ class M_Receipt extends Model
 		'trx_quotation_id',
 		'created_by',
 		'updated_by',
+		'docreference',
+		'isinternaluse',
+		'md_employee_id',
 		'expenseno'
 	];
 	protected $useTimestamps        = true;
 	protected $returnType 			= 'App\Entities\Receipt';
 	protected $allowCallbacks		= true;
 	protected $beforeInsert			= [];
-	protected $afterInsert			= ['createDetail'];
+	protected $afterInsert			= [];
 	protected $beforeUpdate			= ['createCodeAsset'];
 	protected $afterUpdate			= ['createDetail'];
 	protected $beforeDelete			= ['beforeDelete'];
@@ -43,10 +46,11 @@ class M_Receipt extends Model
 		'', // Number column
 		'trx_receipt.documentno',
 		'trx_receipt.receiptdate',
-		'supplier.name',
+		'md_supplier.name' || 'md_employee.name',
 		'md_status.name',
-		'trx_receipt.expenseno',
+		'trx_receipt.docreference',
 		'trx_receipt.invoiceno',
+		'trx_receipt.expenseno',
 		'trx_receipt.grandtotal',
 		'trx_receipt.docstatus',
 		'sys_user.name',
@@ -57,8 +61,9 @@ class M_Receipt extends Model
 		'trx_receipt.receiptdate',
 		'md_supplier.name',
 		'md_status.name',
-		'trx_receipt.expenseno',
+		'trx_receipt.docreference',
 		'trx_receipt.invoiceno',
+		'trx_receipt.expenseno',
 		'trx_receipt.grandtotal',
 		'trx_receipt.docstatus',
 		'sys_user.name',
@@ -103,7 +108,8 @@ class M_Receipt extends Model
 		$sql = $this->table . '.*,' .
 			'md_supplier.name as supplier,
             md_status.name as status,
-			sys_user.name as createdby';
+			sys_user.name as createdby,
+			md_employee.name as employee';
 
 		return $sql;
 	}
@@ -113,7 +119,8 @@ class M_Receipt extends Model
 		$sql = [
 			$this->setDataJoin('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left'),
 			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
-			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left')
+			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left'),
+			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left')
 		];
 
 		return $sql;
@@ -151,25 +158,6 @@ class M_Receipt extends Model
 		return $prefix;
 	}
 
-	public function mandatoryLogic($table)
-	{
-		$result = [];
-
-		foreach ($table as $row) :
-			// Condition to check isspare
-			if ($row[4]->isspare)
-				$row[5]->employee_id = 0;
-
-			// convert format rupiah on the field unitprice
-			if (isset($row[3]->unitprice))
-				$row[3]->unitprice = replaceFormat($row[3]->unitprice);
-
-			$result[] = $row;
-		endforeach;
-
-		return $result;
-	}
-
 	public function getDetail($field = null, $where = null)
 	{
 		$this->builder->join('trx_receipt_detail', 'trx_receipt_detail.trx_receipt_id = ' . $this->table . '.trx_receipt_id', 'left');
@@ -185,31 +173,42 @@ class M_Receipt extends Model
 
 	public function createDetail($rows)
 	{
-		$receiptDetail = new M_ReceiptDetail();
-		$quotationDetail = new M_QuotationDetail();
+		$receiptDetail = new M_ReceiptDetail($this->request);
+		$quotationDetail = new M_QuotationDetail($this->request);
 		$inventory = new M_Inventory($this->request);
 		$transaction = new M_Transaction();
+		$changelog = new M_ChangeLog($this->request);
 
 		$post = $this->request->getVar();
-
-		if (isset($post['table'])) {
-			$post['trx_receipt_id'] = $rows['id'];
-			$receiptDetail->create($post);
-		}
 
 		if (isset($post['docaction'])) {
 			$row = $this->find($post['id']);
 			$line = $receiptDetail->where($this->primaryKey, $post['id'])->findAll();
 
-			// //? Exists data line and docstatus Completed
+			//? Exists data line and docstatus Completed
 			if (count($line) > 0 && $post['docaction'] === $this->DOCSTATUS_Completed) {
-				//* Update qtyreceipt table trx_quotation_detail
 				$arrQuoDetail = $receiptDetail->getSumQtyGroup($post['id'])->getResult();
+
+				//TODO: Insert Change Log 
+				foreach ($arrQuoDetail as $value) :
+					$primaryID = $value->trx_quotation_detail_id;
+					$old = $quotationDetail->find($primaryID);
+
+					$data = (array) $value;
+
+					foreach (array_keys($data) as $key) :
+						if ($key !== $quotationDetail->primaryKey)
+							$changelog->insertLog($quotationDetail->table, $key, $primaryID, $old->{$key}, $value->$key, 'U');
+					endforeach;
+				endforeach;
+
+				//* Update qtyreceipt table trx_quotation_detail
 				$quotationDetail->updateQty($arrQuoDetail, 'qtyreceipt');
 
 				//* Passing data to table inventory
 				$line = $this->field->mergeArrObject($line, [
-					'md_status_id'      => $row->getStatusId()
+					'md_status_id'      => $row->getStatusId(),
+					'receiptdate'		=> $row->getReceiptDate()
 				]);
 
 				$inventory->create($line);
@@ -229,9 +228,9 @@ class M_Receipt extends Model
 
 	public function beforeDelete(array $rows)
 	{
-		$receiptDetail = new M_ReceiptDetail();
+		$receiptDetail = new M_ReceiptDetail($this->request);
 		$inventory = new M_Inventory($this->request);
-		$quotationDetail = new M_QuotationDetail();
+		$quotationDetail = new M_QuotationDetail($this->request);
 
 		$this->builder->where($this->primaryKey, $rows['id']);
 		$sql = $this->builder->get();
@@ -261,14 +260,15 @@ class M_Receipt extends Model
 
 	public function deleteDetail(array $rows)
 	{
-		$receiptDetail = new M_ReceiptDetail();
+		$receiptDetail = new M_ReceiptDetail($this->request);
 		$receiptDetail->where($this->primaryKey, $rows['id'])->delete();
 	}
 
 	public function createCodeAsset($rows)
 	{
 		$sequence = new M_Sequence($this->request);
-		$receiptDetail = new M_ReceiptDetail();
+		$receiptDetail = new M_ReceiptDetail($this->request);
+		$changelog = new M_ChangeLog($this->request);
 
 		$post = $this->request->getVar();
 
@@ -277,11 +277,42 @@ class M_Receipt extends Model
 			$line = $receiptDetail->where($this->primaryKey, $post['id'])->findAll();
 
 			if (count($line) > 0) {
-				$result = $sequence->getDocumentNoFromSeq($header, $line);
-				$receiptDetail->edit($result);
+				$data = $sequence->getDocumentNoFromSeq($header, $line);
+
+				//TODO: Insert Change Log 
+				foreach ($data as $value) :
+					$primaryID = $value['line_id'];
+
+					$arrData = (array) $value;
+
+					foreach (array_keys($arrData) as $key) :
+						if ($key !== 'line_id')
+							$changelog->insertLog($receiptDetail->table, 'assetcode', $primaryID, null, $value[$key], 'U');
+					endforeach;
+				endforeach;
+
+				//TODO: Update Field Assetcode Receipt Detail 
+				$receiptDetail->edit($data);
 			}
 		}
 
 		return $rows;
+	}
+
+	public function getQuotationReceipt($field = null, $where = null)
+	{
+		$this->builder->select('trx_quotation.*,
+			md_supplier.name as supplier,
+			md_employee.name as employee');
+
+		$this->builder->join('trx_quotation', 'trx_quotation.trx_quotation_id = ' . $this->table . '.trx_quotation_id', 'left');
+		$this->builder->join('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left');
+		$this->builder->join('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left');
+
+		if (!empty($field) && !empty($where)) {
+			$this->builder->where($field, $where);
+		}
+
+		return $this->builder->get();
 	}
 }

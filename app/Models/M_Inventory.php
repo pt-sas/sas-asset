@@ -5,7 +5,6 @@ namespace App\Models;
 use CodeIgniter\Model;
 
 use App\Models\M_Transaction;
-
 use CodeIgniter\HTTP\RequestInterface;
 use stdClass;
 
@@ -117,9 +116,15 @@ class M_Inventory extends Model
 
 	public function create($arrData)
 	{
+		$product = new M_Product($this->request);
+
 		foreach ($arrData as $row) :
+			$rowProd = $product->getProductAsset($row->md_product_id)->getRow();
+
 			$data = [
 				'assetcode'					=> $row->assetcode,
+				'inventorydate'				=> $row->receiptdate,
+				'md_groupasset_id'     		=> $rowProd->md_groupasset_id,
 				'md_product_id'     		=> $row->md_product_id,
 				'isspare'		     		=> $row->isspare,
 				'qtyentered'        		=> $row->qtyentered,
@@ -191,19 +196,20 @@ class M_Inventory extends Model
 	{
 		$transaction = new M_Transaction();
 
-		$this->builder->where('trx_inventory_id', $rows['id']);
-		$field = $this->builder->get()->getRow();
+		$post = $this->request->getVar();
 
-		if ($field->md_room_id != $rows['data']['md_room_id'] && $field->md_employee_id !=  $rows['data']['md_employee_id']) {
+		$field = $this->find($rows['id'][0]);
+
+		if ($field->md_room_id != $post['md_room_id'] && $field->md_employee_id != $post['md_employee_id']) {
 			$in = new stdClass();
-			$in->assetcode = $rows['data']['assetcode'];
-			$in->md_product_id = $rows['data']['md_product_id'];
+			$in->assetcode = $post['assetcode'];
+			$in->md_product_id = $post['md_product_id'];
 			$in->transactiontype = $this->Inventory_In;
 			$in->transactiondate = date('Y-m-d');
-			$in->md_room_id = $rows['data']['md_room_id'];
-			$in->md_employee_id = $rows['data']['md_employee_id'];
+			$in->md_room_id = $post['md_room_id'];
+			$in->md_employee_id = $post['md_employee_id'];
 			$in->qtyentered = 1;
-			$in->trx_inventory_id = $rows['id'];
+			$in->trx_inventory_id = $rows['id'][0];
 			$arrInvIn[] = $in;
 
 			$out = new stdClass();
@@ -214,7 +220,7 @@ class M_Inventory extends Model
 			$out->md_room_id = $field->md_room_id;
 			$out->md_employee_id = $field->md_employee_id;
 			$out->qtyentered = - ($field->qtyentered);
-			$out->trx_inventory_id = $rows['id'];
+			$out->trx_inventory_id = $rows['id'][0];
 			$arrInvOut[] = $out;
 
 			$arrData = (array) array_merge(
@@ -249,25 +255,34 @@ class M_Inventory extends Model
 		$transaction->create($data);
 	}
 
-	public function getAssetDetail($assetcode)
+	public function getSelectDetail()
 	{
-		$this->builder->select($this->table . '.*,
-		md_product.name as product,
-		md_branch.name as branch,
-		md_division.name as division,
-		md_room.name as room,
-		md_employee.name as employee,
-		md_status.name as status');
+		$sql = $this->table . '.*,
+					v_all_location.mdb_name as branch,
+					v_all_location.mdd_name as division,
+					v_all_location.mdr_name as room,
+					v_all_location.mde_name as employee,
+					v_all_product.mdg_name as groupasset,
+					v_all_product.md_brand_id,
+					v_all_product.mdbd_name as brand,
+					v_all_product.md_category_id,
+					v_all_product.mdc_name as category,
+					v_all_product.md_subcategory_id,
+					v_all_product.mds_name as subcategory,
+					v_all_product.md_type_id,
+					v_all_product.mdt_name as type,
+					v_all_product.mdp_name as product';
 
-		$this->builder->join('md_product', 'md_product.md_product_id = ' . $this->table . '.md_product_id', 'left');
-		$this->builder->join('md_branch', 'md_branch.md_branch_id = ' . $this->table . '.md_branch_id', 'left');
-		$this->builder->join('md_division', 'md_division.md_division_id = ' . $this->table . '.md_division_id', 'left');
-		$this->builder->join('md_room', 'md_room.md_room_id = ' . $this->table . '.md_room_id', 'left');
-		$this->builder->join('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left');
-		$this->builder->join('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left');
+		return $sql;
+	}
 
-		$this->builder->where($this->table . '.assetcode', $assetcode);
+	public function getJoinDetail()
+	{
+		$sql = [
+			$this->setDataJoin('v_all_location', 'v_all_location.md_employee_id = ' . $this->table . '.md_employee_id', 'left'),
+			$this->setDataJoin('v_all_product', 'v_all_product.md_product_id = ' . $this->table . '.md_product_id', 'left')
+		];
 
-		return $this->builder->get();
+		return $sql;
 	}
 }

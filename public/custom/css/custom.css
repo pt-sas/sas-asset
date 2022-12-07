@@ -268,13 +268,14 @@ button.margin-right {
     width: 100% !important;
 }
 
-.dataTables_scrollHeadInner .table-md {
+.dataTables_scrollHeadInner .table-stretch {
     width: 100% !important;
 }
 
 /* Hidden card view page */
 .card-form,
-.card-button {
+.card-button,
+.card-table-report {
     display: none
 }
 
@@ -326,6 +327,7 @@ button.margin-right {
     border-bottom-width: 2px;
     font-weight: 600;
 }
+
 .table-line td,
 .table-line th {
     font-size: 14px;
@@ -389,6 +391,12 @@ button.margin-right {
     border-top-right-radius: 0.50rem !important;
 }
 
-.tb_display { 
-    white-space: pre; 
+.tb_display {
+    white-space: pre;
+    width: 100%;
+}
+
+/* Datatable Button Collection */
+div.dt-button-collection {
+    width: 100px;
 }

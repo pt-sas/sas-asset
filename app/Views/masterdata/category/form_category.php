@@ -26,7 +26,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_groupasset_id">Group Asset <span class="required">*</span></label>
-                    <select class="form-control select-data" id="md_groupasset_id" name="md_groupasset_id" data-url="groupasset/getList">
+                    <select class="form-control select-data" id="md_groupasset_id" name="md_groupasset_id" data-url="GroupAsset/getList">
                         <option value="">Select Group Asset</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_groupasset_id"></small>

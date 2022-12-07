@@ -19,7 +19,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '326ab825c141073338850ec20b40f1cb5aaf4431',
+    'reference' => '6139344259f24c0c21cc508cff111bea14da71e7',
     'name' => 'codeigniter4/appstarter',
   ),
   'versions' => 
@@ -31,7 +31,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '326ab825c141073338850ec20b40f1cb5aaf4431',
+      'reference' => '6139344259f24c0c21cc508cff111bea14da71e7',
     ),
     'codeigniter4/framework' => 
     array (
@@ -68,6 +68,33 @@ private static $installed = array (
       array (
       ),
       'reference' => 'd7f08a622b3346766325488aa32ddc93ccdecc75',
+    ),
+    'guzzlehttp/guzzle' => 
+    array (
+      'pretty_version' => '7.5.0',
+      'version' => '7.5.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'b50a2a1251152e43f6a37f0fa053e730a67d25ba',
+    ),
+    'guzzlehttp/promises' => 
+    array (
+      'pretty_version' => '1.5.2',
+      'version' => '1.5.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'b94b2807d85443f9719887892882d0329d1e2598',
+    ),
+    'guzzlehttp/psr7' => 
+    array (
+      'pretty_version' => '2.4.1',
+      'version' => '2.4.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '69568e4293f4fa993f3b0e51c9723e1e17c41379',
     ),
     'html2text/html2text' => 
     array (
@@ -141,6 +168,15 @@ private static $installed = array (
       ),
       'reference' => '250c0825537d501e327df879fb3d4cd751933b85',
     ),
+    'mpdf/mpdf' => 
+    array (
+      'pretty_version' => 'v8.1.2',
+      'version' => '8.1.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'a8a22f4874157e490d41b486053a20bec42e182c',
+    ),
     'myclabs/deep-copy' => 
     array (
       'pretty_version' => '1.11.0',
@@ -168,6 +204,24 @@ private static $installed = array (
       ),
       'reference' => '210577fe3cf7badcc5814d99455df46564f3c077',
     ),
+    'paragonie/random_compat' => 
+    array (
+      'pretty_version' => 'v9.99.100',
+      'version' => '9.99.100.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '996434e5492cb4c3edcb9168db6fbb1359ef965a',
+    ),
+    'paragonie/sodium_compat' => 
+    array (
+      'pretty_version' => 'v1.19.0',
+      'version' => '1.19.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'cb15e403ecbe6a6cc515f855c310eb6b1872a933',
+    ),
     'phar-io/manifest' => 
     array (
       'pretty_version' => '2.0.3',
@@ -185,6 +239,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '4f7fd7836c6f332bb2933569e566a0d6c4cbed74',
+    ),
+    'php-http/message-factory' => 
+    array (
+      'pretty_version' => 'v1.0.2',
+      'version' => '1.0.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'a478cb11f66a6ac48d8954216cfed9aa06a501a1',
     ),
     'phpdocumentor/reflection-common' => 
     array (
@@ -285,6 +348,15 @@ private static $installed = array (
       ),
       'reference' => '35ea4b7f3acabb26f4bb640f8c30866c401da807',
     ),
+    'picqer/php-barcode-generator' => 
+    array (
+      'pretty_version' => 'v2.2.4',
+      'version' => '2.2.4.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'b98f110cc5a79f723688fb17fd90b9325300d844',
+    ),
     'psr/container' => 
     array (
       'pretty_version' => '2.0.2',
@@ -303,6 +375,13 @@ private static $installed = array (
       ),
       'reference' => '2dfb5f6c5eff0e91e20e913f8c5452ed95b86621',
     ),
+    'psr/http-client-implementation' => 
+    array (
+      'provided' => 
+      array (
+        0 => '1.0',
+      ),
+    ),
     'psr/http-factory' => 
     array (
       'pretty_version' => '1.0.1',
@@ -312,6 +391,13 @@ private static $installed = array (
       ),
       'reference' => '12ac7fcd07e5b077433f5f2bee95b3a771bf61be',
     ),
+    'psr/http-factory-implementation' => 
+    array (
+      'provided' => 
+      array (
+        0 => '1.0',
+      ),
+    ),
     'psr/http-message' => 
     array (
       'pretty_version' => '1.0.1',
@@ -320,6 +406,13 @@ private static $installed = array (
       array (
       ),
       'reference' => 'f6561bf28d520154e4b0ec72be95418abe6d9363',
+    ),
+    'psr/http-message-implementation' => 
+    array (
+      'provided' => 
+      array (
+        0 => '1.0',
+      ),
     ),
     'psr/log' => 
     array (
@@ -338,6 +431,24 @@ private static $installed = array (
       array (
       ),
       'reference' => '408d5eafb83c57f6365a3ca330ff23aa4a5fa39b',
+    ),
+    'pusher/pusher-php-server' => 
+    array (
+      'pretty_version' => '7.2.0',
+      'version' => '7.2.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '7ed4a62956c7426814c7dc67b2bb764cd0e1a603',
+    ),
+    'ralouphie/getallheaders' => 
+    array (
+      'pretty_version' => '3.0.3',
+      'version' => '3.0.3.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '120b605dfeb996808c31b6477290a714d356e822',
     ),
     'sebastian/cli-parser' => 
     array (
@@ -482,6 +593,15 @@ private static $installed = array (
       array (
       ),
       'reference' => 'c6c1022351a901512170118436c764e473f6de8c',
+    ),
+    'setasign/fpdi' => 
+    array (
+      'pretty_version' => 'v2.3.6',
+      'version' => '2.3.6.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '6231e315f73e4f62d72b73f3d6d78ff0eed93c31',
     ),
     'symfony/deprecation-contracts' => 
     array (

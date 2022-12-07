@@ -18,7 +18,8 @@ class M_GroupAsset extends Model
         'isactive',
         'created_by',
         'updated_by',
-        'md_sequence_id'
+        'md_sequence_id',
+        'depreciationtype'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\GroupAsset';
@@ -51,5 +52,34 @@ class M_GroupAsset extends Model
         $this->db = db_connect();
         $this->request = $request;
         $this->builder = $this->db->table($this->table);
+    }
+
+    public function getSelect()
+    {
+        $sql = $this->table . '.*,
+        sys_ref_detail.name as depreciationtype';
+
+        return $sql;
+    }
+
+    public function getJoin()
+    {
+        //* DepreciationType
+        $defaultID = 9;
+
+        $sql = [
+            $this->setDataJoin('sys_ref_detail', 'sys_ref_detail.sys_reference_id = ' . $defaultID . ' AND sys_ref_detail.value = ' . $this->table . '.depreciationtype', 'left'),
+        ];
+
+        return $sql;
+    }
+
+    private function setDataJoin($tableJoin, $columnJoin, $typeJoin = "inner")
+    {
+        return [
+            "tableJoin" => $tableJoin,
+            "columnJoin" => $columnJoin,
+            "typeJoin" => $typeJoin
+        ];
     }
 }

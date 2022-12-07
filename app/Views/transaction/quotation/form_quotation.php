@@ -17,17 +17,17 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_supplier_id">Supplier <span class="required">*</span></label>
-                    <select class="form-control select-data" id="md_supplier_id" name="md_supplier_id" data-url="supplier/getList" edit-disabled="disabled">
+                    <select class="form-control select-data" id="md_supplier_id" name="md_supplier_id" data-url="supplier/getList">
                         <option value="">Select Supplier</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_supplier_id"></small>
                 </div>
                 <div class="form-group">
                     <label for="md_status_id">Status <span class="required">*</span></label>
-                    <select class="form-control select2" id="md_status_id" name="md_status_id" style="width: 100%;" default-id="<?= $default_status->getStatusId() ?>" <?= !$role ? "disabled" : "" ?>>
+                    <select class="form-control select2" id="md_status_id" name="md_status_id" style="width: 100%;" <?= isset($default_logic->condition) ? "disabled" : "" ?>>
                         <option value="">Select Status</option>
                         <?php foreach ($status as $row) : ?>
-                            <option value="<?= $row->getStatusId() ?>" <?= $default_status->getStatusId() == $row->getStatusId() && !$role ? "selected" : "" ?>><?= $row->getName() ?></option>
+                            <option value="<?= $row->getStatusId() ?>" <?= (isset($default_logic->id) && $default_logic->id == $row->getStatusId()) && isset($default_logic->condition) ? "selected" : "" ?>><?= $row->getName() ?></option>
                         <?php endforeach; ?>
                     </select>
                     <small class="form-text text-danger" id="error_md_status_id"></small>
@@ -37,12 +37,6 @@
                 <div class="form-group">
                     <label for="description">Description </label>
                     <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
-                </div>
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" id="isinternaluse" name="isinternaluse">
-                        <span class="form-check-sign">Internal Use</span>
-                    </label>
                 </div>
             </div>
             <div class="col-md-6">
@@ -56,13 +50,13 @@
             <div class="col-md-12">
                 <div class="form-group">
                     <div class="text-right">
-                        <button type="button" name="button" class="btn btn-primary btn-sm btn-round ml-auto add_row" title="Add New"><i class="fa fa-plus"> Add New</i></button>
+                        <button type="button" name="button" class="btn btn-primary btn-sm btn-round ml-auto create_line" title="Create Line"><i class="fa fa-plus fa-fw"></i> Create Line</button>
                     </div>
                 </div>
             </div>
             <div class="col-md-12">
                 <div class="form-group table-responsive">
-                    <table class="table-line table-light table-hover tb_displayline" style="width: 100%">
+                    <table class="table-line table-light table-hover tb_displayline" id="table_quotation" style="width: 100%">
                         <thead>
                             <tr>
                                 <th class="text-center">Product</th>

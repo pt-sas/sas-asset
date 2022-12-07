@@ -3,22 +3,16 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_GroupAsset;
+use App\Models\M_Reference;
 use App\Models\M_Sequence;
 use Config\Services;
 
 class GroupAsset extends BaseController
 {
-    private $model;
-    private $entity;
-    protected $validation;
-    protected $request;
-
     public function __construct()
     {
         $this->request = Services::request();
-        $this->validation = Services::validation();
         $this->model = new M_GroupAsset($this->request);
         $this->entity = new \App\Entities\GroupAsset();
     }
@@ -26,9 +20,18 @@ class GroupAsset extends BaseController
     public function index()
     {
         $sequence = new M_Sequence($this->request);
+        $reference = new M_Reference($this->request);
 
         $data = [
-            'sequence' => $sequence->find(100000)
+            'sequence' => $sequence->find(100000),
+            'ref_list' => $reference->findBy([
+                'sys_reference.name'              => 'DepreciationType',
+                'sys_reference.isactive'          => 'Y',
+                'sys_ref_detail.isactive'         => 'Y',
+            ], null, [
+                'field'     => 'sys_ref_detail.name',
+                'option'    => 'ASC'
+            ])->getResult()
         ];
 
         return $this->template->render('masterdata/groupasset/v_groupasset', $data);
@@ -36,11 +39,10 @@ class GroupAsset extends BaseController
 
     public function showAll()
     {
-        $datatable = new M_Datatable($this->request);
-
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
-            $select = $this->model->findAll();
+            $select = $this->model->getSelect();
+            $join = $this->model->getJoin();
             $order = $this->model->column_order;
             $sort = $this->model->order;
             $search = $this->model->column_search;
@@ -48,7 +50,7 @@ class GroupAsset extends BaseController
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $datatable->getDatatables($table, $select, $order, $sort, $search);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join);
 
             foreach ($list as $value) :
                 $row = [];
@@ -63,6 +65,7 @@ class GroupAsset extends BaseController
                 $row[] = $value->description;
                 $row[] = $value->initialcode;
                 $row[] = $value->usefullife;
+                $row[] = $value->depreciationtype;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
@@ -70,8 +73,8 @@ class GroupAsset extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $datatable->countAll($table),
-                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search),
+                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join),
                 'data'              => $data
             ];
 
@@ -86,18 +89,15 @@ class GroupAsset extends BaseController
 
             try {
                 $this->entity->fill($post);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
+
+                // Set null data for depreciation type combobox not choose
+                if (!isset($post['depreciationtype']))
+                    $post['depreciationtype'] = "";
 
                 if (!$this->validation->run($post, 'groupasset')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -124,34 +124,6 @@ class GroupAsset extends BaseController
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        if ($this->request->getMethod(true) === 'POST') {
-            $post = $this->request->getVar();
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setGroupAssetId($post['id']);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'groupasset')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
@@ -212,7 +184,7 @@ class GroupAsset extends BaseController
                 } else {
                     $list = $this->model->where('isactive', 'Y')
                         ->orderBy('name', 'ASC')
-                        ->findAll(5);
+                        ->findAll();
                 }
 
                 foreach ($list as $key => $row) :

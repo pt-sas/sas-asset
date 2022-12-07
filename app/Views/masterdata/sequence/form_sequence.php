@@ -24,7 +24,7 @@
             <div class="col-md-2 mt-4">
                 <div class="form-check">
                     <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" id="isautosequence" name="isautosequence" checked-show-field="incrementno, currentnext, startnewyear, startno" checked-hide-field="vformat">
+                        <input type="checkbox" class="form-check-input" id="isautosequence" name="isautosequence" show-field="incrementno, currentnext, startnewyear, startno" hide-field="vformat">
                         <span class="form-check-sign">Auto numbering</span>
                     </label>
                 </div>
@@ -75,20 +75,20 @@
             <div class="col-md-6 mt-4">
                 <div class="form-check">
                     <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" id="isgassetlevelsequence" name="isgassetlevelsequence" checked-show-field="gassetcolumn">
+                        <input type="checkbox" class="form-check-input" id="isgassetlevelsequence" name="isgassetlevelsequence" show-field="gassetcolumn">
                         <span class="form-check-sign">Group Asset Level</span>
                     </label>
                     <small class="form-text text-danger" id="error_isgassetlevelsequence"></small>
                 </div>
                 <div class="form-check">
                     <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" id="iscategorylevelsequence" name="iscategorylevelsequence" checked-show-field="categorycolumn">
+                        <input type="checkbox" class="form-check-input" id="iscategorylevelsequence" name="iscategorylevelsequence" show-field="categorycolumn">
                         <span class="form-check-sign">Category Level</span>
                     </label>
                 </div>
                 <div class="form-check">
                     <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" id="startnewyear" name="startnewyear" checked-show-field="startnewmonth, datecolumn">
+                        <input type="checkbox" class="form-check-input" id="startnewyear" name="startnewyear" show-field="startnewmonth, datecolumn">
                         <span class="form-check-sign">Restart sequence every Year</span>
                     </label>
                 </div>

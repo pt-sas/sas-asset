@@ -131,19 +131,20 @@ class M_Sequence extends Model
             if ($row->startnewyear === 'Y') {
 
                 if ($row->startnewmonth === 'Y')
-                    $format = 'ym';
+                    $format = 'Ym';
                 else
-                    $format = 'y';
+                    $format = 'Y';
 
+                $obj->calendaryearmonth = date($format);
+                $yearmonth = date('y');
 
                 if ($po && !empty($date_column)) {
                     $doc_date = strtotime($po->$date_column);
                     $obj->calendaryearmonth = date($format, $doc_date);
-                } else {
-                    $obj->calendaryearmonth = date($format);
+                    $yearmonth = date('ym', $doc_date);
                 }
 
-                $obj->prefix = $groupasset_code . '/' . $row->category_code . '/' . $obj->calendaryearmonth . '/';
+                $obj->prefix = $groupasset_code . '/' . $row->category_code . '/' . $yearmonth . '/';
             }
 
             $obj->line_id = $val->getReceiptDetailId();
@@ -235,8 +236,7 @@ class M_Sequence extends Model
                                 'md_sequence_id'    => $md_sequence_id,
                                 'md_groupasset_id'  => $md_groupasset_id,
                                 'categorycode'      => $categorycode,
-                                'calendaryearmonth' => $calendaryearmonth,
-                                'updated_by'        => session()->get('sys_user_id')
+                                'calendaryearmonth' => $calendaryearmonth
                             ];
 
                             $sequenceNo->create($arrData, $arrWhere);

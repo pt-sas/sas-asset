@@ -3,21 +3,14 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_Supplier;
 use Config\Services;
 
 class Supplier extends BaseController
 {
-    private $model;
-    private $entity;
-    protected $validation;
-    protected $request;
-
     public function __construct()
     {
         $this->request = Services::request();
-        $this->validation = Services::validation();
         $this->model = new M_Supplier($this->request);
         $this->entity = new \App\Entities\Supplier();
     }
@@ -29,8 +22,6 @@ class Supplier extends BaseController
 
     public function showAll()
     {
-        $datatable = new M_Datatable($this->request);
-
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
             $select = $this->model->findAll();
@@ -41,7 +32,7 @@ class Supplier extends BaseController
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $datatable->getDatatables($table, $select, $order, $sort, $search);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search);
 
             foreach ($list as $value) :
                 $row = [];
@@ -57,8 +48,8 @@ class Supplier extends BaseController
                 $row[] = $value->address;
                 $row[] = $value->owner;
                 $row[] = $value->phone;
-                $row[] = status($value->isvendor);
-                $row[] = status($value->isservice);
+                $row[] = active($value->isvendor);
+                $row[] = active($value->isservice);
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
@@ -66,8 +57,8 @@ class Supplier extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $datatable->countAll($table),
-                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search),
+                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search),
                 'data'              => $data
             ];
 
@@ -82,20 +73,11 @@ class Supplier extends BaseController
 
             try {
                 $this->entity->fill($post);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setIsVendor(setCheckbox(isset($post['isvendor'])));
-                $this->entity->setIsService(setCheckbox(isset($post['isservice'])));
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                 if (!$this->validation->run($post, 'supplier')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -116,36 +98,6 @@ class Supplier extends BaseController
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        if ($this->request->getMethod(true) === 'POST') {
-            $post = $this->request->getVar();
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setSupplierId($post['id']);
-                $this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-                $this->entity->setIsVendor(setCheckbox(isset($post['isvendor'])));
-                $this->entity->setIsService(setCheckbox(isset($post['isservice'])));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'supplier')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
@@ -216,7 +168,7 @@ class Supplier extends BaseController
                         'isactive'  => 'Y',
                         'isvendor'  => 'Y'
                     ])->orderBy('name', 'ASC')
-                        ->findAll(5);
+                        ->findAll();
                 }
 
                 foreach ($list as $key => $row) :

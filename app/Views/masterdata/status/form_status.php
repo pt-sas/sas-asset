@@ -35,17 +35,19 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">
+                        <span class="form-check-sign">Active</span>
+                    </label>
+                </div>
+            </div>
             <div class="col-md-2">
                 <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input" id="isline" name="isline">
                         <span class="form-check-sign">Line</span>
-                    </label>
-                </div>
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">
-                        <span class="form-check-sign">Active</span>
                     </label>
                 </div>
             </div>

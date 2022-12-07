@@ -18,7 +18,11 @@ let ID,
     setSave,
     ul,
     formTable,
-    _tableOpname;
+    _tableInfo,
+    formReport,
+    _tableReport;
+
+let clear = false;
 
 // Data array from option
 let option = [];
@@ -27,6 +31,8 @@ let option = [];
 let fieldReadOnly = [];
 // Data field array is checked default
 let fieldChecked = [];
+// Retrieve multiple select-one
+let arrMultiSelect = [];
 
 // Method default controller
 const SHOWALL = '/showAll',
@@ -37,7 +43,8 @@ const SHOWALL = '/showAll',
     EXPORT = '/export',
     IMPORT = '/import',
     TABLE_LINE = '/tableLine',
-    DELETE_LINE = '/destroyLine/';
+    DELETE_LINE = '/destroyLine/',
+    TEST_EMAIL = '/createTestEmail';
 
 // view page class on div
 let cardMain = $('.card-main'),
@@ -52,15 +59,31 @@ const modalDialog = $('.modal-dialog'),
     modalTitle = $('.modal-title'),
     modalBody = $('.modal-body');
 
+/**
+ * Table Display
+ */
 _table = $('.tb_display').DataTable({
-    'processing': true,
     'serverSide': true,
     'ajax': {
-        'url': SITE_URL + SHOWALL,
+        'url': CURRENT_URL + SHOWALL,
         'type': 'POST',
-        'data': function (d) {
+        'data': function (d, setting) {
+            const container = $(setting.nTable).closest('.container');
+            const filter_page = container.find('.filter_page');
+            const form = filter_page.find('form');
+            const disabled = form.find('[disabled]');
+
+            //! Remove attribute disabled field
+            disabled.removeAttr('disabled');
+
+            //* Serialize form array
+            formTable = form.serializeArray();
+
+            //! Set attribute disabled field
+            disabled.prop('disabled', true);
+
             return $.extend({}, d, {
-                'form': formTable
+                form: formTable
             });
         }
     },
@@ -75,22 +98,26 @@ _table = $('.tb_display').DataTable({
             'visible': false //hide column
         }
     ],
+    'lengthMenu': [
+        [10, 25, 50, 100, -1],
+        [10, 25, 50, 100, 'All']
+    ],
     'order': [],
     'autoWidth': false,
-    'scrollX': checkScrollX(),
-    'scrollY': checkScrollY(),
-    'scrollCollapse': checkScrollX(),
+    'scrollX': true,
+    'scrollY': '50vh',
+    'scrollCollapse': true,
     'fixedColumns': checkFixedColumns(),
-    // 'drawCallback': function () {
-    //     $('[data-toggle="tooltip"]').tooltip();
-    // }
-});
+}).columns.adjust();
 
+/**
+ * Table Display Line
+ */
 _tableLine = $('.tb_displayline').DataTable({
     'drawCallback': function (settings) {
         $(this).find('.number').on('keypress keyup blur', function (evt) {
-            $(this).val($(this).val().replace(/[^\d].+/, ""));
-            if ((evt.which < 48 || evt.which > 57)) {
+            $(this).val($(this).val().replace(/[^\d-].+/, ""));
+            if ((evt.which < 48 && evt.which != 45 || evt.which > 57 && evt.which != 189)) {
                 evt.preventDefault();
             }
         });
@@ -115,6 +142,9 @@ _tableLine = $('.tb_displayline').DataTable({
     'autoWidth': false
 });
 
+/**
+ * Table Tree in Role
+ */
 $('.tb_tree').treeFy({
     initState: 'expanded',
     treeColumn: 0,
@@ -125,6 +155,82 @@ $('.tb_tree').treeFy({
         row.fadeIn();
     }
 });
+
+/**
+ * Table Info on the modal
+ */
+_tableInfo = $('.table_info').DataTable({
+    'processing': true,
+    'drawCallback': function (settings) {
+        $(this).find('.number').on('keypress keyup blur', function (evt) {
+            $(this).val($(this).val().replace(/[^\d-].+/, ""));
+            if ((evt.which < 48 && evt.which != 45 || evt.which > 57 && evt.which != 189)) {
+                evt.preventDefault();
+            }
+        });
+        $(this).find('.select2').select2({
+            placeholder: 'Select an option',
+            theme: "bootstrap",
+            allowClear: true
+        });
+        $(this).find('.rupiah').autoNumeric('init', {
+            aSep: '.',
+            aDec: ',',
+            mDec: '0'
+        });
+    },
+    'columnDefs': [{
+            'targets': [0, 1],
+            'orderable': false,
+            'width': 2
+        },
+        {
+            'targets': 0,
+            'visible': false //hide column
+        }
+    ],
+    'displayLength': -1,
+    'lengthChange': false,
+    'info': false,
+    'searching': false,
+    'paging': false,
+    'autoWidth': false,
+    'scrollX': true,
+    'scrollY': '350px',
+    'scrollCollapse': true
+});
+
+/**
+ * Table Report
+ */
+_tableReport = $('.table_report').DataTable({
+    'serverSide': true,
+    'ajax': {
+        'url': CURRENT_URL + SHOWALL,
+        'type': 'POST',
+        'data': function (d, setting) {
+            return $.extend({}, d, {
+                form: formReport,
+                clear: clear
+            });
+        }
+    },
+    'columnDefs': [{
+        'targets': '_all',
+        'orderable': false,
+        'width': 2
+    }],
+    'order': [],
+    'displayLength': -1,
+    'lengthChange': false,
+    'info': false,
+    'searching': false,
+    'paging': false,
+    'autoWidth': false,
+    'scrollX': true,
+    'scrollY': '70vh',
+    'scrollCollapse': true
+}).columns.adjust();
 
 /**
  * 
@@ -161,59 +267,70 @@ function checkScrollY() {
 }
 
 function reloadTable() {
-    _table.ajax.reload(null, false);
+    if ($('.tb_display').length > 0)
+        _table.ajax.reload(null, false);
+    else if ($('.table_report').length > 0)
+        _tableReport.ajax.reload(null, false);
 }
 
 /**
- * Save
+ * Button Save Form Data
+ * 
  */
 $('.save_form').click(function (evt) {
-    const parent = $(evt.target).closest('.row');
-    const form = parent.find('form');
-    cardForm = parent.find('.card-form');
     const container = $(evt.target).closest('.container');
+    const parent = $(evt.target).closest('.row');
+    cardForm = parent.find('.card-form').length > 0 ? parent.find('.card-form') : parent.find('.card-main');
+    const form = cardForm.find('form');
+    const card = container.find('.card');
+    const actionMenu = card.attr('data-action-menu');
+    const div = cardForm.find('div');
+
+    let field;
 
     let _this = $(this);
     let oriElement = _this.html();
-
-    let url;
-    let action = 'create';
     let oriTitle = container.find('.page-title').text();
 
+    let action = 'create';
     let checkAccess = isAccess(action, LAST_URL);
 
-    if (checkAccess[0].success && checkAccess[0].message == 'Y') {
-        const field = form.find('input, select, textarea');
+    let formData = new FormData();
+    let url = CURRENT_URL + CREATE;
 
-        // remove attribute disabled when field disabled
+    if (checkAccess[0].success && checkAccess[0].message == 'Y') {
+        //* Populate field form header
+        $.each(form, function () {
+            const formHeader = $(this).find('.row')[0];
+            field = $(formHeader).find('input, select, textarea').not('.line');
+        });
+
+        //? Remove attribute disabled when submit data
         for (let i = 0; i < field.length; i++) {
             if (field[i].name !== '') {
-                form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']:not(.line)').removeAttr('disabled');
+                form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').not('.line').removeAttr('disabled');
             }
         }
 
-        let formData = new FormData(form[0]);
-
-        if (setSave === 'add') {
-            url = SITE_URL + CREATE;
-        } else if (setSave === 'update') {
-            formData.append('id', ID);
-            url = SITE_URL + EDIT;
-        }
-
+        //* Form Header
         for (let i = 0; i < field.length; i++) {
             if (field[i].name !== '') {
+                let className = field[i].className.split(/\s+/);
 
-                // input type radio button to set into the formData
+                //* Set field and value to formData 
+                if (field[i].type == 'text' || field[i].type == 'textarea' || field[i].type == 'select-one' || field[i].type == 'password' || field[i].type == 'hidden')
+                    formData.append(field[i].name, field[i].value);
+
+                //* Field type input radio
                 if (field[i].type == 'radio') {
                     if (field[i].checked) {
                         formData.append(field[i].name, field[i].value);
                     }
                 }
 
-                // input type file whom contain class control-upload-image to set into the formData
-                if (field[i].type == 'file' && field[i].className.includes('control-upload-image')) {
-                    // Check condition upload add new image or not upload
+                //* Field type input file and containing class control-upload-image
+                if (field[i].type == 'file' && className.includes('control-upload-image')) {
+                    //? Check condition upload add new image or not upload
                     if (field[i].files.length > 0) {
                         formData.append(field[i].name, field[i].files[0]);
                     } else {
@@ -230,21 +347,44 @@ $('.save_form').click(function (evt) {
                     }
                 }
 
-                // Check textarea summernote isEmpty to set value null
+                //* Field type textarea class summernote isEmpty to set value null
                 if ((form.find('textarea.summernote[name=' + field[i].name + ']').length > 0 ||
                         form.find('textarea.summernote-product[name=' + field[i].name + ']').length > 0) &&
                     $('[name =' + field[i].name + ']').summernote('isEmpty')) {
                     formData.append(field[i].name, '');
                 }
 
-                // Multiple select populate array data
+                //* Field type Multiple select
                 if (field[i].type === 'select-multiple') {
                     formData.append(field[i].name, $('[name = ' + field[i].name + ']').val())
+                }
+
+                //* Field type input checkbox
+                if (field[i].type == 'checkbox') {
+                    if (field[i].checked) {
+                        formData.append(field[i].name, 'Y');
+                    } else {
+                        formData.append(field[i].name, 'N');
+                    }
+                }
+
+                //* Field containing class datepicker 
+                if (className.includes('datepicker')) {
+                    let date = field[i].value;
+                    let time = "00:00:00";
+
+                    let timeAndDate = moment(date + ' ' + time);
+                    formData.append(field[i].name, timeAndDate._i);
+                }
+
+                //* Field containing class rupiah
+                if (className.includes('rupiah')) {
+                    formData.append(field[i].name, replaceRupiah(field[i].value))
                 }
             }
         }
 
-        // Table role
+        //? Check in form exists Table role
         if (form.find('table.tb_tree').length > 0) {
             const table = form.find('table.tb_tree');
             const input = table.find('td input:checkbox');
@@ -315,6 +455,7 @@ $('.save_form').click(function (evt) {
             formData.append('roles', JSON.stringify(arrRole));
         }
 
+        //? Check in form exists Table Line
         if (form.find('table.tb_displayline').length > 0) {
             const rows = _tableLine.rows().nodes().to$();
 
@@ -322,46 +463,44 @@ $('.save_form').click(function (evt) {
             $.each(rows, function (i) {
                 let tag = $(this).find('input, select, button');
 
-                let data = [];
-                $.each(tag, function (index, element) {
-                    let row = [];
-                    let name = $(element).attr('name');
-                    let value = $(element).val();
-                    let id = $(element).attr('id');
+                let row = {};
+                $.each(tag, function () {
+                    let className = this.className.split(/\s+/);
+                    let name = $(this).attr('name');
+                    let value = this.value;
+                    let id = $(this).attr('id');
 
-                    // Check tag element name is delete
-                    if (name !== 'delete') {
-                        if ($(element).attr('type') !== 'checkbox') {
-                            row = {
-                                [name]: value
-                            };
+                    //* Field containing class rupiah
+                    if (className.includes('rupiah'))
+                        value = replaceRupiah(this.value);
+
+                    if ($(this).attr('type') !== 'button') {
+                        if ($(this).attr('type') !== 'checkbox') {
+                            row[name] = value;
                         } else {
-                            row = {
-                                [name]: $(element).is(':checked')
-                            };
+                            row[name] = $(this).is(':checked') ? 'Y' : 'N';
                         }
 
                     } else {
                         if (id !== '')
-                            row = {
-                                [name]: id
-                            };
+                            row[name] = id;
                         else
-                            // Get id for ref_id
-                            row = {
-                                [name]: "",
-                                ['ref_id']: value
-                            };
-                    }
+                            row[name] = '';
 
-                    data.push(row);
+                        if (className.includes('reference-key'))
+                            row[name] = value; // Get value reference key
+                    }
                 });
 
-                output[i] = data;
+                output[i] = row;
             });
 
             formData.append('table', JSON.stringify(output));
         }
+
+        //* Set primary key on the property "id" 
+        if (setSave === 'update')
+            formData.append('id', ID);
 
         $.ajax({
             url: url,
@@ -369,11 +508,10 @@ $('.save_form').click(function (evt) {
             data: formData,
             processData: false,
             contentType: false,
-            // async: false,
             cache: false,
             dataType: 'JSON',
             beforeSend: function () {
-                $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+                $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
                 $('.x_form').prop('disabled', true);
                 $('.close_form').prop('disabled', true);
                 loadingForm(form.prop('id'), 'facebook');
@@ -391,52 +529,59 @@ $('.save_form').click(function (evt) {
                         title: result[0].message
                     });
 
-                    clearForm(evt);
+                    if (actionMenu !== 'F') {
+                        clearForm(evt);
 
-                    if (!cardForm.prop('classList').contains('modal')) {
-                        const parent = cardForm.closest('.container');
-                        const cardBody = parent.find('.card-body');
+                        if (!cardForm.prop('classList').contains('modal')) {
+                            const parent = cardForm.closest('.container');
+                            const cardBody = parent.find('.card-body');
 
-                        $.each(cardBody, function (idx, elem) {
-                            let className = elem.className.split(/\s+/);
+                            $.each(cardBody, function (idx, elem) {
+                                let className = elem.className.split(/\s+/);
 
-                            if (className.includes('card-main')) {
-                                $(this).css('display', 'block');
+                                if (className.includes('card-main')) {
+                                    $(this).css('display', 'block');
 
-                                // Remove breadcrumb list
-                                let li = ul.find('li');
-                                $.each(li, function (idx, elem) {
-                                    if (idx > 2)
-                                        elem.remove();
-                                });
+                                    // Remove breadcrumb list
+                                    let li = ul.find('li');
+                                    $.each(li, function (idx, elem) {
+                                        if (idx > 2)
+                                            elem.remove();
+                                    });
 
-                                if (parent.find('div.filter_page').length > 0) {
-                                    parent.find('div.filter_page').css('display', 'block');
+                                    if (parent.find('div.filter_page').length > 0) {
+                                        parent.find('div.filter_page').css('display', 'block');
+                                    }
                                 }
-                            }
 
-                            if (className.includes('card-form')) {
-                                const cardHeader = parent.find('.card-header');
-                                cardHeader.find('button').show();
-                                $(this).css('display', 'none');
-                            }
-                        });
+                                if (className.includes('card-form')) {
+                                    const cardHeader = parent.find('.card-header');
+                                    cardHeader.find('button').show();
+                                    $(this).css('display', 'none');
+                                }
+                            });
 
-                        cardBtn.css('display', 'none');
+                            cardBtn.css('display', 'none');
 
-                        const cardHeader = parent.find('.card-header');
-                        const btnList = cardHeader.find('button').prop('classList');
+                            const cardHeader = parent.find('.card-header');
+                            const btnList = cardHeader.find('button').prop('classList');
 
-                        if (btnList.contains('new_form'))
-                            cardHeader.find('button').css('display', 'block');
+                            if (btnList.contains('new_form'))
+                                cardHeader.find('button').css('display', 'block');
+                        } else {
+                            modalForm.modal('hide');
+                        }
+
+                        cardTitle.html(oriTitle);
+
+                        //TODO: Call reloadTable();
+                        $('.btn_requery').click();
                     } else {
-                        modalForm.modal('hide');
+                        //TODO: Call function and set data 
+                        showFormData(form);
+
+                        clearErrorForm(form);
                     }
-
-                    cardTitle.html(oriTitle);
-
-                    reloadTable();
-
                 } else if (result[0].error) {
                     errorForm(form, result);
                     $('html, body').animate({
@@ -448,6 +593,8 @@ $('.save_form').click(function (evt) {
                         type: 'error',
                         title: result[0].message
                     });
+
+                    clearErrorForm(form);
                 }
             },
             error: function (jqXHR, exception) {
@@ -467,13 +614,13 @@ $('.save_form').click(function (evt) {
                     form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').removeAttr('disabled');
                 } else {
                     if (!className.includes('active')) {
-                        form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').prop('disabled', true);
+                        form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').not('.line').prop('disabled', true);
                     }
                 }
             } else {
                 // Set attribute disabled based on default field
                 if (fieldReadOnly.includes(field[i].name))
-                    form.find('select[name=' + field[i].name + ']').prop('disabled', true);
+                    form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').not('.line').prop('disabled', true);
             }
         }
     } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
@@ -493,398 +640,245 @@ $('.save_form').click(function (evt) {
  * Button edit data
  * Show data on the form
  */
-_table.on('click', '.edit', function (evt) {
-    const parent = $(evt.target).closest('.container');
+function Edit(id, status, last_url) {
+    const parent = $('.container');
     const cardBody = parent.find('.card-body');
-    const form = parent.find('form');
-    const row = _table.row(this).data();
+    const cardForm = parent.find('.card-form');
+    const form = cardForm.find('form');
+    const main_page = parent.find('.main_page');
+    let s = parent.find('.card');
 
-    ID = $(this).attr('id');
+    ID = id;
 
-    let _this = $(this);
-    let oriElement = _this.html();
-
-    let formList, status;
-    let arrMultiSelect = [];
+    let formList;
     let action = 'update';
 
-    let checkAccess = isAccess(action, LAST_URL);
+    if (typeof last_url === 'undefined' || last_url === '')
+        last_url = LAST_URL;
 
-    if ($(this).attr('data-status'))
-        status = $(this).attr('data-status');
+    let checkAccess = isAccess(action, last_url);
 
-    $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
+    if (checkAccess[0].success && checkAccess[0].message == 'Y') {
+        //? Identified card is more than 1 page 
+        if (s.length > 1)
+            s = parent.find('.page-inner');
+        else
+            s = main_page.find('.card');
 
-    setTimeout(function () {
-        $(_this).html(oriElement).prop('disabled', false);
+        s.length && (s.addClass("is-loading"),
+            setTimeout(function () {
+                $.each(cardBody, function (idx, elem) {
+                    let className = elem.className.split(/\s+/);
 
-        if (checkAccess[0].success && checkAccess[0].message == 'Y') {
-            $.each(cardBody, function (idx, elem) {
-                let className = elem.className.split(/\s+/);
+                    if (cardBody.length > 1) {
+                        if (className.includes('card-main')) {
+                            $(this).css('display', 'none');
 
-                if (cardBody.length > 1) {
-                    if (className.includes('card-main')) {
-                        $(this).css('display', 'none');
+                            const pageHeader = parent.find('.page-header');
+                            ul = pageHeader.find('ul.breadcrumbs');
 
-                        const pageHeader = parent.find('.page-header');
-                        ul = pageHeader.find('ul.breadcrumbs');
+                            // Append list separator and text create
+                            ul.find('li.nav-item > a').attr('href', CURRENT_URL);
 
-                        // Append list separator and text create
-                        ul.find('li.nav-item > a').attr('href', CURRENT_URL);
+                            let list = '<li class="separator">' +
+                                '<i class="flaticon-right-arrow"></i>' +
+                                '</li>';
 
-                        let list = '<li class="separator">' +
-                            '<i class="flaticon-right-arrow"></i>' +
-                            '</li>';
+                            if ((typeof status === 'undefined' || status === '') || status === 'DR')
+                                list += '<li class="nav-item">' +
+                                '<a class="text-primary font-weight-bold">Update</a>' +
+                                '</li>';
+                            else
+                                list += '<li class="nav-item">' +
+                                '<a class="text-primary font-weight-bold">Detail</a>' +
+                                '</li>';
 
-                        if ((typeof status === 'undefined' || status === '') || status === 'DR')
-                            list += '<li class="nav-item">' +
-                            '<a class="text-primary font-weight-bold">Update</a>' +
-                            '</li>';
-                        else
-                            list += '<li class="nav-item">' +
-                            '<a class="text-primary font-weight-bold">Detail</a>' +
-                            '</li>';
+                            ul.append(list);
 
-                        ul.append(list);
-
-                        if (parent.find('div.filter_page').length > 0)
-                            parent.find('div.filter_page').css('display', 'none');
-                    }
-
-                    if (className.includes('card-form')) {
-                        const cardHeader = $(evt.target).closest('.card-header');
-                        cardHeader.find('button').css('display', 'none');
-                        $(this).css('display', 'block');
-                        cardBtn.css('display', 'block');
-                        formList = $(this).prop('classList');
-                    }
-                } else {
-                    openModalForm();
-                    Scrollmodal();
-                    form = modalForm.find('form');
-                    formList = cardForm.prop('classList');
-                }
-            });
-
-            const field = form.find('input, textarea, select');
-
-            if (form.find('select.select-data').length > 0) {
-                let select = form.find('select.select-data');
-                initSelectData(select);
-            }
-
-            let url = SITE_URL + SHOW + ID;
-
-            setSave = ((typeof status === 'undefined' || status === '') || status === 'DR') ? 'update' : 'detail';
-
-            $.ajax({
-                url: url,
-                type: 'GET',
-                // async: false,
-                cache: false,
-                dataType: 'JSON',
-                beforeSend: function () {
-                    $('.save_form').attr('disabled', true);
-                    $('.x_form').attr('disabled', true);
-                    $('.close_form').attr('disabled', true);
-                    loadingForm(form.prop('id'), 'facebook');
-                },
-                complete: function () {
-                    if (setSave !== 'detail')
-                        $('.save_form').removeAttr('disabled');
-
-                    $('.x_form').removeAttr('disabled');
-                    $('.close_form').removeAttr('disabled');
-                    hideLoadingForm(form.prop('id'));
-                },
-                success: function (result) {
-                    if (result[0].success) {
-                        let arrMsg = result[0].message;
-
-                        // Show datatable line
-                        if (arrMsg.line) {
-                            let arrLine = arrMsg.line;
-
-                            if (form.find('table.tb_displayline').length > 0) {
-                                let line = JSON.parse(arrLine);
-
-                                $.each(line, function (idx, elem) {
-                                    _tableLine.row.add(elem).draw(false);
-                                });
-
-                                let btnAction = _tableLine.rows().nodes().to$().find('button');
-
-                                const field = _tableLine.rows().nodes().to$().find('input, select');
-
-                                /**
-                                 * Logic for set detail when status not draft
-                                 */
-                                if (setSave === 'detail' && status !== 'DR') {
-                                    readonly(form, true);
-
-                                    // Button add row table line
-                                    $('.add_row').css('display', 'none');
-
-                                    btnAction.css('display', 'none');
-
-                                    $.each(field, function (index, item) {
-                                        const tr = $(this).closest('tr');
-
-                                        if (item.type !== 'text') {
-                                            tr.find('input:checkbox[name=' + item.name + '], select[name=' + item.name + '], input:radio[name=' + item.name + ']').prop('disabled', true);
-                                        } else {
-                                            tr.find('input:text[name=' + item.name + '], textarea[name=' + item.name + ']').prop('readonly', true);
-                                        }
-                                    });
-                                } else {
-                                    // Button add row table line
-                                    $('.add_row').css('display', 'block');
-
-                                    btnAction.css('display', 'block');
-                                }
-                            }
-
-                            if (form.find('table.tb_tree').length > 0) {
-                                for (let i = 0; i < arrLine.length; i++) {
-                                    const table = form.find('table.tb_tree');
-                                    const input = table.find('td input:checkbox');
-
-                                    $.each(input, function (idx, elem) {
-                                        // Menu parent
-                                        if ($(elem).attr('data-menu') === 'parent') {
-
-                                            if (arrLine[i].sys_menu_id == $(elem).val() && arrLine[i].sys_submenu_id == 0) {
-                                                if ((arrLine[i].isview == 'Y' && $(elem).attr('name') === 'isview') ||
-                                                    (arrLine[i].iscreate == 'Y' && $(elem).attr('name') === 'iscreate') ||
-                                                    (arrLine[i].isupdate == 'Y' && $(elem).attr('name') === 'isupdate') ||
-                                                    (arrLine[i].isdelete == 'Y' && $(elem).attr('name') === 'isdelete')) {
-                                                    $(elem).prop('checked', true);
-                                                } else {
-                                                    $(elem).prop('checked', false);
-                                                }
-
-                                                // Set attribute id element to value sys_access_menu_id
-                                                $(elem).attr('id', arrLine[i].sys_access_menu_id);
-                                            }
-
-                                        } else {
-                                            if (arrLine[i].sys_submenu_id === $(elem).val()) {
-                                                if ((arrLine[i].isview == 'Y' && $(elem).attr('name') === 'isview') ||
-                                                    (arrLine[i].iscreate == 'Y' && $(elem).attr('name') === 'iscreate') ||
-                                                    (arrLine[i].isupdate == 'Y' && $(elem).attr('name') === 'isupdate') ||
-                                                    (arrLine[i].isdelete == 'Y' && $(elem).attr('name') === 'isdelete')) {
-                                                    $(elem).prop('checked', true);
-                                                } else {
-                                                    $(elem).prop('checked', false);
-                                                }
-
-                                                // Set attribute id element to value sys_access_menu_id
-                                                $(elem).attr('id', arrLine[i].sys_access_menu_id);
-                                            }
-                                        }
-                                    });
-                                }
-                            }
+                            if (parent.find('div.filter_page').length > 0)
+                                parent.find('div.filter_page').css('display', 'none');
                         }
 
-                        if (arrMsg.header) {
-                            let header = arrMsg.header;
+                        if (className.includes('card-form')) {
+                            const card = cardForm.closest('.card');
+                            const cardHeader = card.find('.card-header');
 
-                            for (let i = 0; i < header.length; i++) {
-                                let fieldInput = header[i].field;
-                                let label = header[i].label;
-
-                                if (formList.contains('modal') && fieldInput === 'title') {
-                                    modalTitle.html(capitalize(label));
-                                } else if (fieldInput === 'title') {
-                                    cardTitle.html(capitalize(label));
-                                }
-
-                                for (let i = 0; i < field.length; i++) {
-                                    let fields = [];
-
-                                    if (field[i].name !== '' && field[i].name === fieldInput) {
-                                        let className = field[i].className.split(/\s+/);
-
-                                        if (className.includes('datepicker')) {
-                                            form.find('input:text[name=' + field[i].name + ']').val(moment(label).format('Y-MM-DD'));
-                                        } else if (className.includes('rupiah')) {
-                                            form.find('input:text[name=' + field[i].name + ']').val(formatRupiah(label));
-                                        } else {
-                                            form.find('input:text[name=' + field[i].name + ']').val(label);
-                                        }
-
-                                        form.find('textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']').val(label);
-
-                                        if (form.find('textarea.summernote[name=' + field[i].name + ']').length > 0 ||
-                                            form.find('textarea.summernote-product[name=' + field[i].name + ']').length > 0) {
-                                            $('[name =' + field[i].name + ']').summernote('code', label);
-                                        }
-
-                                        if (field[i].type === 'select-one') {
-                                            let fieldName = field[i].name;
-                                            let value = label;
-
-                                            if (typeof value === 'object') {
-                                                value = label.id;
-                                                let text = label.name;
-                                                option.push({
-                                                    fieldName,
-                                                    value,
-                                                    text
-                                                });
-
-                                                let newOption = $("<option selected='selected'></option>").val(label.id).text(label.name);
-
-                                                form.find('select[name=' + field[i].name + ']').append(newOption).change();
-                                            } else {
-                                                option.push({
-                                                    fieldName,
-                                                    value
-                                                });
-
-                                                if (label != 0)
-                                                    form.find('select[name=' + field[i].name + ']').val(label).change();
-                                            }
-
-                                            // // Logic for set value null select if not exist data
-                                            // $('select[name=' + field[i].name + ']').each(function () {
-                                            //     console.log(this)
-                                            //     if (this.selectedIndex <= 0) {
-                                            //         console.log($(this))
-                                            //         $(this).val(null).change();
-                                            //     }
-                                            // });
-                                        }
-
-                                        if (field[i].type === 'select-multiple' && label !== null) {
-                                            // array label explode into array
-                                            let arrLabel = label.split(',');
-
-                                            // Condition data length more than 1
-                                            if (arrLabel.length > 1) {
-                                                form.find('select[name=' + field[i].name + ']').val(arrLabel).change();
-                                            } else {
-                                                arrMultiSelect.push(label);
-                                                form.find('select[name=' + field[i].name + ']').val(arrMultiSelect).change();
-                                            }
-                                        }
-
-                                        // Populate checked field default set on the attribute field
-                                        if (field[i].type === 'checkbox' && field[i].checked)
-                                            fieldChecked.push(field[i].name);
-
-                                        // Set condition value checked for field type Checkbox based on database
-                                        if (field[i].type === 'checkbox' && label === 'Y') {
-                                            form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', true);
-
-                                            if (className.includes('active'))
-                                                readonly(form, false);
-                                        } else {
-                                            form.find('input:checkbox[name=' + field[i].name + ']').removeAttr('checked');
-
-                                            if (className.includes('active'))
-                                                readonly(form, true);
-
-                                            let fieldActive = form.find('input.active');
-
-                                            // set field is readonly/disabled by default condition not field active and when detail content
-                                            if (fieldActive.length == 0 && setSave !== 'detail' && (field[i].readOnly || field[i].disabled)) {
-                                                fieldReadOnly.push(field[i].name);
-                                            }
-
-                                            if ($(field[i]).attr('edit-disabled')) {
-                                                form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + '], input:radio[name=' + field[i].name + ']')
-                                                    .prop('disabled', true);
-                                            }
-                                        }
-                                        // Set value checked for field type Radio Button
-                                        if (field[i].type == 'radio') {
-                                            if (field[i].value == label) {
-                                                field[i].checked = true;
-                                            }
-                                        }
-
-                                        // Pass data form input file to function previewImage
-                                        if (field[i].type === 'file') {
-                                            if (className.includes('control-upload-image')) {
-                                                previewImage(form.find('input[name=' + field[i].name + ']')[0], '', label);
-                                            }
-                                        }
-                                    }
-
-                                    if (field[i].name !== '') {
-                                        //? Condition field checked and contain attribute checked-hide-field
-                                        if (field[i].type === 'checkbox' && $(field[i]).attr('checked-hide-field')) {
-                                            fields = $(field[i]).attr('checked-hide-field').split(',').map(element => element.trim());
-
-                                            if (field[i].checked) {
-                                                for (let i = 0; i < fields.length; i++) {
-                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                                    formGroup.hide();
-                                                }
-                                            } else {
-                                                for (let i = 0; i < fields.length; i++) {
-                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                                    formGroup.show();
-                                                }
-                                            }
-                                        }
-
-                                        //? Condition field checked and contain attribute checked-show-field
-                                        if (field[i].type === 'checkbox' && $(field[i]).attr('checked-show-field')) {
-                                            fields = $(field[i]).attr('checked-show-field').split(',').map(element => element.trim());
-
-                                            if (field[i].checked) {
-                                                for (let i = 0; i < fields.length; i++) {
-                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                                    formGroup.show();
-                                                }
-                                            } else {
-                                                for (let i = 0; i < fields.length; i++) {
-                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                                    formGroup.hide();
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            cardHeader.find('button', 'a').css('display', 'none');
+                            $(this).css('display', 'block');
+                            cardBtn.css('display', 'block');
+                            formList = $(this).prop('classList');
                         }
-
-                        $('html, body').animate({
-                            scrollTop: $('.main-panel').offset().top
-                        }, 500);
                     } else {
-                        Toast.fire({
-                            type: 'error',
-                            title: result[0].message
-                        });
+                        openModalForm();
+                        Scrollmodal();
+                        form = modalForm.find('form');
+                        formList = cardForm.prop('classList');
                     }
-                },
-                error: function (jqXHR, exception) {
-                    showError(jqXHR, exception);
-                }
-            });
-        } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
-            Toast.fire({
-                type: 'error',
-                title: "You are role don't have permission, please reload !!"
-            });
-        } else {
-            Toast.fire({
-                type: 'error',
-                title: checkAccess[0].message
-            });
-        }
-    }, 50);
-});
+                });
+
+                let url = CURRENT_URL + SHOW + ID;
+
+                setSave = ((typeof status === 'undefined' || status === '') || status === 'DR') ? 'update' : 'detail';
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    cache: false,
+                    dataType: 'JSON',
+                    beforeSend: function () {
+                        $('.save_form').attr('disabled', true);
+                        $('.x_form').attr('disabled', true);
+                        $('.close_form').attr('disabled', true);
+                        loadingForm(form.prop('id'), 'facebook');
+                    },
+                    complete: function () {
+                        if (setSave !== 'detail')
+                            $('.save_form').removeAttr('disabled');
+
+                        $('.x_form').removeAttr('disabled');
+                        $('.close_form').removeAttr('disabled');
+                        hideLoadingForm(form.prop('id'));
+                    },
+                    success: function (result) {
+                        if (result[0].success) {
+                            let arrMsg = result[0].message;
+
+                            // Show datatable line
+                            if (arrMsg.line) {
+                                let arrLine = arrMsg.line;
+
+                                if (form.find('table.tb_displayline').length > 0) {
+                                    let line = JSON.parse(arrLine);
+
+                                    $.each(line, function (idx, elem) {
+                                        _tableLine.row.add(elem).draw(false);
+                                    });
+
+                                    let btnAction = _tableLine.rows().nodes().to$().find('button');
+
+                                    const field = _tableLine.rows().nodes().to$().find('input, select');
+
+                                    /**
+                                     * Logic for set detail when status not draft
+                                     */
+                                    if (setSave === 'detail' && status !== 'DR') {
+                                        // Button add row table line
+                                        $('.add_row, .create_line').css('display', 'none');
+
+                                        btnAction.css('display', 'none');
+
+                                        $.each(field, function (index, item) {
+                                            const tr = $(this).closest('tr');
+
+                                            if (item.type !== 'text') {
+                                                tr.find('input:checkbox[name=' + item.name + '], select[name=' + item.name + '], input:radio[name=' + item.name + ']').prop('disabled', true);
+                                            } else {
+                                                tr.find('input:text[name=' + item.name + '], textarea[name=' + item.name + ']').prop('readonly', true);
+                                            }
+                                        });
+                                    } else {
+                                        // Button add row table line
+                                        $('.add_row, .create_line').css('display', 'block');
+
+                                        btnAction.css('display', 'block');
+                                    }
+                                }
+
+                                if (form.find('table.tb_tree').length > 0) {
+                                    for (let i = 0; i < arrLine.length; i++) {
+                                        const table = form.find('table.tb_tree');
+                                        const input = table.find('td input:checkbox');
+
+                                        $.each(input, function (idx, elem) {
+                                            // Menu parent
+                                            if ($(elem).attr('data-menu') === 'parent') {
+
+                                                if (arrLine[i].sys_menu_id == $(elem).val() && arrLine[i].sys_submenu_id == 0) {
+                                                    if ((arrLine[i].isview == 'Y' && $(elem).attr('name') === 'isview') ||
+                                                        (arrLine[i].iscreate == 'Y' && $(elem).attr('name') === 'iscreate') ||
+                                                        (arrLine[i].isupdate == 'Y' && $(elem).attr('name') === 'isupdate') ||
+                                                        (arrLine[i].isdelete == 'Y' && $(elem).attr('name') === 'isdelete')) {
+                                                        $(elem).prop('checked', true);
+                                                    } else {
+                                                        $(elem).prop('checked', false);
+                                                    }
+
+                                                    // Set attribute id element to value sys_access_menu_id
+                                                    $(elem).attr('id', arrLine[i].sys_access_menu_id);
+                                                }
+
+                                            } else {
+                                                if (arrLine[i].sys_submenu_id === $(elem).val()) {
+                                                    if ((arrLine[i].isview == 'Y' && $(elem).attr('name') === 'isview') ||
+                                                        (arrLine[i].iscreate == 'Y' && $(elem).attr('name') === 'iscreate') ||
+                                                        (arrLine[i].isupdate == 'Y' && $(elem).attr('name') === 'isupdate') ||
+                                                        (arrLine[i].isdelete == 'Y' && $(elem).attr('name') === 'isdelete')) {
+                                                        $(elem).prop('checked', true);
+                                                    } else {
+                                                        $(elem).prop('checked', false);
+                                                    }
+
+                                                    // Set attribute id element to value sys_access_menu_id
+                                                    $(elem).attr('id', arrLine[i].sys_access_menu_id);
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+
+                            if (arrMsg.header) {
+                                let data = arrMsg.header;
+                                putFieldData(form, data);
+
+                                for (let i = 0; i < data.length; i++) {
+                                    let fieldInput = data[i].field;
+                                    let label = data[i].label;
+
+                                    if (formList.contains('modal') && fieldInput === 'title') {
+                                        modalTitle.html(capitalize(label));
+                                    } else if (fieldInput === 'title') {
+                                        cardTitle.html(capitalize(label));
+                                    }
+                                }
+                            }
+
+                            $('html, body').animate({
+                                scrollTop: $('.main-panel').offset().top
+                            }, 500);
+                        } else {
+                            Toast.fire({
+                                type: 'error',
+                                title: result[0].message
+                            });
+                        }
+                    },
+                    error: function (jqXHR, exception) {
+                        showError(jqXHR, exception);
+                    }
+                });
+
+                s.removeClass("is-loading");
+            }, 200));
+    } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
+        Toast.fire({
+            type: 'error',
+            title: "You are role don't have permission, please reload !!"
+        });
+    } else {
+        Toast.fire({
+            type: 'error',
+            title: checkAccess[0].message
+        });
+    }
+}
 
 /**
  * Button delete data
  */
 function Destroy(id) {
-    let url = SITE_URL + DELETE + id;
+    let url = CURRENT_URL + DELETE + id;
+
     let action = 'delete';
 
     let checkAccess = isAccess(action, LAST_URL);
@@ -896,7 +890,7 @@ function Destroy(id) {
             type: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            confirmButtonText: 'Okay',
+            confirmButtonText: 'Ok',
             cancelButtonText: 'Close',
             reverseButtons: true
         }).then((data) => {
@@ -951,7 +945,7 @@ _tableLine.on('click', '.btn_delete', function (evt) {
     const row = _tableLine.row(tr);
     let id = this.id;
 
-    let url = SITE_URL + DELETE_LINE + id;
+    let url = CURRENT_URL + DELETE_LINE + id;
 
     let _this = $(this);
     let oriElement = _this.html();
@@ -970,7 +964,7 @@ _tableLine.on('click', '.btn_delete', function (evt) {
             type: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            confirmButtonText: 'Okay',
+            confirmButtonText: 'Ok',
             cancelButtonText: 'Close',
             reverseButtons: true
         }).then((data) => {
@@ -986,7 +980,7 @@ _tableLine.on('click', '.btn_delete', function (evt) {
                         });
 
                         // Update field grand total
-                        if (form.find('input[name="grandtotal"]').length > 0)
+                        if (form.find('input[name="grandtotal"]').length > 0 && !result[0].message)
                             form.find('input[name="grandtotal"]').val(formatRupiah(result[0].message));
 
                         row.remove().draw(false);
@@ -1051,10 +1045,9 @@ function docProcess(id, status) {
                 return new Promise(function (resolve) {
                     let docAction = $('#docaction option:selected').val();
 
-                    let url = SITE_URL + '/processIt?id=' + id + '&docaction=' + docAction;
+                    let url = CURRENT_URL + '/processIt?id=' + id + '&docaction=' + docAction;
 
                     $.getJSON(url, function (result) {
-                            console.log(result)
                             if (result[0].success) {
                                 if (result[0].message == true) {
                                     Swal.fire({
@@ -1109,58 +1102,73 @@ function docProcess(id, status) {
  * @x_form button only in modal
  * @close_form button in card-action
  */
-$(document).on('click', '.x_form, .close_form', function (evt) {
+$(document).on('click', '.x_form, .close_form, .reset_form', function (evt) {
     let target = $(evt.currentTarget);
     const container = target.closest('.container');
+    const card = container.find('.card');
+    const actionMenu = card.attr('data-action-menu');
+    const div = card.find('div');
 
     let oriTitle = container.find('.page-title').text();
 
     setSave = 'close';
 
-    if (target.attr('data-dismiss') !== 'modal') {
-        const parent = target.closest('.container');
-        const cardBody = parent.find('.card-body');
+    if (actionMenu !== 'F') {
+        if (target.attr('data-dismiss') !== 'modal') {
+            const parent = target.closest('.container');
+            const cardBody = parent.find('.card-body');
 
-        $.each(cardBody, function (idx, elem) {
-            let className = elem.className.split(/\s+/);
+            $.each(cardBody, function (idx, elem) {
+                let className = elem.className.split(/\s+/);
 
-            if (className.includes('card-main')) {
-                $(this).css('display', 'block');
+                if (className.includes('card-main')) {
+                    $(this).css('display', 'block');
 
-                // Remove breadcrumb list
-                let li = ul.find('li');
-                $.each(li, function (idx, elem) {
-                    if (idx > 2)
-                        elem.remove();
-                });
+                    // Remove breadcrumb list
+                    let li = ul.find('li');
+                    $.each(li, function (idx, elem) {
+                        if (idx > 2)
+                            elem.remove();
+                    });
 
-                if (parent.find('div.filter_page').length > 0) {
-                    parent.find('div.filter_page').css('display', 'block');
+                    if (parent.find('div.filter_page').length > 0) {
+                        parent.find('div.filter_page').css('display', 'block');
+                    }
                 }
-            }
 
-            if (className.includes('card-form')) {
-                $(this).css('display', 'none');
-            }
-        });
+                if (className.includes('card-form')) {
+                    $(this).css('display', 'none');
+                }
+            });
 
-        cardBtn.css('display', 'none');
+            cardBtn.css('display', 'none');
 
-        const cardHeader = parent.find('.card-header');
-        cardHeader.find('button').show();
+            const cardHeader = parent.find('.card-header');
+            cardHeader.find('button').show();
+        }
+
+        cardTitle.html(oriTitle);
+
+        //TODO: Call reloadTable();
+        $('.btn_requery').click();
+
+        $('html, body').animate({
+            scrollTop: $('.main-panel').offset().top
+        }, 500);
     }
 
     clearForm(evt);
-    cardTitle.html(oriTitle);
 
-    // Clear button attribute disable 
-    $(this).removeAttr('disabled');
+    //TODO: Hide content there is attribute show-after-save 
+    $.each(div, function () {
+        if ($(this).attr('show-after-save')) {
+            $(this).addClass('d-none');
+        }
+    });
+
+    //! Clear button attribute disable 
     $(this).removeAttr('disabled');
     $('.save_form').removeAttr('disabled');
-
-    $('html, body').animate({
-        scrollTop: $('.main-panel').offset().top
-    }, 500);
 });
 
 /**
@@ -1169,133 +1177,171 @@ $(document).on('click', '.x_form, .close_form', function (evt) {
 $('.new_form').click(function (evt) {
     const parent = $(evt.target).closest('.container');
     const cardBody = parent.find('.card-body');
+    const main_page = parent.find('.main_page');
+    let s = parent.find('.card');
 
     let form;
     let action = 'create';
-
     let oriTitle = parent.find('.page-title').text();
-
     let checkAccess = isAccess(action, LAST_URL);
+    let _this = $(this);
+    let oriElement = _this.html();
+    let textElement = _this.text().trim();
+
+    $(this).tooltip('hide');
 
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
-        $.each(cardBody, function (idx, elem) {
-            let className = elem.className.split(/\s+/);
+        $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
 
-            if (cardBody.length > 1) {
-                if (className.includes('card-main')) {
-                    $(this).css('display', 'none');
+        //? Identified card is more than 1 page 
+        if (s.length > 1)
+            s = parent.find('.page-inner');
+        else
+            s = main_page.find('.card');
 
-                    const pageHeader = parent.find('.page-header');
-                    ul = pageHeader.find('ul.breadcrumbs');
+        s.length && (s.addClass("is-loading"),
+            setTimeout(function () {
+                $.each(cardBody, function (idx, elem) {
+                    let className = elem.className.split(/\s+/);
 
-                    // Append list separator and text create
-                    ul.find('li.nav-item > a').attr('href', CURRENT_URL);
+                    if (cardBody.length > 1) {
+                        if (className.includes('card-main')) {
+                            $(this).css('display', 'none');
 
-                    let list = '<li class="separator">' +
-                        '<i class="flaticon-right-arrow"></i>' +
-                        '</li>';
+                            const pageHeader = parent.find('.page-header');
+                            ul = pageHeader.find('ul.breadcrumbs');
 
-                    list += '<li class="nav-item">' +
-                        '<a class="text-primary font-weight-bold">Create</a>' +
-                        '</li>';
+                            // Append list separator and text create
+                            ul.find('li.nav-item > a').attr('href', CURRENT_URL);
 
-                    ul.append(list);
+                            let list = '<li class="separator">' +
+                                '<i class="flaticon-right-arrow"></i>' +
+                                '</li>';
 
-                    if (parent.find('div.filter_page').length > 0) {
-                        parent.find('div.filter_page').css('display', 'none');
-                    }
-                }
+                            list += '<li class="nav-item">' +
+                                '<a class="text-primary font-weight-bold">Create</a>' +
+                                '</li>';
 
-                if (className.includes('card-form')) {
-                    const cardHeader = $(evt.target).closest('.card-header');
-                    cardHeader.find('button').css('display', 'none');
-                    $(this).css('display', 'block');
-                    cardBtn.css('display', 'block');
+                            ul.append(list);
 
-                    cardTitle.html('New ' + oriTitle);
+                            if (parent.find('div.filter_page').length > 0) {
+                                parent.find('div.filter_page').css('display', 'none');
+                            }
+                        }
 
-                    form = $(this).find('form');
+                        if (className.includes('card-form')) {
+                            const cardHeader = $(evt.target).closest('.card-header');
+                            cardHeader.find('button').css('display', 'none');
+                            $(this).css('display', 'block');
+                            cardBtn.css('display', 'block');
 
-                    if (form.find('input:file.control-upload-image').length > 0) {
-                        form.find('.img-result').attr('src', '');
-                    }
+                            cardTitle.html('New ' + oriTitle);
 
-                    const field = parent.find('input, textarea, select');
+                            form = $(this).find('form');
 
-                    for (let i = 0; i < field.length; i++) {
-                        let fields = [];
-
-                        if (field[i].name !== '') {
-
-                            // set field is readonly or disabled by default
-                            if (field[i].readOnly || field[i].disabled)
-                                fieldReadOnly.push(field[i].name);
-
-                            // set field is checked by default from set attribute on the field
-                            if (field[i].type == 'checkbox' && fieldChecked.includes(field[i].name))
-                                form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', true);
-
-                            //? Condition field checked and contain attribute checked-hide-field
-                            if ($(field[i]).attr('checked-hide-field')) {
-                                fields = $(field[i]).attr('checked-hide-field').split(',').map(element => element.trim());
-
-                                if (field[i].checked) {
-                                    for (let i = 0; i < fields.length; i++) {
-                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                        formGroup.hide();
-                                    }
-                                } else {
-                                    for (let i = 0; i < fields.length; i++) {
-                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                        formGroup.show();
-                                    }
-                                }
+                            if (form.find('input:file.control-upload-image').length > 0) {
+                                form.find('.img-result').attr('src', '');
                             }
 
-                            //? Condition field checked and contain attribute checked-show-field
-                            if ($(field[i]).attr('checked-show-field')) {
-                                fields = $(field[i]).attr('checked-show-field').split(',').map(element => element.trim());
+                            const field = parent.find('input, textarea, select');
 
-                                if (field[i].checked) {
-                                    for (let i = 0; i < fields.length; i++) {
-                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                        formGroup.show();
+                            for (let i = 0; i < field.length; i++) {
+                                let fields = [];
+
+                                if (field[i].name !== '') {
+
+                                    // set field is readonly or disabled by default
+                                    if (field[i].readOnly || field[i].disabled)
+                                        fieldReadOnly.push(field[i].name);
+
+                                    // set field is checked by default from set attribute on the field
+                                    if (field[i].type == 'checkbox' && fieldChecked.includes(field[i].name))
+                                        form.find('input:checkbox[name=' + field[i].name + ']').prop('checked', true);
+
+                                    //? Condition field and contain attribute hide-field
+                                    if ($(field[i]).attr('hide-field')) {
+                                        fields = $(field[i]).attr('hide-field').split(',').map(element => element.trim());
+
+                                        if (field[i].type === 'checkbox') {
+                                            if (field[i].checked) {
+                                                for (let i = 0; i < fields.length; i++) {
+                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                    formGroup.hide();
+                                                }
+                                            } else {
+                                                for (let i = 0; i < fields.length; i++) {
+                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                    formGroup.show();
+                                                }
+                                            }
+                                        } else {
+                                            for (let i = 0; i < fields.length; i++) {
+                                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                formGroup.hide();
+                                            }
+                                        }
                                     }
-                                } else {
-                                    for (let i = 0; i < fields.length; i++) {
-                                        let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
-                                        formGroup.hide();
+
+                                    //? Condition field and contain attribute show-field
+                                    if ($(field[i]).attr('show-field')) {
+                                        fields = $(field[i]).attr('show-field').split(',').map(element => element.trim());
+
+                                        if (field[i].type === 'checkbox') {
+                                            if (field[i].checked) {
+                                                for (let i = 0; i < fields.length; i++) {
+                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                    formGroup.show();
+                                                }
+                                            } else if (field[i].type === 'checkbox') {
+                                                for (let i = 0; i < fields.length; i++) {
+                                                    let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                    formGroup.hide();
+                                                }
+                                            }
+                                        } else {
+                                            for (let i = 0; i < fields.length; i++) {
+                                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                formGroup.show();
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
+                    } else {
+                        openModalForm();
+                        Scrollmodal();
+                        modalTitle.html('New1 ' + capitalize(LAST_URL));
+
+                        form = modalForm.find('form');
+
+                        if (form.find('input:file.control-upload-image').length > 0) {
+                            form.find('.img-result').attr('src', '');
+                        }
                     }
+                });
+
+                if (form.find('input.code').length > 0) {
+                    setSeqCode(form);
                 }
-            } else {
-                openModalForm();
-                Scrollmodal();
-                modalTitle.html('New1 ' + capitalize(LAST_URL));
 
-                form = modalForm.find('form');
-
-                if (form.find('input:file.control-upload-image').length > 0) {
-                    form.find('.img-result').attr('src', '');
+                if (form.find('select.select-data').length > 0) {
+                    let select = form.find('select.select-data');
+                    initSelectData(select);
                 }
-            }
-        });
 
-        if (form.find('input.code').length > 0) {
-            setSeqCode(form);
-        }
+                if (form.find('.summernote').length > 0) {
+                    let summernote = form.find('.summernote');
+                    initSummerNote(summernote);
+                }
 
-        if (form.find('select.select-data').length > 0) {
-            let select = form.find('select.select-data');
-            initSelectData(select);
-        }
+                form.find('input[type="checkbox"].active').prop('checked', true);
 
-        form.find('input[type="checkbox"].active').prop('checked', true);
+                setSave = 'add';
 
-        setSave = 'add';
+                $(_this).html(oriElement).prop('disabled', false);
+                s.removeClass("is-loading");
+            }, 200));
     } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
         Toast.fire({
             type: 'warning',
@@ -1326,7 +1372,7 @@ $('.btn_export').click(function (evt) {
     // form submit to export data
     form.submit();
 
-    $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+    $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
 
     setTimeout(function () {
         $(_this).html(oriElement).prop('disabled', false);
@@ -1334,28 +1380,66 @@ $('.btn_export').click(function (evt) {
 });
 
 /**
- * Process for filter datatable form filter
+ * Button Filter datatable form filter
  */
 $('.btn_filter').click(function (evt) {
-    const form = $(evt.target).closest('form');
     let _this = $(this);
+    const container = _this.parents('.container');
+    const main_page = container.find('.main_page');
+    const form = container.find('form');
     let oriElement = _this.html();
+    let textElement = _this.text().trim();
+    let s = container.find('.card');
+
+    //? Identified card is more than 1 page 
+    if (s.length > 1)
+        s = container.find('.page-inner');
+    else
+        s = main_page.find('.card');
 
     formTable = form.serializeArray();
 
-    $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+    $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
 
-    setTimeout(function () {
-        $(_this).html(oriElement).prop('disabled', false);
-    }, 700);
-
-    reloadTable();
+    s.length && (s.addClass("is-loading"),
+        reloadTable(),
+        setTimeout(function () {
+            s.removeClass("is-loading");
+            $(_this).html(oriElement).prop('disabled', false);
+        }, 700));
 });
 
+/**
+ * Button ReQuery DataTable
+ */
+$('.btn_requery').click(function () {
+    let _this = $(this);
+    const container = _this.parents('.container');
+    const main_page = container.find('.main_page');
+    let s = container.find('.card');
+
+    //? Identified card is more than 1 page 
+    if (s.length > 1)
+        s = container.find('.page-inner');
+    else
+        s = main_page.find('.card');
+
+    clear = false;
+
+    s.length && (s.addClass("is-loading"),
+        reloadTable(),
+        setTimeout(function () {
+            s.removeClass("is-loading");
+        }, 500));
+});
+
+/**
+ * Event add row table line
+ */
 $('.add_row').click(function (evt) {
     let form = $(evt.target).closest('form');
 
-    let url = SITE_URL + TABLE_LINE;
+    let url = CURRENT_URL + TABLE_LINE;
 
     let action = 'create';
 
@@ -1364,6 +1448,7 @@ $('.add_row').click(function (evt) {
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
         let _this = $(this);
         let oriElement = _this.html();
+        let textElement = _this.text().trim();
 
         let formData = new FormData(form[0]);
 
@@ -1376,9 +1461,13 @@ $('.add_row').click(function (evt) {
             cache: false,
             dataType: 'JSON',
             beforeSend: function () {
-                $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+                $('.close_form').attr('disabled', true);
+                $('.save_form').attr('disabled', true);
+                $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
             },
             complete: function () {
+                $('.close_form').removeAttr('disabled');
+                $('.save_form').removeAttr('disabled');
                 $(_this).html(oriElement).prop('disabled', false);
             },
             success: function (result) {
@@ -1402,6 +1491,287 @@ $('.add_row').click(function (evt) {
 });
 
 /**
+ * Event create table line
+ */
+$('.create_line').click(function (evt) {
+    let action = 'create';
+    let checkAccess = isAccess(action, LAST_URL);
+    let formData = $(this).closest('form');
+
+    if (checkAccess[0].success && checkAccess[0].message == 'Y') {
+        let _this = $(this);
+        let oriElement = _this.html();
+        let textElement = _this.text().trim();
+
+        let isFree = 'N';
+        if (formData.find('input:checkbox[name="isinternaluse"]').is(':checked'))
+            isFree = 'Y';
+
+        $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
+
+        setTimeout(function () {
+            $(_this).html(oriElement).prop('disabled', false);
+
+            $('#modal_product_info').modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            loadingForm('product_info', 'ios');
+
+            $("#modal_product_info").on('shown.bs.modal', function (e) {
+                const target = $(e.target);
+                const form = target.find('form');
+
+                let url = ADMIN_URL + 'Product' + '/showProductInfo/?data=null';
+
+                form[0].reset();
+
+                setTimeout(function () {
+                    hideLoadingForm('product_info');
+
+                    if (form.find('select.select-data').length > 0) {
+                        let select = form.find('select.select-data');
+                        initSelectData(select);
+                    }
+
+                    if (form.find('input:hidden[name="isfree"]'))
+                        form.find('input:hidden[name="isfree"]').val(isFree);
+
+                    _tableInfo.ajax.url(url).load().columns.adjust();
+
+                }, 50);
+            });
+        }, 100);
+
+
+    } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
+        Toast.fire({
+            type: 'warning',
+            title: "You are role don't have permission !!"
+        });
+    } else {
+        Toast.fire({
+            type: 'error',
+            title: checkAccess[0].message
+        });
+    }
+});
+
+/**
+ * Clear content modal product info
+ */
+$("#modal_product_info").on('hidden.bs.modal', function (evt) {
+    const target = $(evt.target);
+    const form = target.find('form');
+
+    //TODO: Clear form content
+    form[0].reset();
+
+    //TODO: Clear datatable
+    _tableInfo.clear().draw();
+});
+
+/**
+ * Refresh data table info
+ */
+$('.btn_requery_info').click(function (evt) {
+    const target = $(evt.target);
+    const modalContent = target.closest('.modal-content');
+    const form = modalContent.find('form');
+
+    let url = ADMIN_URL + 'Product' + '/showProductInfo/?';
+    let formData = form.serialize();
+
+    $(this).tooltip('hide');
+
+    _tableInfo.ajax.url(url + formData).load().columns.adjust();
+});
+
+/**
+ * Btn save info for set data from table info to table line
+ */
+$('.btn_save_info').click(function (evt) {
+    const modal = $(this).closest('.modal');
+    const modalBody = modal.find('.modal-body');
+
+    const checkbox = _tableInfo.rows().nodes().to$().find('input:checkbox[name="check_data"]:checked');
+
+    let _this = $(this);
+    let oriElement = _this.html();
+
+    if (checkbox.length > 0) {
+        let url = CURRENT_URL + TABLE_LINE + '/create';
+
+        let output = [];
+
+        $.each(checkbox, function (i) {
+            let tr = $(this).closest('tr');
+            let tag = tr.find('input, select');
+
+            let data = [];
+
+            $.each(tag, function (index, element) {
+                let row = [];
+                let name = $(element).attr('name');
+                let value = $(element).val();
+
+                if ($(element).attr('type') !== 'checkbox') {
+                    row = {
+                        [name]: value
+                    };
+                } else {
+                    if (name === 'check_data')
+                        row = {
+                            product_id: value
+                        };
+                    else
+                        row = {
+                            [name]: $(element).is(':checked')
+                        }
+                }
+
+                data.push(row);
+            });
+
+            output[i] = data;
+        });
+
+        let jsonString = JSON.stringify(output);
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                data: jsonString
+            },
+            cache: false,
+            dataType: 'JSON',
+            beforeSend: function () {
+                $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
+                $('.btn_requery_info').attr('disabled', true);
+                $('.btn_close_info').attr('disabled', true);
+                loadingForm(modalBody.attr('id'), 'ios');
+            },
+            complete: function () {
+                $(_this).html(oriElement).prop('disabled', false);
+                $('.btn_requery_info').removeAttr('disabled');
+                $('.btn_close_info').removeAttr('disabled');
+                hideLoadingForm(modalBody.attr('id'));
+            },
+            success: function (result) {
+                $('#' + modal.attr('id')).modal('hide');
+                _tableLine.rows.add(result).draw(false);
+            },
+            error: function (jqXHR, exception) {
+                showError(jqXHR, exception);
+            }
+        });
+    } else {
+        Toast.fire({
+            type: 'warning',
+            title: 'Please selected data !!'
+        });
+    }
+});
+
+/**
+ * Event Click Button OK Report
+ */
+$('.btn_ok_form').on('click', function (evt) {
+    const target = $(evt.target);
+    const pageInner = target.closest('.page-inner');
+    const card = target.closest('.card');
+    const cardTableReport = pageInner.find('.card-table-report');
+    const floatRight = cardTableReport.find('.float-right');
+    const form = card.find('form');
+    const disabled = form.find('[disabled]');
+
+    //! Remove attribute disabled field
+    disabled.removeAttr('disabled');
+
+    //TODO: Collect field array
+    let field = form.find('input, select').map(function () {
+        let row = {};
+
+        row['name'] = $(this).attr('name');
+
+        if (this.type !== 'checkbox' && this.type !== 'select-multiple')
+            row['value'] = this.value;
+        else if (this.type === 'select-multiple')
+            row['value'] = $(this).val();
+        else
+            row['value'] = this.checked ? 'Y' : 'N';
+
+        row['type'] = this.type;
+
+        return row;
+    }).get();
+
+    formReport = field;
+
+    //! Set attribute disabled field
+    disabled.prop('disabled', true);
+
+    //* Set clear to true 
+    clear = false;
+
+    //* Show Toolbar Button
+    floatRight.removeClass('d-none');
+
+    //TODO: Loading and processing
+    pageInner.length && (pageInner.addClass("is-loading"),
+        reloadTable(),
+        setTimeout(function () {
+            pageInner.removeClass("is-loading");
+        }, 500));
+
+    //* Show Toolbar Button
+    cardTableReport.addClass('d-block');
+});
+
+/**
+ * Event Click Button Reset Report
+ */
+$('.btn_reset_form').on('click', function (evt) {
+    const target = $(evt.target);
+    const pageInner = target.closest('.page-inner');
+    const card = target.closest('.card');
+    const cardTableReport = pageInner.find('.card-table-report');
+    const floatRight = cardTableReport.find('.float-right');
+    const form = card.find('form');
+    const field = form.find('input, select');
+
+    for (let i = 0; i < field.length; i++) {
+        if (field[i].name !== '') {
+
+            //TODO: Collect Field yang readonly atau disabled 
+            if ((field[i].readOnly || field[i].disabled))
+                fieldReadOnly.push(field[i].name);
+        }
+    }
+
+    //* Reset form parameter 
+    clearForm(evt);
+
+    //* Set clear to true 
+    clear = true;
+
+    //* Hide Toolbar Button 
+    floatRight.addClass('d-none');
+
+    //TODO: Loading and processing
+    pageInner.length && (pageInner.addClass("is-loading"),
+        reloadTable(),
+        setTimeout(function () {
+            pageInner.removeClass("is-loading");
+        }, 500));
+
+    //* Hide Table Report
+    cardTableReport.removeClass('d-block');
+});
+
+/**
  * Process login
  */
 $('.btn_login').click(function () {
@@ -1420,7 +1790,7 @@ $('.btn_login').click(function () {
         dataType: 'JSON',
         beforeSend: function () {
             $(this).prop('disabled', true);
-            $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+            $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
         },
         complete: function () {
             $(this).removeAttr('disabled');
@@ -1464,6 +1834,7 @@ $('.login-form input').keypress(function (evt) {
  * Anchor change password on the navbar admin
  */
 $('.change-password').click(function (evt) {
+    ID = $(this).attr('id');
     openModalForm();
 });
 
@@ -1481,6 +1852,9 @@ $('.save_form_pass').click(function (evt) {
 
     let formData = new FormData(form[0]);
 
+    if (typeof ID !== 'undefined' && ID !== '')
+        formData.append('id', ID);
+
     $.ajax({
         url: url,
         type: 'POST',
@@ -1492,7 +1866,7 @@ $('.save_form_pass').click(function (evt) {
         beforeSend: function () {
             $('.close').prop('disabled', true);
             loadingForm(form.prop('id'), 'facebook');
-            $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Loading...').prop('disabled', true);
+            $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
         },
         complete: function () {
             $('.close').prop('disabled', false);
@@ -1546,7 +1920,7 @@ $('.save_form_pass').click(function (evt) {
  */
 $('input.active:checkbox').change(function (evt) {
     const parent = $(this).closest('form');
-    const field = parent.find('input, textarea, select');
+    const field = parent.find('input, textarea, select, button');
     let className;
 
     if ($(this).is(':checked')) {
@@ -1555,11 +1929,16 @@ $('input.active:checkbox').change(function (evt) {
                 className = field[i].className.split(/\s+/);
 
                 // field is not readonly by default
-                if (!fieldReadOnly.includes(field[i].name))
-                    parent.find('input:text[name=' + field[i].name + '], textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']').removeAttr('readonly');
+                if (!fieldReadOnly.includes(field[i].name)) {
+                    parent.find('input:text[name=' + field[i].name + '], textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']')
+                        .not('.line')
+                        .removeAttr('readonly');
+                }
 
-                if (field[i].type !== 'text' && !className.includes('active') && !fieldReadOnly.includes(field[i].name)) {
-                    parent.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').removeAttr('disabled');
+                if (!className.includes('active') && !fieldReadOnly.includes(field[i].name)) {
+                    parent.find('input:checkbox[name=' + field[i].name + '], input:radio[name=' + field[i].name + '], select[name=' + field[i].name + '], button[name=' + field[i].name + ']')
+                        .not('.line')
+                        .removeAttr('disabled');
 
                     if (field[i].type === 'file') {
                         parent.find('input[name=' + field[i].name + ']').removeAttr('disabled');
@@ -1581,15 +1960,20 @@ $('input.active:checkbox').change(function (evt) {
                 className = field[i].className.split(/\s+/);
 
                 // set field is readonly by default
-                if (field[i].readOnly || field[i].disabled)
+                if ((field[i].readOnly || field[i].disabled) && field[i].type !== 'radio')
                     fieldReadOnly.push(field[i].name);
 
                 // field is not readonly by default
-                if (!fieldReadOnly.includes(field[i].name))
-                    parent.find('input:text[name=' + field[i].name + '], textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']').prop('readonly', true);
+                if (!fieldReadOnly.includes(field[i].name)) {
+                    parent.find('input:text[name=' + field[i].name + '], textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']')
+                        .not('.line')
+                        .prop('readonly', true);
+                }
 
-                if (field[i].type !== 'text' && !className.includes('active') && !fieldReadOnly.includes(field[i].name)) {
-                    parent.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + ']').prop('disabled', true);
+                if (!className.includes('active') && !fieldReadOnly.includes(field[i].name)) {
+                    parent.find('input:checkbox[name=' + field[i].name + '], input:radio[name=' + field[i].name + '], select[name=' + field[i].name + '], button[name=' + field[i].name + ']')
+                        .not('.line')
+                        .prop('disabled', true);
 
                     if (field[i].type === 'file') {
                         parent.find('input[name=' + field[i].name + ']').prop('disabled', true);
@@ -1607,7 +1991,6 @@ $('input.active:checkbox').change(function (evt) {
         }
     }
 });
-
 
 /**
  * Button close image
@@ -1657,6 +2040,7 @@ function arrContains(value, arr) {
             break;
         }
     }
+
     return result;
 }
 
@@ -1666,7 +2050,7 @@ function arrContains(value, arr) {
  * @param {*} data from database
  */
 function errorForm(parent, data) {
-    const errorInput = parent.find('input, select, textarea');
+    const errorInput = parent.find('input, select, textarea').not('.line');
     const errorText = parent.find('small');
 
     let arrInput = [];
@@ -1690,8 +2074,13 @@ function errorForm(parent, data) {
         let inputName = arrContains(field, arrInput);
 
         if (labelMsg !== '' && j > 0) {
-            parent.find('small[id=' + textName + ']:not(.line)').html(labelMsg);
-            parent.find('input:text[name=' + inputName + ']:not(.line), select[name=' + inputName + ']:not(.line), textarea[name=' + inputName + ']:not(.line), input:password[name=' + inputName + ']:not(.line)').closest('.form-group').addClass('has-error');
+            if (error !== 'error_table') {
+                parent.find('small[id=' + textName + ']').html(labelMsg);
+                parent.find('input:text[name=' + inputName + '], select[name=' + inputName + '], textarea[name=' + inputName + '], input:password[name=' + inputName + ']')
+                    .not('.line')
+                    .closest('.form-group')
+                    .addClass('has-error');
+            }
 
             // Check datatable line for get validation
             if (parent.find('table.tb_displayline').length > 0) {
@@ -1760,8 +2149,35 @@ function errorForm(parent, data) {
             }
         } else {
             parent.find('small[id=' + textName + ']:not(.line)').html('');
-            parent.find('input:text[name=' + inputName + ']:not(.line), select[name=' + inputName + ']:not(.line), textarea[name=' + inputName + ']:not(.line), input:password[name=' + inputName + ']:not(.line)').closest('.form-group').removeClass('has-error');
+            parent.find('input:text[name=' + inputName + ']:not(.line), select[name=' + inputName + '], textarea[name=' + inputName + '], input:password[name=' + inputName + ']')
+                .not('.line')
+                .closest('.form-group')
+                .removeClass('has-error');
         }
+    }
+}
+
+/**
+ * Function to Remove has-error and text-danger
+ * @param {*} evt selector html
+ */
+function clearErrorForm(form) {
+    const field = form.find('input, textarea, select');
+    const errorText = form.find('small');
+
+    //* Remove class has-error 
+    for (let i = 0; i < field.length; i++) {
+        if (field[i].name !== '') {
+            form.find('input[name=' + field[i].name + '], textarea[name=' + field[i].name + '], select[name=' + field[i].name + ']')
+                .closest('.form-group')
+                .removeClass('has-error');
+        }
+    }
+
+    //* Remove text error element small
+    for (let l = 0; l < errorText.length; l++) {
+        if (errorText[l].id !== '')
+            form.find('small[id=' + errorText[l].id + ']').html('');
     }
 }
 
@@ -1777,19 +2193,29 @@ function findArrDuplicate(array) {
  */
 function clearForm(evt) {
     const container = $(evt.target).closest('.container');
-    let parent = $(evt.target).closest('.row').length > 0 ? $(evt.target).closest('.row') : $(evt.target).closest('.modal');
-    const form = parent.find('form');
-    const field = form.find('input, textarea, select');
+    let parent = $(evt.target).closest('.row');
+    const cardForm = parent.find('.card-form');
+    let form = cardForm.length > 0 ? cardForm.find('form') : parent.find('form');
+
+    if (parent.length == 0) {
+        parent = $(evt.target).closest('.modal');
+        form = parent.find('form');
+    }
+
+    const field = form.find('input, textarea, select, button');
     const errorText = form.find('small');
 
     // clear field data on the form
     form[0].reset();
 
+    // Get data default logic
+    let urlDefault = '/quotation/defaultLogic';
+
+    let defaultLogic = getLogic(urlDefault);
+
     // clear data, attribute readonly, attribute disabled on the field and remove class invalid
     for (let i = 0; i < field.length; i++) {
         if (field[i].name !== '') {
-            let defaultOption = $('select[name=' + field[i].name + ']').attr('default-id')
-
             if (fieldReadOnly.length == 0) {
                 form.find('input[name=' + field[i].name + '], textarea[name=' + field[i].name + ']')
                     .removeAttr('readonly')
@@ -1808,26 +2234,30 @@ function clearForm(evt) {
                 }
             }
 
-            form.find('input:checkbox[name=' + field[i].name + ']')
+            if (!fieldReadOnly.includes(field[i].name) && field[i].type === 'checkbox')
+                form.find('input:checkbox[name=' + field[i].name + ']')
                 .removeAttr('disabled');
 
             //logic clear data dropdown if not selected from the beginning
-            if (typeof defaultOption !== 'undefined' && defaultOption !== '') {
+            if (defaultLogic.length > 0 && field[i].name === defaultLogic[0].field && defaultLogic[0].condition) {
                 if (fieldReadOnly.length == 0) {
                     form.find('select[name=' + field[i].name + ']')
-                        .val(defaultOption).change()
+                        .val(defaultLogic[0].id).change()
                         .removeAttr('disabled')
-                        .closest('.form-group').removeClass('has-error');
+                        .closest('.form-group')
+                        .removeClass('has-error');
                 } else if (fieldReadOnly.length > 0) { // field is not readonly by default
                     if (!fieldReadOnly.includes(field[i].name)) {
                         form.find('select[name=' + field[i].name + ']')
-                            .val(defaultOption).change()
+                            .val(defaultLogic[0].id).change()
                             .removeAttr('disabled')
-                            .closest('.form-group').removeClass('has-error');
+                            .closest('.form-group')
+                            .removeClass('has-error');
                     } else {
                         form.find('select[name=' + field[i].name + ']')
-                            .val(defaultOption).change()
-                            .closest('.form-group').removeClass('has-error');
+                            .val(defaultLogic[0].id).change()
+                            .closest('.form-group')
+                            .removeClass('has-error');
                     }
                 }
             } else {
@@ -1835,17 +2265,20 @@ function clearForm(evt) {
                     form.find('select[name=' + field[i].name + ']')
                         .val(null).change()
                         .removeAttr('disabled')
-                        .closest('.form-group').removeClass('has-error');
+                        .closest('.form-group')
+                        .removeClass('has-error');
                 } else if (fieldReadOnly.length > 0) { // field is not readonly by default
                     if (!fieldReadOnly.includes(field[i].name)) {
                         form.find('select[name=' + field[i].name + ']')
                             .val(null).change()
                             .removeAttr('disabled')
-                            .closest('.form-group').removeClass('has-error');
+                            .closest('.form-group')
+                            .removeClass('has-error');
                     } else {
                         form.find('select[name=' + field[i].name + ']')
                             .val(null).change()
-                            .closest('.form-group').removeClass('has-error');
+                            .closest('.form-group')
+                            .removeClass('has-error');
                     }
                 }
             }
@@ -1859,7 +2292,7 @@ function clearForm(evt) {
             if (form.find('textarea.summernote[name=' + field[i].name + ']').length > 0 ||
                 form.find('textarea.summernote-product[name=' + field[i].name + ']').length > 0) {
                 $('[name =' + field[i].name + ']').summernote('reset');
-                $('[name =' + field[i].name + ']').summernote('enable');
+                $('[name =' + field[i].name + ']').summernote('destroy');
             }
 
             // Exist table display line
@@ -1868,7 +2301,7 @@ function clearForm(evt) {
 
                 const btnAction = _tableLine.rows().to$().find('button');
                 // Button add row table line
-                $('.add_row').css('display', 'block');
+                $('.add_row, .create_line').css('display', 'block');
 
                 // button remove data line
                 btnAction.css('display', 'block');
@@ -1876,6 +2309,9 @@ function clearForm(evt) {
 
             if ($(field[i]).attr('edit-disabled'))
                 form.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + '], input:radio[name=' + field[i].name + ']')
+                .removeAttr('disabled');
+
+            form.find('input:radio[name=' + field[i].name + '], button[name=' + field[i].name + ']')
                 .removeAttr('disabled');
         }
     }
@@ -1888,6 +2324,7 @@ function clearForm(evt) {
 
     // Set to empty array option
     option = [];
+    arrMultiSelect = [];
 }
 
 /**
@@ -1896,35 +2333,32 @@ function clearForm(evt) {
  * @param {*} value based on passing data (true/false)
  */
 function readonly(parent, value) {
-    const field = parent.find('input, textarea, select');
+    const field = parent.find('input, textarea, select, button');
 
     for (let i = 0; i < field.length; i++) {
         if (field[i].name !== '') {
             let className = field[i].className.split(/\s+/);
 
-            // set field is readonly by default
-            if (field[i].readOnly || field[i].disabled)
-                fieldReadOnly.push(field[i].name);
-
             // field is not readonly by default
             if (!fieldReadOnly.includes(field[i].name))
-                parent.find('input:text[name=' + field[i].name + '], textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']').prop('readonly', value);
+                parent.find('input:text[name=' + field[i].name + '], textarea[name=' + field[i].name + '], input:password[name=' + field[i].name + ']').not('.line').prop('readonly', value);
 
             if (field[i].type !== 'text' && !className.includes('active') && !fieldReadOnly.includes(field[i].name)) {
-                parent.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + '], input:radio[name=' + field[i].name + ']')
+                parent.find('input:checkbox[name=' + field[i].name + '], select[name=' + field[i].name + '], input:radio[name=' + field[i].name + '], button[name=' + field[i].name + ']')
+                    .not('.line')
                     .prop('disabled', value);
             }
 
             if (field[i].type === 'file') {
-                parent.find('input[name=' + field[i].name + ']').prop('disabled', value);
+                parent.find('input[name=' + field[i].name + ']').not('.line').prop('disabled', value);
             }
 
             if (parent.find('textarea.summernote[name=' + field[i].name + ']').length > 0 ||
                 parent.find('textarea.summernote-product[name=' + field[i].name + ']').length > 0) {
                 if (value) {
-                    $('[name =' + field[i].name + ']').summernote('disable');
+                    $('[name =' + field[i].name + ']').not('.line').summernote('disable');
                 } else {
-                    $('[name =' + field[i].name + ']').summernote('enable');
+                    $('[name =' + field[i].name + ']').not('.line').summernote('enable');
                 }
             }
         }
@@ -1932,12 +2366,12 @@ function readonly(parent, value) {
 
     // check button close image based on value
     if (parent.find('button.close-img').length > 0) {
-        parent.find('button.close-img').prop('disabled', value)
+        parent.find('button.close-img').not('.line').prop('disabled', value)
 
         if (value) {
-            parent.find('button.close-img').css('display', 'none');
+            parent.find('button.close-img').not('.line').css('display', 'none');
         } else {
-            parent.find('button.close-img').css('display', 'block');
+            parent.find('button.close-img').not('.line').css('display', 'block');
         }
     }
 }
@@ -2034,7 +2468,7 @@ function previewImage(input, id, src) {
  * @returns 
  */
 function isAccess(input, last_url) {
-    let url = ADMIN_URL + 'accessmenu/' + 'getAccess';
+    let url = CURRENT_URL + '/AccessMenu/' + 'getAccess';
     let value;
 
     $.ajax({
@@ -2062,7 +2496,7 @@ function isAccess(input, last_url) {
  * @param {*} form 
  */
 function setSeqCode(form) {
-    let url = SITE_URL + '/getSeqCode';
+    let url = CURRENT_URL + '/getSeqCode';
 
     $.getJSON(url, function (result) {
         form.find('input.code').val(result[0].message);
@@ -2189,13 +2623,19 @@ function replaceRupiah(numeric) {
  * Function initialize select2 dropdown based on url on the element html
  * @param {*} select 
  */
-function initSelectData(select) {
+function initSelectData(select, field = null, id = null) {
     $.each(select, function (i, item) {
         let url = $(item).attr('data-url');
         let defaultID = $(item).attr('default-id');
         let defaultText = $(item).attr('default-text');
 
         if (typeof url !== 'undefined' && url !== '') {
+
+            if (field !== null && id !== null)
+                url = ADMIN_URL + url + '?' + field + '=' + id;
+            else
+                url = ADMIN_URL + url;
+
             $(this).select2({
                 placeholder: 'Select an option',
                 width: '100%',
@@ -2205,7 +2645,7 @@ function initSelectData(select) {
                 ajax: {
                     dataType: 'JSON',
                     url: function () {
-                        return ADMIN_URL + url;
+                        return url;
                     },
                     delay: 250,
                     data: function (params) {
@@ -2271,7 +2711,58 @@ function removeItems(array, itemsToRemove) {
         return array.splice(index, 1);
 }
 
+/**
+ * Function for get logic from controller
+ * @param {*} url
+ * @returns 
+ */
+function getLogic(url) {
+    let value = [];
+
+    $.ajax({
+        url: ADMIN_URL + url,
+        type: 'POST',
+        async: false,
+        dataType: 'JSON',
+        success: function (response) {
+            value.push(response);
+        }
+    });
+
+    return value;
+}
+
+/**
+ * Function to initialize summernote
+ * @param {*} selector 
+ */
+function initSummerNote(selector) {
+    $.each(selector, function () {
+        $(this).summernote({
+            fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Times New Roman'],
+            tabsize: 2,
+            height: 200,
+            toolbar: [
+                ['style', ['style', 'bold', 'italic', 'underline', 'clear']],
+                ['fontname', ['fontname']],
+                ['fontsize', ['fontsize']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['view', ['fullscreen', 'codeview', 'help']],
+                ['height', ['height']]
+            ],
+            placeholder: 'write here...'
+        });
+    });
+}
+
 $(document).ready(function (e) {
+    const parent = $('.container');
+    const card = parent.find('.card');
+    const cardMenu = parent.find('.card-action-menu');
+    const actionMenu = cardMenu.attr('data-action-menu');
+
     $('.select2').select2({
         placeholder: 'Select an option',
         width: '100%',
@@ -2280,12 +2771,13 @@ $(document).ready(function (e) {
     });
 
     $('.multiple-select').select2({
-        theme: "bootstrap"
+        theme: "bootstrap",
+        multiple: true
     });
 
     $('.number').on('keypress keyup blur', function (evt) {
-        $(this).val($(this).val().replace(/[^\d].+/, ""));
-        if ((evt.which < 48 || evt.which > 57)) {
+        $(this).val($(this).val().replace(/[^\d-].+/, ""));
+        if ((evt.which < 48 && evt.which != 45 || evt.which > 57 && evt.which != 189)) {
             evt.preventDefault();
         }
     });
@@ -2303,24 +2795,6 @@ $(document).ready(function (e) {
 
     $('.timepicker').datetimepicker({
         format: 'H:mm:ss',
-    });
-
-    $('.summernote').summernote({
-        fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Times New Roman'],
-        tabsize: 2,
-        height: 200,
-        toolbar: [
-            ['style', ['style', 'bold', 'italic', 'underline', 'clear']],
-            ['fontname', ['fontname']],
-            ['fontsize', ['fontsize']],
-            ['color', ['color']],
-            ['para', ['ul', 'ol', 'paragraph']],
-            ['table', ['table']],
-            // ['insert', ['link', 'picture']],
-            ['view', ['fullscreen', 'codeview', 'help']],
-            ['height', ['height']]
-        ],
-        placeholder: 'write here...'
     });
 
     $('.summernote-product').summernote({
@@ -2343,191 +2817,131 @@ $(document).ready(function (e) {
     });
 
     window.setTimeout(function () {
-        $('.alert ').fadeTo(500, 0).slideUp(500, function () {
+        $('.alert').fadeTo(500, 0).slideUp(500, function () {
             $(this).remove();
         });
     }, 4000);
-});
 
-
-$(document).ready(function (evt) {
-    const form = $('.form');
-
-    if (form.length > 0) {
-        const formList = form.prop('classList');
-
-        if (!arrContains('form_page', formList)) {
-            let hidden_ID = form.find('input.id:hidden');
-            ID = hidden_ID.val();
-
-            const field = form.find('input, textarea, select');
-
-            let url = SITE_URL + SHOW + ID;
-
-            setSave = 'update';
-
-            $.ajax({
-                url: url,
-                type: 'GET',
-                async: false,
-                cache: false,
-                dataType: 'JSON',
-                beforeSend: function () {
-                    $('.save_form').attr('disabled', true);
-                    loadingForm(form.find('form').attr('id'), 'facebook');
-                },
-                complete: function () {
-                    $('.save_form').removeAttr('disabled');
-                    hideLoadingForm(form.find('form').attr('id'));
-                },
-                success: function (result) {
-                    cardTitle.html(capitalize(LAST_URL));
-
-                    for (let i = 0; i < result.length; i++) {
-                        let fieldInput = result[i].field;
-                        let label = result[i].label;
-
-                        for (let i = 0; i < formList.length; i++) {
-                            if (formList[i].toLowerCase() === 'show' && fieldInput === 'title') {
-                                modalTitle.html(capitalize(label));
-                            } else if (fieldInput === 'title') {
-                                cardTitle.html(capitalize(label));
-                            }
+    /**
+     * Button Table Display
+     */
+    if ($('.tb_display').length > 0) {
+        new $.fn.dataTable.Buttons(_table, {
+            buttons: [{
+                extend: 'collection',
+                className: 'btn btn-warning btn-sm btn-round ml-auto text-white',
+                text: '<i class="fas fa-download fa-fw"></i> Export',
+                autoClose: true,
+                buttons: [{
+                        extend: 'pdfHtml5',
+                        text: '<i class="fas fa-file-pdf"></i> PDF',
+                        titleAttr: 'Export to PDF',
+                        title: '',
+                        pageSize: 'A4',
+                        exportOptions: {
+                            columns: ':visible:not(:last-child)',
+                        },
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        text: '<i class="fas fa-file"></i> CSV',
+                        titleAttr: 'Export to CSV',
+                        title: '', //Set null value first row in file
+                        exportOptions: {
+                            columns: ':visible:not(:last-child)'
                         }
-
-                        for (let i = 0; i < field.length; i++) {
-                            if (field[i].name === fieldInput) {
-                                form.find('input:text[name=' + field[i].name + '], textarea[name=' + field[i].name + ']').val(label);
-
-                                form.find('select[name=' + field[i].name + ']').val(label).change();
-                            }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        titleAttr: 'Export to Excel',
+                        title: '', //Set null value first row in file
+                        customize: function (xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            //* Bold and Border first column
+                            $('row:first c', sheet).attr('s', '27');
+                            //* Border all column except first column
+                            $('row:not(:first) c', sheet).attr('s', '25');
+                        },
+                        exportOptions: {
+                            columns: ':visible:not(:last-child)'
                         }
                     }
-                }
-            });
-        }
+                ]
+            }]
+        });
+
+        _table.buttons().container()
+            .appendTo($('#dt-button'));
     }
-});
 
-/**
- * Dropdown select for change data
- */
-$('select').change(function (evt) {
-    let target = $(evt.target);
-    let value = '';
-
-    const form = $(this).closest('form');
-    let lengthFilter = $(this).closest('.card-filter').length;
-
-    if (option.length == 0) {
-        if (target.attr('id') === 'md_principal_id' || target.attr('name') === 'md_principal_id') {
-            value = target.val();
-            url = SITE_URL + '/getCategory';
-
-            for (let i = 1; i <= 3; i++) {
-                if (value != 0) {
-                    form.find('select[name = "category' + i + '"]').empty();
-
-                    $.ajax({
-                        url: url,
-                        type: 'POST',
-                        data: {
-                            principal: value,
-                            level: i
-                        },
-                        cache: false,
-                        dataType: 'JSON',
-                        success: function (result) {
-                            if (lengthFilter > 0) {
-                                form.find('select[name = "category' + i + '"]').append('<option value="0">All Categories ' + (i > 1 ? i : '') + '</option>');
-                            } else {
-                                form.find('select[name = "category' + i + '"]').append('<option value="0">&nbsp;</option>');
-                            }
-
-                            if (result[0].success) {
-                                let data = result[0].message;
-
-                                $.each(data, function (idx, elem) {
-                                    let category_id = elem.md_category_id;
-                                    let category = elem.category;
-                                    let category_en = elem.category_en;
-
-                                    form.find('select[name = "category' + i + '"]').append('<option value="' + category_id + '">' + category_en + '</option>');
-                                });
-                            } else {
-                                Swal.fire({
-                                    type: 'error',
-                                    title: result[0].message,
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                });
-                            }
-                        },
-                        error: function (jqXHR, exception) {
-                            showError(jqXHR, exception);
-                        }
-                    });
-                } else {
-                    form.find('select[name = "category' + i + '"]').empty();
-                }
-            }
-        }
-    } else {
-        url = SITE_URL + '/getCategory';
-        let data = option[option.length - 1];
-        let field = data.fieldName;
-        let id_category = data.value;
-
-        value = $('.main-select').val();
-
-        if (field.slice(0, -1) === 'category') {
-            let index = field[field.length - 1];
-
-            form.find('select[name =' + field + ']').empty();
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: {
-                    principal: value,
-                    level: index
-                },
-                cache: false,
-                dataType: 'JSON',
-                success: function (result) {
-                    form.find('select[name =' + field + ']').append('<option value="0">&nbsp;</option>');
-
-                    if (result[0].success) {
-                        let data = result[0].message;
-
-                        $.each(data, function (idx, elem) {
-                            let category_id = elem.md_category_id;
-                            let category_en = elem.category_en;
-
-                            if (id_category == category_id) {
-                                form.find('select[name =' + field + ']').append('<option value="' + category_id + '" selected>' + category_en + '</option>');
-                            } else {
-                                form.find('select[name =' + field + ']').append('<option value="' + category_id + '">' + category_en + '</option>');
-                            }
-
-                        });
-
-                        // Set to empty array option
-                        option = [];
-                    } else {
-                        Swal.fire({
-                            type: 'error',
-                            title: result[0].message,
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
+    /**
+     * Button Table Report
+     */
+    if ($('.table_report').length > 0) {
+        new $.fn.dataTable.Buttons(_tableReport, {
+            buttons: [{
+                    extend: 'colvis',
+                    className: 'btn btn-primary btn-sm btn-round ml-auto text-white',
+                    text: '<i class="fas fa-table fa-fw"></i> Visibility',
+                    attr: {
+                        title: 'Column Visibility',
                     }
                 },
-                error: function (jqXHR, exception) {
-                    showError(jqXHR, exception);
-                }
-            });
+                {
+                    extend: 'collection',
+                    className: 'btn btn-warning btn-sm btn-round ml-auto text-white',
+                    text: '<i class="fas fa-download fa-fw"></i> Export',
+                    attr: {
+                        title: 'Export',
+                    },
+                    autoClose: true,
+                    buttons: [{
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        titleAttr: 'Export to Excel',
+                        title: '',
+                        customize: function (xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            //* Bold and Border first column
+                            $('row:first c', sheet).attr('s', '27');
+                            //* Border all column except first column
+                            $('row:not(:first) c', sheet).attr('s', '25');
+                        },
+                        exportOptions: {
+                            columns: ':visible'
+                        }
+                    }]
+                },
+            ]
+        });
+
+        _tableReport.buttons().container()
+            .appendTo($('#dt-button'));
+    }
+
+    $('.daterange').daterangepicker({
+        autoUpdateInput: false,
+        locale: {
+            format: 'YYYY-MM-DD',
+            cancelLabel: 'Clear'
         }
+    });
+
+    $('.daterange').on('apply.daterangepicker', function (ev, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+    });
+
+    $('.daterange').on('cancel.daterangepicker', function (ev, picker) {
+        $(this).val('');
+    });
+
+    if (typeof actionMenu === 'undefined' && actionMenu !== 'F') {
+        //* Remove class is-loading 
+        $('.main-panel').removeClass('is-loading');
+    } else {
+        const form = card.find('form');
+        showFormData(form);
     }
 });
 
@@ -2599,3 +3013,485 @@ $(document).on('click', 'input:checkbox', function () {
         }
     }
 });
+
+/**
+ * Function check exist role on the user based on session user
+ * 
+ * @param {*} role name
+ * @returns 
+ */
+function checkExistUserRole(role) {
+    let url = ADMIN_URL + 'Role/' + 'getUserRoleName';
+    let value;
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            role_name: role
+        },
+        async: false,
+        cache: false,
+        dataType: 'JSON',
+        success: function (result) {
+            value = result;
+        },
+        error: function (jqXHR, exception) {
+            showError(jqXHR, exception);
+        }
+    });
+
+    return value;
+}
+
+
+/**
+ * Event change input class active type checkbox on the _tableLine
+ */
+_tableLine.on('change', 'input.active:checkbox', function (evt) {
+    const tr = $(this).closest('tr');
+    const field = tr.find('input, select');
+    let className;
+
+    if ($(this).is(':checked')) {
+        for (let i = 0; i < field.length; i++) {
+            if (field[i].name !== '') {
+                className = field[i].className.split(/\s+/);
+
+                tr.find('input:text[name=' + field[i].name + ']').removeAttr('readonly');
+
+                if (field[i].type !== 'text' && !className.includes('active')) {
+                    tr.find('input[name=' + field[i].name + '], select[name=' + field[i].name + ']').removeAttr('disabled');
+                }
+            }
+        }
+    } else {
+        for (let i = 0; i < field.length; i++) {
+            if (field[i].name !== '') {
+                className = field[i].className.split(/\s+/);
+
+                tr.find('input:text[name=' + field[i].name + ']').prop('readonly', true);
+
+                if (field[i].type !== 'text' && !className.includes('active')) {
+                    tr.find('input[name=' + field[i].name + '], select[name=' + field[i].name + ']').prop('disabled', true);
+                }
+            }
+        }
+    }
+});
+
+/**
+ * Event Toogle Sidebar to Resize DataTable
+ */
+$('.toggle-sidebar').click(function (evt) {
+    $('.dataTables_scrollHeadInner').addClass('stretch');
+    $('.tb_display, .table_report').css('width', '100%');
+});
+
+/**
+ * Function show data form
+ * @param {*} form 
+ */
+function showFormData(form) {
+    const cardMain = form.closest('.card-main');
+    const div = cardMain.find('div');
+
+    let url = CURRENT_URL + SHOWALL;
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        cache: false,
+        dataType: 'JSON',
+        beforeSend: function () {
+            $('.reset_form').prop('disabled', true);
+            $('.save_form').prop('disabled', true);
+        },
+        complete: function () {
+            $('.reset_form').removeAttr('disabled');
+            $('.save_form').removeAttr('disabled');
+            $('.main-panel').removeClass('is-loading');
+        },
+        success: function (result) {
+            if (result[0].success) {
+                let arrMsg = result[0].message;
+
+                if (arrMsg.header) {
+                    let data = arrMsg.header;
+                    let length = data.length;
+
+                    if (length > 1) {
+                        putFieldData(form, data);
+
+                        for (let i = 0; i < data.length; i++) {
+                            let label = data[i].label;
+                            let primarykey = data[i].primarykey;
+
+                            if (primarykey) {
+                                setSave = 'update';
+                                ID = label;
+                            }
+                        }
+
+                        $.each(div, function () {
+                            if ($(this).attr('show-after-save')) {
+                                $(this).removeClass('d-none');
+                            }
+                        });
+                    } else {
+                        const field = form.find('input, textarea, select');
+
+                        for (let i = 0; i < field.length; i++) {
+                            let fields = [];
+
+                            if (field[i].name !== '') {
+                                //? Condition field and contain attribute hide-field
+                                if ($(field[i]).attr('hide-field')) {
+                                    fields = $(field[i]).attr('hide-field').split(',').map(element => element.trim());
+
+                                    if (field[i].type === 'checkbox') {
+                                        if (field[i].checked) {
+                                            for (let i = 0; i < fields.length; i++) {
+                                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                formGroup.hide();
+                                            }
+                                        } else {
+                                            for (let i = 0; i < fields.length; i++) {
+                                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                formGroup.show();
+                                            }
+                                        }
+                                    } else {
+                                        for (let i = 0; i < fields.length; i++) {
+                                            let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                            formGroup.hide();
+                                        }
+                                    }
+                                }
+
+                                //? Condition field and contain attribute show-field
+                                if ($(field[i]).attr('show-field')) {
+                                    fields = $(field[i]).attr('show-field').split(',').map(element => element.trim());
+
+                                    if (field[i].type === 'checkbox') {
+                                        if (field[i].checked) {
+                                            for (let i = 0; i < fields.length; i++) {
+                                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                formGroup.show();
+                                            }
+                                        } else if (field[i].type === 'checkbox') {
+                                            for (let i = 0; i < fields.length; i++) {
+                                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                                formGroup.hide();
+                                            }
+                                        }
+                                    } else {
+                                        for (let i = 0; i < fields.length; i++) {
+                                            let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').closest('.form-group, .form-check');
+                                            formGroup.show();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (arrMsg.barcode) {
+                    let data = arrMsg.barcode;
+
+                    $.each(div, function () {
+                        let className = this.className.split(/\s+/);
+
+                        if (className.includes('card-barcode')) {
+                            const barcode = $(this).find('.barcode');
+
+                            var html = '';
+
+                            if (data.barcodetype === 'JPG' || data.barcodetype === 'PNG') {
+                                html += '<img src="data:image/png;base64,' + data.barcode + '"/>';
+                            } else {
+                                html += data.barcode;
+                            }
+
+                            if (data.position !== "" && data.size != 0)
+                                html += '<p class="' + data.position + '" style="font-size: ' + data.size + 'px">' + data.text + '</p>';
+
+                            barcode.html(html)
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Function to put data on the field from database
+ * @param {*} form 
+ * @param {*} data 
+ */
+function putFieldData(form, data) {
+    if (data.length > 1) {
+        const field = form.find('input, textarea, select').not('.line');
+
+        if (form.find('select.select-data').length > 0) {
+            let select = form.find('select.select-data');
+            initSelectData(select, data[1].field, data[1].label);
+        }
+
+        for (let i = 0; i < field.length; i++) {
+            //? Retrieve field name default is readonly/disabled in the attribute field
+            if ((field[i].readOnly || field[i].disabled) && field[i].type !== 'radio') {
+                fieldReadOnly.push(field[i].name);
+            }
+
+            //? Retrieve field name default checked in the attribute field
+            if (field[i].checked) {
+                fieldChecked.push(field[i].name);
+            }
+        }
+
+        if (setSave === 'detail') {
+            readonly(form, true);
+        }
+
+        for (let i = 0; i < data.length; i++) {
+            let fieldInput = data[i].field;
+            let label = data[i].label;
+
+            for (let i = 0; i < field.length; i++) {
+                let fields = [];
+                let fieldName = field[i].name;
+
+                if (fieldName !== '' && fieldName === fieldInput) {
+                    let className = field[i].className.split(/\s+/);
+
+                    if (className.includes('datepicker')) {
+                        form.find('input:text[name=' + fieldName + ']').not('.line').val(moment(label).format('Y-MM-DD'));
+                    } else if (className.includes('rupiah')) {
+                        form.find('input:text[name=' + fieldName + ']').not('.line').val(formatRupiah(label));
+                    } else {
+                        form.find('input:text[name=' + fieldName + ']').not('.line').val(label);
+                    }
+
+                    form.find('textarea[name=' + fieldName + '], input:password[name=' + fieldName + ']').not('.line').val(label);
+
+                    if (form.find('textarea.summernote[name=' + fieldName + ']').length > 0 ||
+                        form.find('textarea.summernote-product[name=' + fieldName + ']').length > 0) {
+                        $('[name =' + fieldName + ']').not('.line').summernote('code', label);
+                    }
+
+                    if (field[i].type === 'select-one') {
+                        if (typeof label === 'object' && label !== null) {
+                            let option_ID = label.id;
+                            let option_Txt = label.name;
+
+                            option.push({
+                                fieldName,
+                                option_ID,
+                                option_Txt
+                            });
+
+                            let newOption = $("<option selected='selected'></option>").val(option_ID).text(option_Txt);
+                            form.find('select[name=' + fieldName + ']').not('.line').append(newOption).change();
+                        } else if (typeof label === 'string' && (label !== null || label != 0)) {
+                            option.push({
+                                fieldName,
+                                label
+                            });
+
+                            form.find('select[name=' + fieldName + ']').not('.line').val(label).change();
+                        }
+                    }
+
+                    if (field[i].type === 'select-multiple' && label !== null) {
+                        // array label explode into array
+                        let arrLabel = label.split(',');
+
+                        // Condition data length more than 1
+                        if (arrLabel.length > 1) {
+                            form.find('select[name=' + fieldName + ']').not('.line').val(arrLabel).change();
+                        } else {
+                            arrMultiSelect.push(label);
+                            form.find('select[name=' + fieldName + ']').not('.line').val(arrMultiSelect).change();
+                        }
+                    }
+
+                    //? Check exist attribute edit-disabled
+                    if ($(field[i]).attr('edit-disabled')) {
+                        form.find('input:checkbox[name=' + fieldName + '], select[name=' + fieldName + '], input:radio[name=' + fieldName + ']')
+                            .not('.line')
+                            .prop('disabled', true);
+                    }
+
+                    if (field[i].type === 'checkbox') {
+                        if (label === 'Y')
+                            form.find('input[name=' + fieldName + ']').not('.line').prop('checked', true);
+                        else if (label === 'N')
+                            form.find('input[name=' + fieldName + ']').not('.line').removeAttr('checked');
+
+                        if (className.includes('active') && field[i].checked)
+                            readonly(form, false);
+                        else if (className.includes('active') && !field[i].checked)
+                            readonly(form, true);
+                    }
+
+                    // Set value checked for field type Radio Button
+                    if (field[i].type == 'radio') {
+                        if (field[i].value == label) {
+                            field[i].checked = true;
+                        }
+                    }
+
+                    // Pass data form input file to function previewImage
+                    if (field[i].type === 'file') {
+                        if (className.includes('control-upload-image')) {
+                            previewImage(form.find('input[name=' + fieldName + ']')[0], '', label);
+                        }
+                    }
+                }
+
+                //? Condition field and contain attribute hide-field
+                if ($(field[i]).attr('hide-field') && fieldName !== '') {
+                    fields = $(field[i]).attr('hide-field').split(',').map(element => element.trim());
+
+                    //TODO: Checkbox
+                    if (field[i].type === 'checkbox') {
+                        if (field[i].checked) {
+                            for (let i = 0; i < fields.length; i++) {
+                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').not('.line').closest('.form-group, .form-check');
+                                formGroup.hide();
+                            }
+                        } else {
+                            for (let i = 0; i < fields.length; i++) {
+                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').not('.line').closest('.form-group, .form-check');
+                                formGroup.show();
+                            }
+                        }
+                    }
+
+                    //TODO: Dropdown select
+                    if (field[i].type === 'select-one') {
+                        for (let i = 0; i < fields.length; i++) {
+                            const select = form.find('select[name=' + fields[i] + ']').not('.line');
+                            let formGroup = [];
+
+                            if ($(select).val() === null && $(select).val() === '') {
+                                formGroup = $(select).closest('.form-group');
+                                formGroup.hide();
+                            } else if ($(select).val() !== null && $(select).val() !== '') {
+                                formGroup = $(select).closest('.form-group');
+                                formGroup.show();
+                            } else if ($(select).val() === null) {
+                                formGroup = $(select).closest('.form-group');
+                                formGroup.hide();
+                            }
+                        }
+                    }
+
+                    //TODO: Radio Button
+                    if (field[i].type === 'radio') {
+                        if (field[i].checked) {
+                            for (let i = 0; i < fields.length; i++) {
+                                const input = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').not('.line');
+
+                                //? Condition field is not null 
+                                if (input.val() !== null) {
+                                    input.closest('.form-group').show();
+                                } else {
+                                    input.closest('.form-group').hide();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //? Condition field and contain attribute show-field
+                if ($(field[i]).attr('show-field') && fieldName !== '') {
+                    fields = $(field[i]).attr('show-field').split(',').map(element => element.trim());
+
+                    //TODO: Checkbox
+                    if (field[i].type === 'checkbox') {
+                        if (field[i].checked) {
+                            for (let i = 0; i < fields.length; i++) {
+                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').not('.line').closest('.form-group, .form-check');
+                                formGroup.show();
+                            }
+                        } else if (field[i].type === 'checkbox') {
+                            for (let i = 0; i < fields.length; i++) {
+                                let formGroup = form.find('input[name=' + fields[i] + '], textarea[name=' + fields[i] + '], select[name=' + fields[i] + ']').not('.line').closest('.form-group, .form-check');
+                                formGroup.hide();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Function to execute Test Email
+ * @param {*} identifier 
+ */
+function prosesTestEmail(identifier) {
+    const form = $(identifier).closest('form');
+
+    let url = CURRENT_URL + TEST_EMAIL;
+    let formData = new FormData(form[0]);
+
+    Swal.fire({
+        title: 'Test EMail',
+        text: "Test EMail Connection on info defined.",
+        type: 'info',
+        showCancelButton: true,
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ok',
+        cancelButtonText: 'Close',
+        showLoaderOnConfirm: true,
+        reverseButtons: true,
+        onOpen: () => {},
+        preConfirm: (generate) => {
+            return new Promise(function (resolve) {
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    cache: false,
+                    dataType: 'JSON',
+                    success: function (result) {
+                        if (result[0].success) {
+                            Swal.fire({
+                                title: 'Test EMail',
+                                text: result[0].message,
+                                type: 'success',
+                                showConfirmButton: true
+                            });
+
+                            clearErrorForm(form);
+                        } else if (result[0].error) {
+                            if (result.length > 1) {
+                                errorForm(form, result);
+                                resolve(true);
+                            } else {
+                                Swal.showValidationMessage(result[0].message);
+                                resolve(false);
+                            }
+                        } else {
+                            Swal.showValidationMessage(result[0].message);
+                            resolve(false);
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        Swal.showValidationMessage(errorThrown);
+                        resolve(false);
+                    }
+                });
+            });
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    });
+}

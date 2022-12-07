@@ -3,7 +3,6 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_Movement;
 use App\Models\M_MovementDetail;
 use App\Models\M_Product;
@@ -19,16 +18,11 @@ use stdClass;
 
 class Movement extends BaseController
 {
-    private $model;
-    private $entity;
-    protected $validation;
-    protected $request;
-
     public function __construct()
     {
         $this->request = Services::request();
-        $this->validation = Services::validation();
         $this->model = new M_Movement($this->request);
+        $this->modelDetail = new M_MovementDetail($this->request);
         $this->entity = new \App\Entities\Movement();
     }
 
@@ -43,8 +37,6 @@ class Movement extends BaseController
 
     public function showAll()
     {
-        $datatable = new M_Datatable($this->request);
-
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
             $select = $this->model->getSelect();
@@ -52,11 +44,17 @@ class Movement extends BaseController
             $order = $this->model->column_order;
             $sort = $this->model->order;
             $search = $this->model->column_search;
+            $where = [];
+
+            //? Check is user exist role W_View_All_Movement 
+            if (!$this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Movement')) {
+                $where['trx_movement.created_by'] = $this->access->getSessionUser();
+            }
 
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $datatable->getDatatables($table, $select, $order, $sort, $search, $join);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join, $where);
 
             foreach ($list as $value) :
                 $row = [];
@@ -77,8 +75,8 @@ class Movement extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $datatable->countAll($table),
-                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search, $join),
+                'recordsTotal'      => $this->datatable->countAll($table, $where),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join, $where),
                 'data'              => $data
             ];
 
@@ -93,8 +91,8 @@ class Movement extends BaseController
 
             $table = json_decode($post['table']);
 
-            //* Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
+            //! Mandatory property for detail validation
+            $post['line'] = countLine($table);
             $post['detail'] = [
                 'table' => arrTableLine($table)
             ];
@@ -102,34 +100,27 @@ class Movement extends BaseController
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
                 if (!$this->validation->run($post, 'movement')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
 
-            return $this->response->setJSON($response);
+            // return $this->response->setJSON($response);
+            return json_encode($response);
         }
     }
 
     public function show($id)
     {
-        $moveDetail = new M_MovementDetail();
-
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
-                $detail = $moveDetail->detail($this->model->table . '.' . $this->model->primaryKey, $id)->getResult();
+                $detail = $this->modelDetail->detail($this->model->table . '.' . $this->model->primaryKey, $id)->getResult();
 
                 $result = [
                     'header'    => $this->field->store($this->model->table, $list),
@@ -137,41 +128,6 @@ class Movement extends BaseController
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        if ($this->request->getMethod(true) === 'POST') {
-            $post = $this->request->getVar();
-
-            $table = json_decode($post['table']);
-
-            //* Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
-            $post['detail'] = [
-                'table' => arrTableLine($table)
-            ];
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setMovementId($post['id']);
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'movement')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
@@ -196,7 +152,6 @@ class Movement extends BaseController
 
     public function processIt()
     {
-        $moveDetail = new M_MovementDetail();
         $inventory = new M_Inventory($this->request);
         $transaction = new M_Transaction();
 
@@ -206,24 +161,18 @@ class Movement extends BaseController
 
             $row = $this->model->find($_ID);
 
-            $line = $moveDetail->where($this->model->primaryKey, $_ID)->findAll();
+            $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->findAll();
 
             try {
                 if (!empty($_DocAction) && $row->docstatus !== $_DocAction) {
-                    $this->entity->setMovementId($_ID);
-                    $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                    $msg = true;
-
                     //* condition exist data line or not exist data line and docstatus not Completed
                     if (count($line) > 0 || (count($line) == 0 && $_DocAction !== $this->DOCSTATUS_Completed)) {
                         $this->entity->setDocStatus($_DocAction);
                     } else if (count($line) == 0 && $_DocAction === $this->DOCSTATUS_Completed) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
-                        $msg = 'Document cannot be processed';
                     }
 
-                    $result = $this->model->save($this->entity);
+                    $response = $this->save();
 
                     //* condition exist data line and docstatus Completed
                     if (count($line) > 0 && $_DocAction === $this->DOCSTATUS_Completed) {
@@ -264,12 +213,8 @@ class Movement extends BaseController
                             (array) $arrMoveOut
                         );
 
-                        $result = $transaction->create($arrData);
+                        $transaction->create($arrData);
                     }
-
-                    $msg = $result ? $msg : $result;
-
-                    $response = message('success', true, $msg);
                 } else if (empty($_DocAction)) {
                     $response = message('error', true, 'Please Choose the Document Action first');
                 } else {
@@ -285,11 +230,9 @@ class Movement extends BaseController
 
     public function destroyLine($id)
     {
-        $moveDetail = new M_MovementDetail();
-
         if ($this->request->isAJAX()) {
             try {
-                $result = $moveDetail->delete($id);
+                $result = $this->modelDetail->delete($id);
                 $response = message('success', true, $result);
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -324,19 +267,51 @@ class Movement extends BaseController
         $inventory = new M_Inventory($this->request);
         $status = new M_Status($this->request);
 
-        /**
-         * Inventory room bukan RUANG IT - BARANG RUSAK
-         */
-        $dataInventory = $inventory->where([
-            'isactive'  => 'Y',
-            'md_room_id <>' => 100041
-        ])->orderBy('assetcode', 'ASC')
-            ->findAll();
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Movement');
+
+        //TODO:  Check Data Employee based on sys_user_id
+        $rowEmp = $employee->where('sys_user_id', $this->access->getSessionUser())->first();
+
+        //? Not Exists Role W_View_All_Movement and exists data employee
+        if (!$role && $rowEmp) {
+            //? Where clause inventory 
+            $invWhere['md_employee_id'] = $rowEmp->getEmployeeId();
+
+            //? Where clause employee to 
+            $empWhere['md_employee_id <>'] = $rowEmp->getEmployeeId();
+            $empWhere['md_division_id'] = $rowEmp->getDivisionId();
+            $empWhere['md_branch_id'] = $rowEmp->getBranchId();
+        }
+
+        //? Where Clause Inventory room bukan RUANG IT - BARANG RUSAK
+        $invWhere['isactive'] = 'Y';
+        $invWhere['md_room_id <>'] = 100041;
+
+        //* Data Inventory 
+        $dataInventory = $inventory->where($invWhere)->orderBy('assetcode', 'ASC')->findAll();
+
+        //* Data Product 
         $dataProduct = $product->where('isactive', 'Y')->findAll();
+
+        //* Data Employee From 
         $dataEmployee = $employee->where('isactive', 'Y')->findAll();
-        $dataDivision = $division->where('isactive', 'Y')->findAll();
-        $dataBranch = $branch->where('isactive', 'Y')->findAll();
-        $dataRoom = $room->where('isactive', 'Y')->findAll();
+
+        //? Where Clause Employee 
+        $empWhere['isactive'] = 'Y';
+
+        //* Data Employee To 
+        $dataEmployeeTo = $employee->where($empWhere)->orderBy('name', 'ASC')->findAll();
+
+        //* Data Division
+        $dataDivision = $division->where('isactive', 'Y')->orderBy('name', 'ASC')->findAll();
+
+        //* Data Branch
+        $dataBranch = $branch->where('isactive', 'Y')->orderBy('name', 'ASC')->findAll();
+
+        //* Data Room
+        $dataRoom = $room->where('isactive', 'Y')->orderBy('name', 'ASC')->findAll();
+
+        //* Data Status
         $dataStatus = $status->where([
             'isactive'  => 'Y',
             'isline'    => 'Y'
@@ -350,18 +325,18 @@ class Movement extends BaseController
         if (empty($set)) {
             $table = [
                 $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, null, 170, 'assetcode', 'assetcode'),
-                $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
-                $this->field->fieldTable('select', null, 'status_id', null, 'required', null, null, $dataStatus, 'BAGUS', 150, 'md_status_id', 'name'),
+                $this->field->fieldTable('select', null, 'md_product_id', null, null, 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
+                $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, 'BAGUS', 150, 'md_status_id', 'name'),
                 $this->field->fieldTable('select', null, 'employee_from', null, null, 'readonly', null, $dataEmployee, null, 200, 'md_employee_id', 'name'),
-                $this->field->fieldTable('select', null, 'employee_to', null, 'required', null, null, $dataEmployee, null, 200, 'md_employee_id', 'name'),
+                $this->field->fieldTable('select', null, 'employee_to', null, 'required', null, null, $dataEmployeeTo, null, 200, 'md_employee_id', 'name'),
                 $this->field->fieldTable('select', null, 'branch_from', null, null, 'readonly', null, $dataBranch, null, 200, 'md_branch_id', 'name'),
                 $this->field->fieldTable('select', null, 'branch_to', null, null, 'readonly', null, null, null, 200),
                 $this->field->fieldTable('select', null, 'division_from', null, null, 'readonly', null, $dataDivision, null, 200, 'md_division_id', 'name'),
                 $this->field->fieldTable('select', null, 'division_to', null, null, 'readonly', null, null, null, 200),
                 $this->field->fieldTable('select', null, 'room_from', null, null, 'readonly', null, $dataRoom, null, 250, 'md_room_id', 'name'),
                 $this->field->fieldTable('select', null, 'room_to', null, 'required', null, null, null, null, 250),
-                $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, null, 250),
-                $this->field->fieldTable('button', 'button', 'delete')
+                $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250),
+                $this->field->fieldTable('button', 'button', 'trx_movement_detail_id')
             ];
         }
 
@@ -374,18 +349,18 @@ class Movement extends BaseController
 
                 $table[] = [
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
-                    $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
-                    $this->field->fieldTable('select', null, 'status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
                     $this->field->fieldTable('select', null, 'employee_from', null, null, 'readonly', null, $dataEmployee, $row->employee_from, 200, 'md_employee_id', 'name'),
-                    $this->field->fieldTable('select', null, 'employee_to', null, 'required', $row->status === 'RUSAK' ? 'readonly' : null, null, $dataEmployee, $row->employee_to, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('select', null, 'employee_to', null, 'required', $row->status === 'RUSAK' ? 'readonly' : null, null, $dataEmployeeTo, $row->employee_to, 200, 'md_employee_id', 'name'),
                     $this->field->fieldTable('select', null, 'branch_from', null, null, 'readonly', null, $dataBranch, $row->branch_from, 200, 'md_branch_id', 'name'),
                     $this->field->fieldTable('select', null, 'branch_to', null, null, 'readonly', null, $dataBranch, $row->branch_to, 200, 'md_branch_id', 'name'),
                     $this->field->fieldTable('select', null, 'division_from', null, null, 'readonly', null, $dataDivision, $row->division_from, 200, 'md_division_id', 'name'),
                     $this->field->fieldTable('select', null, 'division_to', null, null, 'readonly', null, $dataDivision, $row->division_to, 200, 'md_division_id', 'name'),
                     $this->field->fieldTable('select', null, 'room_from', null, null, 'readonly', null, $dataRoom, $row->room_from, 250, 'md_room_id', 'name'),
                     $this->field->fieldTable('select', null, 'room_to', null, 'required', null, null, $dataRoom, $row->room_to, 250, 'md_room_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row->description, 250),
-                    $this->field->fieldTable('button', 'button', 'delete', null, null, null, null, null, $row->trx_movement_detail_id)
+                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
+                    $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', null, null, null, null, null, $row->trx_movement_detail_id)
                 ];
             endforeach;
         }

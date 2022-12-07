@@ -4,7 +4,7 @@
 
 <?= $this->include('masterdata/groupasset/form_groupasset'); ?>
 <div class="card-body card-main">
-    <table class="table table-bordered table-hover table-pointer tb_display" style="width: 100%">
+    <table class="table table-striped table-hover tb_display">
         <thead>
             <tr>
                 <th>ID</th>
@@ -14,6 +14,7 @@
                 <th>Description</th>
                 <th>Initial Code</th>
                 <th>Useful Life</th>
+                <th>Depreciation Type</th>
                 <th>Active</th>
                 <th>Actions</th>
             </tr>

@@ -13,7 +13,7 @@
       <form class="login-form" id="login-form">
         <div class="form-group">
           <label for="username" class="placeholder"><b>Username</b></label>
-          <input type="text" class="form-control" id="username" name="username" autocomplete="off">
+          <input type="text" class="form-control" id="username" name="username" autocomplete="off" autofocus>
           <small class="form-text text-danger" id="error_username"></small>
         </div>
         <div class="form-group">

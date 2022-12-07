@@ -35,6 +35,15 @@
                     <label for="description">Description </label>
                     <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
                 </div>
+                <div class="form-group">
+                    <?php foreach ($ref_list as $row) : ?>
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="<?= strtolower($row->name) ?>" name="depreciationtype" class="custom-control-input" value="<?= $row->value ?>">
+                            <label class="custom-control-label" for="<?= strtolower($row->name) ?>"><?= $row->name ?></label>
+                        </div>
+                    <?php endforeach; ?>
+                    <small class="form-text text-danger" id="error_depreciationtype"></small>
+                </div>
                 <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">

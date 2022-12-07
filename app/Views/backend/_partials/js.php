@@ -1,8 +1,5 @@
 <!--   Core JS Files   -->
-<!-- <script src="<? //= base_url('atlantis-pro/js/core/jquery.3.2.1.min.js') 
-                    ?>"></script> -->
-<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="<?= base_url('atlantis-pro/js/core/jquery.3.2.1.min.js') ?>"></script>
 <script src="<?= base_url('atlantis-pro/js/core/popper.min.js') ?>"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <!-- jQuery UI -->
@@ -21,8 +18,14 @@
 <!-- Datatables -->
 <script src="<?= base_url('atlantis-pro/js/plugin/datatables/datatables.min.js') ?>"></script>
 <script src="<?= base_url('atlantis-pro/js/plugin/datatables-bs4/js/dataTables.bootstrap4.js') ?>"></script>
-<script src="<?= base_url('atlantis-pro/js/plugin/datatables-fixedcolumns/js/dataTables.fixedColumns.min.js') ?>">
-</script>
+<script src="<?= base_url('atlantis-pro/js/plugin/datatables-fixedcolumns/js/dataTables.fixedColumns.min.js') ?>"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.colVis.min.js"></script>
 <!-- Bootstrap Notify -->
 <script src="<?= base_url('atlantis-pro/js/plugin/bootstrap-notify/bootstrap-notify.min.js') ?>"></script>
 <!-- Bootstrap Toggle -->
@@ -38,6 +41,8 @@
 <script src="<?= base_url('atlantis-pro/js/plugin/fullcalendar/fullcalendar.min.js') ?>"></script>
 <!-- DateTimePicker -->
 <script src="<?= base_url('atlantis-pro/js/plugin/datepicker/bootstrap-datetimepicker.min.js') ?>"></script>
+<!-- DateRangePicker -->
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <!-- Bootstrap Tagsinput -->
 <script src="<?= base_url('atlantis-pro/js/plugin/bootstrap-tagsinput/bootstrap-tagsinput.min.js') ?>"></script>
 <!-- Bootstrap Wizard -->
@@ -64,6 +69,8 @@
 <script src="<?= base_url('atlantis-pro/js/plugin/auto-numeric/autoNumeric.js') ?>"></script>
 <!-- Table Treefy -->
 <script src="<?= base_url('atlantis-pro/js/plugin/bootstrap-treefy/js/bootstrap-treefy.min.js') ?>"></script>
+<!-- Websocket Pusher -->
+<script src="https://js.pusher.com/7.2/pusher.min.js"></script>
 <!-- Custom Process -->
 <script src="<?= base_url('custom/js/Process.js') ?>"></script>
 <!-- Event For Table Line -->

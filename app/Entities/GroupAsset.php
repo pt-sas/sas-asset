@@ -16,6 +16,7 @@ class GroupAsset extends Entity
     protected $created_by;
     protected $updated_by;
     protected $md_sequence_id;
+    protected $depreciationtype;
 
     protected $dates   = [
         'created_at',
@@ -131,5 +132,15 @@ class GroupAsset extends Entity
     public function setSequenceId($md_sequence_id)
     {
         $this->attributes['md_sequence_id'] = $md_sequence_id;
+    }
+
+    public function getDepreciationType()
+    {
+        return $this->attributes['depreciationtype'];
+    }
+
+    public function setDepreciationType($depreciationtype)
+    {
+        $this->attributes['depreciationtype'] = $depreciationtype;
     }
 }

@@ -19,7 +19,8 @@ class M_Submenu extends Model
         'sys_menu_id',
         'isactive',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'action'
     ];
     protected $useTimestamps        = true;
     protected $returnType           = 'App\Entities\Submenu';

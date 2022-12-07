@@ -17,6 +17,11 @@ class Quotation extends Entity
 	protected $created_by;
 	protected $updated_by;
 	protected $isinternaluse;
+	protected $md_employee_id;
+	protected $docreference;
+	protected $isfrom;
+	protected $md_groupasset_id;
+	protected $sys_wfscenario_id;
 
 	protected $dates   = [
 		'created_at',
@@ -142,5 +147,55 @@ class Quotation extends Entity
 	public function setIsInternalUse($isinternaluse)
 	{
 		$this->attributes['isinternaluse'] = $isinternaluse;
+	}
+
+	public function getEmployeeId()
+	{
+		return $this->attributes['md_employee_id'];
+	}
+
+	public function setEmployeeId($md_employee_id)
+	{
+		$this->attributes['md_employee_id'] = $md_employee_id;
+	}
+
+	public function getDocReference()
+	{
+		return $this->attributes['docreference'];
+	}
+
+	public function setDocReference($docreference)
+	{
+		$this->attributes['docreference'] = $docreference;
+	}
+
+	public function getIsFrom()
+	{
+		return $this->attributes['isfrom'];
+	}
+
+	public function setIsFrom($isfrom)
+	{
+		$this->attributes['isfrom'] = $isfrom;
+	}
+
+	public function getGroupAssetId()
+	{
+		return $this->attributes['md_groupasset_id'];
+	}
+
+	public function setGroupAssetId($md_groupasset_id)
+	{
+		$this->attributes['md_groupasset_id'] = $md_groupasset_id;
+	}
+
+	public function getWfScenarioId()
+	{
+		return $this->attributes['sys_wfscenario_id'];
+	}
+
+	public function setWfScenarioId($sys_wfscenario_id)
+	{
+		$this->attributes['sys_wfscenario_id'] = $sys_wfscenario_id;
 	}
 }

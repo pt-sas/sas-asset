@@ -8,11 +8,6 @@ use Config\Services;
 
 class Auth extends BaseController
 {
-	protected $request;
-	protected $validation;
-	protected $model;
-	protected $entity;
-
 	public function __construct()
 	{
 		$this->request = Services::request();
@@ -23,20 +18,24 @@ class Auth extends BaseController
 
 	public function index()
 	{
-		$this->new_title = 'Login';
+		if ($this->session->get('logged_in')) {
+			return redirect()->to(site_url());
+		} else {
+			$this->new_title = 'Login';
 
-		$data = [
-			'title'    	=> '' . $this->new_title . ''
-		];
+			$data = [
+				'title'    	=> '' . $this->new_title . ''
+			];
 
-		return view('backend/auth/login', $data);
+			return view('backend/auth/login', $data);
+		}
 	}
 
 	public function login()
 	{
 		if ($this->request->getMethod(true) === 'POST') {
 			$post = $this->request->getVar();
-			
+
 			try {
 				if (!$this->validation->run($post, 'login')) {
 					$response =	$this->field->errorValidation($this->model->table, $post);
@@ -83,8 +82,6 @@ class Auth extends BaseController
 
 			try {
 				$this->entity->setPassword($post['new_password']);
-				$this->entity->setDatePasswordChange(date('Y-m-d H:i:s'));
-				$this->entity->setUserId($this->session->get('sys_user_id'));
 
 				if (!$this->validation->run($post, 'change_password')) {
 					$errors = [
@@ -95,9 +92,7 @@ class Auth extends BaseController
 
 					$response = message('error', true, $errors);
 				} else {
-					$result = $this->model->save($this->entity);
-
-					$response = message('success', true, $result);
+					$response = $this->save();
 				}
 			} catch (\Exception $e) {
 				$response = message('error', false, $e->getMessage());

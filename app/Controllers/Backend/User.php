@@ -3,18 +3,12 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_User;
 use App\Models\M_Role;
 use Config\Services;
 
 class User extends BaseController
 {
-	private $model;
-	private $entity;
-	protected $validation;
-	protected $request;
-
 	public function __construct()
 	{
 		$this->request = Services::request();
@@ -38,8 +32,6 @@ class User extends BaseController
 
 	public function showAll()
 	{
-		$datatable = new M_Datatable($this->request);
-
 		if ($this->request->getMethod(true) === 'POST') {
 			$table = $this->model->table;
 			$select = $this->model->findAll();
@@ -50,7 +42,7 @@ class User extends BaseController
 			$data = [];
 
 			$number = $this->request->getPost('start');
-			$list = $datatable->getDatatables($table, $select, $order, $sort, $search);
+			$list = $this->datatable->getDatatables($table, $select, $order, $sort, $search);
 
 			foreach ($list as $value) :
 				$row = [];
@@ -71,8 +63,8 @@ class User extends BaseController
 
 			$result = [
 				'draw'              => $this->request->getPost('draw'),
-				'recordsTotal'      => $datatable->countAll($table),
-				'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search),
+				'recordsTotal'      => $this->datatable->countAll($table),
+				'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search),
 				'data'              => $data
 			];
 
@@ -87,18 +79,11 @@ class User extends BaseController
 
 			try {
 				$this->entity->fill($post);
-				$this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-				$this->entity->setCreatedBy($this->session->get('sys_user_id'));
-				$this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
 				if (!$this->validation->run($post, 'user')) {
 					$response =	$this->field->errorValidation($this->model->table, $post);
 				} else {
-					$result = $this->model->save($this->entity);
-
-					$msg = $result ? notification('insert') : $result;
-
-					$response = message('success', true, $msg);
+					$response = $this->save();
 				}
 			} catch (\Exception $e) {
 				$response = message('error', false, $e->getMessage());
@@ -119,49 +104,6 @@ class User extends BaseController
 				];
 
 				$response = message('success', true, $result);
-			} catch (\Exception $e) {
-				$response = message('error', false, $e->getMessage());
-			}
-
-			return $this->response->setJSON($response);
-		}
-	}
-
-	public function edit()
-	{
-		if ($this->request->getMethod(true) === 'POST') {
-			$post = $this->request->getVar();
-
-			$row = $this->model->find($post['id']);
-
-			if ($row->password !== $post['password'])
-				$row->password = $post['password'];
-
-			try {
-				$this->entity->setUserName($post['username']);
-				$this->entity->setName($post['name']);
-				$this->entity->setEmail($post['email']);
-				$this->entity->setDescription($post['description']);
-				$this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-				// Check password has change true
-				if ($row->hasChanged('password')) {
-					$this->entity->setPassword($post['password']);
-					$this->entity->setDatePasswordChange(date('Y-m-d H:i:s'));
-				}
-
-				$this->entity->setUserId($post['id']);
-				$this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-
-				if (!$this->validation->run($post, 'user')) {
-					$response =	$this->field->errorValidation($this->model->table, $post);
-				} else {
-					$result = $this->model->save($this->entity);
-
-					$msg = $result ? notification('update') : $result;
-
-					$response = message('success', true, $msg);
-				}
 			} catch (\Exception $e) {
 				$response = message('error', false, $e->getMessage());
 			}
@@ -200,7 +142,7 @@ class User extends BaseController
 				} else {
 					$list = $this->model->where('isactive', 'Y')
 						->orderBy('name', 'ASC')
-						->findAll(5);
+						->findAll();
 				}
 
 				foreach ($list as $key => $row) :

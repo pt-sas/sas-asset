@@ -22,9 +22,9 @@ class M_Movement extends Model
 	protected $returnType 			= 'App\Entities\Movement';
 	protected $allowCallbacks		= true;
 	protected $beforeInsert			= [];
-	protected $afterInsert			= ['createDetail'];
+	protected $afterInsert			= [];
 	protected $beforeUpdate			= [];
-	protected $afterUpdate			= ['createDetail'];
+	protected $afterUpdate			= [];
 	protected $beforeDelete			= [];
 	protected $afterDelete			= ['deleteDetail'];
 	protected $column_order = [
@@ -105,21 +105,9 @@ class M_Movement extends Model
 		return $prefix;
 	}
 
-	public function createDetail(array $rows)
-	{
-		$moveDetail = new M_MovementDetail();
-
-		$post = $this->request->getVar();
-
-		if (isset($post['table'])) {
-			$post['trx_movement_id'] = $rows['id'];
-			$moveDetail->create($post);
-		}
-	}
-
 	public function deleteDetail(array $rows)
 	{
-		$moveDetail = new M_MovementDetail();
+		$moveDetail = new M_MovementDetail($this->request);
 		$moveDetail->where($this->primaryKey, $rows['id'])->delete();
 	}
 }

@@ -20,6 +20,7 @@ class Inventory extends Entity
     protected $isactive;
     protected $created_by;
     protected $updated_by;
+    protected $md_groupasset_id;
 
     protected $dates   = [
         'created_at',
@@ -175,5 +176,15 @@ class Inventory extends Entity
     public function setUpdatedBy($updated_by)
     {
         $this->attributes['updated_by'] = $updated_by;
+    }
+
+    public function getGroupAssetId()
+    {
+        return $this->attributes['md_groupasset_id'];
+    }
+
+    public function setGroupAssetId($md_groupasset_id)
+    {
+        $this->attributes['md_groupasset_id'] = $md_groupasset_id;
     }
 }

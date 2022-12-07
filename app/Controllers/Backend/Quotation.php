@@ -3,7 +3,6 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_Quotation;
 use App\Models\M_QuotationDetail;
 use App\Models\M_Status;
@@ -14,18 +13,11 @@ use Config\Services;
 
 class Quotation extends BaseController
 {
-    private $model;
-    private $model_detail;
-    private $entity;
-    protected $validation;
-    protected $request;
-
     public function __construct()
     {
         $this->request = Services::request();
-        $this->validation = Services::validation();
         $this->model = new M_Quotation($this->request);
-        $this->model_detail = new M_QuotationDetail();
+        $this->modelDetail = new M_QuotationDetail($this->request);
         $this->entity = new \App\Entities\Quotation();
     }
 
@@ -34,14 +26,17 @@ class Quotation extends BaseController
         $uri = $this->request->uri->getSegment(2);
         $status = new M_Status($this->request);
 
+        $start_date = date('Y-m-d', strtotime('- 1 days'));
+        $end_date = date('Y-m-d');
+
         $data = [
             'today'     => date('Y-m-d'),
             'status'    => $status->where('isactive', 'Y')
                 ->like('menu_id', $uri)
                 ->orderBy('name', 'ASC')
                 ->findAll(),
-            'default_status' => $status->find(100000), //! Default value ASET
-            'role' => $this->access->getUserRoleName(session()->get('sys_user_id'), 'W_Not_Default_Status')
+            'default_logic' => json_decode($this->defaultLogic()),
+            'date_range' => $start_date . ' - ' . $end_date
         ];
 
         return $this->template->render('transaction/quotation/v_quotation', $data);
@@ -49,8 +44,6 @@ class Quotation extends BaseController
 
     public function showAll()
     {
-        $datatable = new M_Datatable($this->request);
-
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
             $select = $this->model->getSelect();
@@ -58,11 +51,16 @@ class Quotation extends BaseController
             $order = $this->model->column_order;
             $sort = $this->model->order;
             $search = $this->model->column_search;
+            $where['trx_quotation.isinternaluse'] = 'N';
+
+            //? Check is use exist role W_Not_Default_Status 
+            if (!$this->access->getUserRoleName($this->session->get('sys_user_id'), 'W_Not_Default_Status'))
+                $where['trx_quotation.md_status_id'] = 100000;
 
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $datatable->getDatatables($table, $select, $order, $sort, $search, $join);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join, $where);
 
             foreach ($list as $value) :
                 $row = [];
@@ -86,8 +84,8 @@ class Quotation extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $datatable->countAll($table),
-                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search, $join),
+                'recordsTotal'      => $this->datatable->countAll($table, $where),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join, $where),
                 'data'              => $data
             ];
 
@@ -102,27 +100,21 @@ class Quotation extends BaseController
 
             $table = json_decode($post['table']);
 
-            // Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
+            //! Mandatory property for detail validation
+            $post['line'] = countLine($table);
             $post['detail'] = [
-                'table' => arrTableLine($this->model->mandatoryLogic($table))
+                'table' => arrTableLine($table)
             ];
 
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-                $this->entity->setIsInternalUse(setCheckbox(isset($post['isinternaluse'])));
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
+                $this->entity->setGrandTotal(arrSumField('lineamt', $table));
 
                 if (!$this->validation->run($post, 'quotation')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -139,7 +131,7 @@ class Quotation extends BaseController
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
-                $detail = $this->model_detail->where($this->model->primaryKey, $id)->findAll();
+                $detail = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
 
                 $rowSupplier = $supplier->find($list[0]->getSupplierId());
 
@@ -151,42 +143,6 @@ class Quotation extends BaseController
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        if ($this->request->isAJAX()) {
-            $post = $this->request->getVar();
-
-            $table = json_decode($post['table']);
-
-            // Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
-            $post['detail'] = [
-                'table' => arrTableLine($this->model->mandatoryLogic($table))
-            ];
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setQuotationId($post['id']);
-                $this->entity->setIsInternalUse(setCheckbox(isset($post['isinternaluse'])));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'quotation')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
@@ -219,27 +175,17 @@ class Quotation extends BaseController
 
             $row = $this->model->find($_ID);
 
-            $msg = true;
-
             try {
                 if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
-                    $line = $this->model_detail->where($this->model->primaryKey, $_ID)->first();
+                    $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->first();
 
                     if ($line || (!$line && $_DocAction !== $this->DOCSTATUS_Completed)) {
                         $this->entity->setDocStatus($_DocAction);
                     } else if (!$line && $_DocAction === $this->DOCSTATUS_Completed) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
-                        $msg = 'Document cannot be processed';
                     }
 
-                    $this->entity->setQuotationId($_ID);
-                    $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? $msg : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 } else if (empty($_DocAction)) {
                     $response = message('error', true, 'Please Choose the Document Action first');
                 } else {
@@ -257,7 +203,7 @@ class Quotation extends BaseController
     {
         if ($this->request->isAJAX()) {
             try {
-                $row = $this->model->getDetail($this->model_detail->primaryKey, $id)->getRow();
+                $row = $this->model->getDetail($this->modelDetail->primaryKey, $id)->getRow();
 
                 $grandTotal = ($row->grandtotal - $row->lineamt);
 
@@ -268,7 +214,7 @@ class Quotation extends BaseController
                 $this->model->save($this->entity);
 
                 //* Delete row quotation detail
-                $delete = $this->model_detail->delete($id);
+                $delete = $this->modelDetail->delete($id);
 
                 $result = $delete ? $grandTotal : false;
 
@@ -286,11 +232,6 @@ class Quotation extends BaseController
         $product = new M_Product($this->request);
         $employee = new M_Employee($this->request);
 
-        $post = $this->request->getVar();
-
-        $dataProduct = $product->where('isactive', 'Y')
-            ->orderBy('name', 'ASC')
-            ->findAll();
         $dataEmployee = $employee->where('isactive', 'Y')
             ->orderBy('name', 'ASC')
             ->findAll();
@@ -298,35 +239,46 @@ class Quotation extends BaseController
         $table = [];
 
         //? Create
-        if (empty($set)) {
-            $table = [
-                $this->field->fieldTable('select', null, 'product_id', null, 'required', null, null, $dataProduct, null, 300, 'md_product_id', 'name'),
-                $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, null, 70),
-                $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', isset($post['isinternaluse']) ? 'readonly' : null, null, null, isset($post['isinternaluse']) ? 0 : null, 125),
-                $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, 0, 125),
-                $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, 'checked'),
-                $this->field->fieldTable('select', null, 'employee_id', null, 'required', 'readonly', null, $dataEmployee, 'IT', 200, 'md_employee_id', 'name'),
-                $this->field->fieldTable('input', 'text', 'spek', null, null, null, null, null, null, 250),
-                $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, null, 250),
-                $this->field->fieldTable('button', 'button', 'delete')
-            ];
+        $data = $this->request->getPost('data');
+        $arrData = json_decode($data);
+
+        if ($set === 'create' && count($arrData) > 0) {
+            foreach ($arrData as $row) :
+                $valPro = $product->find($row[0]->product_id);
+
+                $lineamt = 0;
+                if (!empty($row[1]->qtyentered) && !empty($row[2]->unitprice))
+                    $lineamt = $row[1]->qtyentered * replaceFormat($row[2]->unitprice);
+
+                $table[] = [
+                    $this->field->fieldTable('input', 'text', 'md_product_id', 'text-uppercase', 'required', 'readonly', null, null, $valPro->getName(), 300),
+                    $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, $row[1]->qtyentered, 70),
+                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, replaceFormat($row[2]->unitprice), 125),
+                    $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $lineamt, 125),
+                    $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, $row[3]->isspare ? 'checked' : null),
+                    $this->field->fieldTable('select', null, 'md_employee_id', null, 'required', null, null, $dataEmployee, !empty($row[4]->employee_id) ? $row[4]->employee_id : null, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('input', 'text', 'specification', null, null, null, null, null, null, 250),
+                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250),
+                    $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id')
+                ];
+            endforeach;
         }
 
         //? Update
         if (!empty($set) && count($detail) > 0) {
             foreach ($detail as $row) :
-                $quotation = $this->model->where($this->model->primaryKey, $row->trx_quotation_id)->first();
+                $valPro = $product->find($row->md_product_id);
 
                 $table[] = [
-                    $this->field->fieldTable('select', null, 'product_id', null, 'required', null, null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'qtyentered', 'rupiah', 'required', null, null, null, $row->qtyentered, 70),
-                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $quotation->isinternaluse == 'Y' ? 'readonly' : null, null, null, $row->unitprice, 125),
+                    $this->field->fieldTable('input', 'text', 'md_product_id', 'text-uppercase', 'required', 'readonly', null, null, $valPro->getName(), 300),
+                    $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, $row->qtyentered, 70),
+                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, $row->unitprice, 125),
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row->lineamt, 125),
                     $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
-                    $this->field->fieldTable('select', 'text', 'employee_id', null, 'required', $row->isspare == 'Y' ?? 'readonly', null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'spek', null, null, null, null, null, $row->spesification, 250),
-                    $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row->description, 250),
-                    $this->field->fieldTable('button', 'button', 'delete', null, null, null, null, null, $row->trx_quotation_detail_id)
+                    $this->field->fieldTable('select', null, 'md_employee_id', null, 'required', null, null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('input', 'text', 'specification', null, null, null, null, null, $row->specification, 250),
+                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
+                    $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id', null, null, null, null, null, $row->trx_quotation_detail_id)
                 ];
             endforeach;
         }
@@ -338,7 +290,7 @@ class Quotation extends BaseController
     {
         if ($this->request->isAJAX()) {
             try {
-                $docNo = $this->model->getInvNumber();
+                $docNo = $this->model->getInvNumber('isinternaluse', 'N');
                 $response = message('success', true, $docNo);
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -360,13 +312,20 @@ class Quotation extends BaseController
                     $list = $this->model->checkExistQuotation(null, [
                         'q.documentno'  => $post['search']
                     ])->getResult();
+                } else if (isset($post['trx_receipt_id'])) {
+                    $list = $this->model->checkExistQuotation($post['trx_receipt_id'])->getResult();
                 } else {
                     $list = $this->model->checkExistQuotation()->getResult();
                 }
 
                 foreach ($list as $key => $row) :
+                    $bp = $row->supplier;
+
+                    if (!empty($row->employee))
+                        $bp = $row->employee;
+
                     $response[$key]['id'] = $row->trx_quotation_id;
-                    $response[$key]['text'] = $row->documentno . ' - ' . $row->supplier . ' - ' . format_dmy($row->quotationdate, '/') . ' - ' . $row->grandtotal;
+                    $response[$key]['text'] = $row->documentno . ' - ' . $bp . ' - ' . format_dmy($row->quotationdate, '/') . ' - ' . $row->grandtotal;
                 endforeach;
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -374,5 +333,23 @@ class Quotation extends BaseController
 
             return $this->response->setJSON($response);
         }
+    }
+
+    public function defaultLogic()
+    {
+        $result = [];
+
+        //! default logic for dropdown md_status_id
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_Not_Default_Status');
+
+        if (!$role) {
+            $result = [
+                'field'         => 'md_status_id',
+                'id'            => 100000, //Aset
+                'condition'     => true
+            ];
+        }
+
+        return json_encode($result);
     }
 }

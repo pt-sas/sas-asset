@@ -3,7 +3,6 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_Service;
 use App\Models\M_ServiceDetail;
 use App\Models\M_Product;
@@ -15,18 +14,11 @@ use Config\Services;
 
 class Service extends BaseController
 {
-    private $model;
-    private $model_detail;
-    private $entity;
-    protected $validation;
-    protected $request;
-
     public function __construct()
     {
         $this->request = Services::request();
-        $this->validation = Services::validation();
         $this->model = new M_Service($this->request);
-        $this->model_detail = new M_ServiceDetail();
+        $this->modelDetail = new M_ServiceDetail($this->request);
         $this->entity = new \App\Entities\Service();
     }
 
@@ -41,8 +33,6 @@ class Service extends BaseController
 
     public function showAll()
     {
-        $datatable = new M_Datatable($this->request);
-
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
             $select = $this->model->getSelect();
@@ -54,7 +44,7 @@ class Service extends BaseController
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $datatable->getDatatables($table, $select, $order, $sort, $search, $join);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join);
 
             foreach ($list as $value) :
                 $row = [];
@@ -77,8 +67,8 @@ class Service extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $datatable->countAll($table),
-                'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search, $join),
+                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join),
                 'data'              => $data
             ];
 
@@ -93,8 +83,8 @@ class Service extends BaseController
 
             $table = json_decode($post['table']);
 
-            // Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
+            //! Mandatory property for detail validation
+            $post['line'] = countLine($table);
             $post['detail'] = [
                 'table' => arrTableLine($table)
             ];
@@ -102,17 +92,12 @@ class Service extends BaseController
             try {
                 $this->entity->fill($post);
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-                $this->entity->setCreatedBy($this->session->get('sys_user_id'));
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
+                $this->entity->setGrandTotal(arrSumField('unitprice', $table));
 
                 if (!$this->validation->run($post, 'service')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('insert') : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -129,7 +114,7 @@ class Service extends BaseController
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
-                $detail = $this->model_detail->where($this->model->primaryKey, $id)->findAll();
+                $detail = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
 
                 $rowSupplier = $supplier->find($list[0]->getSupplierId());
 
@@ -141,41 +126,6 @@ class Service extends BaseController
                 ];
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function edit()
-    {
-        if ($this->request->isAJAX()) {
-            $post = $this->request->getVar();
-
-            $table = json_decode($post['table']);
-
-            // Mandatory property for detail validation
-            $post['line'] = countLine(count($table));
-            $post['detail'] = [
-                'table' => arrTableLine($table)
-            ];
-
-            try {
-                $this->entity->fill($post);
-                $this->entity->setServiceId($post['id']);
-                $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                if (!$this->validation->run($post, 'service')) {
-                    $response = $this->field->errorValidation($this->model->table, $post);
-                } else {
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? notification('update') : $result;
-
-                    $response = message('success', true, $msg);
-                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
@@ -202,7 +152,7 @@ class Service extends BaseController
     {
         if ($this->request->isAJAX()) {
             try {
-                $row = $this->model->getDetail($this->model_detail->primaryKey, $id)->getRow();
+                $row = $this->model->getDetail($this->modelDetail->primaryKey, $id)->getRow();
 
                 $grandTotal = ($row->grandtotal - $row->unitprice);
 
@@ -213,7 +163,7 @@ class Service extends BaseController
                 $this->model->save($this->entity);
 
                 //* Delete row quotation detail
-                $delete = $this->model_detail->delete($id);
+                $delete = $this->modelDetail->delete($id);
 
                 $result = $delete ? $grandTotal : false;
 
@@ -236,27 +186,17 @@ class Service extends BaseController
 
             $row = $this->model->find($_ID);
 
-            $msg = true;
-
             try {
                 if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
-                    $line = $this->model_detail->where($this->model->primaryKey, $_ID)->first();
+                    $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->first();
 
                     if ($line || (!$line && $_DocAction !== $this->DOCSTATUS_Completed)) {
                         $this->entity->setDocStatus($_DocAction);
                     } else if (!$line && $_DocAction === $this->DOCSTATUS_Completed) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
-                        $msg = 'Document cannot be processed';
                     }
 
-                    $this->entity->setServiceId($_ID);
-                    $this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-                    $result = $this->model->save($this->entity);
-
-                    $msg = $result ? $msg : $result;
-
-                    $response = message('success', true, $msg);
+                    $response = $this->save();
                 } else if (empty($_DocAction)) {
                     $response = message('error', true, 'Please Choose the Document Action first');
                 } else {
@@ -294,11 +234,11 @@ class Service extends BaseController
         if (empty($set)) {
             $table = [
                 $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, null, 170, 'assetcode', 'assetcode'),
-                $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
+                $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
                 $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, null, 125),
-                $this->field->fieldTable('select', null, 'status_id', null, 'required', null, null, $dataStatus, 'On Service', 150, 'md_status_id', 'name'),
-                $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, null, 250),
-                $this->field->fieldTable('button', 'button', 'delete')
+                $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, 'On Service', 150, 'md_status_id', 'name'),
+                $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250),
+                $this->field->fieldTable('button', 'button', 'trx_service_detail_id')
             ];
         }
 
@@ -307,11 +247,11 @@ class Service extends BaseController
             foreach ($detail as $row) :
                 $table[] = [
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
-                    $this->field->fieldTable('select', null, 'product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', null, null, null, null, $row->unitprice, 125),
-                    $this->field->fieldTable('select', null, 'status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'desc', null, null, null, null, null, $row->description, 250),
-                    $this->field->fieldTable('button', 'button', 'delete', null, null, null, null, null, $row->trx_service_detail_id)
+                    $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
+                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
+                    $this->field->fieldTable('button', 'button', 'trx_service_detail_id', null, null, null, null, null, $row->trx_service_detail_id)
                 ];
             endforeach;
         }

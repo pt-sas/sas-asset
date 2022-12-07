@@ -4,7 +4,7 @@
 
 <?= $this->include('masterdata/product/form_product'); ?>
 <div class="card-body card-main">
-    <table class="table table-bordered table-hover table-pointer tb_display" style="width: 100%">
+    <table class="table table-striped table-hover tb_display">
         <thead>
             <tr>
                 <th>ID</th>

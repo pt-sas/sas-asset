@@ -16,7 +16,8 @@ class M_Room extends Model
         'md_branch_id',
         'isactive',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'userrep_id'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\Room';
@@ -26,12 +27,14 @@ class M_Room extends Model
         'md_room.value',
         'md_room.name',
         'md_branch.name',
+        'sys_user.name',
         'md_room.isactive',
     ];
     protected $column_search = [
         'md_room.value',
         'md_room.name',
         'md_branch.name',
+        'sys_user.name',
         'md_room.isactive',
     ];
     protected $order = ['value' => 'ASC'];
@@ -50,7 +53,8 @@ class M_Room extends Model
     public function getSelect()
     {
         $sql = $this->table . '.*,
-                md_branch.name as branch,';
+                md_branch.name as branch,
+                sys_user.name as userrep';
 
         return $sql;
     }
@@ -58,7 +62,8 @@ class M_Room extends Model
     public function getJoin()
     {
         $sql = [
-            $this->setDataJoin('md_branch', 'md_branch.md_branch_id = ' . $this->table . '.md_branch_id', 'left')
+            $this->setDataJoin('md_branch', 'md_branch.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
+            $this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.userrep_id', 'left')
         ];
 
         return $sql;

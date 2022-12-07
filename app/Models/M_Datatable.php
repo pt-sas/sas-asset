@@ -19,7 +19,7 @@ class M_Datatable extends Model
         $this->request = $request;
     }
 
-    private function getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join = [])
+    private function getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join = [], $where = [])
     {
         $post = $this->request->getVar();
         $this->builder = $this->db->table($table);
@@ -32,8 +32,11 @@ class M_Datatable extends Model
         if (count($join) > 0)
             $this->setJoin($join);
 
+        if (count($where) > 0)
+            $this->builder->where($where);
+
         if (isset($post['form']))
-            $this->filterDatatable($table, $post);
+            $this->filterDatatable($table, $post, $join);
 
         $i = 0;
         foreach ($column_search as $item) :
@@ -52,14 +55,14 @@ class M_Datatable extends Model
 
         if ($this->request->getPost('order')) {
             $this->builder->orderBy($column_order[$this->request->getPost('order')['0']['column']], $this->request->getPost('order')['0']['dir']);
-        } else if (isset($order)) {
+        } else if (isset($order) && !empty($order)) {
             $this->builder->orderBy(key($order), $order[key($order)]);
         }
     }
 
-    public function getDatatables($table, $select, $column_order, $order, $column_search, $join = [])
+    public function getDatatables($table, $select, $column_order, $order, $column_search, $join = [], $where = [])
     {
-        $this->getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join);
+        $this->getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join, $where);
 
         if ($this->request->getPost('length') != -1)
             $this->builder->limit($this->request->getPost('length'), $this->request->getPost('start'));
@@ -67,23 +70,81 @@ class M_Datatable extends Model
         return $query->getResult();
     }
 
-    public function countAll($table)
+    public function countAll($table, $where = [])
     {
         $this->builder = $this->db->table($table);
+
+        if (count($where) > 0)
+            $this->builder->where($where);
+
         return $this->builder->countAllResults();
     }
 
-    public function countFiltered($table, $select, $column_order, $order, $column_search, $join = [])
+    public function countFiltered($table, $select, $column_order, $order, $column_search, $join = [], $where = [])
     {
-        $this->getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join);
+        $this->getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join, $where);
         return $this->builder->countAllResults();
     }
 
-    public function filterDatatable($table, $post)
+    public function filterDatatable($table, $post, $joinTable)
     {
         foreach ($post['form'] as $value) :
-            if (!empty($value['value']) && $this->db->fieldExists($value['name'], $table))
-                $this->builder->where($table . '.' . $value['name'] . '', $value['value']);
+            if (!empty($value['value'])) {
+                //? Cek kolom ditable
+                if ($this->db->fieldExists($value['name'], $table)) {
+                    $fields = $this->db->getFieldData($table);
+
+                    foreach ($fields as $field) :
+                        if ($field->name === $value['name'] && $field->type === 'timestamp') {
+                            $datetime =  urldecode($value['value']);
+                            $date = explode(" - ", $datetime);
+
+                            $this->builder->where($table . '.' . $value['name'] . ' >= "' . $date[0] . '" AND ' . $table . '.' . $value['name'] . ' <= "' . $date[1] . '"');
+                        }
+
+                        if ($field->name === $value['name'] && $field->type !== 'timestamp') {
+                            if (isset($value['type']) && $value['type'] === 'select-multiple') {
+                                $this->builder->whereIn($table . '.' . $value['name'] . '', $value['value']);
+                            } else {
+                                $this->builder->where($table . '.' . $value['name'] . '', $value['value']);
+                            }
+                        }
+                    endforeach;
+                } else {
+                    if (!empty($joinTable)) {
+                        foreach ($joinTable as $row) :
+                            $tableJoin = $row['tableJoin'];
+
+                            //? Cek data join exist alias
+                            if (strpos($tableJoin, " ")) {
+                                $tableJoin = explode(" ", $tableJoin);
+                                $tableJoin = $tableJoin[0];
+                            }
+
+                            if ($this->db->fieldExists($value['name'], $tableJoin)) {
+                                $fields = $this->db->getFieldData($tableJoin);
+
+                                foreach ($fields as $field) :
+                                    if ($field->name === $value['name'] && $field->type === 'timestamp') {
+                                        $datetime =  urldecode($value['value']);
+                                        $date = explode(" - ", $datetime);
+
+                                        $this->builder->where($tableJoin . '.' . $value['name'] . ' >= "' . $date[0] . '" AND ' . $tableJoin . '.' . $value['name'] . ' <= "' . $date[1] . '"');
+                                    }
+
+                                    if ($field->name === $value['name'] && $field->type !== 'timestamp') {
+                                        if (isset($value['type']) && $value['type'] === 'select-multiple') {
+                                            $this->builder->whereIn($tableJoin . '.' . $value['name'] . '', $value['value']);
+                                        } else {
+                                            $this->builder->where($tableJoin . '.' . $value['name'] . '', $value['value']);
+                                        }
+                                    }
+                                endforeach;
+                            }
+                        endforeach;
+                    }
+                }
+            }
         endforeach;
     }
 

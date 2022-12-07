@@ -78,12 +78,13 @@ class Field
          * #empty query using modeling data
          */
         if (empty($query)) {
-            $fields = $this->db->getFieldNames($table);
+            $fields = $this->db->getFieldData($table);
             foreach ($fields as $field) :
                 foreach ($data as $row) :
                     $result[] = [
-                        'field' =>  $field,
-                        'label' =>  $row->$field
+                        'field' => $field->name,
+                        'label' => $row->{$field->name},
+                        'primarykey' => $field->primary_key == 1 ? true : false
                     ];
                 endforeach;
             endforeach;
@@ -92,8 +93,8 @@ class Field
             foreach ($fields as $field) :
                 foreach ($data as $row) :
                     $result[] = [
-                        'field' =>  $field,
-                        'label' =>  $row->$field
+                        'field' => $field,
+                        'label' => $row->$field
                     ];
                 endforeach;
             endforeach;
@@ -111,17 +112,21 @@ class Field
      * $field_post mendapatkan field dari method post
      * @return $result
      */
-    function errorValidation($table, $field_post)
+    function errorValidation($table, $field_post, $str = null)
     {
         $allError = $this->validation->getErrors();
 
         $result = [];
         $arrField = [];
+        $sparator = '_';
 
         $result[] = [
             'error' => true,
             'field' => $table
         ];
+
+
+        $str = empty($str) ? $sparator . 'line' : $sparator . $str;
 
         // Populate array field from object all error
         foreach ($allError as $field => $msg) :
@@ -154,11 +159,16 @@ class Field
                 foreach ($field as $key2 => $obj) :
                     foreach ($arrField as $row) :
                         $errorField = $key . '.' . $key2 . '.*.' . $row;
-                        $result[] = [
-                            'error' => 'error_' . $key2,
-                            'field' => $row,
-                            'label' => $this->validation->getError($errorField)
-                        ];
+
+                        if (strpos($row, $str))
+                            $row = str_replace($str, '', $row);
+
+                        if (!empty($key2))
+                            $result[] = [
+                                'error' => 'error_' . $key2,
+                                'field' => $row,
+                                'label' => $this->validation->getError($errorField)
+                            ];
                     endforeach;
                 endforeach;
             }
@@ -203,8 +213,10 @@ class Field
                 if (!empty($defaultValue)) {
                     if ($defaultValue === 'Y')
                         $element .= '<input type="' . $type . '" class="form-check-input line ' . $class . '" name="' . $name . '" checked ' . $disabled . '>';
-                    else
+                    else if ($defaultValue === 'N')
                         $element .= '<input type="' . $type . '" class="form-check-input line ' . $class . '" name="' . $name . '" ' . $disabled . '>';
+                    else
+                        $element .= '<input type="' . $type . '" class="form-check-input line ' . $class . '" name="' . $name . '" value="' . $defaultValue . '">';
                 } else {
                     $element .= '<input type="' . $type . '" class="form-check-input line ' . $class . '" name="' . $name . '" ' . $checked . ' ' . $disabled . '>';
                 }
@@ -260,7 +272,7 @@ class Field
                 $defaultValue = "";
             }
 
-            $element .= '<button type="button" title="' . ucwords($name) . '" class="btn btn-link btn-danger line btn_delete" id="' . $defaultValue . '" name="' . $name . '" value="' . $field . '">
+            $element .= '<button type="button" title="' . ucwords($name) . '" class="btn btn-link btn-danger line btn_delete ' . $class . '" id="' . $defaultValue . '" name="' . $name . '" value="' . $field . '">
                                     <i class="fa fa-times"></i>
                                 </button>';
         }
@@ -286,7 +298,12 @@ class Field
     {
         foreach ($data as $row) :
             if ($this->db->fieldExists($field, $table))
-                $row->$field = ([
+                $row->{$field} = ([
+                    'id' => $value,
+                    'name' => $text
+                ]);
+            else
+                $row->{$field} = ([
                     'id' => $value,
                     'name' => $text
                 ]);

@@ -6,9 +6,8 @@ use CodeIgniter\Validation\CreditCardRules;
 use CodeIgniter\Validation\FileRules;
 use CodeIgniter\Validation\FormatRules;
 use CodeIgniter\Validation\Rules;
-
 use App\Validation\PasswordRules;
-use App\Validation\DuplicateRules;
+use App\Validation\SASRules;
 
 class Validation
 {
@@ -28,7 +27,7 @@ class Validation
         FileRules::class,
         CreditCardRules::class,
         PasswordRules::class,
-        DuplicateRules::class
+        SASRules::class
     ];
 
     /**
@@ -65,16 +64,30 @@ class Validation
 
     public $submenu = [
         'name'              => [
-            'rules'         =>    'required|is_unique[sys_submenu.name,sys_submenu_id,{id}]',
+            'rules'         => 'required|is_unique[sys_submenu.name,sys_submenu_id,{id}]',
             'errors'        => [
                 'is_unique' => 'This {field} already exists.'
             ]
         ],
         'url'               => [
-            'rules'         =>    'required|valid_url'
+            'rules'         => 'required'
         ],
         'sequence'          => [
-            'rules'         =>    'required'
+            'rules'         => 'required'
+        ],
+        'sys_menu_id' => [
+            'label'         => 'Parent',
+            'rules'         => 'required',
+            'errors'        => [
+                'required'  => 'Please Choose the {field} Line'
+            ]
+        ],
+        'action' => [
+            'label'         => 'Action',
+            'rules'         => 'required',
+            'errors'        => [
+                'required'  => 'Please Choose the {field} Line'
+            ]
         ]
     ];
 
@@ -288,9 +301,10 @@ class Validation
         ],
         'initialcode' => [
             'label'                 => 'Initial Code',
-            'rules'                 => 'required|min_length[2]|max_length[2]',
+            'rules'                 => 'required|min_length[2]|max_length[2]|is_unique[md_category.initialcode,md_category_id,{id}]',
             'errors'                => [
-                'required' => 'Please Insert the {field}'
+                'required' => 'Please Insert the {field}',
+                'is_unique' => 'This {field} already exists',
             ]
         ],
         'md_groupasset_id'            => [
@@ -456,34 +470,19 @@ class Validation
                 'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.assetcode'  => [
-            'label'                 => 'Asset Code',
-            'rules'                 => 'required|is_exists',
-            'errors'                => [
-                'required' => 'Please Insert the {field} Line',
-                'is_exists' => 'The {field} duplicate value'
-            ]
-        ],
-        'detail.table.*.product_id'  => [
+        'detail.table.*.md_product_id_line'  => [
             'label'             => 'Product',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.status_id'  => [
+        'detail.table.*.md_status_id_line'  => [
             'label'             => 'Status',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Choose the {field} Line'
             ]
-            // ],
-            // 'detail.table.*.unitprice'  => [
-            //     'label'             => 'Unit Price',
-            //     'rules'             => 'required',
-            //     'errors'            => [
-            //         'required'      => 'Please Insert the {field} Line'
-            //     ]
         ],
     ];
 
@@ -524,14 +523,14 @@ class Validation
                 'required'      => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.product_id'  => [
+        'detail.table.*.md_product_id_line'  => [
             'label'             => 'Product',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.qtyentered'  => [
+        'detail.table.*.qtyentered_line'  => [
             'label'             => 'Qty',
             'rules'             => 'required|is_natural_no_zero',
             'errors'            => [
@@ -539,21 +538,21 @@ class Validation
                 'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
             ]
         ],
-        'detail.table.*.unitprice'  => [
+        'detail.table.*.unitprice_line'  => [
             'label'             => 'Unit Price',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.lineamt'  => [
+        'detail.table.*.lineamt_line'  => [
             'label'             => 'Line Amount',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.employee_id'  => [
+        'detail.table.*.md_employee_id_line'  => [
             'label'             => 'Employee',
             'rules'             => 'required',
             'errors'            => [
@@ -585,8 +584,8 @@ class Validation
                 'required'  => 'Please Choose the {field} first.'
             ]
         ],
-        'expenseno'                 => [
-            'label'                 => 'Expense No',
+        'docreference'              => [
+            'label'                 => 'Document Reference',
             'rules'                 => 'required',
             'errors'                => [
                 'required'  => 'Please Insert the {field} first.'
@@ -608,10 +607,17 @@ class Validation
             ]
         ],
         'md_supplier_id'            => [
-            'label'                 => 'Suplier',
-            'rules'                 => 'required',
+            'label'                 => 'From',
+            'rules'                 => 'required_without[md_employee_id]',
             'errors'                => [
-                'required'  => 'Please Choose the {field} first.'
+                'required_without'  => 'Please Choose the {field} first.'
+            ]
+        ],
+        'md_employee_id'            => [
+            'label'                 => 'From',
+            'rules'                 => 'required_without[md_supplier_id]',
+            'errors'                => [
+                'required_without'  => 'Please Choose the {field} first.'
             ]
         ],
         'line'                      => [
@@ -621,44 +627,42 @@ class Validation
                 'required' => 'Please Insert the {field} first.'
             ]
         ],
-        // 'detail.table.*.assetcode'  => [
-        //     'label'                 => 'Asset Code',
-        //     'rules'                 => 'required|is_exists|is_unique[trx_inventory.assetcode]',
-        //     'errors'                => [
-        //         'required' => 'Please Insert the {field} Line',
-        //         'is_exists' => 'The {field} duplicate value',
-        //         'is_unique' => '{value}|The {field} ({value}) already exists'
-        //     ]
-        // ],
-        'detail.table.*.unitprice' => [
-            'label'                 => 'Unitprice',
+        'detail.table.*.residualvalue_line' => [
+            'label'                 => 'Residual Value',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Insert the {field} Line'
             ]
         ],
-        'detail.table.*.employee_id' => [
+        'detail.table.*.unitprice_line' => [
+            'label'                 => 'Unit Price',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required'          => 'Please Insert the {field} Line'
+            ]
+        ],
+        'detail.table.*.md_employee_id_line' => [
             'label'                 => 'Employee',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.branch_id'  => [
+        'detail.table.*.md_branch_id_line'  => [
             'label'                 => 'Branch',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.division_id' => [
+        'detail.table.*.md_division_id_line' => [
             'label'                 => 'Division',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.room_id'  => [
+        'detail.table.*.md_room_id_line'  => [
             'label'                 => 'Room',
             'rules'                 => 'required',
             'errors'                => [
@@ -683,7 +687,7 @@ class Validation
                 'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'detail.table.*.assetcode'  => [
+        'detail.table.*.assetcode_line'  => [
             'label'                 => 'Asset Code',
             'rules'                 => 'required|is_exists',
             'errors'                => [
@@ -691,21 +695,21 @@ class Validation
                 'is_exists' => 'The {field} duplicate value'
             ]
         ],
-        'detail.table.*.status_id' => [
+        'detail.table.*.md_status_id_line' => [
             'label'                 => 'Status',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.employee_to' => [
+        'detail.table.*.employee_to_line' => [
             'label'                 => 'Employee To',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
             ]
         ],
-        'detail.table.*.room_to' => [
+        'detail.table.*.room_to_line' => [
             'label'                 => 'Room To',
             'rules'                 => 'required',
             'errors'                => [
@@ -772,9 +776,10 @@ class Validation
         ],
         'initialcode' => [
             'label'                 => 'Initial Code',
-            'rules'                 => 'required|min_length[2]|max_length[2]',
+            'rules'                 => 'required|min_length[2]|max_length[2]|is_unique[md_groupasset.initialcode,md_groupasset_id,{id}]',
             'errors'                => [
-                'required' => 'Please Insert the {field}'
+                'required' => 'Please Insert the {field}',
+                'is_unique' => 'This {field} already exists',
             ]
         ],
         'usefullife' => [
@@ -786,6 +791,13 @@ class Validation
         ],
         'md_sequence_id' => [
             'label'                 => 'Document Sequence',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Choose the {field}'
+            ]
+        ],
+        'depreciationtype' => [
+            'label'                 => 'Depreciation Type',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field}'
@@ -842,6 +854,341 @@ class Validation
             'rules'                 => 'required_with[iscategorylevelsequence]',
             'errors'                => [
                 'required_with'     => 'Please Checked the {field}'
+            ]
+        ]
+    ];
+
+    public $internal = [
+        'documentno'            => [
+            'label'             => 'Document No',
+            'rules'             => 'required|min_length[10]|max_length[10]|is_unique[trx_quotation.documentno,trx_quotation_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'quotationdate'         => [
+            'label'             => 'Date',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'docreference'          => [
+            'label'             => 'Internal Use No',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'md_status_id'          => [
+            'label'             => 'Status',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'md_supplier_id'        => [
+            'label'             => 'From',
+            'rules'             => 'required_based_field_value[isfrom, S]',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Choose the field first.'
+            ]
+        ],
+        'md_employee_id'        => [
+            'label'             => 'From',
+            'rules'             => 'required_based_field_value[isfrom, E]',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Choose the field first.'
+            ]
+        ],
+        'isfrom' => [
+            'label'             => 'From',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} fisrt.'
+            ]
+        ],
+        'line'                  => [
+            'label'             => 'Free Asset Detail',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'detail.table.*.md_product_id_line'  => [
+            'label'             => 'Product',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} Line'
+            ]
+        ],
+        'detail.table.*.qtyentered_line'  => [
+            'label'             => 'Qty',
+            'rules'             => 'required|is_natural_no_zero',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line',
+                'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
+            ]
+        ],
+        'detail.table.*.unitprice_line'  => [
+            'label'             => 'Unit Price',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line'
+            ]
+        ],
+        'detail.table.*.lineamt_line'  => [
+            'label'             => 'Line Amount',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line'
+            ]
+        ],
+        'detail.table.*.md_employee_id_line'  => [
+            'label'             => 'Employee',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} Line'
+            ]
+        ]
+    ];
+
+    public $reference = [
+        'name'                  => [
+            'label'             => 'Name',
+            'rules'             => 'required|is_unique[sys_reference.name,sys_reference_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'validationtype'        => [
+            'label'             => 'Validation Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'line'                  => [
+            'label'             => 'Reference List',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'detail.table.*.value_line'  => [
+            'label'             => 'Search Key',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line'
+            ]
+        ],
+        'detail.table.*.name_line'  => [
+            'label'             => 'Name',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line'
+            ]
+        ]
+    ];
+
+    public $responsible = [
+        'name'                  => [
+            'label'             => 'Name',
+            'rules'             => 'required|is_unique[sys_wfresponsible.name,sys_wfresponsible_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'responsibletype'       => [
+            'label'             => 'Responsible Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'sys_role_id'           => [
+            'label'             => 'Role',
+            'rules'             => 'required_based_field_value[responsibletype, R]',
+            'errors'            => [
+                'required_based_field_value'    => 'Please Choose the {field} first.'
+            ]
+        ],
+        'sys_user_id'           => [
+            'label'             => 'User',
+            'rules'             => 'required_based_field_value[responsibletype, H]',
+            'errors'            => [
+                'required_based_field_value'    => 'Please Choose the {field} first.'
+            ]
+        ]
+    ];
+
+    public $notifText = [
+        'name'                  => [
+            'label'             => 'Name',
+            'rules'             => 'required|is_unique[sys_notiftext.name,sys_notiftext_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'subject'               => [
+            'label'             => 'Subject',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'text'                  => [
+            'label'             => 'Text',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'notiftype'             => [
+            'label'             => 'Notification Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ]
+    ];
+
+    public $mail = [
+        'smtphost'              => [
+            'label'             => 'Mail Host',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'smtpport'              => [
+            'label'             => 'SMTP Port',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'smtpcrypto'            => [
+            'label'             => 'SMTP Crypto',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'smtpuser'              => [
+            'label'             => 'Request User',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'smtppassword'          => [
+            'label'             => 'Request User Password',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'requestemail'          => [
+            'label'             => 'Request Email',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ]
+    ];
+
+    public $wscenario = [
+        'name'                  => [
+            'label'             => 'Name',
+            'rules'             => 'required|is_unique[sys_wfscenario.name,sys_wfscenario_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'menu'                  => [
+            'label'             => 'Menu',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'line'                  => [
+            'label'             => 'Workflow Scenario List',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'detail.table.*.sys_wfresponsible_id_line'  => [
+            'label'             => 'Workflow Responsible',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'detail.table.*.sys_notiftext_id_line'  => [
+            'label'             => 'Notification Template',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ]
+    ];
+
+    public $barcode = [
+        'barcodetype'           => [
+            'label'             => 'Barcode Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'generatortype'         => [
+            'label'             => 'Generator Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'widthfactor'           => [
+            'label'             => 'Width Factor',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'height'                => [
+            'label'             => 'Height',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'text'                  => [
+            'label'             => 'Example Text',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'positiontext'          => [
+            'label'             => 'Position',
+            'rules'             => 'required_based_field_value[iswithtext, Y]|',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'sizetext'              => [
+            'label'             => 'Size Font',
+            'rules'             => 'required_based_field_value[iswithtext, Y]',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Insert the {field} first.'
             ]
         ]
     ];

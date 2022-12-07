@@ -33,16 +33,16 @@ class Template
 
         $view_data['title'] = $this->access->getMenu($uri, 'name');
         $view_data['filter'] = $this->renderPage($template, 'form_filter');
+        $view_data['table_report'] = $this->renderPage($template, 'table_report');
         $view_data['sidebar'] = $this->menuSidebar();
         $view_data['toolbar_button'] = $this->toolbarButton();
         $view_data['action_button'] = $this->actionButton();
+        $view_data['action_menu'] = $this->access->getMenu($uri, 'action');
 
         $view_data['username'] = $this->access->getUser('username');
         $view_data['name'] = $this->access->getUser('name');
         $view_data['email'] = $this->access->getUser('email');
-        $view_data['level'] = $this->access->getRole();
-
-        $view_data['menu_action'] = $this->access->getMenu($uri, 'action');
+        $view_data['level'] = $this->access->getRole() ? $this->access->getRole()->getName() : 'No Role';
 
         return view($template, $view_data);
     }
@@ -74,13 +74,13 @@ class Template
         $uri = $this->request->uri->getSegment(2);
         $allBtn = '';
 
-        $btnUpdate = '<a class="btn edit" id="' . $btnID . '" data-toggle="tooltip" title="Edit" data-original-title="Edit"><i class="far fa-edit text-info"></i></a>';
+        $btnUpdate = '<a class="btn" onclick="Edit(' . "'" . $btnID . "'" . ')" id="' . $btnID . '" data-toggle="tooltip" title="Edit" data-original-title="Edit"><i class="fas fa-edit text-info"></i></a>';
 
         $btnDelete = '<a class="btn" onclick="Destroy(' . "'" . $btnID . "'" . ')" data-toggle="tooltip" title="Delete" data-original-title="Delete"><i class="fas fa-trash-alt text-danger"></i></a>';
 
         $btnProcess = '<a class="btn" onclick="docProcess(' . "'" . $btnID . "'," . "'" . $status . "'" . ')" data-toggle="tooltip" title="Document Action" data-original-title="Document Action"><i class="fas fa-cog text-primary"></i></a>';
 
-        $btnDetail = '<a class="btn edit" id="' . $btnID . '" data-status="' . $status . '" data-toggle="tooltip" title="Detail" data-original-title="Detail"><i class="far fa-edit text-info"></i></a>';
+        $btnDetail = '<a class="btn" onclick="Edit(' . "'" . $btnID . "'," . "'" . $status . "'" . ')" id="' . $btnID . '" data-status="' . $status . '" data-toggle="tooltip" title="Detail" data-original-title="Detail"><i class="fas fa-file text-info"></i></a>';
 
         $update = $this->access->checkCrud($uri, $this->isUpdate);
         $delete = $this->access->checkCrud($uri, $this->isDelete);
@@ -104,14 +104,26 @@ class Template
         $uri = $this->request->uri->getSegment(2);
         $allBtn = '';
 
-        $btnNew = '<button type="button" class="btn btn-primary btn-sm btn-round ml-auto new_form">
-                        <i class="fa fa-plus fa-fw"></i> Add New
-                      </button>';
+        $btnNew = '<button type="button" class="btn btn-primary btn-sm btn-round ml-auto new_form" title="New Record"><i class="fas fa-plus fa-fw"></i> Add New</button>';
+        $btnExport = '<a id="dt-button"></a> ';
+
+        $btnReQuery = '<button type="button" class="btn btn-success btn-sm btn-round ml-auto btn_requery" title="ReQuery"><i class="fas fa-sync fa-fw"></i> ReQuery </button>';
 
         $check = $this->access->checkCrud($uri, $this->isCreate);
+        $role = $this->access->getRole();
 
-        if ($check === 'Y')
-            $allBtn .= $btnNew;
+        //TODO: Get field action from menu
+        $action_menu = $this->access->getMenu($uri, 'action');
+
+        if (($role && $role->getIsCanExport() === 'Y' || $action_menu === 'R') && $action_menu !== 'F')
+            $allBtn .= $btnExport;
+
+        if ($action_menu === 'T') {
+            $allBtn .= $btnReQuery . ' ';
+
+            if ($check === 'Y')
+                $allBtn .= $btnNew;
+        }
 
         return $allBtn;
     }
@@ -119,23 +131,42 @@ class Template
     private function actionButton()
     {
         $uri = $this->request->uri->getSegment(2);
-        $menu_action = $this->access->getMenu($uri, 'action');
-
         $allBtn = '';
-        $class = '';
 
-        if ($menu_action != 1)
-            $class = 'card-button';
-
-        $btnBottom = '<div class="card-action ' . $class . '">
+        //* Button for Table Form 
+        $btnTableForm = '<div class="card-action card-button">
                         <button type="button" class="btn btn-outline-danger btn-round ml-auto close_form">Close</button>
+                        <button type="button" class="btn btn-primary btn-round ml-auto save_form">Save changes</button>
+                    </div>';
+
+        //* Button for Parameter Form 
+        $btnParamForm = '<div class="card-action d-flex justify-content-center">
+                            <div>
+                                <button type="button" class="btn btn-danger btn-sm btn-round ml-auto btn_reset_form"><i class="fas fa-undo-alt fa-fw"></i> Reset</button>
+                                <button type="button" class="btn btn-success btn-sm btn-round ml-auto btn_ok_form"><i class="fas fa-check fa-fw"></i> OK</button>
+                            </div>
+                        </div>';
+
+        //* Button for Single Form 
+        $btnForm = '<div class="card-action">
+                        <button type="button" class="btn btn-outline-danger btn-round ml-auto reset_form">Reset</button>
                         <button type="button" class="btn btn-primary btn-round ml-auto save_form">Save changes</button>
                     </div>';
 
         $check = $this->access->checkCrud($uri, $this->isCreate);
 
-        if ($check === 'Y')
-            $allBtn .= $btnBottom;
+        //TODO: Get field action from menu 
+        $action_menu = $this->access->getMenu($uri, 'action');
+
+        if ($check === 'Y') {
+            if ($action_menu === 'F') {
+                $allBtn .= $btnForm;
+            } else if ($action_menu === 'T') {
+                $allBtn .= $btnTableForm;
+            } else if ($action_menu === 'R') {
+                $allBtn .= $btnParamForm;
+            }
+        }
 
         return $allBtn;
     }

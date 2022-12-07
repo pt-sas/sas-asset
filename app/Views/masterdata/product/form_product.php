@@ -37,7 +37,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_subcategory_id">Subcategory <span class="required">*</span></label>
-                    <select class="form-control select-data" id="md_subcategory_id" name="md_subcategory_id" data-url="subcategory/getList">
+                    <select class="form-control select2" id="md_subcategory_id" name="md_subcategory_id">
                         <option value="">Select Subcategory</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_subcategory_id"></small>
@@ -46,7 +46,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_type_id">Type <span class="required">*</span></label>
-                    <select class="form-control select-data" id="md_type_id" name="md_type_id" data-url="type/getList">
+                    <select class="form-control select2" id="md_type_id" name="md_type_id">
                         <option value="">Select Type</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_type_id"></small>

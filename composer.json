@@ -9,7 +9,10 @@
         "codeigniter4/framework": "^4",
         "phpoffice/phpspreadsheet": "^1.20",
         "html2text/html2text": "^4.3",
-        "jason-napolitano/codeigniter4-cart-module": "^1.1"
+        "jason-napolitano/codeigniter4-cart-module": "^1.1",
+        "pusher/pusher-php-server": "^7.2",
+        "picqer/php-barcode-generator": "^2.2",
+        "mpdf/mpdf": "^8.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9",

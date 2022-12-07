@@ -3,24 +3,18 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Datatable;
 use App\Models\M_Role;
 use App\Models\M_Menu;
 use App\Models\M_Submenu;
 use App\Models\M_AccessMenu;
+use App\Models\M_User;
 use Config\Services;
 
 class Role extends BaseController
 {
-	private $model;
-	private $entity;
-	protected $validation;
-	protected $request;
-
 	public function __construct()
 	{
 		$this->request = Services::request();
-		$this->validation = Services::validation();
 		$this->model = new M_Role($this->request);
 		$this->entity = new \App\Entities\Role();
 	}
@@ -44,8 +38,6 @@ class Role extends BaseController
 
 	public function showAll()
 	{
-		$datatable = new M_Datatable($this->request);
-
 		if ($this->request->getMethod(true) === 'POST') {
 			$table = $this->model->table;
 			$select = $this->model->findAll();
@@ -56,7 +48,7 @@ class Role extends BaseController
 			$data = [];
 
 			$number = $this->request->getPost('start');
-			$list = $datatable->getDatatables($table, $select, $order, $sort, $search);
+			$list = $this->datatable->getDatatables($table, $select, $order, $sort, $search);
 
 			foreach ($list as $value) :
 				$row = [];
@@ -68,10 +60,10 @@ class Role extends BaseController
 				$row[] = $number;
 				$row[] = $value->name;
 				$row[] = $value->description;
-				$row[] = status($value->ismanual);
-				$row[] = status($value->iscanexport);
-				$row[] = status($value->iscanreport);
-				$row[] = status($value->isallowmultipleprint);
+				$row[] = active($value->ismanual);
+				$row[] = active($value->iscanexport);
+				$row[] = active($value->iscanreport);
+				$row[] = active($value->isallowmultipleprint);
 				$row[] = active($value->isactive);
 				$row[] = $this->template->tableButton($ID);
 				$data[] = $row;
@@ -79,8 +71,8 @@ class Role extends BaseController
 
 			$result = [
 				'draw'              => $this->request->getPost('draw'),
-				'recordsTotal'      => $datatable->countAll($table),
-				'recordsFiltered'   => $datatable->countFiltered($table, $select, $order, $sort, $search),
+				'recordsTotal'      => $this->datatable->countAll($table),
+				'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search),
 				'data'              => $data
 			];
 
@@ -95,22 +87,11 @@ class Role extends BaseController
 
 			try {
 				$this->entity->fill($post);
-				$this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-				$this->entity->setIsManual(setCheckbox(isset($post['ismanual'])));
-				$this->entity->setIsCanExport(setCheckbox(isset($post['iscanexport'])));
-				$this->entity->setIsCanReport(setCheckbox(isset($post['iscanreport'])));
-				$this->entity->setIsAllowMultiplePrint(setCheckbox(isset($post['isallowmultipleprint'])));
-				$this->entity->setCreatedBy($this->session->get('sys_user_id'));
-				$this->entity->setUpdatedBy($this->session->get('sys_user_id'));
 
 				if (!$this->validation->run($post, 'role')) {
-					$response =	$this->field->errorValidation($this->model->table);
+					$response =	$this->field->errorValidation($this->model->table, $post);
 				} else {
-					$result = $this->model->save($this->entity);
-
-					$msg = $result ? notification('insert') : $result;
-
-					$response = message('success', true, $msg);
+					$response = $this->save();
 				}
 			} catch (\Exception $e) {
 				$response = message('error', false, $e->getMessage());
@@ -143,30 +124,12 @@ class Role extends BaseController
 		}
 	}
 
-	public function edit()
+	public function destroy($id)
 	{
-		if ($this->request->getMethod(true) === 'POST') {
-			$post = $this->request->getVar();
-
+		if ($this->request->isAJAX()) {
 			try {
-				$this->entity->fill($post);
-				$this->entity->setRoleId($post['id']);
-				$this->entity->setIsActive(setCheckbox(isset($post['isactive'])));
-				$this->entity->setIsManual(setCheckbox(isset($post['ismanual'])));
-				$this->entity->setIsCanExport(setCheckbox(isset($post['iscanexport'])));
-				$this->entity->setIsCanReport(setCheckbox(isset($post['iscanreport'])));
-				$this->entity->setIsAllowMultiplePrint(setCheckbox(isset($post['isallowmultipleprint'])));
-				$this->entity->setUpdatedBy($this->session->get('sys_user_id'));
-
-				if (!$this->validation->run($post, 'role')) {
-					$response =	$this->field->errorValidation($this->model->table);
-				} else {
-					$result = $this->model->save($this->entity);
-
-					$msg = $result ? notification('update') : $result;
-
-					$response = message('success', true, $msg);
-				}
+				$result = $this->model->delete($id);
+				$response = message('success', true, $result);
 			} catch (\Exception $e) {
 				$response = message('error', false, $e->getMessage());
 			}
@@ -175,12 +138,55 @@ class Role extends BaseController
 		}
 	}
 
-	public function destroy($id)
+	public function getUserRoleName()
 	{
+		$user = new M_User($this->request);
+
 		if ($this->request->isAJAX()) {
+			$post = $this->request->getVar();
+
+			$response = true;
+
 			try {
-				$result = $this->model->delete($id);
-				$response = message('success', true, $result);
+				$role = $user->detail([
+					'sr.isactive'           => $this->access->active(),
+					'sys_user.sys_user_id'  => $this->access->getSessionUser(),
+					'sr.name'               => $post['role_name']
+				])->getRow();
+
+				if (!$role)
+					$response = false;
+			} catch (\Exception $e) {
+				$response = message('error', false, $e->getMessage());
+			}
+
+			return $this->response->setJSON($response);
+		}
+	}
+
+	public function getList()
+	{
+		if ($this->request->isAjax()) {
+			$post = $this->request->getVar();
+
+			$response = [];
+
+			try {
+				if (isset($post['search'])) {
+					$list = $this->model->where('isactive', 'Y')
+						->like('name', $post['search'])
+						->orderBy('name', 'ASC')
+						->findAll();
+				} else {
+					$list = $this->model->where('isactive', 'Y')
+						->orderBy('name', 'ASC')
+						->findAll();
+				}
+
+				foreach ($list as $key => $row) :
+					$response[$key]['id'] = $row->getRoleId();
+					$response[$key]['text'] = $row->getName();
+				endforeach;
 			} catch (\Exception $e) {
 				$response = message('error', false, $e->getMessage());
 			}

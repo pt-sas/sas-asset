@@ -19,15 +19,20 @@ class M_Quotation extends Model
 		'created_by',
 		'updated_by',
 		'grandtotal',
-		'isinternaluse'
+		'isinternaluse',
+		'md_employee_id',
+		'docreference',
+		'isfrom',
+		'md_groupasset_id',
+		'sys_wfscenario_id'
 	];
 	protected $useTimestamps        = true;
 	protected $returnType 			= 'App\Entities\Quotation';
 	protected $allowCallbacks		= true;
 	protected $beforeInsert			= [];
-	protected $afterInsert			= ['createDetail'];
+	protected $afterInsert			= [];
 	protected $beforeUpdate			= [];
-	protected $afterUpdate			= ['createDetail'];
+	protected $afterUpdate			= [];
 	protected $beforeDelete			= [];
 	protected $afterDelete			= ['deleteDetail'];
 	protected $column_order = [
@@ -35,7 +40,7 @@ class M_Quotation extends Model
 		'', // Number column
 		'trx_quotation.documentno',
 		'trx_quotation.quotationdate',
-		'md_supplier.name',
+		'md_supplier.name' || 'md_employee.name',
 		'md_status.name',
 		'trx_quotation.grandtotal',
 		'trx_quotation.docstatus',
@@ -48,9 +53,10 @@ class M_Quotation extends Model
 		'trx_quotation.quotationdate',
 		'trx_quotation.docstatus',
 		'trx_quotation.grandtotal',
-		'md_supplier.name',
+		'md_supplier.name' || 'md_employee.name',
 		'md_status.name',
-		'sys_user.name'
+		'sys_user.name',
+		'md_employee.name'
 	];
 	protected $order = ['created_at' => 'DESC'];
 	protected $request;
@@ -70,7 +76,8 @@ class M_Quotation extends Model
 		$sql = $this->table . '.*,' .
 			'md_supplier.name as supplier,
 			md_status.name as status,
-			sys_user.name as createdby';
+			sys_user.name as createdby,
+			md_employee.name as employee';
 
 		return $sql;
 	}
@@ -79,6 +86,7 @@ class M_Quotation extends Model
 	{
 		$sql = [
 			$this->setDataJoin('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left'),
+			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left'),
 			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
 			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left')
 		];
@@ -95,12 +103,13 @@ class M_Quotation extends Model
 		];
 	}
 
-	public function getInvNumber()
+	public function getInvNumber($field, $where)
 	{
 		$month = date('m');
 
 		$this->builder->select('MAX(RIGHT(documentno,4)) AS documentno');
 		$this->builder->where("DATE_FORMAT(quotationdate, '%m')", $month);
+		$this->builder->where($field, $where);
 		$sql = $this->builder->get();
 
 		$code = "";
@@ -113,25 +122,15 @@ class M_Quotation extends Model
 			$code = "0001";
 		}
 
-		$prefix = "QU" . date('ym') . $code;
+		//* Menu Free Aset 
+		$first = "FA";
+
+		if ($where === 'N')
+			$first = "QU";
+
+		$prefix = $first . date('ym') . $code;
 
 		return $prefix;
-	}
-
-	public function mandatoryLogic($table)
-	{
-		$result = [];
-
-		foreach ($table as $row) :
-
-			// Condition to check isspare
-			if ($row[4]->isspare)
-				$row[5]->employee_id = 0;
-
-			$result[] = $row;
-		endforeach;
-
-		return $result;
 	}
 
 	public function getDetail($field = null, $where = null)
@@ -151,9 +150,11 @@ class M_Quotation extends Model
 	{
 
 		$sql = "SELECT q.*,
-			p.name as supplier
+			p.name as supplier,
+			e.name as employee
 		FROM trx_quotation q
 		LEFT JOIN md_supplier p ON p.md_supplier_id = q.md_supplier_id
+		LEFT JOIN md_employee e ON e.md_employee_id = q.md_employee_id
 		WHERE q.docstatus = 'CO' ";
 
 		if (!empty($where)) {
@@ -177,21 +178,9 @@ class M_Quotation extends Model
 		return $this->db->query($sql, $where);
 	}
 
-	public function createDetail(array $rows)
-	{
-		$quotationDetail = new M_QuotationDetail();
-
-		$post = $this->request->getVar();
-
-		if (isset($post['table'])) {
-			$post['trx_quotation_id'] = $rows['id'];
-			$quotationDetail->create($post);
-		}
-	}
-
 	public function deleteDetail(array $rows)
 	{
-		$quotationDetail = new M_QuotationDetail();
+		$quotationDetail = new M_QuotationDetail($this->request);
 		$quotationDetail->where($this->primaryKey, $rows['id'])->delete();
 	}
 }

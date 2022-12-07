@@ -24,9 +24,9 @@ class M_Service extends Model
     protected $returnType       = 'App\Entities\Service';
     protected $allowCallbacks   = true;
     protected $beforeInsert     = [];
-    protected $afterInsert      = ['createDetail'];
+    protected $afterInsert      = [];
     protected $beforeUpdate     = [];
-    protected $afterUpdate      = ['createDetail'];
+    protected $afterUpdate      = [];
     protected $beforeDelete     = [];
     protected $afterDelete      = ['deleteDetail'];
     protected $column_order = [
@@ -113,21 +113,34 @@ class M_Service extends Model
         return $prefix;
     }
 
-    public function createDetail(array $rows)
-    {
-        $serviceDetail = new M_ServiceDetail();
-
-        $post = $this->request->getVar();
-
-        if (isset($post['table'])) {
-            $post['trx_service_id'] = $rows['id'];
-            $serviceDetail->create($post);
-        }
-    }
-
     public function deleteDetail(array $rows)
     {
-        $serviceDetail = new M_ServiceDetail();
+        $serviceDetail = new M_ServiceDetail($this->request);
         $serviceDetail->where($this->primaryKey, $rows['id'])->delete();
+    }
+
+    public function getServiceDetail()
+    {
+        $sql = 'trx_service.documentno,
+            trx_service.docstatus,
+            trx_service.servicedate,
+            md_supplier.name AS supplier,
+            trx_service_detail.assetcode,
+            md_product.name AS product,
+            md_status.name AS status';
+
+        return $sql;
+    }
+
+    public function getJoinDetail()
+    {
+        $sql = [
+            $this->setDataJoin('trx_service_detail', 'trx_service_detail.trx_service_id =' . $this->table . '.trx_service_id', 'left'),
+            $this->setDataJoin('md_supplier', 'md_supplier.md_supplier_id =' . $this->table . '.md_supplier_id', 'left'),
+            $this->setDataJoin('md_product', 'md_product.md_product_id = trx_service_detail.md_product_id', 'left'),
+            $this->setDataJoin('md_status', 'md_status.md_status_id = trx_service_detail.md_status_id', 'left'),
+        ];
+
+        return $sql;
     }
 }
