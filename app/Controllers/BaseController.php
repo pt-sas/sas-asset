@@ -78,6 +78,10 @@ class BaseController extends Controller
 	protected $DOCSTATUS_Invalid = "IN";
 	/** In Progress = IP */
 	protected $DOCSTATUS_Inprogress = "IP";
+	/** Suspended = OS */
+	protected $DOCSTATUS_Suspended = "OS";
+	/** Aborted = AB */
+	protected $DOCSTATUS_Aborted = "AB";
 	/** Inventory In */
 	protected $Inventory_In = 'I+';
 	/** Inventory Out */
