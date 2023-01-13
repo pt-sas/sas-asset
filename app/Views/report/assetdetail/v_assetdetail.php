@@ -63,7 +63,7 @@
         </div>
         <div class="form-group row">
             <label for="inventorydate" class="col-lg-3 col-md-3 col-sm-4 mt-sm-2 text-right">Date Inventory </label>
-            <div class="col-lg-6 col-md-9 col-sm-8 ">
+            <div class="col-lg-6 col-md-9 col-sm-8">
                 <div class="input-icon">
                     <input type="text" class="form-control daterange" name="inventorydate" value="<?= $date_range ?>" placeholder="Date Inventory">
                     <span class="input-icon-addon">
