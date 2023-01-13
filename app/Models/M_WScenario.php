@@ -21,14 +21,14 @@ class M_WScenario extends Model
 		'updated_by',
 	];
 	protected $useTimestamps        = true;
-	protected $returnType 			= 'App\Entities\WScenario';
-	protected $allowCallbacks		= true;
-	protected $beforeInsert			= [];
-	protected $afterInsert			= [];
-	protected $beforeUpdate			= [];
-	protected $afterUpdate			= [];
-	protected $beforeDelete			= [];
-	protected $afterDelete			= ['deleteDetail'];
+	protected $returnType             = 'App\Entities\WScenario';
+	protected $allowCallbacks        = true;
+	protected $beforeInsert            = [];
+	protected $afterInsert            = [];
+	protected $beforeUpdate            = [];
+	protected $afterUpdate            = [];
+	protected $beforeDelete            = [];
+	protected $afterDelete            = ['deleteDetail'];
 	protected $column_order = [
 		'', // Hide column
 		'', // Number column
@@ -92,5 +92,28 @@ class M_WScenario extends Model
 	{
 		$scenarioDetail = new M_WScenarioDetail($this->request);
 		$scenarioDetail->where($this->primaryKey, $rows['id'])->delete();
+	}
+
+	public function getScenario(string $menu, int $md_groupasset_id, int $md_status_id, float $grandtotal)
+	{
+		$this->builder->select('sys_wfscenario_id');
+		$this->builder->where('menu', $menu);
+
+		if (!is_null($md_groupasset_id)) {
+			$this->builder->where('md_groupasset_id', $md_groupasset_id);
+		}
+
+		if (!is_null($md_status_id)) {
+			$this->builder->where('md_status_id', $md_status_id);
+		}
+
+		if (!empty($grandtotal)) {
+			$this->builder->where('grandtotal >=', $grandtotal);
+		}
+
+		$this->builder->orderBy('lineno', 'DESC');
+
+		$sql = $this->builder->get()->getRow();
+		return !is_null($sql) ? $sql->sys_wfscenario_id : null;
 	}
 }
