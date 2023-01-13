@@ -84,4 +84,23 @@ class M_Responsible extends Model
             "typeJoin" => $typeJoin
         ];
     }
+
+    public function getUserByResponsible($sys_wfresponsible_id)
+    {
+        $mUr = new M_UserRole($this->request);
+        $resp = $this->find($sys_wfresponsible_id);
+
+        if ($resp->getResponsibleType() === 'U') {
+            $user_id = $resp->getUserId();
+        } else if ($resp->getResponsibleType() === 'R') {
+            $list = $mUr->where('sys_role_id', $resp->getRoleId())->orderBy('created_at', 'ASC')->findAll();
+
+            foreach ($list as $key => $user) :
+                if ($key == 0)
+                    $user_id = $user->getUserId();
+            endforeach;
+        }
+
+        return $user_id;
+    }
 }
