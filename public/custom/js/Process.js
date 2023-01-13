@@ -20,7 +20,8 @@ let ID,
     formTable,
     _tableInfo,
     formReport,
-    _tableReport;
+    _tableReport,
+    _tableApproval;
 
 let clear = false;
 
@@ -229,7 +230,37 @@ _tableReport = $('.table_report').DataTable({
     'autoWidth': false,
     'scrollX': true,
     'scrollY': '70vh',
-    'scrollCollapse': true
+    'scrollCollapse': true,
+}).columns.adjust();
+
+/**
+ * Table Approval on the modal
+ */
+_tableApproval = $('.table_approval').DataTable({
+    'processing': true,
+    'columnDefs': [{
+            'targets': '_all',
+            'orderable': false
+        },
+        {
+            'targets': [0, 1, 2, 3],
+            'visible': false //hide column
+        },
+        {
+            'targets': [4],
+            'width': '20%'
+        }
+    ],
+    'order': [],
+    'displayLength': -1,
+    'lengthChange': false,
+    'info': false,
+    'searching': false,
+    'paging': false,
+    'autoWidth': false,
+    // 'scrollX': true,
+    // 'scrollY': '70vh',
+    // 'scrollCollapse': true
 }).columns.adjust();
 
 /**
@@ -885,7 +916,7 @@ function Destroy(id) {
 
     if (checkAccess[0].success && checkAccess[0].message == 'Y') {
         Swal.fire({
-            title: 'Delete?',
+            title: 'Delete ?',
             text: "Are you sure you wish to delete the selected data ? ",
             type: 'warning',
             showCancelButton: true,
@@ -1038,8 +1069,10 @@ function docProcess(id, status) {
                 $('#docaction').select2({
                     placeholder: 'Select an option',
                     width: '40%',
-                    theme: "bootstrap"
-                })
+                    theme: "bootstrap",
+                    dropdownAutoWidth: true,
+                    allowClear: true
+                });
             },
             preConfirm: (generate) => {
                 return new Promise(function (resolve) {
@@ -1520,6 +1553,7 @@ $('.create_line').click(function (evt) {
             loadingForm('product_info', 'ios');
 
             $("#modal_product_info").on('shown.bs.modal', function (e) {
+                e.preventDefault();
                 const target = $(e.target);
                 const form = target.find('form');
 
@@ -1570,6 +1604,18 @@ $("#modal_product_info").on('hidden.bs.modal', function (evt) {
 
     //TODO: Clear datatable
     _tableInfo.clear().draw();
+});
+
+/**
+ * Do Not Submit data Enter Keypress the form_product_info
+ */
+$('#form_product_info').on("keypress", function (evt) {
+    let keyPressed = evt.keyCode || evt.which;
+
+    if (keyPressed === 13) {
+        evt.preventDefault();
+        return false;
+    }
 });
 
 /**
@@ -2829,7 +2875,7 @@ $(document).ready(function (e) {
         new $.fn.dataTable.Buttons(_table, {
             buttons: [{
                 extend: 'collection',
-                className: 'btn btn-warning btn-sm btn-round ml-auto text-white',
+                className: 'btn btn-warning btn-sm btn-round ml-auto text-white mr-1',
                 text: '<i class="fas fa-download fa-fw"></i> Export',
                 autoClose: true,
                 buttons: [{
@@ -3495,3 +3541,107 @@ function prosesTestEmail(identifier) {
         allowOutsideClick: () => !Swal.isLoading()
     });
 }
+
+$('#task_activity').click(function (e) {
+    e.preventDefault();
+    // console.log(e)
+    $('#modal_activity_info').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
+
+    $("#modal_activity_info").on('shown.bs.modal', function (e) {
+        const target = $(e.target);
+        const form = target.find('form');
+
+        let url = ADMIN_URL + 'WActivity' + '/showActivityInfo';
+
+        form.find('input').prop('readonly', true);
+        form.find('select[name="isanswer"]').hide();
+        form.find('button').prop('disabled', true);
+
+        // form[0].reset();
+
+        // loadingForm('modal_activity_info', 'facebook');
+        setTimeout(function () {
+            // hideLoadingForm('modal_activity_info');
+
+            //     if (form.find('select.select-data').length > 0) {
+            //         let select = form.find('select.select-data');
+            //         initSelectData(select);
+            //     }
+
+
+            //     if (form.find('input:hidden[name="isfree"]'))
+            //         form.find('input:hidden[name="isfree"]').val(isFree);
+            _tableApproval.ajax.url(url).load().columns.adjust();
+
+        }, 50);
+    });
+});
+
+$('.table_approval tbody').on('click', 'tr', function () {
+    const modalBody = $(this).closest('.modal-body');
+    const form = modalBody.find('form');
+
+    if ($(this).hasClass('selected')) {
+        $(this).removeClass('selected');
+
+        ID = 0;
+        form.find('input').prop('readonly', true);
+        form.find('select[name="isanswer"]')
+            .val('N')
+            .prop('disabled', true);
+        form.find('button').prop('disabled', true);
+    } else {
+        _tableApproval.$('tr.selected').removeClass('selected');
+        $(this).addClass('selected');
+
+        ID = _tableApproval.row(this).data()[0];
+        form.find('input').removeAttr('readonly');
+        form.find('select[name="isanswer"]')
+            .val('N')
+            .removeAttr('disabled')
+            .show();
+        form.find('button').removeAttr('disabled');
+    }
+});
+
+$('.btn_ok_answer').click(function (evt) {
+    evt.preventDefault();
+    let _this = $(this);
+    let oriElement = _this.html();
+    const modalBody = _this.closest('.modal-body');
+    const form = _this.closest('form');
+
+    let formData = new FormData(form[0]);
+    let url = ADMIN_URL + 'WActivity' + CREATE;
+
+    formData.append('id', ID);
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        cache: false,
+        dataType: 'JSON',
+        beforeSend: function () {
+            $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
+            // $('.x_form').prop('disabled', true);
+            // $('.close_form').prop('disabled', true);
+            loadingForm(modalBody.prop('id'), 'facebook');
+        },
+        complete: function () {
+            $(_this).html(oriElement).prop('disabled', false);
+            // $('.x_form').removeAttr('disabled');
+            // $('.close_form').removeAttr('disabled');
+            hideLoadingForm(modalBody.prop('id'));
+        },
+        success: function (result) {
+            console.log(result)
+
+        }
+    });
+});
