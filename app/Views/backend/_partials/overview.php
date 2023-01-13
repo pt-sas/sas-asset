@@ -78,6 +78,7 @@
     <i class="fas fa-angle-up"></i>
   </a>
   <?= $this->include('backend/auth/form_password') ?>
+  <?= $this->include('backend/modal/activity_info') ?>
 
   <?= $this->include('backend/_partials/js') ?>
 </body>
