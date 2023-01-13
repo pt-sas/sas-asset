@@ -104,10 +104,10 @@ class Template
         $uri = $this->request->uri->getSegment(2);
         $allBtn = '';
 
-        $btnNew = '<button type="button" class="btn btn-primary btn-sm btn-round ml-auto new_form" title="New Record"><i class="fas fa-plus fa-fw"></i> Add New</button>';
+        $btnNew = '<button type="button" class="btn btn-primary btn-sm btn-round ml-auto new_form mr-1" title="New Record"><i class="fas fa-plus fa-fw"></i> Add New</button>';
         $btnExport = '<a id="dt-button"></a> ';
 
-        $btnReQuery = '<button type="button" class="btn btn-success btn-sm btn-round ml-auto btn_requery" title="ReQuery"><i class="fas fa-sync fa-fw"></i> ReQuery </button>';
+        $btnReQuery = '<button type="button" class="btn btn-black btn-border btn-sm btn-round ml-auto btn_requery mr-1" title="Refresh"><i class="fas fa-sync fa-fw"></i> Refresh </button>';
 
         $check = $this->access->checkCrud($uri, $this->isCreate);
         $role = $this->access->getRole();
@@ -119,10 +119,10 @@ class Template
             $allBtn .= $btnExport;
 
         if ($action_menu === 'T') {
-            $allBtn .= $btnReQuery . ' ';
-
             if ($check === 'Y')
                 $allBtn .= $btnNew;
+
+            $allBtn .= $btnReQuery . ' ';
         }
 
         return $allBtn;
