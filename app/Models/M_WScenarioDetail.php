@@ -10,8 +10,8 @@ class M_WScenarioDetail extends Model
 	protected $table                = 'sys_wfscenario_detail';
 	protected $primaryKey           = 'sys_wfscenario_detail_id';
 	protected $allowedFields        = [
-		'lineno',
 		'grandtotal',
+		'lineno',
 		'sys_wfscenario_id',
 		'sys_wfresponsible_id',
 		'sys_notiftext_id',
