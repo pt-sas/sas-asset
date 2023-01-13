@@ -79,7 +79,8 @@ class Rpt_AssetDetail extends BaseController
                 'draw'              => $this->request->getPost('draw'),
                 'recordsTotal'      => $recordTotal,
                 'recordsFiltered'   => $recordsFiltered,
-                'data'              => $data
+                'data'              => $data,
+                'post'              => $post
             ];
 
             return $this->response->setJSON($result);
