@@ -88,10 +88,15 @@ class ComposerStaticInitf68aa72018c539608adfec876f671a35
         array (
             'Faker\\' => 6,
         ),
+        'E' => 
+        array (
+            'Endroid\\QrCode\\' => 15,
+        ),
         'D' => 
         array (
             'Doctrine\\Instantiator\\' => 22,
             'DeepCopy\\' => 9,
+            'DASPRiD\\Enum\\' => 13,
         ),
         'C' => 
         array (
@@ -99,6 +104,10 @@ class ComposerStaticInitf68aa72018c539608adfec876f671a35
             'Complex\\' => 8,
             'CodeIgniter\\' => 12,
             'CodeIgniterCart\\' => 16,
+        ),
+        'B' => 
+        array (
+            'BaconQrCode\\' => 12,
         ),
         'A' => 
         array (
@@ -223,6 +232,10 @@ class ComposerStaticInitf68aa72018c539608adfec876f671a35
         array (
             0 => __DIR__ . '/..' . '/fakerphp/faker/src/Faker',
         ),
+        'Endroid\\QrCode\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/endroid/qr-code/src',
+        ),
         'Doctrine\\Instantiator\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator',
@@ -230,6 +243,10 @@ class ComposerStaticInitf68aa72018c539608adfec876f671a35
         'DeepCopy\\' => 
         array (
             0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
+        ),
+        'DASPRiD\\Enum\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dasprid/enum/src',
         ),
         'Config\\' => 
         array (
@@ -246,6 +263,10 @@ class ComposerStaticInitf68aa72018c539608adfec876f671a35
         'CodeIgniterCart\\' => 
         array (
             0 => __DIR__ . '/..' . '/jason-napolitano/codeigniter4-cart-module/src',
+        ),
+        'BaconQrCode\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/bacon/bacon-qr-code/src',
         ),
         'App\\' => 
         array (

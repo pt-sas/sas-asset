@@ -19,11 +19,20 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '6139344259f24c0c21cc508cff111bea14da71e7',
+    'reference' => '9bfc2ba2f2ac67df6bfa8204a57a4c7c6fe9a7d9',
     'name' => 'codeigniter4/appstarter',
   ),
   'versions' => 
   array (
+    'bacon/bacon-qr-code' => 
+    array (
+      'pretty_version' => '2.0.8',
+      'version' => '2.0.8.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8674e51bb65af933a5ffaf1c308a660387c35c22',
+    ),
     'codeigniter4/appstarter' => 
     array (
       'pretty_version' => 'dev-master',
@@ -31,7 +40,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '6139344259f24c0c21cc508cff111bea14da71e7',
+      'reference' => '9bfc2ba2f2ac67df6bfa8204a57a4c7c6fe9a7d9',
     ),
     'codeigniter4/framework' => 
     array (
@@ -42,6 +51,15 @@ private static $installed = array (
       ),
       'reference' => '4ec623a6b8269dd09f570ab514e5864276bb7f56',
     ),
+    'dasprid/enum' => 
+    array (
+      'pretty_version' => '1.0.3',
+      'version' => '1.0.3.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '5abf82f213618696dda8e3bf6f64dd042d8542b2',
+    ),
     'doctrine/instantiator' => 
     array (
       'pretty_version' => '1.4.1',
@@ -50,6 +68,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '10dcfce151b967d20fde1b34ae6640712c3891bc',
+    ),
+    'endroid/qr-code' => 
+    array (
+      'pretty_version' => '4.6.1',
+      'version' => '4.6.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'a75c913b0e4d6ad275e49a2c1de1cacffc6c2184',
     ),
     'ezyang/htmlpurifier' => 
     array (
