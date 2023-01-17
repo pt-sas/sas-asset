@@ -19,7 +19,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'f00a2e6435bb768b437482a5b9fe9cf046f89172',
+    'reference' => '89816e2eeb6633c7f060a408a5133367245aa8f8',
     'name' => 'codeigniter4/appstarter',
   ),
   'versions' => 
@@ -40,7 +40,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'f00a2e6435bb768b437482a5b9fe9cf046f89172',
+      'reference' => '89816e2eeb6633c7f060a408a5133367245aa8f8',
     ),
     'codeigniter4/framework' => 
     array (
@@ -68,6 +68,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '10dcfce151b967d20fde1b34ae6640712c3891bc',
+    ),
+    'dompdf/dompdf' => 
+    array (
+      'pretty_version' => 'v2.0.1',
+      'version' => '2.0.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'c5310df0e22c758c85ea5288175fc6cd777bc085',
     ),
     'endroid/qr-code' => 
     array (
@@ -186,6 +195,15 @@ private static $installed = array (
       ),
       'reference' => 'c66aefcafb4f6c269510e9ac46b82619a904c576',
     ),
+    'masterminds/html5' => 
+    array (
+      'pretty_version' => '2.7.6',
+      'version' => '2.7.6.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '897eb517a343a2281f11bc5556d6548db7d93947',
+    ),
     'mikey179/vfsstream' => 
     array (
       'pretty_version' => 'v1.6.10',
@@ -266,6 +284,24 @@ private static $installed = array (
       array (
       ),
       'reference' => '4f7fd7836c6f332bb2933569e566a0d6c4cbed74',
+    ),
+    'phenx/php-font-lib' => 
+    array (
+      'pretty_version' => '0.5.4',
+      'version' => '0.5.4.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'dd448ad1ce34c63d09baccd05415e361300c35b4',
+    ),
+    'phenx/php-svg-lib' => 
+    array (
+      'pretty_version' => '0.5.0',
+      'version' => '0.5.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '76876c6cf3080bcb6f249d7d59705108166a6685',
     ),
     'php-http/message-factory' => 
     array (
@@ -476,6 +512,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '120b605dfeb996808c31b6477290a714d356e822',
+    ),
+    'sabberworm/php-css-parser' => 
+    array (
+      'pretty_version' => '8.4.0',
+      'version' => '8.4.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'e41d2140031d533348b2192a83f02d8dd8a71d30',
     ),
     'sebastian/cli-parser' => 
     array (
