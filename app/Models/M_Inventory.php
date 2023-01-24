@@ -123,7 +123,7 @@ class M_Inventory extends Model
 
 			$data = [
 				'assetcode'					=> $row->assetcode,
-				'inventorydate'				=> $row->receiptdate,
+				'inventorydate'				=> $row->invoicedate,
 				'md_groupasset_id'     		=> $rowProd->md_groupasset_id,
 				'md_product_id'     		=> $row->md_product_id,
 				'isspare'		     		=> $row->isspare,

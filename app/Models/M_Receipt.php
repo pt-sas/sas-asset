@@ -30,7 +30,8 @@ class M_Receipt extends Model
 		'docreference',
 		'isinternaluse',
 		'md_employee_id',
-		'expenseno'
+		'expenseno',
+		'invoicedate'
 	];
 	protected $useTimestamps        = true;
 	protected $returnType 			= 'App\Entities\Receipt';
@@ -208,7 +209,7 @@ class M_Receipt extends Model
 				//* Passing data to table inventory
 				$line = $this->field->mergeArrObject($line, [
 					'md_status_id'      => $row->getStatusId(),
-					'receiptdate'		=> $row->getReceiptDate()
+					'invoicedate'		=> $row->getInvoiceDate()
 				]);
 
 				$inventory->create($line);

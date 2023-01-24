@@ -357,7 +357,7 @@ class Receipt extends BaseController
                         $this->field->fieldTable('input', 'text', 'assetcode', 'text-uppercase unique', null, 'readonly', null, null, null, 170),
                         $this->field->fieldTable('select', null, 'md_product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                         $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, 'readonly', null, null, 1, 50),
-                        $this->field->fieldTable('input', 'text', 'residualvalue', 'rupiah', 'required', $rowQuo->getIsInternalUse() === 'N' ?: 'readonly', null, null, $rowQuo->getIsInternalUse() === 'Y' ? 0 : null, 125),
+                        $this->field->fieldTable('input', 'text', 'residualvalue', 'rupiah', 'required', $rowQuo->getIsInternalUse() === 'N' ?: 'readonly', null, null, 0, 125),
                         $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowQuo->getIsInternalUse() === 'N' ?: 'readonly', null, null, $row->unitprice, 125),
                         $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
                         $this->field->fieldTable('select', 'text', 'md_employee_id', null, 'required', null, null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
@@ -487,7 +487,7 @@ class Receipt extends BaseController
                     $addMonth = strtotime("+1 months", strtotime($dateTrx));
                     $nextMonth = date('m', $addMonth);
 
-                    //* Total month substract next month plus current month to calculate 
+                    //* Total month substract next month add current month to calculate 
                     $notFullMonth = ($fullMonth - $nextMonth) + 1;
                     $remainMonth = ($fullMonth - $notFullMonth);
 

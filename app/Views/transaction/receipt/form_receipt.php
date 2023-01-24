@@ -14,7 +14,7 @@
                     <small class="form-text text-danger" id="error_receiptdate"></small>
                 </div>
                 <div class="form-group">
-                    <label for="docreference">Document Receipt <span class="required">*</span></label>
+                    <label for="docreference">Document Reference <span class="required">*</span></label>
                     <input type="text" class="form-control" id="docreference" name="docreference" placeholder="Document Reference">
                     <small class="form-text text-danger" id="error_docreference"></small>
                 </div>
@@ -26,6 +26,11 @@
                         <option value="">Select Reference</option>
                     </select>
                     <small class="form-text text-danger" id="error_trx_quotation_id"></small>
+                </div>
+                <div class="form-group">
+                    <label for="invoicedate">Invoice Date <span class="required">*</span></label>
+                    <input type="text" class="form-control datepicker" id="invoicedate" name="invoicedate" value="<?= $today; ?>">
+                    <small class="form-text text-danger" id="error_invoicedate"></small>
                 </div>
                 <div class="form-group">
                     <label for="md_supplier_id">From <span class="required">*</span></label>
@@ -41,16 +46,6 @@
                     </select>
                     <small class="form-text text-danger" id="error_md_employee_id"></small>
                 </div>
-                <div class="form-group">
-                    <label for="md_status_id">Status <span class="required">*</span></label>
-                    <select class="form-control select2" id="md_status_id" name="md_status_id" style="width: 100%;" disabled>
-                        <option value="">Select Status</option>
-                        <?php foreach ($status as $row) : ?>
-                            <option value="<?= $row->getStatusId() ?>"><?= $row->getName() ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <small class="form-text text-danger" id="error_md_status_id"></small>
-                </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
@@ -61,8 +56,14 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="grandtotal">Grand Total </label>
-                    <input type="text" class="form-control rupiah" id="grandtotal" name="grandtotal" readonly>
+                    <label for="md_status_id">Status <span class="required">*</span></label>
+                    <select class="form-control select2" id="md_status_id" name="md_status_id" style="width: 100%;" disabled>
+                        <option value="">Select Status</option>
+                        <?php foreach ($status as $row) : ?>
+                            <option value="<?= $row->getStatusId() ?>"><?= $row->getName() ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="form-text text-danger" id="error_md_status_id"></small>
                 </div>
             </div>
             <div class="col-md-6">
@@ -79,6 +80,12 @@
                         <input type="checkbox" class="form-check-input" id="isinternaluse" name="isinternaluse" disabled>
                         <span class="form-check-sign">Free</span>
                     </label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="grandtotal">Grand Total </label>
+                    <input type="text" class="form-control rupiah" id="grandtotal" name="grandtotal" readonly>
                 </div>
             </div>
             <div class="col-md-12">

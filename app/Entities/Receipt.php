@@ -22,6 +22,7 @@ class Receipt extends Entity
 	protected $isinternaluse;
 	protected $md_employee_id;
 	protected $expenseno;
+	protected $invoicedate;
 
 	protected $dates   = [
 		'created_at',
@@ -197,5 +198,15 @@ class Receipt extends Entity
 	public function setExpenseNo($expenseno)
 	{
 		$this->attributes['expenseno'] = $expenseno;
+	}
+
+	public function getInvoiceDate()
+	{
+		return $this->attributes['invoicedate'];
+	}
+
+	public function setInvoiceDate($invoicedate)
+	{
+		$this->attributes['invoicedate'] = $invoicedate;
 	}
 }

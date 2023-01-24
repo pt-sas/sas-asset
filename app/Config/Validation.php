@@ -577,6 +577,13 @@ class Validation
                 'required'  => 'Please Insert the {field} first.'
             ]
         ],
+        'invoicedate'               => [
+            'label'                 => 'Invoice Date',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required'  => 'Please Insert the {field} first.'
+            ]
+        ],
         'md_status_id'              => [
             'label'                 => 'Status',
             'rules'                 => 'required',
