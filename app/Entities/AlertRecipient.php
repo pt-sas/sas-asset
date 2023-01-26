@@ -12,6 +12,7 @@ class AlertRecipient extends Entity
     protected $sys_role_id;
     protected $created_by;
     protected $updated_by;
+    protected $table;
 
     protected $dates   = [
         'created_at',
@@ -27,6 +28,16 @@ class AlertRecipient extends Entity
     public function setAlertRecipientId($md_alertrecipient_id)
     {
         $this->attributes['md_alertrecipient_id'] = $md_alertrecipient_id;
+    }
+
+    public function getTable()
+    {
+        return $this->attributes['table'];
+    }
+
+    public function setTable($table)
+    {
+        $this->attributes['table'] = $table;
     }
 
     public function getRecordId()
