@@ -26,6 +26,17 @@
                     </select>
                     <small class="form-text text-danger" id="error_responsibletype"></small>
                 </div>
+                <div class="form-group">
+                    <label>Alert Recipient <span class="required">*</span></label>
+                    <div class="select2-input select2-primary">
+                        <select class="form-control multiple-select" name="alert" multiple="multiple" style="width: 100%;">
+                            <?php foreach ($user as $row) : ?>
+                                <option value="<?= $row->sys_user_id; ?>"><?= $row->name; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small class="form-text text-danger" id="error_alert"></small>
+                    </div>
+                </div>
                 <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">

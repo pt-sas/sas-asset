@@ -21,6 +21,7 @@ class Responsible extends BaseController
     public function index()
     {
         $reference = new M_Reference($this->request);
+        $user = new M_User($this->request);
 
         $data = [
             'ref_list' => $reference->findBy([
@@ -30,7 +31,10 @@ class Responsible extends BaseController
             ], null, [
                 'field'     => 'sys_ref_detail.name',
                 'option'    => 'ASC'
-            ])->getResult()
+            ])->getResult(),
+            'user'        => $user->where('isactive', 'Y')
+                ->orderBy('name', 'ASC')
+                ->findAll()
         ];
 
         return $this->template->render('backend/configuration/responsible/v_responsible', $data);
@@ -114,20 +118,22 @@ class Responsible extends BaseController
 
         if ($this->request->isAJAX()) {
             try {
-                $list = $this->model->where($this->model->primaryKey, $id)->findAll();
+                $list = $this->model->detail([], $this->model->table . '.' . $this->model->primaryKey, $id);
 
-                if (!empty($list[0]->sys_role_id)) {
-                    $rowRole = $role->find($list[0]->sys_role_id);
-                    $list = $this->field->setDataSelect($role->table, $list, $role->primaryKey, $rowRole->sys_role_id, $rowRole->name);
+                $arrList = $list->getResult();
+
+                if (!empty($arrList[0]->sys_role_id)) {
+                    $rowRole = $role->find($arrList[0]->sys_role_id);
+                    $arrList = $this->field->setDataSelect($role->table, $list->getResult(), $role->primaryKey, $rowRole->sys_role_id, $rowRole->name);
                 }
 
-                if (!empty($list[0]->sys_user_id)) {
-                    $rowUser = $user->find($list[0]->sys_user_id);
-                    $list = $this->field->setDataSelect($user->table, $list, $user->primaryKey, $rowUser->sys_user_id, $rowUser->name);
+                if (!empty($arrList[0]->sys_user_id)) {
+                    $rowUser = $user->find($arrList[0]->sys_user_id);
+                    $arrList = $this->field->setDataSelect($user->table, $list->getResult(), $user->primaryKey, $rowUser->sys_user_id, $rowUser->name);
                 }
 
                 $result = [
-                    'header'   => $this->field->store($this->model->table, $list)
+                    'header'   => $this->field->store($this->model->table, $arrList, $list)
                 ];
 
                 $response = message('success', true, $result);

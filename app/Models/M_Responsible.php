@@ -19,8 +19,15 @@ class M_Responsible extends Model
         'created_by',
         'updated_by'
     ];
-    protected $useTimestamps = true;
-    protected $returnType = 'App\Entities\Responsible';
+    protected $useTimestamps    = true;
+    protected $returnType       = 'App\Entities\Responsible';
+    protected $allowCallbacks   = true;
+    protected $beforeInsert     = [];
+    protected $afterInsert      = ['createAlert'];
+    protected $beforeUpdate     = [];
+    protected $afterUpdate      = ['createAlert'];
+    protected $beforeDelete     = [];
+    protected $afterDelete      = ['deleteAlert'];
     protected $column_order = [
         '', // Hide column
         '', // Number column
