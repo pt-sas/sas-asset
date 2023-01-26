@@ -5,10 +5,10 @@
       <li class="nav-item dropdown hidden-caret">
         <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="task_activity" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-tasks"></i>
-          <span class="notification">4</span>
+          <span class="notif-workflow"></span>
         </a>
       </li>
-      <li class="nav-item dropdown hidden-caret">
+      <li class=" nav-item dropdown hidden-caret">
         <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
           <div class="avatar-sm">
             <img src="<?= base_url('custom/image/undraw_profile_1.svg') ?>" alt="..." class="avatar-img rounded-circle">
