@@ -625,7 +625,7 @@ class BaseController extends Controller
 		//* Get Request POST From View 
 		$post = $this->request->getVar();
 
-		//? Check property id or object primarKey
+		//? Check property id or object primaryKey
 		if (isset($post['id']) || isset($this->entity->{$this->primaryKey}))
 			return false;
 
