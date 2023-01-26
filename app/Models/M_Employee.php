@@ -101,7 +101,7 @@ class M_Employee extends Model
 			md_alertrecipient.record_id,
 			md_alertrecipient.sys_user_id AS alert');
 
-		$this->builder->join('md_alertrecipient', 'md_alertrecipient.record_id = ' . $this->table . '.md_employee_id', 'left');
+		$this->builder->join('md_alertrecipient', 'md_alertrecipient.table = "' . $this->table . '" AND md_alertrecipient.record_id = ' . $this->table . '.md_employee_id', 'left');
 		$this->builder->join('sys_user', 'sys_user.sys_user_id = md_alertrecipient.sys_user_id', 'left');
 
 		if (count($arrParam) > 0) {
@@ -121,57 +121,19 @@ class M_Employee extends Model
 	public function createAlert(array $rows)
 	{
 		$alert = new M_AlertRecipient($this->request);
-		$entity = new \App\Entities\AlertRecipient();
-
 		$post = $this->request->getVar();
 
 		if (isset($post['alert'])) {
-			$post['alert'] = explode(',', $post['alert']);
-
-			if (!isset($post['id'])) {
-				foreach ($post['alert'] as $key => $val) :
-					$entity->setRecordId($rows['id']);
-					$entity->setUserId($val);
-					$entity->setCreatedBy(session()->get('sys_user_id'));
-					$entity->setUpdatedBy(session()->get('sys_user_id'));
-
-					$alert->save($entity);
-				endforeach;
-			} else {
-				$arrAlert = $alert->where('record_id', $post['id'])->findAll();
-
-				$arrUser = [];
-
-				foreach ($arrAlert as $key => $row) :
-					if (!in_array($row->getUserId(), $post['alert'])) {
-						$alert->where([
-							'record_id'		=> $rows['id'],
-							'sys_user_id'	=> $row->getUserId()
-						])->delete();
-					}
-
-					// Get list user in this employee before update
-					$arrUser[] = $row->getUserId();
-				endforeach;
-
-				// Add new user when update employee
-				foreach ($post['alert'] as $key => $val) :
-					if (!in_array($val, $arrUser)) {
-						$entity->setRecordId($rows['id']);
-						$entity->setUserId($val);
-						$entity->setCreatedBy(session()->get('sys_user_id'));
-						$entity->setUpdatedBy(session()->get('sys_user_id'));
-
-						$alert->save($entity);
-					}
-				endforeach;
-			}
+			$alert->create($post, $this->table, $rows['id']);
 		}
 	}
 
 	public function deleteAlert(array $rows)
 	{
 		$alert = new M_AlertRecipient($this->request);
-		$alert->where('record_id', $rows['id'])->delete();
+		$alert->where([
+			'table'			=> $this->table,
+			'record_id' 	=> $rows['id']
+		])->delete();
 	}
 }
