@@ -111,6 +111,5 @@ class M_WActivity extends Model
 			$this->builder->whereIn('sys_wfresponsible.sys_role_id', $role);
 
 		return $this->builder->countAllResults();
-		// return 1;
 	}
 }

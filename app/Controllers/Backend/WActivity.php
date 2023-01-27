@@ -217,6 +217,8 @@ class WActivity extends BaseController
     public function create()
     {
         $mWe = new M_WEvent($this->request);
+        $mUser = new M_User($this->request);
+        $cMail = new Mail();
 
         if ($this->request->getMethod(true) === 'POST') {
             $post = $this->request->getVar();
@@ -241,6 +243,21 @@ class WActivity extends BaseController
                 } else {
                     $s = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Aborted, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
                     $response = 'aborted';
+
+                    $builder = $this->getBuilder($activity->getTable());
+                    $builder->where($this->getPrimaryKey($activity->getTable()), $activity->getRecordId());
+                    $sql = $builder->get()->getRow();
+                    $subject = ucwords($activity->getMenu()) . "_" . $sql->documentno;
+                    $message =  'Sudah Di Approve' . "<br>";
+                    $message .= "---" . "<br>";
+                    $message .= ucwords($activity->getMenu()) . " " . $sql->documentno . "<br>";
+                    $message .= "Approval Amount = " . $sql->grandtotal . "<br>";
+                    $message .= $sql->description;
+                    $message = new Html2Text($message);
+                    $message = $message->getText();
+
+                    $user = $mUser->find($sql->created_by);
+                    $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
                 }
 
                 $options = array(
