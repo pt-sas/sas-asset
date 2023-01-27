@@ -20,8 +20,12 @@ let ID,
     formTable,
     _tableInfo,
     formReport,
+<<<<<<< HEAD
     _tableReport,
     _tableApproval;
+=======
+    _tableReport;
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
 
 let clear = false;
 
@@ -230,6 +234,7 @@ _tableReport = $('.table_report').DataTable({
     'autoWidth': false,
     'scrollX': true,
     'scrollY': '70vh',
+<<<<<<< HEAD
     'scrollCollapse': true,
 }).columns.adjust();
 
@@ -261,6 +266,9 @@ _tableApproval = $('.table_approval').DataTable({
     // 'scrollX': true,
     // 'scrollY': '70vh',
     // 'scrollCollapse': true
+=======
+    'scrollCollapse': true
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
 }).columns.adjust();
 
 /**
@@ -404,10 +412,15 @@ $('.save_form').click(function (evt) {
                     let date = field[i].value;
                     let time = "00:00:00";
 
+<<<<<<< HEAD
                     if (date !== "") {
                         let timeAndDate = moment(date + ' ' + time);
                         formData.append(field[i].name, timeAndDate._i);
                     }
+=======
+                    let timeAndDate = moment(date + ' ' + time);
+                    formData.append(field[i].name, timeAndDate._i);
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
                 }
 
                 //* Field containing class rupiah
@@ -890,6 +903,7 @@ function Edit(id, status, last_url) {
                         showError(jqXHR, exception);
                     }
                 });
+<<<<<<< HEAD
 
                 s.removeClass("is-loading");
             }, 200));
@@ -980,6 +994,98 @@ _tableLine.on('click', '.btn_delete', function (evt) {
 
     let url = CURRENT_URL + DELETE_LINE + id;
 
+=======
+
+                s.removeClass("is-loading");
+            }, 200));
+    } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
+        Toast.fire({
+            type: 'error',
+            title: "You are role don't have permission, please reload !!"
+        });
+    } else {
+        Toast.fire({
+            type: 'error',
+            title: checkAccess[0].message
+        });
+    }
+}
+
+/**
+ * Button delete data
+ */
+function Destroy(id) {
+    let url = CURRENT_URL + DELETE + id;
+
+    let action = 'delete';
+
+    let checkAccess = isAccess(action, LAST_URL);
+
+    if (checkAccess[0].success && checkAccess[0].message == 'Y') {
+        Swal.fire({
+            title: 'Delete?',
+            text: "Are you sure you wish to delete the selected data ? ",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Ok',
+            cancelButtonText: 'Close',
+            reverseButtons: true
+        }).then((data) => {
+            if (data.value) //value is true
+
+                $.getJSON(url, function (result) {
+                    if (result[0].success) {
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: 'Your data has been deleted.',
+                            type: 'success',
+                            showConfirmButton: false,
+                            timer: 1000,
+                        });
+
+                        reloadTable();
+                    } else if (!result[0].error) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: result[0].message,
+                            type: 'error',
+                            showConfirmButton: true
+                        });
+
+                        reloadTable();
+                    } else {
+                        console.info(result)
+                    }
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    console.info(errorThrown)
+                    reloadTable();
+                });
+        });
+    } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
+        Toast.fire({
+            type: 'error',
+            title: "You are role don't have permission, please reload !!"
+        });
+    } else {
+        Toast.fire({
+            type: 'error',
+            title: checkAccess[0].message
+        });
+    }
+}
+
+_tableLine.on('click', '.btn_delete', function (evt) {
+    evt.preventDefault();
+    const form = $(evt.currentTarget).closest('form');
+    const tr = _tableLine.$(this).closest('tr');
+    const row = _tableLine.row(tr);
+    let id = this.id;
+
+    let url = CURRENT_URL + DELETE_LINE + id;
+
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
     let _this = $(this);
     let oriElement = _this.html();
 
@@ -1152,6 +1258,7 @@ $(document).on('click', '.x_form, .close_form, .reset_form', function (evt) {
         if (target.attr('data-dismiss') !== 'modal') {
             const parent = target.closest('.container');
             const cardBody = parent.find('.card-body');
+<<<<<<< HEAD
 
             $.each(cardBody, function (idx, elem) {
                 let className = elem.className.split(/\s+/);
@@ -1176,6 +1283,32 @@ $(document).on('click', '.x_form, .close_form, .reset_form', function (evt) {
                 }
             });
 
+=======
+
+            $.each(cardBody, function (idx, elem) {
+                let className = elem.className.split(/\s+/);
+
+                if (className.includes('card-main')) {
+                    $(this).css('display', 'block');
+
+                    // Remove breadcrumb list
+                    let li = ul.find('li');
+                    $.each(li, function (idx, elem) {
+                        if (idx > 2)
+                            elem.remove();
+                    });
+
+                    if (parent.find('div.filter_page').length > 0) {
+                        parent.find('div.filter_page').css('display', 'block');
+                    }
+                }
+
+                if (className.includes('card-form')) {
+                    $(this).css('display', 'none');
+                }
+            });
+
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
             cardBtn.css('display', 'none');
 
             const cardHeader = parent.find('.card-header');
@@ -1527,6 +1660,8 @@ $('.add_row').click(function (evt) {
 
 /**
  * Event create table line
+<<<<<<< HEAD
+=======
  */
 $('.create_line').click(function (evt) {
     let action = 'create';
@@ -1545,6 +1680,303 @@ $('.create_line').click(function (evt) {
         $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
 
         setTimeout(function () {
+            $(_this).html(oriElement).prop('disabled', false);
+
+            $('#modal_product_info').modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            loadingForm('product_info', 'ios');
+
+            $("#modal_product_info").on('shown.bs.modal', function (e) {
+                const target = $(e.target);
+                const form = target.find('form');
+
+                let url = ADMIN_URL + 'Product' + '/showProductInfo/?data=null';
+
+                form[0].reset();
+
+                setTimeout(function () {
+                    hideLoadingForm('product_info');
+
+                    if (form.find('select.select-data').length > 0) {
+                        let select = form.find('select.select-data');
+                        initSelectData(select);
+                    }
+
+                    if (form.find('input:hidden[name="isfree"]'))
+                        form.find('input:hidden[name="isfree"]').val(isFree);
+
+                    _tableInfo.ajax.url(url).load().columns.adjust();
+
+                }, 50);
+            });
+        }, 100);
+
+
+    } else if (checkAccess[0].success && checkAccess[0].message == 'N') {
+        Toast.fire({
+            type: 'warning',
+            title: "You are role don't have permission !!"
+        });
+    } else {
+        Toast.fire({
+            type: 'error',
+            title: checkAccess[0].message
+        });
+    }
+});
+
+/**
+ * Clear content modal product info
+ */
+$("#modal_product_info").on('hidden.bs.modal', function (evt) {
+    const target = $(evt.target);
+    const form = target.find('form');
+
+    //TODO: Clear form content
+    form[0].reset();
+
+    //TODO: Clear datatable
+    _tableInfo.clear().draw();
+});
+
+/**
+ * Refresh data table info
+ */
+$('.btn_requery_info').click(function (evt) {
+    const target = $(evt.target);
+    const modalContent = target.closest('.modal-content');
+    const form = modalContent.find('form');
+
+    let url = ADMIN_URL + 'Product' + '/showProductInfo/?';
+    let formData = form.serialize();
+
+    $(this).tooltip('hide');
+
+    _tableInfo.ajax.url(url + formData).load().columns.adjust();
+});
+
+/**
+ * Btn save info for set data from table info to table line
+ */
+$('.btn_save_info').click(function (evt) {
+    const modal = $(this).closest('.modal');
+    const modalBody = modal.find('.modal-body');
+
+    const checkbox = _tableInfo.rows().nodes().to$().find('input:checkbox[name="check_data"]:checked');
+
+    let _this = $(this);
+    let oriElement = _this.html();
+
+    if (checkbox.length > 0) {
+        let url = CURRENT_URL + TABLE_LINE + '/create';
+
+        let output = [];
+
+        $.each(checkbox, function (i) {
+            let tr = $(this).closest('tr');
+            let tag = tr.find('input, select');
+
+            let data = [];
+
+            $.each(tag, function (index, element) {
+                let row = [];
+                let name = $(element).attr('name');
+                let value = $(element).val();
+
+                if ($(element).attr('type') !== 'checkbox') {
+                    row = {
+                        [name]: value
+                    };
+                } else {
+                    if (name === 'check_data')
+                        row = {
+                            product_id: value
+                        };
+                    else
+                        row = {
+                            [name]: $(element).is(':checked')
+                        }
+                }
+
+                data.push(row);
+            });
+
+            output[i] = data;
+        });
+
+        let jsonString = JSON.stringify(output);
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                data: jsonString
+            },
+            cache: false,
+            dataType: 'JSON',
+            beforeSend: function () {
+                $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
+                $('.btn_requery_info').attr('disabled', true);
+                $('.btn_close_info').attr('disabled', true);
+                loadingForm(modalBody.attr('id'), 'ios');
+            },
+            complete: function () {
+                $(_this).html(oriElement).prop('disabled', false);
+                $('.btn_requery_info').removeAttr('disabled');
+                $('.btn_close_info').removeAttr('disabled');
+                hideLoadingForm(modalBody.attr('id'));
+            },
+            success: function (result) {
+                $('#' + modal.attr('id')).modal('hide');
+                _tableLine.rows.add(result).draw(false);
+            },
+            error: function (jqXHR, exception) {
+                showError(jqXHR, exception);
+            }
+        });
+    } else {
+        Toast.fire({
+            type: 'warning',
+            title: 'Please selected data !!'
+        });
+    }
+});
+
+/**
+ * Event Click Button OK Report
+ */
+$('.btn_ok_form').on('click', function (evt) {
+    const target = $(evt.target);
+    const pageInner = target.closest('.page-inner');
+    const card = target.closest('.card');
+    const cardTableReport = pageInner.find('.card-table-report');
+    const floatRight = cardTableReport.find('.float-right');
+    const form = card.find('form');
+    const disabled = form.find('[disabled]');
+
+    //! Remove attribute disabled field
+    disabled.removeAttr('disabled');
+
+    //TODO: Collect field array
+    let field = form.find('input, select').map(function () {
+        let row = {};
+
+        row['name'] = $(this).attr('name');
+
+        if (this.type !== 'checkbox' && this.type !== 'select-multiple')
+            row['value'] = this.value;
+        else if (this.type === 'select-multiple')
+            row['value'] = $(this).val();
+        else
+            row['value'] = this.checked ? 'Y' : 'N';
+
+        row['type'] = this.type;
+
+        return row;
+    }).get();
+
+    formReport = field;
+
+    //! Set attribute disabled field
+    disabled.prop('disabled', true);
+
+    //* Set clear to true 
+    clear = false;
+
+    //* Show Toolbar Button
+    floatRight.removeClass('d-none');
+
+    //TODO: Loading and processing
+    pageInner.length && (pageInner.addClass("is-loading"),
+        reloadTable(),
+        setTimeout(function () {
+            pageInner.removeClass("is-loading");
+        }, 500));
+
+    //* Show Toolbar Button
+    cardTableReport.addClass('d-block');
+});
+
+/**
+ * Event Click Button Reset Report
+ */
+$('.btn_reset_form').on('click', function (evt) {
+    const target = $(evt.target);
+    const pageInner = target.closest('.page-inner');
+    const card = target.closest('.card');
+    const cardTableReport = pageInner.find('.card-table-report');
+    const floatRight = cardTableReport.find('.float-right');
+    const form = card.find('form');
+    const field = form.find('input, select');
+
+    for (let i = 0; i < field.length; i++) {
+        if (field[i].name !== '') {
+
+            //TODO: Collect Field yang readonly atau disabled 
+            if ((field[i].readOnly || field[i].disabled))
+                fieldReadOnly.push(field[i].name);
+        }
+    }
+
+    //* Reset form parameter 
+    clearForm(evt);
+
+    //* Set clear to true 
+    clear = true;
+
+    //* Hide Toolbar Button 
+    floatRight.addClass('d-none');
+
+    //TODO: Loading and processing
+    pageInner.length && (pageInner.addClass("is-loading"),
+        reloadTable(),
+        setTimeout(function () {
+            pageInner.removeClass("is-loading");
+        }, 500));
+
+    //* Hide Table Report
+    cardTableReport.removeClass('d-block');
+});
+
+/**
+ * Process login
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
+ */
+$('.create_line').click(function (evt) {
+    let action = 'create';
+    let checkAccess = isAccess(action, LAST_URL);
+    let formData = $(this).closest('form');
+
+    if (checkAccess[0].success && checkAccess[0].message == 'Y') {
+        let _this = $(this);
+        let oriElement = _this.html();
+        let textElement = _this.text().trim();
+
+        let isFree = 'N';
+        if (formData.find('input:checkbox[name="isinternaluse"]').is(':checked'))
+            isFree = 'Y';
+
+<<<<<<< HEAD
+        $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
+
+        setTimeout(function () {
+=======
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: form.serialize(),
+        cache: false,
+        dataType: 'JSON',
+        beforeSend: function () {
+            $(this).prop('disabled', true);
+            $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>').prop('disabled', true);
+        },
+        complete: function () {
+            $(this).removeAttr('disabled');
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
             $(_this).html(oriElement).prop('disabled', false);
 
             $('#modal_product_info').modal({
@@ -2811,6 +3243,7 @@ $(document).ready(function (e) {
     const cardMenu = parent.find('.card-action-menu');
     const actionMenu = cardMenu.attr('data-action-menu');
 
+<<<<<<< HEAD
     showNotification();
 
     // Enable pusher logging - don't include this in production
@@ -2825,6 +3258,8 @@ $(document).ready(function (e) {
         showNotification();
     });
 
+=======
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
     $('.select2').select2({
         placeholder: 'Select an option',
         width: '100%',
@@ -2833,9 +3268,14 @@ $(document).ready(function (e) {
     });
 
     $('.multiple-select').select2({
+<<<<<<< HEAD
         width: '100%',
         theme: 'bootstrap',
         multiple: true,
+=======
+        theme: "bootstrap",
+        multiple: true
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
     });
 
     $('.number').on('keypress keyup blur', function (evt) {
@@ -2892,7 +3332,11 @@ $(document).ready(function (e) {
         new $.fn.dataTable.Buttons(_table, {
             buttons: [{
                 extend: 'collection',
+<<<<<<< HEAD
                 className: 'btn btn-warning btn-sm btn-round ml-auto text-white mr-1',
+=======
+                className: 'btn btn-warning btn-sm btn-round ml-auto text-white',
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
                 text: '<i class="fas fa-download fa-fw"></i> Export',
                 autoClose: true,
                 buttons: [{
@@ -2937,6 +3381,7 @@ $(document).ready(function (e) {
         _table.buttons().container()
             .appendTo($('#dt-button'));
     }
+<<<<<<< HEAD
 
     /**
      * Button Table Report
@@ -2999,6 +3444,70 @@ $(document).ready(function (e) {
         $(this).val('');
     });
 
+=======
+
+    /**
+     * Button Table Report
+     */
+    if ($('.table_report').length > 0) {
+        new $.fn.dataTable.Buttons(_tableReport, {
+            buttons: [{
+                    extend: 'colvis',
+                    className: 'btn btn-primary btn-sm btn-round ml-auto text-white',
+                    text: '<i class="fas fa-table fa-fw"></i> Visibility',
+                    attr: {
+                        title: 'Column Visibility',
+                    }
+                },
+                {
+                    extend: 'collection',
+                    className: 'btn btn-warning btn-sm btn-round ml-auto text-white',
+                    text: '<i class="fas fa-download fa-fw"></i> Export',
+                    attr: {
+                        title: 'Export',
+                    },
+                    autoClose: true,
+                    buttons: [{
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        titleAttr: 'Export to Excel',
+                        title: '',
+                        customize: function (xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            //* Bold and Border first column
+                            $('row:first c', sheet).attr('s', '27');
+                            //* Border all column except first column
+                            $('row:not(:first) c', sheet).attr('s', '25');
+                        },
+                        exportOptions: {
+                            columns: ':visible'
+                        }
+                    }]
+                },
+            ]
+        });
+
+        _tableReport.buttons().container()
+            .appendTo($('#dt-button'));
+    }
+
+    $('.daterange').daterangepicker({
+        autoUpdateInput: false,
+        locale: {
+            format: 'YYYY-MM-DD',
+            cancelLabel: 'Clear'
+        }
+    });
+
+    $('.daterange').on('apply.daterangepicker', function (ev, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+    });
+
+    $('.daterange').on('cancel.daterangepicker', function (ev, picker) {
+        $(this).val('');
+    });
+
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
     if (typeof actionMenu === 'undefined' && actionMenu !== 'F') {
         //* Remove class is-loading 
         $('.main-panel').removeClass('is-loading');
@@ -3571,6 +4080,7 @@ function prosesTestEmail(identifier) {
         },
         allowOutsideClick: () => !Swal.isLoading()
     });
+<<<<<<< HEAD
 }
 
 $('#task_activity').click(function (e) {
@@ -3725,4 +4235,6 @@ window.onload = function () {
         sessionStorage.removeItem("reloading");
         Edit(data.record_id, data.menu);
     }
+=======
+>>>>>>> d725b3670eb3e86b9958eca929c94ab6b34a5287
 }
