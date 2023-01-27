@@ -46,9 +46,9 @@ class Rpt_Depreciation extends BaseController
                     $row[] = format_dmy($value->transactiondate, '-');
                     $row[] = $value->totalyear;
                     $row[] = $value->startyear;
-                    $row[] = $value->costdepreciation;
-                    $row[] = $value->accumulateddepreciation;
-                    $row[] = $value->bookvalue;
+                    $row[] = formatRupiah(round($value->costdepreciation, 2, PHP_ROUND_HALF_UP));
+                    $row[] = formatRupiah(round($value->accumulateddepreciation, 2, PHP_ROUND_HALF_UP));
+                    $row[] = formatRupiah(round($value->bookvalue, 2, PHP_ROUND_HALF_UP));
                     $row[] = $value->currentmonth;
                     $row[] = $value->depreciationtype;
 
