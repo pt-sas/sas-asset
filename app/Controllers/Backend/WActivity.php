@@ -113,7 +113,7 @@ class WActivity extends BaseController
             $subject = ucwords($menu) . "_" . $sql->documentno;
             $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please approve document below.</span></p><div><br></div>';
             $message .= "-----" . " " . ucwords($menu) . " ";
-            $message .= $sql->documentno . ": Approval Amount =" . $sql->grandtotal;
+            $message .= $sql->documentno . ": Approval Amount =" . formatRupiah($sql->grandtotal);
             $message = new Html2Text($message);
             $message = $message->getText();
 
@@ -154,7 +154,7 @@ class WActivity extends BaseController
                 $subject = ucwords($menu) . "_" . $sql->documentno;
                 $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please approve document below.</span></p><div><br></div>';
                 $message .= "-----" . " " . ucwords($menu) . " ";
-                $message .= $sql->documentno . ": Approval Amount =" . $sql->grandtotal;
+                $message .= $sql->documentno . ": Approval Amount =" . formatRupiah($sql->grandtotal);
                 $message = new Html2Text($message);
                 $message = $message->getText();
 
@@ -193,7 +193,7 @@ class WActivity extends BaseController
                 $message =  'Sudah Di Approve' . "<br>";
                 $message .= "---" . "<br>";
                 $message .= ucwords($menu) . " " . $sql->documentno . "<br>";
-                $message .= "Approval Amount = " . $sql->grandtotal . "<br>";
+                $message .= "Approval Amount = " . formatRupiah($sql->grandtotal) . "<br>";
                 $message .= $sql->description;
                 $message = new Html2Text($message);
                 $message = $message->getText();
@@ -248,10 +248,10 @@ class WActivity extends BaseController
                     $builder->where($this->getPrimaryKey($activity->getTable()), $activity->getRecordId());
                     $sql = $builder->get()->getRow();
                     $subject = ucwords($activity->getMenu()) . "_" . $sql->documentno;
-                    $message =  'Sudah Tidak Di Approve' . "<br>";
+                    $message =  'Tidak Di Approve' . "<br>";
                     $message .= "---" . "<br>";
                     $message .= ucwords($activity->getMenu()) . " " . $sql->documentno . "<br>";
-                    $message .= "Approval Amount = " . $sql->grandtotal . "<br>";
+                    $message .= "Approval Amount = " . formatRupiah($sql->grandtotal) . "<br>";
                     $message .= $sql->description;
                     $message = new Html2Text($message);
                     $message = $message->getText();
