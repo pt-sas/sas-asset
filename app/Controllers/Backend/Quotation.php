@@ -167,6 +167,8 @@ class Quotation extends BaseController
 
     public function processIt()
     {
+        $cWfs = new WScenario();
+
         if ($this->request->isAJAX()) {
             $post = $this->request->getVar();
 
@@ -175,19 +177,16 @@ class Quotation extends BaseController
 
             $row = $this->model->find($_ID);
 
+            $menu = $this->request->uri->getSegment(2);
+
             try {
-                if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
-                    $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->first();
-
-                    if ($line || (!$line && $_DocAction !== $this->DOCSTATUS_Completed)) {
-                        $this->entity->setDocStatus($_DocAction);
-                    } else if (!$line && $_DocAction === $this->DOCSTATUS_Completed) {
-                        $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
+                if ($row->getDocStatus() !== $this->DOCSTATUS_Completed) {
+                    if (!empty($_DocAction)) {
+                        $this->message = $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $_ID, $_DocAction, $menu, $this->session);
+                        $response = message('success', true, $this->message);
+                    } else {
+                        $response = message('error', true, 'Please Choose the Document Action first');
                     }
-
-                    $response = $this->save();
-                } else if (empty($_DocAction)) {
-                    $response = message('error', true, 'Please Choose the Document Action first');
                 } else {
                     $response = message('error', true, 'Please reload the Document');
                 }

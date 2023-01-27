@@ -37,9 +37,30 @@ class M_WActivity extends Model
 		$this->builder = $this->db->table($this->table);
 	}
 
+	private function getRole()
+	{
+		$sql = "SELECT sys_user_role.sys_role_id 
+				FROM sys_user_role
+				WHERE sys_user_role.sys_user_id = ?";
+
+		$query = $this->db->query($sql, [session()->get('sys_user_id')]);
+
+		$role = [];
+
+		if ($query->getNumRows() > 0) {
+			foreach ($query->getResult() as $row) :
+				$role[] = $row->sys_role_id;
+			endforeach;
+		}
+
+		return $role;
+	}
+
 	public function getActivity()
 	{
 		$list = $this->findAll();
+
+		$role = $this->getRole();
 
 		foreach ($list as $row) :
 			$this->builder->select($this->table . '.*,' .
@@ -54,11 +75,18 @@ class M_WActivity extends Model
 			endforeach;
 
 			$this->builder->join('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by');
+			$this->builder->join('sys_wfresponsible', 'sys_wfresponsible.sys_wfresponsible_id = ' . $this->table . '.sys_wfresponsible_id');
+
+			// $role = $this->getResponsibleRole($row->getWfResponsibleId());
 
 			$this->builder->where([
 				$this->table . '.state'			=> 'OS',
-				$this->table . '.processed'		=> 'N',
+				$this->table . '.processed'		=> 'N'
 			]);
+
+			// Saat user mempunyai lebih dari 1 role approval, dokumen yg harus diapprove belum muncul
+			if (!empty($role))
+				$this->builder->whereIn('sys_wfresponsible.sys_role_id', $role);
 
 			$this->builder->orderBy($this->table . '.created_at', 'ASC');
 
@@ -66,5 +94,23 @@ class M_WActivity extends Model
 		endforeach;
 
 		return $sql;
+	}
+
+	public function countData()
+	{
+		$role = $this->getRole();
+
+		$this->builder->select($this->table . '.*');
+		$this->builder->join('sys_wfresponsible', 'sys_wfresponsible.sys_wfresponsible_id = ' . $this->table . '.sys_wfresponsible_id');
+		$this->builder->where([
+			$this->table . '.state'			=> 'OS',
+			$this->table . '.processed'		=> 'N'
+		]);
+
+		if (!empty($role))
+			$this->builder->whereIn('sys_wfresponsible.sys_role_id', $role);
+
+		return $this->builder->countAllResults();
+		// return 1;
 	}
 }

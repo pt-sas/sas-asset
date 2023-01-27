@@ -285,4 +285,50 @@ class M_Inventory extends Model
 
 		return $sql;
 	}
+
+	public function getInventory()
+	{
+		$post = $this->request->getPost();
+
+		$this->builder->select('trx_inventory.*,
+		md_product.name as product,
+		md_branch.name as branch');
+		$this->builder->join('md_product', 'md_product.md_product_id = ' . $this->table . '.md_product_id', 'left');
+		$this->builder->join('md_branch', 'md_branch.md_branch_id = ' . $this->table . '.md_branch_id', 'left');
+
+		if (isset($post['md_groupasset_id']))
+			$this->builder->whereIn('trx_inventory.md_groupasset_id', $post['md_groupasset_id']);
+
+		if (isset($post['assetcode']))
+			$this->builder->whereIn('trx_inventory.assetcode', $post['assetcode']);
+
+		if (isset($post['md_branch_id']) && !empty($post['md_branch_id'])) {
+			$this->builder->where('trx_inventory.md_branch_id', $post['md_branch_id']);
+
+			if (isset($post['md_room_id']))
+				$this->builder->whereIn('trx_inventory.md_room_id', $post['md_room_id']);
+		}
+
+		if (isset($post['md_employee_id'])) {
+			$this->builder->whereIn('trx_inventory.md_employee_id', $post['md_employee_id']);
+		}
+
+		return $this->builder->get();
+	}
+
+	public function getAssetLocation($field, $where)
+	{
+		$this->builder->select($this->table . '.*,
+		v_all_location.mdb_name as branch,
+		v_all_location.mdd_name as division,
+		v_all_location.mdr_name as room,
+		v_all_location.mde_name as employee,
+		v_all_product.mdp_name as product');
+
+		$this->builder->join('v_all_location', 'v_all_location.md_employee_id = ' . $this->table . '.md_employee_id', 'left');
+		$this->builder->join('v_all_product', 'v_all_product.md_product_id = ' . $this->table . '.md_product_id', 'left');
+
+		$this->builder->where($field, $where);
+		return $this->builder->get()->getResult();
+	}
 }

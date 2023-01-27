@@ -3,13 +3,15 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
+use App\Models\M_AlertRecipient;
 use App\Models\M_Responsible;
 use App\Models\M_User;
-use App\Models\M_UserRole;
 use App\Models\M_WActivity;
 use App\Models\M_WEvent;
 use App\Models\M_WScenarioDetail;
 use Config\Services;
+use Pusher\Pusher;
+use Html2Text\Html2Text;
 
 class WActivity extends BaseController
 {
@@ -25,9 +27,22 @@ class WActivity extends BaseController
 
     public function index()
     {
-        // $r = $this->create('Y', 1);
-        $r = $this->setActivity(null, 1, 1, 1, 'OS', false, null, 'trx_quotation', 3, 'quotation');
-        dd($r);
+    }
+
+    private function toForwardAlert($table, $record_id, $subject, $message)
+    {
+        $mAlert = new M_AlertRecipient($this->request);
+        $cMail = new Mail();
+        $alert = $mAlert->getAlertRecipient($table, $record_id);
+
+        $result = false;
+
+        foreach ($alert as $val) :
+            if (!empty($val->email))
+                $result = $cMail->sendEmail($val->email, $subject, $message, null, "SAS Asset");
+        endforeach;
+
+        return $result;
     }
 
     public function showActivityInfo()
@@ -60,8 +75,6 @@ class WActivity extends BaseController
 
             return $this->response->setJSON($result);
         }
-
-        // return $list;
     }
 
     public function setActivity($sys_wfactivity_id, $sys_wfscenario_id, $sys_wfresponsible_id, $user_by, $state, $processed, $textmsg, $table, $record_id, $menu)
@@ -69,12 +82,13 @@ class WActivity extends BaseController
         $mWr = new M_Responsible($this->request);
         $mWe = new M_WEvent($this->request);
         $mUser = new M_User($this->request);
+        $cMail = new Mail();
 
         $this->entity->setWfScenarioId($sys_wfscenario_id);
-
         $this->entity->setTable($table);
         $this->entity->setRecordId($record_id);
         $this->entity->setMenu($menu);
+
         $user_id = $mWr->getUserByResponsible($sys_wfresponsible_id);
 
         if (empty($sys_wfactivity_id)) {
@@ -85,10 +99,29 @@ class WActivity extends BaseController
             $this->entity->setProcessed($processed);
             $this->entity->setCreatedBy($user_by);
             $this->entity->setUpdatedBy($user_by);
-            $result = $this->save($this->entity);
+            $result = $this->model->save($this->entity);
 
             $sys_wfactivity_id = $this->model->getInsertID();
             $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+
+            $resp = $mWr->find($sys_wfresponsible_id);
+            $list = $mUser->detail(['sr.sys_role_id' => $resp->getRoleId()])->getResult();
+
+            $builder = $this->getBuilder($table);
+            $builder->where($this->getPrimaryKey($table), $record_id);
+            $sql = $builder->get()->getRow();
+            $subject = ucwords($menu) . "_" . $sql->documentno;
+            $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please approve document below.</span></p><div><br></div>';
+            $message .= "-----" . " " . ucwords($menu) . " ";
+            $message .= $sql->documentno . ": Approval Amount =" . $sql->grandtotal;
+            $message = new Html2Text($message);
+            $message = $message->getText();
+
+            foreach ($list as $key => $user) :
+                $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
+            endforeach;
+
+            $this->toForwardAlert('sys_wfresponsible', $sys_wfresponsible_id, $subject, $message);
         } else {
             if (!empty($this->getNextResponsible())) {
                 $newWfResponsibleId = $this->getNextResponsible();
@@ -111,16 +144,63 @@ class WActivity extends BaseController
                     $processed = false;
                     $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
                 }
-                // } else {
-                // $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
-                // $this->entity->setWfResponsibleId($sys_wfresponsible_id);
-            }
 
-            if ($state === $this->DOCSTATUS_Aborted && $processed) {
-                $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
-            }
+                $resp = $mWr->find($sys_wfresponsible_id);
+                $list = $mUser->detail(['sr.sys_role_id' => $resp->getRoleId()])->getResult();
 
-            // $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+                $builder = $this->getBuilder($table);
+                $builder->where($this->getPrimaryKey($table), $record_id);
+                $sql = $builder->get()->getRow();
+                $subject = ucwords($menu) . "_" . $sql->documentno;
+                $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please approve document below.</span></p><div><br></div>';
+                $message .= "-----" . " " . ucwords($menu) . " ";
+                $message .= $sql->documentno . ": Approval Amount =" . $sql->grandtotal;
+                $message = new Html2Text($message);
+                $message = $message->getText();
+
+                foreach ($list as $key => $user) :
+                    $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
+                endforeach;
+
+                $this->toForwardAlert('sys_wfresponsible', $sys_wfresponsible_id, $subject, $message);
+            } else {
+                $builder = $this->model->db->table($table);
+
+                if ($state === $this->DOCSTATUS_Aborted && $processed) {
+                    $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+
+                    $data = [
+                        'docstatus' => $this->DOCSTATUS_NotApproved
+                    ];
+
+                    $builder->where($this->getPrimaryKey($table), $record_id)->update($data);
+                } else {
+                    $state = $this->DOCSTATUS_Completed;
+                    $processed = true;
+                    $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+
+                    $data = [
+                        'docstatus' => $state
+                    ];
+
+                    $builder->where($this->getPrimaryKey($table), $record_id)->update($data);
+                }
+
+                $builder = $this->getBuilder($table);
+                $builder->where($this->getPrimaryKey($table), $record_id);
+                $sql = $builder->get()->getRow();
+                $subject = ucwords($menu) . "_" . $sql->documentno;
+                $message =  'Sudah Di Approve' . "<br>";
+                $message .= "---" . "<br>";
+                $message .= ucwords($menu) . " " . $sql->documentno . "<br>";
+                $message .= "Approval Amount = " . $sql->grandtotal . "<br>";
+                $message .= $sql->description;
+                $message = new Html2Text($message);
+                $message = $message->getText();
+
+                $user = $mUser->find($sql->created_by);
+                $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
+            }
 
             $this->entity->setWfResponsibleId($sys_wfresponsible_id);
             $this->entity->setSysUserId($user_id);
@@ -132,47 +212,56 @@ class WActivity extends BaseController
         }
 
         return $result;
-        // return $this->entity;
-        // return $sys_wfresponsible_id;
     }
 
     public function create()
     {
         $mWe = new M_WEvent($this->request);
-        // if ($this->request->getMethod(true) === 'POST') {
-        $post = $this->request->getVar();
-        $isAnswer = $post['isanswer'];
-        $_ID = $post['id'];
-        $txtMsg = $post['textmsg'];
 
-        try {
-            $activity = $this->model->find($_ID);
+        if ($this->request->getMethod(true) === 'POST') {
+            $post = $this->request->getVar();
+            $isAnswer = $post['isanswer'];
+            $_ID = $post['id'];
+            $txtMsg = $post['textmsg'];
 
-            if ($isAnswer === 'Y') {
-                $eList = $mWe->where($this->model->primaryKey, $_ID)->orderBy('created_at', 'ASC')->findAll();
+            try {
+                $activity = $this->model->find($_ID);
 
-                foreach ($eList as $event) :
-                    $this->wfResponsibleId[] = $event->getWfResponsibleId();
-                endforeach;
+                if ($isAnswer === 'Y') {
+                    $eList = $mWe->where($this->model->primaryKey, $_ID)->orderBy('created_at', 'ASC')->findAll();
 
-                $this->wfScenarioId = $activity->getWfScenarioId();
+                    foreach ($eList as $event) :
+                        $this->wfResponsibleId[] = $event->getWfResponsibleId();
+                    endforeach;
 
-                $s = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Completed, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
-                // $s = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), 100160, $this->DOCSTATUS_Completed, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
-                $response = $s;
-            } else {
-                $s = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Aborted, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
-                $response = 'aborted';
+                    $this->wfScenarioId = $activity->getWfScenarioId();
+
+                    $s = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Completed, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
+                    $response = $s;
+                } else {
+                    $s = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Aborted, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
+                    $response = 'aborted';
+                }
+
+                $options = array(
+                    'cluster' => 'ap1',
+                    'useTLS' => true
+                );
+                $pusher = new Pusher(
+                    '8ae4540d78a7d493226a',
+                    '808c4eb78d03842672ca',
+                    '1490113',
+                    $options
+                );
+
+                $data['message'] = 'hello world';
+                $pusher->trigger('my-channel', 'my-event', $data);
+            } catch (\Exception $e) {
+                $response = message('error', false, $e->getMessage());
             }
-        } catch (\Exception $e) {
-            $response = message('error', false, $e->getMessage());
+
+            return json_encode($response);
         }
-
-        // return $this->response->setJSON($response);
-
-        return json_encode($response);
-        // return $response;
-        // }
     }
 
     private function getNextResponsible()
@@ -196,5 +285,30 @@ class WActivity extends BaseController
         }
 
         return $nextResp;
+    }
+
+    public function showNotif()
+    {
+        $list = $this->model->countData();
+        return json_encode($list);
+    }
+
+    public function getBuilder($table)
+    {
+        return $this->model->db->table($table);
+    }
+
+    public function getPrimaryKey($table)
+    {
+        $fields = $this->model->db->getFieldData($table);
+
+        $field = "";
+
+        foreach ($fields as $row) :
+            if ($row->primary_key == 1)
+                $field = $row->name;
+        endforeach;
+
+        return $field;
     }
 }

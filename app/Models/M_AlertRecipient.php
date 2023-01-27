@@ -80,4 +80,16 @@ class M_AlertRecipient extends Model
 			endforeach;
 		}
 	}
+
+	public function getAlertRecipient($table, $record_id)
+	{
+		$this->builder->join('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.sys_user_id');
+
+		$this->builder->where([
+			'table' 	=> $table,
+			'record_id' => $record_id
+		]);
+
+		return $this->builder->get()->getResult();
+	}
 }

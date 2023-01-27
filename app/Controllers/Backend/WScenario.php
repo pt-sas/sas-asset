@@ -10,6 +10,7 @@ use App\Models\M_NotificationText;
 use App\Models\M_Responsible;
 use App\Models\M_Status;
 use Config\Services;
+use Pusher\Pusher;
 
 class WScenario extends BaseController
 {
@@ -223,6 +224,7 @@ class WScenario extends BaseController
         $table = $this->model->table;
         $primaryKey = $this->model->primaryKey;
         $sessionUserId = $session->get('sys_user_id');
+        $isWfscenario = false;
 
         $trxLine = $this->modelDetail->where($primaryKey, $trxID)->first();
 
@@ -240,8 +242,7 @@ class WScenario extends BaseController
                 if ($this->sys_wfscenario_id) {
                     $this->entity->setDocStatus($this->DOCSTATUS_Inprogress);
                     $this->entity->setWfScenarioId($this->sys_wfscenario_id);
-
-                    $cWfa->setActivity(null, $this->sys_wfscenario_id, $this->getScenarioResponsible($this->sys_wfscenario_id), $sessionUserId, $this->DOCSTATUS_Suspended, false, null, $table, $trxID, $menu);
+                    $isWfscenario = true;
                 } else {
                     $this->entity->setDocStatus($this->DOCSTATUS_Completed);
                     $this->entity->setWfScenarioId(0);
@@ -251,7 +252,27 @@ class WScenario extends BaseController
 
         $this->entity->setUpdatedBy($session->get('sys_user_id'));
         $this->entity->{$primaryKey} = $trxID;
-        return $this->save();
+        $result = $this->save();
+
+        if ($result && $isWfscenario) {
+            $result = $cWfa->setActivity(null, $this->sys_wfscenario_id, $this->getScenarioResponsible($this->sys_wfscenario_id), $sessionUserId, $this->DOCSTATUS_Suspended, false, null, $table, $trxID, $menu);
+
+            $options = array(
+                'cluster' => 'ap1',
+                'useTLS' => true
+            );
+            $pusher = new Pusher(
+                '8ae4540d78a7d493226a',
+                '808c4eb78d03842672ca',
+                '1490113',
+                $options
+            );
+
+            $data['message'] = 'hello world';
+            $pusher->trigger('my-channel', 'my-event', $data);
+        }
+
+        return $result;
     }
 
     private function getScenarioResponsible($sys_wfscenario_id)

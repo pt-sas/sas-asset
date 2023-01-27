@@ -143,6 +143,10 @@ function docStatus(string $str)
         $msg .= '<center><span class="badge badge-primary">Voided</span></center>';
     else if ($str === "IN")
         $msg .= '<center><span class="badge badge-danger">Invalid</span></center>';
+    else if ($str === "AP")
+        $msg .= '<center><span class="badge badge-info">Approved</span></center>';
+    else if ($str === "NA")
+        $msg .= '<center><span class="badge badge-black">Not Approved</span></center>';
     else
         $msg .= '<center><span class="badge badge-warning">Drafted</span></center>';
 

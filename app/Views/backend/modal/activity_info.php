@@ -36,7 +36,7 @@
                             </select>
                         </div>
                         <div class="col-lg-2">
-                            <button type="button" class="btn btn-icon btn-primary" data-toggle="tooltip" data-placement="top" title="Record Info">
+                            <button type="button" class="btn btn-icon btn-primary btn_record_info" data-toggle="tooltip" data-placement="top" title="Record Info">
                                 <i class="fas fa-search fa-lg"></i>
                             </button>
                         </div>

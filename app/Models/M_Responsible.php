@@ -110,4 +110,48 @@ class M_Responsible extends Model
 
         return $user_id;
     }
+
+
+    public function detail($arrParam = [], $field = null, $where = null)
+    {
+        $this->builder->select($this->table . '.*,' .
+            'md_alertrecipient.md_alertrecipient_id,
+			md_alertrecipient.record_id,
+			md_alertrecipient.sys_user_id AS alert');
+
+        $this->builder->join('md_alertrecipient', 'md_alertrecipient.table = "' . $this->table . '" AND md_alertrecipient.record_id = ' . $this->table . '.sys_wfresponsible_id', 'left');
+        $this->builder->join('sys_user', 'sys_user.sys_user_id = md_alertrecipient.sys_user_id', 'left');
+
+        if (count($arrParam) > 0) {
+            $this->builder->where($arrParam);
+        } else {
+            if (!empty($where)) {
+                $this->builder->where($field, $where);
+            }
+        }
+
+        $this->builder->orderBy('sys_user.name', 'ASC');
+
+        $query = $this->builder->get();
+        return $query;
+    }
+
+    public function createAlert(array $rows)
+    {
+        $alert = new M_AlertRecipient($this->request);
+        $post = $this->request->getVar();
+
+        if (isset($post['alert'])) {
+            $alert->create($post, $this->table, $rows['id']);
+        }
+    }
+
+    public function deleteAlert(array $rows)
+    {
+        $alert = new M_AlertRecipient($this->request);
+        $alert->where([
+            'table'            => $this->table,
+            'record_id'     => $rows['id']
+        ])->delete();
+    }
 }
