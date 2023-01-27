@@ -404,8 +404,10 @@ $('.save_form').click(function (evt) {
                     let date = field[i].value;
                     let time = "00:00:00";
 
-                    let timeAndDate = moment(date + ' ' + time);
-                    formData.append(field[i].name, timeAndDate._i);
+                    if (date !== "") {
+                        let timeAndDate = moment(date + ' ' + time);
+                        formData.append(field[i].name, timeAndDate._i);
+                    }
                 }
 
                 //* Field containing class rupiah
@@ -2809,6 +2811,20 @@ $(document).ready(function (e) {
     const cardMenu = parent.find('.card-action-menu');
     const actionMenu = cardMenu.attr('data-action-menu');
 
+    showNotification();
+
+    // Enable pusher logging - don't include this in production
+    Pusher.logToConsole = false;
+
+    var pusher = new Pusher('8ae4540d78a7d493226a', {
+        cluster: 'ap1'
+    });
+
+    var channel = pusher.subscribe('my-channel');
+    channel.bind('my-event', function (data) {
+        showNotification();
+    });
+
     $('.select2').select2({
         placeholder: 'Select an option',
         width: '100%',
@@ -2817,8 +2833,9 @@ $(document).ready(function (e) {
     });
 
     $('.multiple-select').select2({
-        theme: "bootstrap",
-        multiple: true
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
     });
 
     $('.number').on('keypress keyup blur', function (evt) {
@@ -2990,6 +3007,20 @@ $(document).ready(function (e) {
         showFormData(form);
     }
 });
+
+function showNotification() {
+    $.ajax({
+        url: ADMIN_URL + 'WActivity/showNotif',
+        type: "GET",
+        dataType: "JSON",
+        success: function (response) {
+            if (response > 0)
+                $(".notif-workflow").addClass('notification').text(response);
+            else
+                $(".notif-workflow").removeClass('notification').text("");
+        }
+    });
+}
 
 /**
  * Function to merge Array Object
@@ -3597,13 +3628,18 @@ $('.table_approval tbody').on('click', 'tr', function () {
         _tableApproval.$('tr.selected').removeClass('selected');
         $(this).addClass('selected');
 
-        ID = _tableApproval.row(this).data()[0];
-        form.find('input').removeAttr('readonly');
-        form.find('select[name="isanswer"]')
-            .val('N')
-            .removeAttr('disabled')
-            .show();
-        form.find('button').removeAttr('disabled');
+        let data = _tableApproval.row(this).data();
+
+        if (typeof data !== 'undefined') {
+            ID = data[0];
+            form.find('input').removeAttr('readonly');
+            form.find('select[name="isanswer"]')
+                .val('N')
+                .removeAttr('disabled')
+                .show();
+            form.find('button').removeAttr('disabled');
+        }
+
     }
 });
 
@@ -3611,6 +3647,7 @@ $('.btn_ok_answer').click(function (evt) {
     evt.preventDefault();
     let _this = $(this);
     let oriElement = _this.html();
+
     const modalBody = _this.closest('.modal-body');
     const form = _this.closest('form');
 
@@ -3640,8 +3677,52 @@ $('.btn_ok_answer').click(function (evt) {
             hideLoadingForm(modalBody.prop('id'));
         },
         success: function (result) {
-            console.log(result)
+            if (result) {
+                ID = 0;
+                form.find('input').prop('readonly', true);
+                form.find('select[name="isanswer"]')
+                    .val('N')
+                    .prop('disabled', true);
+                form.find('button').prop('disabled', true);
 
+                url = ADMIN_URL + 'WActivity' + '/showActivityInfo';
+                _tableApproval.ajax.url(url).load().columns.adjust();
+            }
         }
     });
 });
+
+$('.btn_record_info').click(function (evt) {
+    const tr = _tableApproval.$('tr.selected');
+    const td = tr.find('td');
+    const row = _tableApproval.row(td).data();
+
+    ID = row[0];
+    let record_id = row[1];
+    let table = row[2];
+    let menu = row[3];
+
+    let arrData = ({
+        id: ID,
+        record_id: record_id,
+        table: table,
+        menu: menu
+    });
+
+    arrData = JSON.stringify(arrData);
+
+    sessionStorage.setItem("reloading", "true");
+    sessionStorage.setItem("data", arrData);
+
+    window.open(ORI_URL + '/sas' + '/' + menu, '_self');
+});
+
+window.onload = function () {
+    let reloading = sessionStorage.getItem("reloading");
+    let data = JSON.parse(sessionStorage.getItem("data"));
+
+    if (reloading) {
+        sessionStorage.removeItem("reloading");
+        Edit(data.record_id, data.menu);
+    }
+}

@@ -327,11 +327,13 @@ function getOption(controller, field, tr, selected_id, ref_id = null) {
 /**
  * MASTER DATA EMPLOYEE
  */
-$('#form_employee').on('change', '#md_branch_id', function (evt) {
+$('#form_employee, #form_opname').on('change', '#md_branch_id', function (evt) {
+    let _this = $(this);
     let url = ADMIN_URL + 'room' + '/getList';
     let value = this.value;
+    const form = _this.closest('form');
 
-    $('#md_room_id').empty();
+    form.find('[name="md_room_id"]').empty();
 
     if (value !== '') {
         $.ajax({
@@ -342,9 +344,19 @@ $('#form_employee').on('change', '#md_branch_id', function (evt) {
                 reference: value,
                 key: 'branch'
             },
+            beforeSend: function () {
+                $('.save_form').attr('disabled', true);
+                $('.close_form').attr('disabled', true);
+                loadingForm(form.prop('id'), 'pulse');
+            },
+            complete: function () {
+                $('.save_form').removeAttr('disabled');
+                $('.close_form').removeAttr('disabled');
+                hideLoadingForm(form.prop('id'));
+            },
             dataType: 'JSON',
             success: function (result) {
-                $('#md_room_id').append('<option value=""></option>');
+                form.find('[name="md_room_id"]').append('<option value=""></option>');
 
                 let md_room_id = 0;
 
@@ -355,10 +367,19 @@ $('#form_employee').on('change', '#md_branch_id', function (evt) {
 
                 if (!result[0].error) {
                     $.each(result, function (idx, item) {
-                        if (md_room_id == item.id) {
-                            $('#md_room_id').append('<option value="' + item.id + '" selected>' + item.text + '</option>');
+                        if (form.find('[name="md_room_id"]').length > 0) {
+                            if (md_room_id == item.id) {
+                                form.find('[name="md_room_id"]').append('<option value="' + item.id + '" selected>' + item.text + '</option>');
+                            } else {
+                                form.find('[name="md_room_id"]').append('<option value="' + item.id + '">' + item.text + '</option>');
+                            }
                         } else {
-                            $('#md_room_id').append('<option value="' + item.id + '">' + item.text + '</option>');
+                            Swal.fire({
+                                type: 'error',
+                                title: 'Field is not found',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
                         }
                     });
                 } else {
@@ -380,55 +401,55 @@ $('#form_employee').on('change', '#md_branch_id', function (evt) {
 /**
  * Event Listener Movement Detail
  */
-_tableLine.on('change', 'select[name="assetcode"]', function (evt) {
-    const tr = _tableLine.$(this).closest('tr');
+// _tableLine.on('change', 'select[name="assetcode"]', function (evt) {
+//     const tr = _tableLine.$(this).closest('tr');
 
-    let url = ADMIN_URL + 'inventory' + '/getAssetDetail';
-    let value = this.value;
+//     let url = ADMIN_URL + 'inventory' + '/getAssetDetail';
+//     let value = this.value;
 
-    $.ajax({
-        url: url,
-        type: 'POST',
-        cache: false,
-        data: {
-            assetcode: value
-        },
-        dataType: 'JSON',
-        success: function (result) {
-            if (result[0].success) {
-                $.each(result[0].message, function (idx, item) {
-                    if (tr.find('select[name="md_product_id"]').length > 0) {
-                        tr.find('select[name="md_product_id"]').val(item.md_product_id).change();
-                    }
+//     $.ajax({
+//         url: url,
+//         type: 'POST',
+//         cache: false,
+//         data: {
+//             assetcode: value
+//         },
+//         dataType: 'JSON',
+//         success: function (result) {
+//             if (result[0].success) {
+//                 $.each(result[0].message, function (idx, item) {
+//                     if (tr.find('select[name="md_product_id"]').length > 0) {
+//                         tr.find('select[name="md_product_id"]').val(item.md_product_id).change();
+//                     }
 
-                    if (tr.find('select[name="employee_from"]').length > 0) {
-                        tr.find('select[name="employee_from"]').val(item.md_employee_id).change();
-                    }
+//                     if (tr.find('select[name="employee_from"]').length > 0) {
+//                         tr.find('select[name="employee_from"]').val(item.md_employee_id).change();
+//                     }
 
-                    if (tr.find('select[name="branch_from"]').length > 0) {
-                        tr.find('select[name="branch_from"]').val(item.md_branch_id).change();
-                    }
+//                     if (tr.find('select[name="branch_from"]').length > 0) {
+//                         tr.find('select[name="branch_from"]').val(item.md_branch_id).change();
+//                     }
 
-                    if (tr.find('select[name="division_from"]').length > 0) {
-                        tr.find('select[name="division_from"]').val(item.md_division_id).change();
-                    }
+//                     if (tr.find('select[name="division_from"]').length > 0) {
+//                         tr.find('select[name="division_from"]').val(item.md_division_id).change();
+//                     }
 
-                    if (tr.find('select[name="room_from"]').length > 0) {
-                        tr.find('select[name="room_from"]').val(item.md_room_id).change();
-                    }
-                });
-            } else {
-                Toast.fire({
-                    type: 'error',
-                    title: result[0].message
-                });
-            }
-        },
-        error: function (jqXHR, exception) {
-            showError(jqXHR, exception);
-        }
-    });
-});
+//                     if (tr.find('select[name="room_from"]').length > 0) {
+//                         tr.find('select[name="room_from"]').val(item.md_room_id).change();
+//                     }
+//                 });
+//             } else {
+//                 Toast.fire({
+//                     type: 'error',
+//                     title: result[0].message
+//                 });
+//             }
+//         },
+//         error: function (jqXHR, exception) {
+//             showError(jqXHR, exception);
+//         }
+//     });
+// });
 
 // Event change field Status
 _tableLine.on('change', 'select[name="md_status_id"]', function (evt) {
@@ -1125,6 +1146,30 @@ $(document).ready(function (e) {
             cache: true
         }
     });
+
+    $('.multiple-select-employee').select2({
+        placeholder: 'Select an option',
+        width: '100%',
+        theme: 'bootstrap',
+        multiple: true,
+        ajax: {
+            dataType: 'JSON',
+            url: ADMIN_URL + 'employee/getList',
+            delay: 250,
+            data: function (params) {
+                return {
+                    search: params.term
+                }
+            },
+            processResults: function (data, page) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
+
 });
 
 $('#filter_inventory').on('change', '[name="md_branch_id"]', function (evt) {
@@ -1509,4 +1554,96 @@ $('#form_product, #form_product_info').on('change', '#md_subcategory_id', functi
             }
         });
     }
+});
+
+$('#parameter_barcode').on('change', '#md_branch_id', function (evt) {
+    let url = ADMIN_URL + 'room' + '/getList';
+    let value = this.value;
+
+    $('#md_room_id').empty();
+
+    // Set condition when clear or value zero
+    if (value !== '' && value !== '0') {
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: {
+                reference: value,
+                key: 'all'
+            },
+            dataType: 'JSON',
+            success: function (result) {
+                if (!result[0].error) {
+                    $.each(result, function (idx, item) {
+                        $('#md_room_id').append('<option value="' + item.id + '">' + item.text + '</option>');
+                    });
+                } else {
+                    Swal.fire({
+                        type: 'error',
+                        title: result[0].message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            },
+            error: function (jqXHR, exception) {
+                showError(jqXHR, exception);
+            }
+        });
+    }
+});
+
+$('#form_opname').on('change', '#md_employee_id', function (evt) {
+    const form = $(this).closest('form');
+    let formData = new FormData();
+
+    ID = this.value;
+
+    formData.append('md_employee_id', ID);
+
+    let url = SITE_URL + '/getDetailAsset';
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        cache: false,
+        dataType: 'JSON',
+        beforeSend: function () {
+            $('.x_form').prop('disabled', true);
+            $('.close_form').prop('disabled', true);
+            loadingForm(form.prop('id'), 'facebook');
+        },
+        complete: function () {
+            $('.x_form').removeAttr('disabled');
+            $('.close_form').removeAttr('disabled');
+            hideLoadingForm(form.prop('id'));
+        },
+        success: function (result) {
+            if (result[0].success) {
+                let arrMsg = result[0].message;
+
+                if (arrMsg.line) {
+                    if (form.find('table.tb_displayline').length > 0) {
+                        let line = JSON.parse(arrMsg.line);
+
+                        $.each(line, function (idx, elem) {
+                            _tableLine.row.add(elem).draw(false);
+                        });
+                    }
+                }
+            } else {
+                Toast.fire({
+                    type: 'error',
+                    title: result[0].message
+                });
+            }
+        },
+        error: function (jqXHR, exception) {
+            showError(jqXHR, exception);
+        }
+    });
 });
