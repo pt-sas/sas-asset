@@ -200,6 +200,8 @@ class WActivity extends BaseController
 
                 $user = $mUser->find($sql->created_by);
                 $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
+
+                $this->toForwardAlert('sys_wfresponsible', $sys_wfresponsible_id, $subject, $message);
             }
 
             $this->entity->setWfResponsibleId($sys_wfresponsible_id);
@@ -258,6 +260,7 @@ class WActivity extends BaseController
 
                     $user = $mUser->find($sql->created_by);
                     $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
+                    $this->toForwardAlert('sys_wfresponsible', $sys_wfresponsible_id, $subject, $message);
                 }
 
                 $options = array(
