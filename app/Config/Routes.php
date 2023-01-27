@@ -264,6 +264,19 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
 
     $routes->add('rpt_depreciation', 'Backend\Rpt_Depreciation::index');
     $routes->match(['get', 'post'], 'rpt_depreciation/showAll', 'Backend\Rpt_Depreciation::showAll');
+
+    $routes->add('rpt_barcode', 'Backend\Rpt_Barcode::index');
+    $routes->match(['get', 'post'], 'rpt_barcode/showAll', 'Backend\Rpt_Barcode::showAll');
+
+    $routes->add('opname', 'Backend\Opname::index');
+    $routes->match(['get', 'post'], 'opname/showAll', 'Backend\Opname::showAll');
+    $routes->post('opname/create', 'Backend\Opname::create');
+    $routes->get('opname/show/(:any)', 'Backend\Opname::show/$1');
+    $routes->get('opname/destroy/(:any)', 'Backend\Opname::destroy/$1');
+    $routes->post('opname/tableLine', 'Backend\Opname::tableLine');
+    $routes->get('opname/destroyLine/(:any)', 'Backend\Opname::destroyLine/$1');
+    $routes->get('opname/getSeqCode', 'Backend\Opname::getSeqCode');
+    $routes->get('opname/processIt', 'Backend\Opname::processIt');
 });
 
 /*
