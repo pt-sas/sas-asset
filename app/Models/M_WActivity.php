@@ -70,11 +70,12 @@ class M_WActivity extends Model
 			$dataField = $this->db->getFieldData($row->table);
 
 			foreach ($dataField as $field) :
-				if ($field->primary_key == 1)
+				if ($field->primary_key == 1) {
 					$this->builder->join($row->getTable(), $row->getTable() . '.' . $field->name . '=' . $this->table . '.record_id');
+					$this->builder->join('sys_user', 'sys_user.sys_user_id = ' . $row->getTable() . '.created_by');
+				}
 			endforeach;
 
-			$this->builder->join('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by');
 			$this->builder->join('sys_wfresponsible', 'sys_wfresponsible.sys_wfresponsible_id = ' . $this->table . '.sys_wfresponsible_id');
 
 			// $role = $this->getResponsibleRole($row->getWfResponsibleId());
