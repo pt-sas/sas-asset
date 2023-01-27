@@ -248,7 +248,7 @@ class WActivity extends BaseController
                     $builder->where($this->getPrimaryKey($activity->getTable()), $activity->getRecordId());
                     $sql = $builder->get()->getRow();
                     $subject = ucwords($activity->getMenu()) . "_" . $sql->documentno;
-                    $message =  'Sudah Di Approve' . "<br>";
+                    $message =  'Sudah Tidak Di Approve' . "<br>";
                     $message .= "---" . "<br>";
                     $message .= ucwords($activity->getMenu()) . " " . $sql->documentno . "<br>";
                     $message .= "Approval Amount = " . $sql->grandtotal . "<br>";
