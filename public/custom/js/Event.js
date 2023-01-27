@@ -401,55 +401,55 @@ $('#form_employee, #form_opname').on('change', '#md_branch_id', function (evt) {
 /**
  * Event Listener Movement Detail
  */
-// _tableLine.on('change', 'select[name="assetcode"]', function (evt) {
-//     const tr = _tableLine.$(this).closest('tr');
+_tableLine.on('change', 'select[name="assetcode"]', function (evt) {
+    const tr = _tableLine.$(this).closest('tr');
 
-//     let url = ADMIN_URL + 'inventory' + '/getAssetDetail';
-//     let value = this.value;
+    let url = ADMIN_URL + 'inventory' + '/getAssetDetail';
+    let value = this.value;
 
-//     $.ajax({
-//         url: url,
-//         type: 'POST',
-//         cache: false,
-//         data: {
-//             assetcode: value
-//         },
-//         dataType: 'JSON',
-//         success: function (result) {
-//             if (result[0].success) {
-//                 $.each(result[0].message, function (idx, item) {
-//                     if (tr.find('select[name="md_product_id"]').length > 0) {
-//                         tr.find('select[name="md_product_id"]').val(item.md_product_id).change();
-//                     }
+    $.ajax({
+        url: url,
+        type: 'POST',
+        cache: false,
+        data: {
+            assetcode: value
+        },
+        dataType: 'JSON',
+        success: function (result) {
+            if (result[0].success) {
+                $.each(result[0].message, function (idx, item) {
+                    if (tr.find('select[name="md_product_id"]').length > 0) {
+                        tr.find('select[name="md_product_id"]').val(item.md_product_id).change();
+                    }
 
-//                     if (tr.find('select[name="employee_from"]').length > 0) {
-//                         tr.find('select[name="employee_from"]').val(item.md_employee_id).change();
-//                     }
+                    if (tr.find('select[name="employee_from"]').length > 0) {
+                        tr.find('select[name="employee_from"]').val(item.md_employee_id).change();
+                    }
 
-//                     if (tr.find('select[name="branch_from"]').length > 0) {
-//                         tr.find('select[name="branch_from"]').val(item.md_branch_id).change();
-//                     }
+                    if (tr.find('select[name="branch_from"]').length > 0) {
+                        tr.find('select[name="branch_from"]').val(item.md_branch_id).change();
+                    }
 
-//                     if (tr.find('select[name="division_from"]').length > 0) {
-//                         tr.find('select[name="division_from"]').val(item.md_division_id).change();
-//                     }
+                    if (tr.find('select[name="division_from"]').length > 0) {
+                        tr.find('select[name="division_from"]').val(item.md_division_id).change();
+                    }
 
-//                     if (tr.find('select[name="room_from"]').length > 0) {
-//                         tr.find('select[name="room_from"]').val(item.md_room_id).change();
-//                     }
-//                 });
-//             } else {
-//                 Toast.fire({
-//                     type: 'error',
-//                     title: result[0].message
-//                 });
-//             }
-//         },
-//         error: function (jqXHR, exception) {
-//             showError(jqXHR, exception);
-//         }
-//     });
-// });
+                    if (tr.find('select[name="room_from"]').length > 0) {
+                        tr.find('select[name="room_from"]').val(item.md_room_id).change();
+                    }
+                });
+            } else {
+                Toast.fire({
+                    type: 'error',
+                    title: result[0].message
+                });
+            }
+        },
+        error: function (jqXHR, exception) {
+            showError(jqXHR, exception);
+        }
+    });
+});
 
 // Event change field Status
 _tableLine.on('change', 'select[name="md_status_id"]', function (evt) {
@@ -1623,6 +1623,7 @@ $('#form_opname').on('change', '#md_employee_id', function (evt) {
             hideLoadingForm(form.prop('id'));
         },
         success: function (result) {
+            console.log(result)
             if (result[0].success) {
                 let arrMsg = result[0].message;
 
