@@ -15,6 +15,7 @@
                 <th>Category</th>
                 <th>Sub-Category</th>
                 <th>Type</th>
+                <th>Variant</th>
                 <th>Description</th>
                 <th>Active</th>
                 <th>Actions</th>

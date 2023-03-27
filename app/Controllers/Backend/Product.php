@@ -9,6 +9,7 @@ use App\Models\M_Subcategory;
 use App\Models\M_Category;
 use App\Models\M_Brand;
 use App\Models\M_Employee;
+use App\Models\M_Variant;
 use Config\Services;
 
 class Product extends BaseController
@@ -54,6 +55,7 @@ class Product extends BaseController
                 $row[] = $value->category;
                 $row[] = $value->subcategory;
                 $row[] = $value->type;
+                $row[] = $value->variant;
                 $row[] = $value->description;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
@@ -77,7 +79,7 @@ class Product extends BaseController
             $post = $this->request->getVar();
 
             if (!empty($post['md_brand_id']) && !empty($post['md_category_id']) && !empty($post['md_subcategory_id']) && !empty($post['md_type_id'])) {
-                $post['name'] = $this->merge_name($post['md_brand_id'], $post['md_category_id'], $post['md_subcategory_id'], $post['md_type_id']);
+                $post['name'] = $this->merge_name($post['md_brand_id'], $post['md_category_id'], $post['md_subcategory_id'], $post['md_type_id'], $post['md_variant_id']);
             }
 
             try {
@@ -102,6 +104,7 @@ class Product extends BaseController
         $category = new M_Category($this->request);
         $sub = new M_Subcategory($this->request);
         $type = new M_Type($this->request);
+        $variant = new M_Variant($this->request);
 
         if ($this->request->isAJAX()) {
             try {
@@ -123,6 +126,12 @@ class Product extends BaseController
                     $rowType = $type->getListType($type->table . '.' . $type->primaryKey, $list[0]->getTypeId())->getRow();
 
                     $list = $this->field->setDataSelect($type->table, $list, $type->primaryKey, $rowType->md_type_id, $rowType->name . '_' . $rowType->subcategory);
+                }
+
+                if (!empty($list[0]->getVariantId())) {
+                    $rowVariant = $type->getListVariant($variant->table . '.' . $variant->primaryKey, $list[0]->getVariantId())->getRow();
+
+                    $list = $this->field->setDataSelect($variant->table, $list, $variant->primaryKey, $rowVariant->md_type_id, $rowVariant->name . '_' . $rowVariant->subcategory);
                 }
 
                 $result = [
@@ -174,12 +183,13 @@ class Product extends BaseController
         }
     }
 
-    public function merge_name($brand_id, $category_id, $subcategory_id = null, $type_id = null)
+    public function merge_name($brand_id, $category_id, $subcategory_id = null, $type_id = null, $variant_id = null)
     {
         $brand = new M_Brand($this->request);
         $category = new M_Category($this->request);
         $subcategory = new M_Subcategory($this->request);
         $type = new M_Type($this->request);
+        $variant = new M_Variant($this->request);
 
         $separator = ' / ';
 
@@ -187,6 +197,7 @@ class Product extends BaseController
         $rowCategory = $category->find($category_id);
         $rowSubcategory = $subcategory->find($subcategory_id);
         $rowType = $type->find($type_id);
+        $rowVariant = $variant->find($variant_id);
 
         $text =  $rowBrand->getName() . $separator . $rowCategory->getName();
 
@@ -196,6 +207,10 @@ class Product extends BaseController
 
         if (!empty($rowType)) {
             $text .= $separator . $rowType->getName();
+        }
+
+        if (!empty($rowVariant)) {
+            $text .= $separator . $rowVariant->getName();
         }
 
         return $text;
