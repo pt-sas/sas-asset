@@ -49,9 +49,8 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="invoiceno">Invoice No <span class="required">*</span></label>
+                    <label for="invoiceno">Invoice No </label>
                     <input type="text" class="form-control" id="invoiceno" name="invoiceno" placeholder="Invoice No">
-                    <small class="form-text text-danger" id="error_invoiceno"></small>
                 </div>
             </div>
             <div class="col-md-6">
