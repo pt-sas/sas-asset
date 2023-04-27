@@ -54,6 +54,14 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
+                    <label for="md_variant_id">Variant</label>
+                    <select class="form-control select-data" id="md_variant_id" name="md_variant_id" data-url="variant/getList">
+                        <option value="">Select Variant</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
                     <label for="description">Description </label>
                     <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
                 </div>

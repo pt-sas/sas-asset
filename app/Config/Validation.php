@@ -368,6 +368,25 @@ class Validation
         ]
     ];
 
+    public $variant = [
+        'value'                 => [
+            'label'             => 'Variant Code',
+            'rules'             => 'required|min_length[7]|max_length[7]|is_unique[md_variant.value,md_variant_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Fill {field} first'
+            ]
+        ],
+        'name'                  => [
+            'label'             => 'Variant Name',
+            'rules'             => 'required|is_exist[md_variant.name,md_variant_id,{id},md_subcategory_id,{md_subcategory_id}]',
+            'errors'            => [
+                'is_exist'      => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ]
+    ];
+
     public $product = [
         'value'             => [
             'label'            => 'Product Code',

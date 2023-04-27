@@ -96,6 +96,13 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('type/destroy/(:any)', 'Backend\Type::destroy/$1');
     $routes->get('type/getSeqCode', 'Backend\Type::getSeqCode');
 
+    $routes->add('variant', 'Backend\Variant::index');
+    $routes->match(['get', 'post'], 'variant/showAll', 'Backend\Variant::showAll');
+    $routes->post('variant/create', 'Backend\Variant::create');
+    $routes->get('variant/show/(:any)', 'Backend\Variant::show/$1');
+    $routes->get('variant/destroy/(:any)', 'Backend\Variant::destroy/$1');
+    $routes->get('variant/getSeqCode', 'Backend\Variant::getSeqCode');
+
     $routes->add('product', 'Backend\Product::index');
     $routes->match(['get', 'post'], 'product/showAll', 'Backend\Product::showAll');
     $routes->post('product/create', 'Backend\Product::create');

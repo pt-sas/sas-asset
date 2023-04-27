@@ -20,7 +20,8 @@ class M_Product extends Model
         'md_type_id',
         'isactive',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'md_variant_id'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\Product';
@@ -33,6 +34,7 @@ class M_Product extends Model
         'md_category.name',
         'md_subcategory.name',
         'md_type.name',
+        'md_variant.name',
         'md_product.description',
         'md_product.isactive'
     ];
@@ -65,7 +67,8 @@ class M_Product extends Model
             'md_brand.name as brand,
                 md_category.name as category,
                 md_subcategory.name as subcategory,
-                md_type.name as type';
+                md_type.name as type,
+                md_variant.name as variant';
 
         return $sql;
     }
@@ -77,6 +80,7 @@ class M_Product extends Model
             $this->setDataJoin('md_category', 'md_category.md_category_id = ' . $this->table . '.md_category_id', 'left'),
             $this->setDataJoin('md_subcategory', 'md_subcategory.md_subcategory_id = ' . $this->table . '.md_subcategory_id', 'left'),
             $this->setDataJoin('md_type', 'md_type.md_type_id = ' . $this->table . '.md_type_id', 'left'),
+            $this->setDataJoin('md_variant', 'md_variant.md_variant_id = ' . $this->table . '.md_variant_id', 'left')
         ];
 
         return $sql;
