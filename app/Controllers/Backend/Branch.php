@@ -160,7 +160,8 @@ class Branch extends BaseController
 
             try {
                 if (isset($post['search'])) {
-                    $list = $this->model->like('name', $post['search'])
+                    $list = $this->model->where('isactive', 'Y')
+                        ->like('name', $post['search'])
                         ->orderBy('name', 'ASC')
                         ->findAll();
                 } else {
