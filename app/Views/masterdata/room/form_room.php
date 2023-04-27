@@ -33,9 +33,9 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="userrep_id">Room Agent </label>
+                    <label for="userrep_id">Room PIC </label>
                     <select class="form-control select-data" id="userrep_id" name="userrep_id" data-url="user/getList">
-                        <option value="">Select Room Agent</option>
+                        <option value="">Select Room PIC</option>
                     </select>
                 </div>
                 <div class="form-check">

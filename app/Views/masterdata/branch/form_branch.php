@@ -18,9 +18,9 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="leader_id">Leader </label>
+                    <label for="leader_id">PIC </label>
                     <select class="form-control select-data" id="leader_id" name="leader_id" data-url="employee/getList">
-                        <option value="">Select Leader</option>
+                        <option value="">Select PIC</option>
                     </select>
                 </div>
             </div>
