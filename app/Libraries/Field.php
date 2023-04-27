@@ -221,7 +221,7 @@ class Field
                     $element .= '<input type="' . $type . '" class="form-check-input line ' . $class . '" name="' . $name . '" ' . $checked . ' ' . $disabled . '>';
                 }
 
-                $element .= '<span class="form-check-sign"></span></label>';
+                $element .= '<span class="form-check-sign"></span></label></div>';
             } else {
                 if ($class === 'rupiah') {
                     $element .= '<input type="' . $type . '" class="form-control text-right line ' . $class . '" name="' . $name . '" value="' . $defaultValue . '" ' . $readonly . ' ' . $required . ' style="width: ' . $length . 'px;">';
