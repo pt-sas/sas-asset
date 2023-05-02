@@ -211,8 +211,6 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('sequence/show/(:any)', 'Backend\Sequence::show/$1');
     $routes->get('sequence/destroy/(:any)', 'Backend\Sequence::destroy/$1');
 
-    $routes->add('opname', 'Backend\Opname::index');
-
     $routes->add('internal', 'Backend\Internal::index');
     $routes->match(['get', 'post'], 'internal/showAll', 'Backend\Internal::showAll');
     $routes->post('internal/create', 'Backend\Internal::create');
@@ -284,6 +282,17 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('opname/destroyLine/(:any)', 'Backend\Opname::destroyLine/$1');
     $routes->get('opname/getSeqCode', 'Backend\Opname::getSeqCode');
     $routes->get('opname/processIt', 'Backend\Opname::processIt');
+    $routes->get('opname/getAset', 'Backend\Opname::getAset');
+
+    $routes->add('disposal', 'Backend\Disposal::index');
+    $routes->match(['get', 'post'], 'disposal/showAll', 'Backend\Disposal::showAll');
+    $routes->post('disposal/create', 'Backend\Disposal::create');
+    $routes->get('disposal/show/(:any)', 'Backend\Disposal::show/$1');
+    $routes->get('disposal/destroy/(:any)', 'Backend\Disposal::destroy/$1');
+    $routes->post('disposal/tableLine', 'Backend\Disposal::tableLine');
+    $routes->get('disposal/destroyLine/(:any)', 'Backend\Disposal::destroyLine/$1');
+    $routes->get('disposal/getSeqCode', 'Backend\Disposal::getSeqCode');
+    $routes->get('disposal/processIt', 'Backend\Disposal::processIt');
 });
 
 /*

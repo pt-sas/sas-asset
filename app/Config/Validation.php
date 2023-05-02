@@ -1218,4 +1218,65 @@ class Validation
             ]
         ]
     ];
+
+    public $disposal = [
+        'documentno'            => [
+            'label'             => 'Document No',
+            'rules'             => 'required|min_length[10]|max_length[10]|is_unique[trx_disposal.documentno,trx_disposal_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'disposaldate'         => [
+            'label'             => 'Date Disposal',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'disposaltype'          => [
+            'label'             => 'Disposal Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'md_supplier_id'        => [
+            'label'             => 'Supplier',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'line'                  => [
+            'label'             => 'Disposal Detail',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'detail.table.*.assetcode_line'  => [
+            'label'             => 'Asset Code',
+            'rules'             => 'required|is_exists',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line',
+                'is_exists'     => 'The {field} duplicate value'
+            ]
+        ],
+        'detail.table.*.md_product_id_line'  => [
+            'label'             => 'Product',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} Line'
+            ]
+        ],
+        'detail.table.*.unitprice_line'  => [
+            'label'             => 'Unit Price',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line'
+            ]
+        ]
+    ];
 }
