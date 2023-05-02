@@ -183,4 +183,35 @@ class M_Quotation extends Model
 		$quotationDetail = new M_QuotationDetail($this->request);
 		$quotationDetail->where($this->primaryKey, $rows['id'])->delete();
 	}
+
+	public function getSelectReport()
+	{
+		$sql = $this->table . '.documentno,' .
+			'md_supplier.name as supplier,' .
+			$this->table . '.quotationdate,' .
+			$this->table . '.docstatus,' .
+			'md_status.name as status,
+			md_product.name as product,
+			trx_quotation_detail.qtyentered,
+			trx_quotation_detail.qtyreceipt,
+			trx_quotation_detail.unitprice,
+			trx_quotation_detail.lineamt,
+			md_employee.name as employee,' .
+			$this->table . '.created_at';
+
+		return $sql;
+	}
+
+	public function getJoinReport()
+	{
+		$sql = [
+			$this->setDataJoin('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left'),
+			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
+			$this->setDataJoin('trx_quotation_detail', 'trx_quotation_detail.trx_quotation_id = ' . $this->table . '.trx_quotation_id', 'left'),
+			$this->setDataJoin('md_product', 'md_product.md_product_id = trx_quotation_detail.md_product_id', 'left'),
+			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left')
+		];
+
+		return $sql;
+	}
 }
