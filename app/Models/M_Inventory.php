@@ -258,10 +258,10 @@ class M_Inventory extends Model
 	public function getSelectDetail()
 	{
 		$sql = $this->table . '.*,
-					v_all_location.mdb_name as branch,
-					v_all_location.mdd_name as division,
-					v_all_location.mdr_name as room,
-					v_all_location.mde_name as employee,
+					md_branch.name as branch,
+					md_division.name as division,
+					md_room.name as room,
+					md_employee.name as employee,
 					v_all_product.mdg_name as groupasset,
 					v_all_product.md_brand_id,
 					v_all_product.mdbd_name as brand,
@@ -279,8 +279,11 @@ class M_Inventory extends Model
 	public function getJoinDetail()
 	{
 		$sql = [
-			$this->setDataJoin('v_all_location', 'v_all_location.md_employee_id = ' . $this->table . '.md_employee_id', 'left'),
-			$this->setDataJoin('v_all_product', 'v_all_product.md_product_id = ' . $this->table . '.md_product_id', 'left')
+			$this->setDataJoin('v_all_product', 'v_all_product.md_product_id = ' . $this->table . '.md_product_id', 'left'),
+			$this->setDataJoin('md_branch', 'md_branch.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
+			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_division_id', 'left'),
+			$this->setDataJoin('md_room', 'md_room.md_room_id = ' . $this->table . '.md_room_id', 'left'),
+			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left'),
 		];
 
 		return $sql;
