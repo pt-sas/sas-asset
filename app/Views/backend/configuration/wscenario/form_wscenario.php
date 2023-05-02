@@ -68,7 +68,7 @@
             </div>
             <div class="col-md-12">
                 <div class="form-group table-responsive">
-                    <table class="table table-light table-hover tb_displayline" id="table_quotation" style="width: 100%">
+                    <table class="table table-light table-hover tb_displayline" id="table_scenario" style="width: 100%">
                         <thead>
                             <tr>
                                 <th>Line No</th>
