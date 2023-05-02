@@ -11,7 +11,7 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="name">Name <span class="required">*</span></label>
+                    <label for="name">Full Name <span class="required">*</span></label>
                     <input type="text" class="form-control" id="employee_name" name="name">
                     <small class="form-text text-danger" id="error_name"></small>
                 </div>
@@ -65,14 +65,13 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label>Alert Recipient <span class="required">*</span></label>
+                    <label>Alert Recipient </label>
                     <div class="select2-input select2-primary">
                         <select class="form-control multiple-select" name="alert" multiple="multiple" style="width: 100%;">
                             <?php foreach ($user as $row) : ?>
                                 <option value="<?= $row->sys_user_id; ?>"><?= $row->name; ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <small class="form-text text-danger" id="error_alert"></small>
                     </div>
                 </div>
             </div>
