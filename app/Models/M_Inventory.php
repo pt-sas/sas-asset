@@ -271,7 +271,8 @@ class M_Inventory extends Model
 					v_all_product.mds_name as subcategory,
 					v_all_product.md_type_id,
 					v_all_product.mdt_name as type,
-					v_all_product.mdp_name as product';
+					v_all_product.mdp_name as product,
+					trx_receipt.documentno as receipt';
 
 		return $sql;
 	}
@@ -284,39 +285,10 @@ class M_Inventory extends Model
 			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_division_id', 'left'),
 			$this->setDataJoin('md_room', 'md_room.md_room_id = ' . $this->table . '.md_room_id', 'left'),
 			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left'),
+			$this->setDataJoin('trx_receipt', 'trx_receipt.trx_receipt_id = ' . $this->table . '.trx_receipt_id', 'left'),
 		];
 
 		return $sql;
-	}
-
-	public function getInventory()
-	{
-		$post = $this->request->getPost();
-
-		$this->builder->select('trx_inventory.*,
-		md_product.name as product,
-		md_branch.name as branch');
-		$this->builder->join('md_product', 'md_product.md_product_id = ' . $this->table . '.md_product_id', 'left');
-		$this->builder->join('md_branch', 'md_branch.md_branch_id = ' . $this->table . '.md_branch_id', 'left');
-
-		if (isset($post['md_groupasset_id']))
-			$this->builder->whereIn('trx_inventory.md_groupasset_id', $post['md_groupasset_id']);
-
-		if (isset($post['assetcode']))
-			$this->builder->whereIn('trx_inventory.assetcode', $post['assetcode']);
-
-		if (isset($post['md_branch_id']) && !empty($post['md_branch_id'])) {
-			$this->builder->where('trx_inventory.md_branch_id', $post['md_branch_id']);
-
-			if (isset($post['md_room_id']))
-				$this->builder->whereIn('trx_inventory.md_room_id', $post['md_room_id']);
-		}
-
-		if (isset($post['md_employee_id'])) {
-			$this->builder->whereIn('trx_inventory.md_employee_id', $post['md_employee_id']);
-		}
-
-		return $this->builder->get();
 	}
 
 	public function getAssetLocation($field, $where)

@@ -272,6 +272,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
 
     $routes->add('rpt_barcode', 'Backend\Rpt_Barcode::index');
     $routes->match(['get', 'post'], 'rpt_barcode/showAll', 'Backend\Rpt_Barcode::showAll');
+    $routes->match(['get', 'post'], 'rpt_barcode/print', 'Backend\Rpt_Barcode::print');
 
     $routes->add('opname', 'Backend\Opname::index');
     $routes->match(['get', 'post'], 'opname/showAll', 'Backend\Opname::showAll');

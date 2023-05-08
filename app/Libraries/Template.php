@@ -105,9 +105,12 @@ class Template
         $allBtn = '';
 
         $btnNew = '<button type="button" class="btn btn-primary btn-sm btn-round ml-auto new_form mr-1" title="New Record"><i class="fas fa-plus fa-fw"></i> Add New</button>';
+
         $btnExport = '<a id="dt-button"></a> ';
 
         $btnReQuery = '<button type="button" class="btn btn-black btn-border btn-sm btn-round ml-auto btn_requery mr-1" title="Refresh"><i class="fas fa-sync fa-fw"></i> Refresh </button>';
+
+        $btnPrint = '<button type="button" class="btn btn-danger btn-sm btn-round ml-auto btn_print_qrcode mr-1" title="Print"><i class="fas fa-print fa-fw"></i> Print</button>';
 
         $check = $this->access->checkCrud($uri, $this->isCreate);
         $role = $this->access->getRole();
@@ -124,6 +127,9 @@ class Template
 
             $allBtn .= $btnReQuery . ' ';
         }
+
+        if ($action_menu === 'R')
+            $allBtn .= $btnPrint;
 
         return $allBtn;
     }
