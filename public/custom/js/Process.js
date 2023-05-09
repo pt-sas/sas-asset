@@ -4538,6 +4538,7 @@ _tableReport.on("click", ".check-data", function (evt) {
 $(".btn_print_qrcode").on("click", function (evt) {
   let _this = $(this);
   let oriElement = _this.html();
+  let textElement = _this.text().trim();
 
   let formData = new FormData();
 
@@ -4566,7 +4567,8 @@ $(".btn_print_qrcode").on("click", function (evt) {
     beforeSend: function () {
       $(_this)
         .html(
-          '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+          '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' +
+            textElement
         )
         .prop("disabled", true);
       $(".btn_ok_form").prop("disabled", true);
