@@ -3,6 +3,7 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
+use App\Models\M_Category;
 use App\Models\M_GroupAsset;
 use App\Models\M_Reference;
 use App\Models\M_Sequence;
@@ -170,6 +171,8 @@ class GroupAsset extends BaseController
 
     public function getList()
     {
+        $category = new M_Category($this->request);
+
         if ($this->request->isAjax()) {
             $post = $this->request->getVar();
 
@@ -187,9 +190,15 @@ class GroupAsset extends BaseController
                         ->findAll();
                 }
 
+                if (!empty($post['reference']))
+                    $value = $category->getByProduct($post['reference']);
+
                 foreach ($list as $key => $row) :
                     $response[$key]['id'] = $row->getGroupAssetId();
                     $response[$key]['text'] = $row->getName();
+
+                    if (!empty($post['reference']))
+                        $response[$key]['key'] = $value->md_groupasset_id;
                 endforeach;
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
