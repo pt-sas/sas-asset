@@ -189,7 +189,7 @@ class Validation
         ],
         'name'                 => [
             'label'            => 'Branch Name',
-            'rules'            =>    'required|is_unique[md_branch.name,md_branch_id,{id}]',
+            'rules'            => 'required|is_unique[md_branch.name,md_branch_id,{id}]',
             'errors'        => [
                 'is_unique' => 'This {field} already exists.',
                 'required'    => 'Please Insert the {field} first'
