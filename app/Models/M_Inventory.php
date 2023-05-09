@@ -18,6 +18,7 @@ class M_Inventory extends Model
 		'trx_receipt_id',
 		'assetcode',
 		'md_product_id',
+		'md_groupasset_id',
 		'inventorydate',
 		'qtyentered',
 		'unitprice',

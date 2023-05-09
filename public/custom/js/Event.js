@@ -642,9 +642,19 @@ $("#form_inventory").on("change", "#md_product_id", function (evt) {
       success: function (result) {
         $("#md_groupasset_id").append('<option value=""></option>');
 
+        let md_groupasset_id = 0;
+
+        $.each(option, function (i, item) {
+          if (item.fieldName == "md_groupasset_id")
+            md_groupasset_id = item.label;
+        });
+
         if (!result[0].error) {
           $.each(result, function (idx, item) {
-            if (typeof item.key !== "undefined" && item.key == item.id) {
+            if (
+              (typeof item.key !== "undefined" && item.key == item.id) ||
+              (setSave === "update" && md_groupasset_id == item.id)
+            ) {
               $("#md_groupasset_id").append(
                 '<option value="' +
                   item.id +
@@ -777,7 +787,10 @@ $("#form_inventory").on("change", "#md_employee_id", function (evt) {
 
         if (!result[0].error) {
           $.each(result, function (idx, item) {
-            if (typeof item.key !== "undefined" && item.key == item.id) {
+            if (
+              (typeof item.key !== "undefined" && item.key == item.id) ||
+              (setSave === "update" && md_division_id == item.id)
+            ) {
               $("#md_division_id").append(
                 '<option value="' +
                   item.id +
