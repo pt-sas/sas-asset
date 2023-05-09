@@ -6,8 +6,8 @@ use App\Controllers\BaseController;
 use App\Models\M_Inventory;
 use App\Models\M_Product;
 use App\Models\M_Branch;
-use App\Models\M_Brand;
 use App\Models\M_Employee;
+use App\Models\M_Status;
 use Config\Services;
 
 class Inventory extends BaseController
@@ -21,7 +21,19 @@ class Inventory extends BaseController
 
     public function index()
     {
-        return $this->template->render('transaction/inventory/v_inventory');
+        $uri = $this->request->uri->getSegment(2);
+        $status = new M_Status($this->request);
+
+        $data = [
+            'today'     => date('Y-m-d'),
+            'status'    => $status->where('isactive', 'Y')
+                ->like('menu_id', $uri)
+                ->orderBy('name', 'ASC')
+                ->findAll(),
+            'default_logic' => json_decode($this->defaultLogic()),
+        ];
+
+        return $this->template->render('transaction/inventory/v_inventory', $data);
     }
 
     public function showAll()
@@ -49,11 +61,14 @@ class Inventory extends BaseController
                 $row[] = $number;
                 $row[] = $value->assetcode;
                 $row[] = $value->product;
+                $row[] = format_dmy($value->inventorydate, '-');
+                $row[] = formatRupiah($value->unitprice);
                 $row[] = $value->branch;
                 $row[] = $value->division;
                 $row[] = $value->room;
                 $row[] = $value->employee;
                 $row[] = $value->status;
+                $row[] = active($value->isspare);
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
@@ -111,6 +126,7 @@ class Inventory extends BaseController
     {
         $product = new M_Product($this->request);
         $branch = new M_Branch($this->request);
+        $employee = new M_Employee($this->request);
 
         if ($this->request->isAJAX()) {
             try {
@@ -118,9 +134,11 @@ class Inventory extends BaseController
 
                 $rowProduct = $product->find($list[0]->getProductId());
                 $rowBranch = $branch->find($list[0]->getBranchId());
+                $rowEmployee = $employee->find($list[0]->getEmployeeId());
 
                 $list = $this->field->setDataSelect($product->table, $list, $product->primaryKey, $rowProduct->getProductId(), $rowProduct->getName());
                 $list = $this->field->setDataSelect($branch->table, $list, $branch->primaryKey, $rowBranch->getBranchId(), $rowBranch->getName());
+                $list = $this->field->setDataSelect($employee->table, $list, $employee->primaryKey, $rowEmployee->getEmployeeId(), $rowEmployee->getName());
 
                 $result = [
                     'header'   => $this->field->store($this->model->table, $list)
@@ -194,5 +212,23 @@ class Inventory extends BaseController
 
             return $this->response->setJSON($response);
         }
+    }
+
+    public function defaultLogic()
+    {
+        $result = [];
+
+        //! default logic for dropdown md_status_id
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_Not_Default_Status');
+
+        if (!$role) {
+            $result = [
+                'field'         => 'md_status_id',
+                'id'            => 100000, //Aset
+                'condition'     => true
+            ];
+        }
+
+        return json_encode($result);
     }
 }

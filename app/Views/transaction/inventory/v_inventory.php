@@ -11,11 +11,14 @@
                 <th>No</th>
                 <th>Asset Code</th>
                 <th>Product</th>
+                <th>Date</th>
+                <th>Unit Price</th>
                 <th>Branch</th>
                 <th>Division</th>
                 <th>Room</th>
                 <th>Employee</th>
                 <th>Status</th>
+                <th>Spare</th>
                 <th>Active</th>
                 <th>Actions</th>
             </tr>

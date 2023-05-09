@@ -18,6 +18,7 @@ class M_Inventory extends Model
 		'trx_receipt_id',
 		'assetcode',
 		'md_product_id',
+		'inventorydate',
 		'qtyentered',
 		'unitprice',
 		'md_employee_id',
@@ -25,6 +26,7 @@ class M_Inventory extends Model
 		'md_division_id',
 		'md_room_id',
 		'isspare',
+		'md_status_id',
 		'isactive',
 		'created_by',
 		'updated_by'

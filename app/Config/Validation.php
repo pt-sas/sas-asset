@@ -753,32 +753,67 @@ class Validation
                 'is_unique' => 'This {field} already exists.'
             ]
         ],
-        'md_product_id' => [
+        'inventorydate'             => [
+            'label'                 => 'Inventory Date',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required'  => 'Please Insert the {field} first.'
+            ]
+        ],
+        'md_product_id'             => [
             'label'                 => 'Product',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field}'
             ]
         ],
-        'md_branch_id' => [
+        'md_groupasset_id'          => [
+            'label'                 => 'Group Asset',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Choose the {field}'
+            ]
+        ],
+        'md_branch_id'              => [
             'label'                 => 'Branch',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field}'
             ]
         ],
-        'md_room_id' => [
+        'md_room_id'                => [
             'label'                 => 'Room',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field}'
             ]
         ],
-        'md_employee_id' => [
+        'md_employee_id'            => [
             'label'                 => 'Employee',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field}'
+            ]
+        ],
+        'md_division_id'            => [
+            'label'                 => 'Division',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Choose the {field}'
+            ]
+        ],
+        'md_status_id'              => [
+            'label'                 => 'Status',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Choose the {field}'
+            ]
+        ],
+        'unitprice'                 => [
+            'label'                 => 'Unit Price',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Insert the {field} first.'
             ]
         ]
     ];
