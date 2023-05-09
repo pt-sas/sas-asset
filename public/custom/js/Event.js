@@ -614,6 +614,66 @@ _tableLine.on("change", 'select[name="employee_to"]', function (evt) {
  * Event Menu Inventory
  */
 // Form Inventory
+$("#form_inventory").on("change", "#md_product_id", function (evt) {
+  let url = ADMIN_URL + "groupasset" + "/getList";
+  let value = this.value;
+
+  $("#md_groupasset_id").empty();
+
+  if (value !== "") {
+    $.ajax({
+      url: url,
+      type: "POST",
+      cache: false,
+      data: {
+        reference: value,
+      },
+      beforeSend: function () {
+        $(".save_form").attr("disabled", true);
+        $(".close_form").attr("disabled", true);
+        loadingForm("form_inventory", "pulse");
+      },
+      complete: function () {
+        $(".save_form").removeAttr("disabled");
+        $(".close_form").removeAttr("disabled");
+        hideLoadingForm("form_inventory");
+      },
+      dataType: "JSON",
+      success: function (result) {
+        $("#md_groupasset_id").append('<option value=""></option>');
+
+        if (!result[0].error) {
+          $.each(result, function (idx, item) {
+            if (typeof item.key !== "undefined" && item.key == item.id) {
+              $("#md_groupasset_id").append(
+                '<option value="' +
+                  item.id +
+                  '" selected>' +
+                  item.text +
+                  "</option>"
+              );
+            } else {
+              $("#md_groupasset_id").append(
+                '<option value="' + item.id + '">' + item.text + "</option>"
+              );
+            }
+          });
+        } else {
+          Swal.fire({
+            type: "error",
+            title: result[0].message,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
+  }
+});
+
 $("#form_inventory").on("change", "#md_branch_id", function (evt) {
   let url = ADMIN_URL + "room" + "/getList";
   let value = this.value;
@@ -681,30 +741,19 @@ $("#form_inventory").on("change", "#md_branch_id", function (evt) {
   }
 });
 
-$("#form_inventory").on("change", "#md_room_id", function (evt) {
-  let url = ADMIN_URL + "employee" + "/getList";
+$("#form_inventory").on("change", "#md_employee_id", function (evt) {
+  let url = ADMIN_URL + "division" + "/getList";
   let value = this.value;
-  let md_room_id = 0;
-  let md_branch_id = $("#md_branch_id option:selected").val();
 
-  $.each(option, function (i, item) {
-    if (item.fieldName == "md_room_id") {
-      md_room_id = item.label;
-    }
-  });
+  $("#md_division_id").empty();
 
-  $("#md_employee_id").empty();
-
-  if ((value !== "" || md_room_id !== "") && md_branch_id !== "") {
-    let refValue = value !== "" ? value : md_room_id;
-
+  if (value !== "") {
     $.ajax({
       url: url,
       type: "POST",
       cache: false,
       data: {
-        reference: refValue,
-        branch: md_branch_id,
+        reference: value,
       },
       beforeSend: function () {
         $(".save_form").attr("disabled", true);
@@ -718,24 +767,18 @@ $("#form_inventory").on("change", "#md_room_id", function (evt) {
       },
       dataType: "JSON",
       success: function (result) {
-        $("#md_employee_id").append('<option value=""></option>');
+        $("#md_division_id").append('<option value=""></option>');
 
-        let md_employee_id = 0;
+        let md_division_id = 0;
 
         $.each(option, function (i, item) {
-          if (item.fieldName == "md_employee_id") {
-            md_employee_id = item.label;
-          }
+          if (item.fieldName == "md_division_id") md_division_id = item.label;
         });
 
         if (!result[0].error) {
           $.each(result, function (idx, item) {
-            // Check employee from db and event first change edit is null value or event change get value
-            if (
-              (md_employee_id == item.id && value == "") ||
-              (md_employee_id == item.id && value == md_room_id)
-            ) {
-              $("#md_employee_id").append(
+            if (typeof item.key !== "undefined" && item.key == item.id) {
+              $("#md_division_id").append(
                 '<option value="' +
                   item.id +
                   '" selected>' +
@@ -743,7 +786,7 @@ $("#form_inventory").on("change", "#md_room_id", function (evt) {
                   "</option>"
               );
             } else {
-              $("#md_employee_id").append(
+              $("#md_division_id").append(
                 '<option value="' + item.id + '">' + item.text + "</option>"
               );
             }
