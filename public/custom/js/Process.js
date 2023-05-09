@@ -717,15 +717,28 @@ $(".save_form").click(function (evt) {
         let className = field[i].className.split(/\s+/);
 
         if (form.find("input.active").is(":checked")) {
-          form
-            .find(
-              "input:checkbox[name=" +
-                field[i].name +
-                "], select[name=" +
-                field[i].name +
-                "]"
-            )
-            .removeAttr("disabled");
+          if (!fieldReadOnly.includes(field[i].name)) {
+            form
+              .find(
+                "input:checkbox[name=" +
+                  field[i].name +
+                  "], select[name=" +
+                  field[i].name +
+                  "]"
+              )
+              .removeAttr("disabled");
+          } else {
+            form
+              .find(
+                "input:checkbox[name=" +
+                  field[i].name +
+                  "], select[name=" +
+                  field[i].name +
+                  "]"
+              )
+              .not(".line")
+              .prop("disabled", true);
+          }
         } else {
           if (!className.includes("active")) {
             form
