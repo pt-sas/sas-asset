@@ -72,8 +72,7 @@ class Rpt_Barcode extends BaseController
                 'draw'              => $this->request->getPost('draw'),
                 'recordsTotal'      => $recordTotal,
                 'recordsFiltered'   => $recordsFiltered,
-                'data'              => $data,
-                'post'              => $post
+                'data'              => $data
             ];
 
             return $this->response->setJSON($result);
