@@ -52,7 +52,7 @@
             <div class="col-md-2">
                 <div class="form-check">
                     <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" id="isvendor" name="isvendor">
+                        <input type="checkbox" class="form-check-input" id="isvendor" name="isvendor" checked>
                         <span class="form-check-sign">Vendor</span>
                     </label>
                 </div>

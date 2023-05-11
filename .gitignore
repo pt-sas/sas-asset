@@ -129,3 +129,5 @@ nb-configuration.xml
 public/custom/image/*/*.jpg
 public/custom/image/*/*.jpeg
 public/custom/image/*/*.png
+
+public/uploads

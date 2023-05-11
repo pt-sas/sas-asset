@@ -17,10 +17,12 @@ class Rpt_AssetDetail extends BaseController
     public function index()
     {
         $start_date = date('Y-m-d', strtotime('- 1 days'));
+        $start_created = date('Y-m-d');
         $end_date = date('Y-m-d');
 
         $data = [
-            'date_range' => $start_date . ' - ' . $end_date
+            'date_range' => $start_date . ' - ' . $end_date,
+            'date_created' => $start_created . ' - ' . $end_date
         ];
 
         return $this->template->render('report/assetdetail/v_assetdetail', $data);
@@ -79,8 +81,7 @@ class Rpt_AssetDetail extends BaseController
                 'draw'              => $this->request->getPost('draw'),
                 'recordsTotal'      => $recordTotal,
                 'recordsFiltered'   => $recordsFiltered,
-                'data'              => $data,
-                'post'              => $post
+                'data'              => $data
             ];
 
             return $this->response->setJSON($result);

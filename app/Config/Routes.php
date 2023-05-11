@@ -96,6 +96,13 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('type/destroy/(:any)', 'Backend\Type::destroy/$1');
     $routes->get('type/getSeqCode', 'Backend\Type::getSeqCode');
 
+    $routes->add('variant', 'Backend\Variant::index');
+    $routes->match(['get', 'post'], 'variant/showAll', 'Backend\Variant::showAll');
+    $routes->post('variant/create', 'Backend\Variant::create');
+    $routes->get('variant/show/(:any)', 'Backend\Variant::show/$1');
+    $routes->get('variant/destroy/(:any)', 'Backend\Variant::destroy/$1');
+    $routes->get('variant/getSeqCode', 'Backend\Variant::getSeqCode');
+
     $routes->add('product', 'Backend\Product::index');
     $routes->match(['get', 'post'], 'product/showAll', 'Backend\Product::showAll');
     $routes->post('product/create', 'Backend\Product::create');
@@ -197,14 +204,13 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('groupasset/show/(:any)', 'Backend\GroupAsset::show/$1');
     $routes->get('groupasset/destroy/(:any)', 'Backend\GroupAsset::destroy/$1');
     $routes->get('groupasset/getSeqCode', 'Backend\GroupAsset::getSeqCode');
+    $routes->match(['get', 'post'], 'groupasset/getList', 'Backend\GroupAsset::getList');
 
     $routes->add('sequence', 'Backend\Sequence::index');
     $routes->match(['get', 'post'], 'sequence/showAll', 'Backend\Sequence::showAll');
     $routes->post('sequence/create', 'Backend\Sequence::create');
     $routes->get('sequence/show/(:any)', 'Backend\Sequence::show/$1');
     $routes->get('sequence/destroy/(:any)', 'Backend\Sequence::destroy/$1');
-
-    $routes->add('opname', 'Backend\Opname::index');
 
     $routes->add('internal', 'Backend\Internal::index');
     $routes->match(['get', 'post'], 'internal/showAll', 'Backend\Internal::showAll');
@@ -267,6 +273,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
 
     $routes->add('rpt_barcode', 'Backend\Rpt_Barcode::index');
     $routes->match(['get', 'post'], 'rpt_barcode/showAll', 'Backend\Rpt_Barcode::showAll');
+    $routes->match(['get', 'post'], 'rpt_barcode/print', 'Backend\Rpt_Barcode::print');
 
     $routes->add('opname', 'Backend\Opname::index');
     $routes->match(['get', 'post'], 'opname/showAll', 'Backend\Opname::showAll');
@@ -276,10 +283,21 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->post('opname/tableLine', 'Backend\Opname::tableLine');
     $routes->get('opname/destroyLine/(:any)', 'Backend\Opname::destroyLine/$1');
     $routes->get('opname/getSeqCode', 'Backend\Opname::getSeqCode');
-    $routes->get('opname/processIt', 'Backend\Opname::processIt');
-
+    $routes->get('opname/processIt', 'Backend\Opname::processIt');  
+    $routes->get('opname/getAset', 'Backend\Opname::getAset');
+  
     $routes->add('rpt_quotation', 'Backend\Rpt_Quotation::index');
     $routes->match(['get', 'post'], 'rpt_quotation/showAll', 'Backend\Rpt_Quotation::showAll');
+  
+    $routes->add('disposal', 'Backend\Disposal::index');
+    $routes->match(['get', 'post'], 'disposal/showAll', 'Backend\Disposal::showAll');
+    $routes->post('disposal/create', 'Backend\Disposal::create');
+    $routes->get('disposal/show/(:any)', 'Backend\Disposal::show/$1');
+    $routes->get('disposal/destroy/(:any)', 'Backend\Disposal::destroy/$1');
+    $routes->post('disposal/tableLine', 'Backend\Disposal::tableLine');
+    $routes->get('disposal/destroyLine/(:any)', 'Backend\Disposal::destroyLine/$1');
+    $routes->get('disposal/getSeqCode', 'Backend\Disposal::getSeqCode');
+    $routes->get('disposal/processIt', 'Backend\Disposal::processIt');
 });
 
 /*

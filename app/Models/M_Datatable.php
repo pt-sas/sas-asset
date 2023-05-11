@@ -99,7 +99,7 @@ class M_Datatable extends Model
                             $datetime =  urldecode($value['value']);
                             $date = explode(" - ", $datetime);
 
-                            $this->builder->where($table . '.' . $value['name'] . ' >= "' . $date[0] . '" AND ' . $table . '.' . $value['name'] . ' <= "' . $date[1] . '"');
+                            $this->builder->where('DATE(' . $table . '.' . $value['name'] . ')' . ' >= "' . $date[0] . '" AND ' . 'DATE(' . $table . '.' . $value['name'] . ')' . ' <= "' . $date[1] . '"');
                         }
 
                         if ($field->name === $value['name'] && $field->type !== 'timestamp') {

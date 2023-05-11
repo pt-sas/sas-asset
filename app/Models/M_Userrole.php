@@ -16,7 +16,7 @@ class M_UserRole extends Model
 		'isactive'
 	];
 	protected $useTimestamps = true;
-	protected $returnType = 'App\Entities\Userrole';
+	protected $returnType = 'App\Entities\UserRole';
 	protected $request;
 	protected $db;
 	protected $builder;

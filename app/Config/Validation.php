@@ -189,7 +189,7 @@ class Validation
         ],
         'name'                 => [
             'label'            => 'Branch Name',
-            'rules'            =>    'required|is_unique[md_branch.name,md_branch_id,{id}]',
+            'rules'            => 'required|is_unique[md_branch.name,md_branch_id,{id}]',
             'errors'        => [
                 'is_unique' => 'This {field} already exists.',
                 'required'    => 'Please Insert the {field} first'
@@ -364,6 +364,25 @@ class Validation
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Choose the {field} first'
+            ]
+        ]
+    ];
+
+    public $variant = [
+        'value'                 => [
+            'label'             => 'Variant Code',
+            'rules'             => 'required|min_length[7]|max_length[7]|is_unique[md_variant.value,md_variant_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Fill {field} first'
+            ]
+        ],
+        'name'                  => [
+            'label'             => 'Variant Name',
+            'rules'             => 'required|is_exist[md_variant.name,md_variant_id,{id},md_subcategory_id,{md_subcategory_id}]',
+            'errors'            => [
+                'is_exist'      => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
             ]
         ]
     ];
@@ -734,32 +753,67 @@ class Validation
                 'is_unique' => 'This {field} already exists.'
             ]
         ],
-        'md_product_id' => [
+        'inventorydate'             => [
+            'label'                 => 'Inventory Date',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required'  => 'Please Insert the {field} first.'
+            ]
+        ],
+        'md_product_id'             => [
             'label'                 => 'Product',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field}'
             ]
         ],
-        'md_branch_id' => [
+        'md_groupasset_id'          => [
+            'label'                 => 'Group Asset',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Choose the {field}'
+            ]
+        ],
+        'md_branch_id'              => [
             'label'                 => 'Branch',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field}'
             ]
         ],
-        'md_room_id' => [
+        'md_room_id'                => [
             'label'                 => 'Room',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field}'
             ]
         ],
-        'md_employee_id' => [
+        'md_employee_id'            => [
             'label'                 => 'Employee',
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field}'
+            ]
+        ],
+        'md_division_id'            => [
+            'label'                 => 'Division',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Choose the {field}'
+            ]
+        ],
+        'md_status_id'              => [
+            'label'                 => 'Status',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Choose the {field}'
+            ]
+        ],
+        'unitprice'                 => [
+            'label'                 => 'Unit Price',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Insert the {field} first.'
             ]
         ]
     ];
@@ -1196,6 +1250,67 @@ class Validation
             'rules'             => 'required_based_field_value[iswithtext, Y]',
             'errors'            => [
                 'required_based_field_value'      => 'Please Insert the {field} first.'
+            ]
+        ]
+    ];
+
+    public $disposal = [
+        'documentno'            => [
+            'label'             => 'Document No',
+            'rules'             => 'is_unique[trx_disposal.documentno,trx_disposal_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'disposaldate'         => [
+            'label'             => 'Date Disposal',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'disposaltype'          => [
+            'label'             => 'Disposal Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'md_supplier_id'        => [
+            'label'             => 'Supplier',
+            'rules'             => 'required_based_field_value[disposaltype, SL]',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'line'                  => [
+            'label'             => 'Disposal Detail',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'detail.table.*.assetcode_line'  => [
+            'label'             => 'Asset Code',
+            'rules'             => 'required|is_exists',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line',
+                'is_exists'     => 'The {field} duplicate value'
+            ]
+        ],
+        'detail.table.*.md_product_id_line'  => [
+            'label'             => 'Product',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} Line'
+            ]
+        ],
+        'detail.table.*.unitprice_line'  => [
+            'label'             => 'Unit Price',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line'
             ]
         ]
     ];

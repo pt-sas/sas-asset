@@ -69,6 +69,8 @@
 <script src="<?= base_url('atlantis-pro/js/plugin/auto-numeric/autoNumeric.js') ?>"></script>
 <!-- Table Treefy -->
 <script src="<?= base_url('atlantis-pro/js/plugin/bootstrap-treefy/js/bootstrap-treefy.min.js') ?>"></script>
+<!-- Scanner Auto Focus -->
+<script src="<?= base_url('atlantis-pro/js/plugin/jquery-scanner/jquery.scannerdetection.js') ?>"></script>
 <!-- Websocket Pusher -->
 <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
 <!-- Custom Process -->

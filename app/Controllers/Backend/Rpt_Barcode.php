@@ -4,15 +4,7 @@ namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
 use App\Models\M_Inventory;
-use Endroid\QrCode\Color\Color;
-use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelLow;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Label\Label;
-use Endroid\QrCode\Logo\Logo;
-use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
-use Endroid\QrCode\Writer\PngWriter;
-use Dompdf\Dompdf;
+use TCPDF;
 use Config\Services;
 
 class Rpt_Barcode extends BaseController
@@ -25,61 +17,151 @@ class Rpt_Barcode extends BaseController
 
     public function index()
     {
-        return $this->template->render('report/barcode/v_barcode');
+        $start_date = date('Y-m-d');
+        $end_date = date('Y-m-d');
+
+        $data = [
+            'date_range' => $start_date . ' - ' . $end_date
+        ];
+
+        return $this->template->render('report/barcode/v_barcode', $data);
     }
 
     public function showAll()
     {
-        $dompdf = new Dompdf();
-        $writer = new PngWriter();
+        $post = $this->request->getVar();
+        $data = [];
 
-        $list = $this->model->getInventory()->getResult();
+        $recordTotal = 0;
+        $recordsFiltered = 0;
 
-        $g = count($list);
+        if ($this->request->getMethod(true) === 'POST') {
+            if (isset($post['form']) && $post['clear'] === 'false') {
+                $table = $this->model->table;
+                $select = $this->model->getSelectDetail();
+                $join = $this->model->getJoinDetail();
+                $order = $this->request->getPost('columns');
+                $sort = $this->model->order;
+                $search = $this->request->getPost('search');
 
-        foreach ($list as $key => $row) :
-            // Create QR code
-            $qrCode = QrCode::create($row->assetcode)
-                ->setEncoding(new Encoding('UTF-8'))
-                ->setErrorCorrectionLevel(new ErrorCorrectionLevelLow())
-                ->setSize(85)
-                ->setMargin(2)
-                ->setRoundBlockSizeMode(new RoundBlockSizeModeMargin())
-                ->setForegroundColor(new Color(0, 0, 0))
-                ->setBackgroundColor(new Color(255, 255, 255));
+                $number = $this->request->getPost('start');
+                $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join);
 
-            // // Create generic logo
-            // $logo = Logo::create(FCPATH . 'custom/image/logo.png')
-            //     ->setResizeToWidth(100);
+                foreach ($list as $value) :
+                    $row = [];
 
-            // // Create generic label
-            // $label = Label::create('PR00001')
-            //     ->setTextColor(new Color(255, 0, 0));
+                    $checkbox = '<div class="form-check">
+                                    <label class="form-check-label">
+                                        <input type="checkbox" class="form-check-input check-data" name="ischeck" value="' . $value->assetcode . '" checked>
+                                        <span class="form-check-sign"></span>
+                                    </label>
+                                </div>';
 
-            $result = $writer->write($qrCode);
+                    $row[] = $checkbox;
+                    $row[] = $value->assetcode;
+                    $row[] = $value->receipt;
+                    $data[] = $row;
 
-            $data[] = [
-                'qr'        => $result->getDataUri(),
-                'branch'    => $row->branch,
-                'product'   => $row->product,
-                'assetcode' => $row->assetcode,
-                'date'      => date('d-M-Y'),
-                'list'      => count($list)
+                endforeach;
+
+                $recordTotal = $this->datatable->countAll($table);
+                $recordsFiltered = $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join);
+            }
+
+            $result = [
+                'draw'              => $this->request->getPost('draw'),
+                'recordsTotal'      => $recordTotal,
+                'recordsFiltered'   => $recordsFiltered,
+                'data'              => $data
             ];
+
+            return $this->response->setJSON($result);
+        }
+    }
+
+
+    public function print()
+    {
+        $post = $this->request->getPost();
+
+        $width = 300;
+        $height = 95;
+        $pageLayout = array($width, $height); //  or array($height, $width) 
+        $pdf = new TCPDF('l', 'pt', $pageLayout, true, 'UTF-8', false);
+
+        // remove default header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // set default monospaced font
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+        // set auto page breaks
+        $pdf->SetMargins(PDF_MARGIN_LEFT - 15, PDF_MARGIN_TOP - 29, PDF_MARGIN_RIGHT - 16);
+
+        // set auto page breaks
+        $pdf->SetAutoPageBreak(TRUE, 0);
+
+        // set image scale factor
+        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+        // set some language-dependent strings (optional)
+        if (@file_exists(dirname(__FILE__) . '/lang/eng.php')) {
+            require_once(dirname(__FILE__) . '/lang/eng.php');
+            $pdf->setLanguageArray($l);
+        }
+
+        // add a page
+        $pdf->AddPage();
+
+        $pdf->SetFont('helvetica', '', 10);
+
+        // set style for barcode
+        $style = array(
+            'border' => false,
+            'vpadding' => 'auto',
+            'hpadding' => 'auto',
+            'fgcolor' => array(0, 0, 0),
+            'bgcolor' => false, //array(255,255,255)
+            'module_width' => 1, // width of a single module in points
+            'module_height' => 1, // height of a single module in points
+        );
+
+        $list = json_decode($post['assetcode']);
+
+        foreach ($list as $key => $value) :
+            if ($key % 2 == 0) {
+                $pdf->write2DBarcode($value, 'QRCODE,L', 20, -5, 100, 100, $style, 'N');
+                $pdf->StartTransform();
+                $pdf->Rotate(90, 130, 90);
+                $pdf->Text(138, 80, $value);
+                $pdf->StopTransform();
+            } else {
+                $pdf->write2DBarcode($value, 'QRCODE,L', 170, -5, 100, 100, $style, 'N');
+                $pdf->StartTransform();
+                $pdf->Rotate(90, 280, 90);
+                $pdf->Text(288, 80, $value);
+                $pdf->StopTransform();
+
+                $key += 1;
+                $totalData = count($list);
+
+                if ($key < $totalData)
+                    $pdf->AddPage();
+            }
         endforeach;
 
-        $f = [
-            'data' => $data
-        ];
+        $path = FCPATH . 'uploads/';
 
-        // return view('report/barcode/qrcode', $f);
-        $html = view('report/barcode/qrcode', $f);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'potrait');
-        $dompdf->render();
-        $dompdf->stream("QRCode.pdf", array("Attachment" => false));
+        if (!is_dir($path))
+            mkdir($path);
 
-        // return json_encode($this->request->getPost());
-        // return json_encode($list);
+        $fileName = 'qrcode_' . date('YmdHis') . '.pdf';
+
+        $pdf->Output($path . $fileName, 'F');
+
+        $path = base_url('uploads') . '/' . $fileName;
+
+        return json_encode($path);
     }
 }

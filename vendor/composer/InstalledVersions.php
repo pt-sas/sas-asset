@@ -19,7 +19,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '89816e2eeb6633c7f060a408a5133367245aa8f8',
+    'reference' => '0d0dda20c9381ea50281f8e55581a61cd59289fc',
     'name' => 'codeigniter4/appstarter',
   ),
   'versions' => 
@@ -40,7 +40,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '89816e2eeb6633c7f060a408a5133367245aa8f8',
+      'reference' => '0d0dda20c9381ea50281f8e55581a61cd59289fc',
     ),
     'codeigniter4/framework' => 
     array (
@@ -701,6 +701,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '0abb51d2f102e00a4eefcf46ba7fec406d245825',
+    ),
+    'tecnickcom/tcpdf' => 
+    array (
+      'pretty_version' => '6.6.2',
+      'version' => '6.6.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'e3cffc9bcbc76e89e167e9eb0bbda0cab7518459',
     ),
     'theseer/tokenizer' => 
     array (
