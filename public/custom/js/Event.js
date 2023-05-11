@@ -623,7 +623,7 @@ _tableLine.on("change", 'select[name="employee_to"]', function (evt) {
  */
 // Form Inventory
 $("#form_inventory").on("change", "#md_product_id", function (evt) {
-  let url = ADMIN_URL + "groupasset" + "/getList";
+  let url = ORI_URL + "/sas/groupasset" + "/getList";
   let value = this.value;
 
   $("#md_groupasset_id").empty();

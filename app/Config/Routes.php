@@ -204,6 +204,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('groupasset/show/(:any)', 'Backend\GroupAsset::show/$1');
     $routes->get('groupasset/destroy/(:any)', 'Backend\GroupAsset::destroy/$1');
     $routes->get('groupasset/getSeqCode', 'Backend\GroupAsset::getSeqCode');
+    $routes->match(['get', 'post'], 'groupasset/getList', 'Backend\GroupAsset::getList');
 
     $routes->add('sequence', 'Backend\Sequence::index');
     $routes->match(['get', 'post'], 'sequence/showAll', 'Backend\Sequence::showAll');
