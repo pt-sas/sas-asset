@@ -65,7 +65,7 @@ class Disposal extends BaseController
                 $row[] = $number;
                 $row[] = $value->documentno;
                 $row[] = format_dmy($value->disposaldate, '-');
-                $row[] = $value->disposaltype;
+                $row[] = $value->type;
                 $row[] = $value->supplier;
                 $row[] = formatRupiah($value->grandtotal);
                 $row[] = docStatus($value->docstatus);
@@ -103,6 +103,11 @@ class Disposal extends BaseController
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
                 $this->entity->setGrandTotal(arrSumField('unitprice', $table));
 
+                if (!isset($post['id'])) {
+                    $docNo = $this->model->getInvNumber();
+                    $this->entity->setDocumentNo($docNo);
+                }
+
                 if (!$this->validation->run($post, 'disposal')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
@@ -125,8 +130,10 @@ class Disposal extends BaseController
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
                 $detail = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
 
-                $rowSupplier = $supplier->find($list[0]->md_supplier_id);
-                $list = $this->field->setDataSelect($supplier->table, $list, $supplier->primaryKey, $rowSupplier->getSupplierId(), $rowSupplier->getName());
+                if (!empty($list[0]->getSupplierId())) {
+                    $rowSupplier = $supplier->find($list[0]->getSupplierId());
+                    $list = $this->field->setDataSelect($supplier->table, $list, $supplier->primaryKey, $rowSupplier->getSupplierId(), $rowSupplier->getName());
+                }
 
                 $result = [
                     'header'    => $this->field->store($this->model->table, $list),
@@ -239,7 +246,7 @@ class Disposal extends BaseController
             $table = [
                 $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, null, 170, 'assetcode', 'assetcode'),
                 $this->field->fieldTable('select', null, 'md_product_id', null, null, 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
-                $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, null, 125),
+                $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, 0, 125),
                 $this->field->fieldTable('input', 'text', 'condition', null, null, null, null, null, null, 250),
                 $this->field->fieldTable('button', 'button', 'trx_disposal_detail_id')
             ];
@@ -259,19 +266,5 @@ class Disposal extends BaseController
         }
 
         return json_encode($table);
-    }
-
-    public function getSeqCode()
-    {
-        if ($this->request->isAJAX()) {
-            try {
-                $docNo = $this->model->getInvNumber();
-                $response = message('success', true, $docNo);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
     }
 }

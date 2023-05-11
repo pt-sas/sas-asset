@@ -65,15 +65,20 @@ class M_Disposal extends Model
 	public function getSelect()
 	{
 		$sql = $this->table . '.*,' .
-			'md_supplier.name as supplier';
+			'md_supplier.name as supplier,
+			sys_ref_detail.name as type';
 
 		return $sql;
 	}
 
 	public function getJoin()
 	{
+		//* WF_Participant Type
+		$defaultID = 10;
+
 		$sql = [
-			$this->setDataJoin('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left')
+			$this->setDataJoin('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left'),
+			$this->setDataJoin('sys_ref_detail', 'sys_ref_detail.sys_reference_id = ' . $defaultID . ' AND sys_ref_detail.value = ' . $this->table . '.disposaltype', 'left'),
 		];
 
 		return $sql;

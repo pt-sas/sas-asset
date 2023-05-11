@@ -5,18 +5,8 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="documentno">Document No <span class="required">*</span></label>
-                    <input type="text" class="form-control code" id="documentno" name="documentno" readonly>
+                    <input type="text" class="form-control" id="documentno" name="documentno" placeholder="[auto]" readonly>
                     <small class="form-text text-danger" id="error_documentno"></small>
-                </div>
-                <div class="form-group">
-                    <label for="disposaltype">Disposal Type <span class="required">*</span></label>
-                    <select class="form-control select2" id="disposaltype" name="disposaltype">
-                        <option value="">Select Status</option>
-                        <?php foreach ($ref_list as $row) : ?>
-                            <option value="<?= $row->value ?>"><?= $row->name ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <small class="form-text text-danger" id="error_disposaltype"></small>
                 </div>
             </div>
             <div class="col-md-6">
@@ -25,6 +15,24 @@
                     <input type="text" class="form-control datepicker" id="disposaldate" name="disposaldate" value="<?= $today; ?>">
                     <small class="form-text text-danger" id="error_disposaldate"></small>
                 </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="disposaltype">Disposal Type <span class="required">*</span></label>
+                    <select class="form-control select2" id="disposaltype" name="disposaltype" hide-field="md_supplier_id">
+                        <option value="">Select Status</option>
+                        <?php foreach ($ref_list as $row) : ?>
+                            <option value="<?= $row->value ?>"><?= $row->name ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="form-text text-danger" id="error_disposaltype"></small>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description </label>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_supplier_id">Supplier <span class="required">*</span></label>
                     <select class="form-control select-data" id="md_supplier_id" name="md_supplier_id" data-url="supplier/getList">
@@ -32,14 +40,6 @@
                     </select>
                     <small class="form-text text-danger" id="error_md_supplier_id"></small>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="description">Description </label>
-                    <textarea type="text" class="form-control" id="description" name="description" rows="4"></textarea>
-                </div>
-            </div>
-            <div class="col-md-6">
                 <div class="form-group">
                     <label for="grandtotal">Invoice Sale Amount <span class="required">*</span></label>
                     <input type="text" class="form-control rupiah" id="grandtotal" name="grandtotal" readonly>

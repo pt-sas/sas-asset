@@ -496,9 +496,17 @@ _tableLine.on("change", 'select[name="assetcode"]', function (evt) {
       if (result[0].success) {
         $.each(result[0].message, function (idx, item) {
           if (tr.find('select[name="md_product_id"]').length > 0) {
-            tr.find('select[name="md_product_id"]')
-              .val(item.md_product_id)
-              .change();
+            if (value === "OTHER") {
+              tr.find('select[name="md_product_id"]')
+                .val(item.md_product_id)
+                .change()
+                .removeAttr("disabled");
+            } else {
+              tr.find('select[name="md_product_id"]')
+                .val(item.md_product_id)
+                .change()
+                .prop("disabled", true);
+            }
           }
 
           if (tr.find('select[name="employee_from"]').length > 0) {
@@ -1866,5 +1874,58 @@ $("#parameter_barcode").on("change", "#md_branch_id", function (evt) {
         showError(jqXHR, exception);
       },
     });
+  }
+});
+
+/**
+ * Event Menu Disposal
+ */
+$("#form_disposal").on("change", "#disposaltype", function (e) {
+  const form = $(this).closest("form");
+  const field = form.find("select");
+  const tr = _tableLine.rows().nodes().to$("tr");
+  let value = this.value;
+  let fields = [];
+
+  for (let i = 0; i < field.length; i++) {
+    if (typeof $(field[i]).attr("hide-field") !== "undefined")
+      fields = $(field[i])
+        .attr("hide-field")
+        .split(",")
+        .map((element) => element.trim());
+
+    if (fields.includes(field[i].name)) {
+      const select = form.find("select[name=" + field[i].name + "]");
+      let formGroup = select.closest(".form-group");
+
+      if (setSave === "add") {
+        if (value === "SL") {
+          formGroup.show();
+          tr.find('input[name="unitprice"]').val(null);
+        } else {
+          formGroup.hide();
+          tr.find('input[name="unitprice"]').val(0);
+        }
+
+        select.val(null).change();
+      }
+
+      $.each(option, function (idx, elem) {
+        if (
+          setSave !== "add" &&
+          value != elem.label &&
+          _tableLine.data().any()
+        ) {
+          if (value === "SL") {
+            formGroup.show();
+            tr.find('input[name="unitprice"]').val(elem.label);
+          } else {
+            formGroup.hide();
+            tr.find('input[name="unitprice"]').val(0);
+            select.val(null).change();
+          }
+        }
+      });
+    }
   }
 });
