@@ -1257,7 +1257,7 @@ class Validation
     public $disposal = [
         'documentno'            => [
             'label'             => 'Document No',
-            'rules'             => 'required|min_length[10]|max_length[10]|is_unique[trx_disposal.documentno,trx_disposal_id,{id}]',
+            'rules'             => 'is_unique[trx_disposal.documentno,trx_disposal_id,{id}]',
             'errors'            => [
                 'is_unique'     => 'This {field} already exists.',
                 'required'      => 'Please Insert the {field} first'
@@ -1279,9 +1279,9 @@ class Validation
         ],
         'md_supplier_id'        => [
             'label'             => 'Supplier',
-            'rules'             => 'required',
+            'rules'             => 'required_based_field_value[disposaltype, SL]',
             'errors'            => [
-                'required'      => 'Please Choose the {field} first.'
+                'required_based_field_value'      => 'Please Choose the {field} first.'
             ]
         ],
         'line'                  => [
