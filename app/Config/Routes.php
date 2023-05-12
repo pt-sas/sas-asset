@@ -283,9 +283,12 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->post('opname/tableLine', 'Backend\Opname::tableLine');
     $routes->get('opname/destroyLine/(:any)', 'Backend\Opname::destroyLine/$1');
     $routes->get('opname/getSeqCode', 'Backend\Opname::getSeqCode');
-    $routes->get('opname/processIt', 'Backend\Opname::processIt');
+    $routes->get('opname/processIt', 'Backend\Opname::processIt');  
     $routes->get('opname/getAset', 'Backend\Opname::getAset');
-
+  
+    $routes->add('rpt_quotation', 'Backend\Rpt_Quotation::index');
+    $routes->match(['get', 'post'], 'rpt_quotation/showAll', 'Backend\Rpt_Quotation::showAll');
+  
     $routes->add('disposal', 'Backend\Disposal::index');
     $routes->match(['get', 'post'], 'disposal/showAll', 'Backend\Disposal::showAll');
     $routes->post('disposal/create', 'Backend\Disposal::create');
