@@ -42,7 +42,7 @@
             </div>
         </div>
         <div class="form-group row">
-            <label for="created_at" class="col-lg-3 col-md-3 col-sm-4 mt-sm-2 text-right">Crated </label>
+            <label for="created_at" class="col-lg-3 col-md-3 col-sm-4 mt-sm-2 text-right">Created </label>
             <div class="col-lg-6 col-md-9 col-sm-8">
                 <div class="input-icon">
                     <input type="text" class="form-control daterange" name="created_at" value="<?= $date_range ?>" placeholder="Created">
