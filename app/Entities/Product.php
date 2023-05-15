@@ -17,13 +17,14 @@ class Product extends Entity
 	protected $isactive;
 	protected $created_by;
 	protected $updated_by;
+	protected $md_variant_id;
 
 	protected $dates   = [
 		'created_at',
 		'updated_at',
 		'deleted_at',
 	];
-	
+
 	public function getProductId()
 	{
 		return $this->attributes['md_product_id'];
@@ -152,5 +153,15 @@ class Product extends Entity
 	public function setUpdatedBy($updated_by)
 	{
 		$this->attributes['updated_by'] = $updated_by;
+	}
+
+	public function getVariantId()
+	{
+		return $this->attributes['md_variant_id'];
+	}
+
+	public function setVariantId($md_variant_id)
+	{
+		$this->attributes['md_variant_id'] = $md_variant_id;
 	}
 }
