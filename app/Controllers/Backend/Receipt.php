@@ -577,4 +577,35 @@ class Receipt extends BaseController
             return $result;
         }
     }
+
+    public function getList()
+    {
+        if ($this->request->isAjax()) {
+            $post = $this->request->getVar();
+
+            $response = [];
+
+            try {
+                if (isset($post['search'])) {
+                    $list = $this->model->where('isactive', 'Y')
+                        ->like('documentno', $post['search'])
+                        ->orderBy('documentno', 'ASC')
+                        ->findAll();
+                } else {
+                    $list = $this->model->where('isactive', 'Y')
+                        ->orderBy('documentno', 'ASC')
+                        ->findAll();
+                }
+
+                foreach ($list as $key => $row) :
+                    $response[$key]['id'] = $row->getReceiptId();
+                    $response[$key]['text'] = $row->getDocumentNo();
+                endforeach;
+            } catch (\Exception $e) {
+                $response = message('error', false, $e->getMessage());
+            }
+
+            return $this->response->setJSON($response);
+        }
+    }
 }

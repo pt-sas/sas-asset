@@ -1337,6 +1337,29 @@ $(document).ready(function (e) {
       cache: true,
     },
   });
+
+  $(".multiple-select-receipt").select2({
+    placeholder: "Select an option",
+    width: "100%",
+    theme: "bootstrap",
+    multiple: true,
+    ajax: {
+      dataType: "JSON",
+      url: ADMIN_URL + "receipt/getList",
+      delay: 250,
+      data: function (params) {
+        return {
+          search: params.term,
+        };
+      },
+      processResults: function (data, page) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
 });
 
 $("#filter_inventory").on("change", '[name="md_branch_id"]', function (evt) {
