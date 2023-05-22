@@ -90,6 +90,10 @@ class BaseController extends Controller
 	protected $Movement_In = 'M+';
 	/** Movement Out */
 	protected $Movement_Out = 'M-';
+	/** Movement In */
+	protected $Movement_Kirim = 'KIRIM';
+	/** Movement Out */
+	protected $Movement_Terima = 'TERIMA';
 
 	/**
 	 * The column used for primaryKey int
