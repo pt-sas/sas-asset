@@ -8905,6 +8905,8 @@ label.error {
 .progress {
   border-radius: 100px;
   height: 14px;
+  background-color:silver;
+  width: 100px;
 }
 
 .progress .progress-bar {
@@ -8917,6 +8919,12 @@ label.error {
 
 .progress.progress-lg {
   height: 20px;
+}
+
+.progress span {
+  position: absolute;
+  margin-left: 3px;
+  color: white;
 }
 
 /*     Pagination     */
