@@ -24,7 +24,7 @@ class GroupAsset extends BaseController
         $reference = new M_Reference($this->request);
 
         $data = [
-            'sequence' => $sequence->find(100000),
+            'sequence' => $sequence->find(100001),
             'ref_list' => $reference->findBy([
                 'sys_reference.name'              => 'DepreciationType',
                 'sys_reference.isactive'          => 'Y',
