@@ -925,7 +925,15 @@ function Edit(id, status, last_url) {
                     // Button add row table line
                     $(".add_row, .create_line").css("display", "none");
 
-                    btnAction.css("display", "none");
+                    $.each(btnAction, function (index, item) {
+                      let className = item.className.split(/\s+/);
+
+                      if (className.includes("btn_accept") && status !== "IP")
+                        $(this).css("display", "none");
+
+                      if (className.includes("btn_delete"))
+                        $(this).css("display", "none");
+                    });
 
                     $.each(field, function (index, item) {
                       const tr = $(this).closest("tr");
