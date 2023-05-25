@@ -1174,10 +1174,7 @@ _tableLine.on("click", ".btn_delete", function (evt) {
             });
 
             // Update field grand total
-            if (
-              form.find('input[name="grandtotal"]').length > 0 &&
-              !result[0].message
-            )
+            if (form.find('input[name="grandtotal"]').length > 0)
               form
                 .find('input[name="grandtotal"]')
                 .val(formatRupiah(result[0].message));
