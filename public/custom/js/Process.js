@@ -1764,7 +1764,11 @@ $(".add_row").click(function (evt) {
         $(_this).html(oriElement).prop("disabled", false);
       },
       success: function (result) {
-        _tableLine.row.add(result).draw(false);
+        if (result[0].error) {
+          errorForm(form, result);
+        } else {
+          _tableLine.row.add(result).draw(false);
+        }
       },
       error: function (jqXHR, exception) {
         showError(jqXHR, exception);
