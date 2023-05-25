@@ -209,8 +209,7 @@ class Quotation extends BaseController
                 //* Update table quotation
                 $this->entity->setQuotationId($row->trx_quotation_id);
                 $this->entity->setGrandTotal($grandTotal);
-
-                $this->model->save($this->entity);
+                $this->save();
 
                 //* Delete row quotation detail
                 $delete = $this->modelDetail->delete($id);
