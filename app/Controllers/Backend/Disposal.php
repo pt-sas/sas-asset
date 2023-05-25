@@ -245,7 +245,7 @@ class Disposal extends BaseController
         if (empty($set)) {
             $table = [
                 $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, null, 170, 'assetcode', 'assetcode'),
-                $this->field->fieldTable('select', null, 'md_product_id', null, null, 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
+                $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
                 $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, 0, 125),
                 $this->field->fieldTable('input', 'text', 'condition', null, null, null, null, null, null, 250),
                 $this->field->fieldTable('button', 'button', 'trx_disposal_detail_id')
@@ -257,7 +257,7 @@ class Disposal extends BaseController
             foreach ($detail as $row) :
                 $table[] = [
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
-                    $this->field->fieldTable('select', null, 'md_product_id', null, null, 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, $row->unitprice, 125),
                     $this->field->fieldTable('input', 'text', 'condition', null, null, null, null, null, $row->condition, 250),
                     $this->field->fieldTable('button', 'button', 'trx_disposal_detail_id', null, null, null, null, null, $row->trx_disposal_detail_id)
