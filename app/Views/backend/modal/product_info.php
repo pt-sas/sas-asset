@@ -22,7 +22,7 @@
                             <div class="form-group form-inline">
                                 <label for="md_category_id" class="col-sm-3 col-form-label">Group Asset </label>
                                 <div class="col-sm-9">
-                                    <select class="form-control select-data" id="md_groupasset_id" name="md_groupasset_id" data-url="groupasset/getList">
+                                    <select class="form-control select-data" id="md_groupasset_id" name="md_groupasset_id" data-url="GroupAsset/getList">
                                         <option value="">Select Group Asset</option>
                                     </select>
                                 </div>
