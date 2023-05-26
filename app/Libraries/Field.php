@@ -272,8 +272,18 @@ class Field
                 $defaultValue = "";
             }
 
-            $element .= '<button type="button" title="' . ucwords($name) . '" class="btn btn-link btn-danger line btn_delete ' . $class . '" id="' . $defaultValue . '" name="' . $name . '" value="' . $field . '">
-                                    <i class="fa fa-times"></i>
+            $class = $class ?? 'btn-danger btn_delete';
+
+            if ($checked) {
+                $icon = '<i class="fas fa-check fa-lg"></i>';
+                $title = 'Accept';
+            } else {
+                $icon = '<i class="fas fa-times fa-lg"></i>';
+                $title = 'Delete';
+            }
+
+            $element .= '<button type="button" title="' . $title . '" class="btn btn-link line ' . $class . '" id="' . $defaultValue . '" name="' . $name . '" value="' . $field . '">
+                                ' . $icon . '
                                 </button>';
         }
 

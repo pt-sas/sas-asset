@@ -155,21 +155,22 @@ class M_Inventory extends Model
 	{
 		foreach ($arrData as $row) :
 			$data = [
-				'md_employee_id'			=> $row->employee_to,
-				'md_branch_id'     			=> $row->branch_to,
-				'md_division_id'    		=> $row->division_to,
-				'md_room_id'     			=> $row->room_to,
+				'md_product_id'				=> $row->md_product_id,
+				'md_employee_id'			=> $row->md_employee_id,
+				'md_branch_id'     			=> $row->md_branch_id,
+				'md_division_id'    		=> $row->md_division_id,
+				'md_room_id'     			=> $row->md_room_id,
 				'updated_at'    			=> date('Y-m-d H:i:s'),
 				'updated_by'    			=> session()->get('sys_user_id')
 			];
 
-			//* ROOM RUANG IT - BARANG BAGUS
-			if ($row->room_to == 100040)
-				$data['isspare']	= 'Y';
-			else if ($row->room_to == 100041) //* ROOM RUANG IT - BARANG RUSAK
-				$data['isspare']	= 'N';
-			else
-				$data['isspare']	= 'N';
+			// //* ROOM RUANG IT - BARANG BAGUS
+			// if ($row->room_to == 100040)
+			// 	$data['isspare']	= 'Y';
+			// else if ($row->room_to == 100041) //* ROOM RUANG IT - BARANG RUSAK
+			// 	$data['isspare']	= 'N';
+			// else
+			// 	$data['isspare']	= 'N';
 
 			$result = $this->builder->where('assetcode', $row->assetcode)->update($data);
 		endforeach;

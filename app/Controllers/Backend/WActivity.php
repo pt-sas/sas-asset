@@ -4,14 +4,19 @@ namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
 use App\Models\M_AlertRecipient;
+use App\Models\M_Employee;
+use App\Models\M_MovementDetail;
 use App\Models\M_Responsible;
 use App\Models\M_User;
 use App\Models\M_WActivity;
 use App\Models\M_WEvent;
 use App\Models\M_WScenarioDetail;
+use App\Models\M_Transaction;
+use App\Models\M_Room;
 use Config\Services;
 use Pusher\Pusher;
 use Html2Text\Html2Text;
+use stdClass;
 
 class WActivity extends BaseController
 {
@@ -23,10 +28,6 @@ class WActivity extends BaseController
         $this->request = Services::request();
         $this->model = new M_WActivity($this->request);
         $this->entity = new \App\Entities\WActivity();
-    }
-
-    public function index()
-    {
     }
 
     private function toForwardAlert($table, $record_id, $subject, $message)
@@ -51,27 +52,30 @@ class WActivity extends BaseController
             $data = [];
             $list = $this->model->getActivity();
 
-            foreach ($list as $value) :
-                $row = [];
-                $ID = $value->sys_wfactivity_id;
-                $record_id = $value->record_id;
-                $table = $value->table;
-                $menu = $value->menu;
-                $node = 'Approval ' . ucwords($menu);
-                $summary = ucwords($menu) . ' ' . $value->documentno . ': ' . $value->usercreated_by;
+            $result = [];
+            if (!empty($list)) {
+                foreach ($list as $value) :
+                    $row = [];
+                    $ID = $value->sys_wfactivity_id;
+                    $record_id = $value->record_id;
+                    $table = $value->table;
+                    $menu = $value->menu;
+                    $node = 'Approval ' . ucwords($menu);
+                    $summary = ucwords($menu) . ' ' . $value->documentno . ': ' . $value->usercreated_by;
 
-                $row[] = $ID;
-                $row[] = $record_id;
-                $row[] = $table;
-                $row[] = $menu;
-                $row[] = $node;
-                $row[] = $summary;
-                $data[] = $row;
-            endforeach;
+                    $row[] = $ID;
+                    $row[] = $record_id;
+                    $row[] = $table;
+                    $row[] = $menu;
+                    $row[] = $node;
+                    $row[] = $summary;
+                    $data[] = $row;
+                endforeach;
 
-            $result = [
-                'data'              => $data
-            ];
+                $result = [
+                    'data'              => $data
+                ];
+            }
 
             return $this->response->setJSON($result);
         }
@@ -113,7 +117,12 @@ class WActivity extends BaseController
             $subject = ucwords($menu) . "_" . $sql->documentno;
             $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please approve document below.</span></p><div><br></div>';
             $message .= "-----" . " " . ucwords($menu) . " ";
-            $message .= $sql->documentno . ": Approval Amount =" . formatRupiah($sql->grandtotal);
+
+            if (isset($sql->grandtotal))
+                $message .= $sql->documentno . ": Approval Amount =" . formatRupiah($sql->grandtotal);
+            else
+                $message .= $sql->documentno;
+
             $message = new Html2Text($message);
             $message = $message->getText();
 
@@ -122,6 +131,39 @@ class WActivity extends BaseController
             endforeach;
 
             $this->toForwardAlert('sys_wfresponsible', $sys_wfresponsible_id, $subject, $message);
+
+            if (isset($sql->movementtype) && $sql->movementtype === $this->Movement_Terima) {
+                $mMoveDetail = new M_MovementDetail($this->request);
+                $mEmployee = new M_Employee($this->request);
+
+                $detail = $mMoveDetail->where([
+                    "trx_movement_id"   => $sql->trx_movement_id
+                ])->findAll();
+
+                $listEmployee = [];
+                foreach ($detail as $val) :
+                    $listEmployee[] = $val->employee_to;
+                endforeach;
+
+                $listEmployee = array_unique($listEmployee);
+
+                $list = $mEmployee->whereIn("md_employee_id", $listEmployee)->findAll();
+
+                $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please received asset.</span></p><div><br></div>';
+                $message .= "-----" . " " . ucwords($menu) . " ";
+
+                $message = new Html2Text($message);
+                $message = $message->getText();
+
+                foreach ($list as $row) :
+                    if (!empty($row->sys_user_id)) {
+                        $user = $mUser->find($row->sys_user_id);
+
+                        if (!empty($user->email))
+                            $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
+                    }
+                endforeach;
+            }
         } else {
             if (!empty($this->getNextResponsible())) {
                 $newWfResponsibleId = $this->getNextResponsible();
@@ -154,7 +196,12 @@ class WActivity extends BaseController
                 $subject = ucwords($menu) . "_" . $sql->documentno;
                 $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please approve document below.</span></p><div><br></div>';
                 $message .= "-----" . " " . ucwords($menu) . " ";
-                $message .= $sql->documentno . ": Approval Amount =" . formatRupiah($sql->grandtotal);
+
+                if (isset($sql->grandtotal))
+                    $message .= $sql->documentno . ": Approval Amount =" . formatRupiah($sql->grandtotal);
+                else
+                    $message .= $sql->documentno;
+
                 $message = new Html2Text($message);
                 $message = $message->getText();
 
@@ -193,7 +240,10 @@ class WActivity extends BaseController
                 $message =  'Sudah Di Approve' . "<br>";
                 $message .= "---" . "<br>";
                 $message .= ucwords($menu) . " " . $sql->documentno . "<br>";
-                $message .= "Approval Amount = " . formatRupiah($sql->grandtotal) . "<br>";
+
+                if (isset($sql->grandtotal))
+                    $message .= "Approval Amount = " . formatRupiah($sql->grandtotal) . "<br>";
+
                 $message .= $sql->description;
                 $message = new Html2Text($message);
                 $message = $message->getText();
@@ -202,6 +252,86 @@ class WActivity extends BaseController
                 $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
 
                 $this->toForwardAlert('sys_wfresponsible', $sys_wfresponsible_id, $subject, $message);
+
+                if (isset($sql->movementtype) && $sql->movementtype === $this->Movement_Terima) {
+                    $transaction = new M_Transaction($this->request);
+                    $room = new M_Room($this->request);
+                    $mMoveDetail = new M_MovementDetail($this->request);
+                    $mEmployee = new M_Employee($this->request);
+
+                    $detail = $mMoveDetail->where([
+                        "isaccept"          => "N",
+                        "trx_movement_id"   => $sql->trx_movement_id
+                    ])->findAll();
+
+                    $dataUpdate = $this->setField("isaccept", "Y", $detail);
+                    $dataUpdate = $this->setField($this->updatedByField, $user_id, $detail);
+                    $dataUpdate = $this->setField($this->updatedField, date("Y-m-d H:i:s"), $detail);
+                    $mMoveDetail->updateBatch($dataUpdate, $mMoveDetail->primaryKey);
+
+                    $line = $mMoveDetail->where([
+                        "trx_movement_id"   => $sql->trx_movement_id
+                    ])->findAll();
+
+                    $listEmployee = [];
+                    foreach ($line as $val) :
+                        $listEmployee[] = $val->employee_from;
+                    endforeach;
+
+                    $listEmployee = array_unique($listEmployee);
+
+                    $list = $mEmployee->whereIn("md_employee_id", $listEmployee)->findAll();
+
+                    $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Sudah Di Terima.</span></p><div><br></div>';
+                    $message .= "-----" . " " . ucwords($menu) . " ";
+
+                    $message = new Html2Text($message);
+                    $message = $message->getText();
+
+                    foreach ($list as $row) :
+                        if (!empty($row->sys_user_id)) {
+                            $user = $mUser->find($row->sys_user_id);
+
+                            if (!empty($user->email))
+                                $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
+                        }
+                    endforeach;
+
+                    // $arrMoveIn = [];
+                    // $arrMoveOut = [];
+                    // foreach ($line as $key => $value) :
+                    //     //? Data movement from
+                    //     $arrOut = new stdClass();
+                    //     $arrOut->assetcode = $value->assetcode;
+                    //     $arrOut->md_product_id = $value->md_product_id;
+                    //     $arrOut->md_employee_id = $value->employee_from;
+                    //     $arrOut->md_room_id = $value->room_from;
+                    //     $arrOut->transactiontype = $this->Movement_Out;
+                    //     $arrOut->transactiondate = date("Y-m-d");
+                    //     $arrOut->qtyentered = -1;
+                    //     $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
+                    //     $arrMoveOut[$key] = $arrOut;
+
+                    //     //? Data movement to
+                    //     $arrIn = new stdClass();
+                    //     $arrIn->assetcode = $value->assetcode;
+                    //     $arrIn->md_product_id = $value->md_product_id;
+                    //     $arrIn->md_employee_id = $value->employee_to;
+                    //     $arrIn->md_room_id = $transit->md_room_id;
+                    //     $arrIn->transactiontype = $this->Movement_In;
+                    //     $arrIn->transactiondate = date("Y-m-d");
+                    //     $arrIn->qtyentered = 1;
+                    //     $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
+                    //     $arrMoveIn[$key] = $arrIn;
+                    // endforeach;
+
+                    // $arrData = (array) array_merge(
+                    //     (array) $arrMoveIn,
+                    //     (array) $arrMoveOut
+                    // );
+
+                    // $transaction->create($arrData);
+                }
             }
 
             $this->entity->setWfResponsibleId($sys_wfresponsible_id);
@@ -253,7 +383,10 @@ class WActivity extends BaseController
                     $message =  'Tidak Di Approve' . "<br>";
                     $message .= "---" . "<br>";
                     $message .= ucwords($activity->getMenu()) . " " . $sql->documentno . "<br>";
-                    $message .= "Approval Amount = " . formatRupiah($sql->grandtotal) . "<br>";
+
+                    if (isset($sql->grandtotal))
+                        $message .= "Approval Amount = " . formatRupiah($sql->grandtotal) . "<br>";
+
                     $message .= $sql->description;
                     $message = new Html2Text($message);
                     $message = $message->getText();

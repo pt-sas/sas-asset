@@ -14,6 +14,8 @@
                 <th>Grand Total</th>
                 <th>Menu</th>
                 <th>Status</th>
+                <th>Branch</th>
+                <th>Division</th>
                 <th>Description</th>
                 <th>Active</th>
                 <th>Actions</th>

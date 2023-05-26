@@ -25,6 +25,8 @@ class M_MovementDetail extends Model
 		'updated_by',
 		'description',
 		'md_status_id',
+		'ref_movement_detail_id',
+		'isaccept'
 	];
 	protected $useTimestamps = true;
 	protected $returnType = 'App\Entities\MovementDetail';

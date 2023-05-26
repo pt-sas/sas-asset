@@ -37,6 +37,12 @@ class M_WActivity extends Model
 		$this->builder = $this->db->table($this->table);
 	}
 
+	public function index()
+	{
+		$d = $this->getActivity();
+		dd($d);
+	}
+
 	private function getRole()
 	{
 		$sql = "SELECT sys_user_role.sys_role_id 
@@ -62,37 +68,41 @@ class M_WActivity extends Model
 
 		$role = $this->getRole();
 
-		foreach ($list as $row) :
-			$this->builder->select($this->table . '.*,' .
-				$row->getTable() . '.documentno,
+		$sql = "";
+
+		if ($list) {
+			foreach ($list as $row) :
+				$this->builder->select($this->table . '.*,' .
+					$row->getTable() . '.documentno,
 			sys_user.name as usercreated_by');
 
-			$dataField = $this->db->getFieldData($row->table);
+				$dataField = $this->db->getFieldData($row->table);
 
-			foreach ($dataField as $field) :
-				if ($field->primary_key == 1) {
-					$this->builder->join($row->getTable(), $row->getTable() . '.' . $field->name . '=' . $this->table . '.record_id');
-					$this->builder->join('sys_user', 'sys_user.sys_user_id = ' . $row->getTable() . '.created_by');
-				}
+				foreach ($dataField as $field) :
+					if ($field->primary_key == 1) {
+						$this->builder->join($row->getTable(), $row->getTable() . '.' . $field->name . '=' . $this->table . '.record_id');
+						$this->builder->join('sys_user', 'sys_user.sys_user_id = ' . $row->getTable() . '.created_by');
+					}
+				endforeach;
+
+				$this->builder->join('sys_wfresponsible', 'sys_wfresponsible.sys_wfresponsible_id = ' . $this->table . '.sys_wfresponsible_id');
+
+				// $role = $this->getResponsibleRole($row->getWfResponsibleId());
+
+				$this->builder->where([
+					$this->table . '.state'			=> 'OS',
+					$this->table . '.processed'		=> 'N'
+				]);
+
+				// Saat user mempunyai lebih dari 1 role approval, dokumen yg harus diapprove belum muncul
+				if (!empty($role))
+					$this->builder->whereIn('sys_wfresponsible.sys_role_id', $role);
+
+				$this->builder->orderBy($this->table . '.created_at', 'ASC');
+
+				$sql = $this->builder->get()->getResult();
 			endforeach;
-
-			$this->builder->join('sys_wfresponsible', 'sys_wfresponsible.sys_wfresponsible_id = ' . $this->table . '.sys_wfresponsible_id');
-
-			// $role = $this->getResponsibleRole($row->getWfResponsibleId());
-
-			$this->builder->where([
-				$this->table . '.state'			=> 'OS',
-				$this->table . '.processed'		=> 'N'
-			]);
-
-			// Saat user mempunyai lebih dari 1 role approval, dokumen yg harus diapprove belum muncul
-			if (!empty($role))
-				$this->builder->whereIn('sys_wfresponsible.sys_role_id', $role);
-
-			$this->builder->orderBy($this->table . '.created_at', 'ASC');
-
-			$sql = $this->builder->get()->getResult();
-		endforeach;
+		}
 
 		return $sql;
 	}

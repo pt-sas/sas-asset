@@ -1952,3 +1952,134 @@ $("#form_disposal").on("change", "#disposaltype", function (e) {
     }
   }
 });
+
+$("#form_movement").on(
+  "change",
+  "#md_branch_id, #movementtype, #md_branchto_id, #md_division_id",
+  function (evt) {
+    const form = $(this).closest("form");
+    const field = form.find("select");
+    const attrName = $(this).attr("name");
+    let value = this.value;
+    let fields = [];
+
+    if (attrName === "movementtype")
+      for (let i = 0; i < field.length; i++) {
+        if (typeof $(field[i]).attr("hide-field") !== "undefined")
+          fields = $(field[i])
+            .attr("hide-field")
+            .split(",")
+            .map((element) => element.trim());
+
+        if (fields.includes(field[i].name)) {
+          const select = form.find("select[name=" + field[i].name + "]");
+          let formGroup = select.closest(".form-group");
+
+          if (value === "KIRIM") {
+            formGroup.show();
+            $(".add_row").show();
+          } else if (value === "TERIMA") {
+            formGroup.hide();
+            $(".add_row").hide();
+          }
+
+          select.val(null).change();
+        }
+      }
+
+    if (setSave === "add") {
+      _tableLine.clear().draw(false);
+    }
+
+    // update data
+    $.each(option, function (idx, elem) {
+      if (elem.fieldName === attrName && setSave !== "add") {
+        if (
+          attrName === "movementtype" &&
+          value !== "" &&
+          value != elem.label &&
+          _tableLine.data().any()
+        ) {
+          Swal.fire({
+            title: "Delete?",
+            text: "Are you sure you want to change all data ? ",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            confirmButtonText: "Okay",
+            cancelButtonText: "Close",
+            reverseButtons: true,
+          }).then((data) => {
+            if (data.value) {
+              _tableLine.clear().draw(false);
+              destroyAllLine("trx_movement_id", ID);
+            } else {
+              form
+                .find("select[name=" + attrName + "]")
+                .val(elem.label)
+                .change();
+
+              if (elem.label === "Kirim") {
+                $("#md_branchto_id").closest(".form-group").show();
+                $(".add_row").show();
+                $("#md_branchto_id").val(option[2].option_ID).change();
+              } else if (value === "Terima") {
+                $("#md_branchto_id").closest(".form-group").hide();
+                $(".add_row").hide();
+                $("#md_branchto_id").val(null).change();
+              }
+            }
+          });
+        }
+
+        if (
+          attrName !== "movementtype" &&
+          value !== "" &&
+          value != elem.option_ID &&
+          _tableLine.data().any()
+        ) {
+          Swal.fire({
+            title: "Delete?",
+            text: "Are you sure you want to change all data ? ",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            confirmButtonText: "Okay",
+            cancelButtonText: "Close",
+            reverseButtons: true,
+          }).then((data) => {
+            if (data.value) {
+              _tableLine.clear().draw(false);
+              destroyAllLine("trx_movement_id", ID);
+            } else {
+              form
+                .find("select[name=" + attrName + "]")
+                .val(elem.option_ID)
+                .change();
+            }
+          });
+        }
+      }
+    });
+  }
+);
+
+function destroyAllLine(field, id) {
+  let url = CURRENT_URL + "/destroyAllLine";
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: {
+      trx_movement_id: id,
+    },
+    cache: false,
+    dataType: "JSON",
+    success: function (result) {
+      console.log(result);
+    },
+    error: function (jqXHR, exception) {
+      showError(jqXHR, exception);
+    },
+  });
+}

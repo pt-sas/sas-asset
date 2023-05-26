@@ -9,6 +9,8 @@ use App\Models\M_Menu;
 use App\Models\M_NotificationText;
 use App\Models\M_Responsible;
 use App\Models\M_Status;
+use App\Models\M_Branch;
+use App\Models\M_Division;
 use Config\Services;
 use Pusher\Pusher;
 
@@ -39,10 +41,6 @@ class WScenario extends BaseController
         ];
 
         return $this->template->render('backend/configuration/wscenario/v_wscenario', $data);
-
-        // $this->sys_wfscenario_id = 1;
-        // $d = $this->getNextResponsible();
-        // dd($d);
     }
 
     public function showAll()
@@ -73,6 +71,8 @@ class WScenario extends BaseController
                 $row[] = $value->grandtotal;
                 $row[] = $value->menu;
                 $row[] = $value->status;
+                $row[] = $value->branch;
+                $row[] = $value->division;
                 $row[] = $value->description;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
@@ -121,10 +121,23 @@ class WScenario extends BaseController
 
     public function show($id)
     {
+        $branch = new M_Branch($this->request);
+        $division = new M_Division($this->request);
+
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
                 $detail = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
+
+                if (!empty($list[0]->getBranchId())) {
+                    $rowBranch = $branch->find($list[0]->getBranchId());
+                    $list = $this->field->setDataSelect($branch->table, $list, $branch->primaryKey, $rowBranch->getBranchId(), $rowBranch->getName());
+                }
+
+                if (!empty($list[0]->getDivisionId())) {
+                    $rowDivision = $division->find($list[0]->getDivisionId());
+                    $list = $this->field->setDataSelect($division->table, $list, $division->primaryKey, $rowDivision->getDivisionId(), $rowDivision->getName());
+                }
 
                 $result = [
                     'header'    => $this->field->store($this->model->table, $list),
@@ -237,7 +250,20 @@ class WScenario extends BaseController
             $trx = $this->model->find($trxID);
 
             if ($table === 'trx_quotation') {
-                $this->sys_wfscenario_id = $mWfs->getScenario($menu, $trx->getGroupAssetId(), $trx->getStatusId(), 0);
+                $this->sys_wfscenario_id = $mWfs->getScenario($menu, $trx->getGroupAssetId(), $trx->getStatusId());
+
+                if ($this->sys_wfscenario_id) {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Inprogress);
+                    $this->entity->setWfScenarioId($this->sys_wfscenario_id);
+                    $isWfscenario = true;
+                } else {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Completed);
+                    $this->entity->setWfScenarioId(0);
+                }
+            }
+
+            if ($table === 'trx_movement') {
+                $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, $trx->md_branch_id, $trx->md_division_id);
 
                 if ($this->sys_wfscenario_id) {
                     $this->entity->setDocStatus($this->DOCSTATUS_Inprogress);
@@ -252,7 +278,7 @@ class WScenario extends BaseController
 
         $this->entity->setUpdatedBy($session->get('sys_user_id'));
         $this->entity->{$primaryKey} = $trxID;
-        $result = $this->save();
+        $result = $this->model->save($this->entity);
 
         if ($result && $isWfscenario) {
             $result = $cWfa->setActivity(null, $this->sys_wfscenario_id, $this->getScenarioResponsible($this->sys_wfscenario_id), $sessionUserId, $this->DOCSTATUS_Suspended, false, null, $table, $trxID, $menu);

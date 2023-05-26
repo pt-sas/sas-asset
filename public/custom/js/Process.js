@@ -45,7 +45,8 @@ const SHOWALL = "/showAll",
   IMPORT = "/import",
   TABLE_LINE = "/tableLine",
   DELETE_LINE = "/destroyLine/",
-  TEST_EMAIL = "/createTestEmail";
+  TEST_EMAIL = "/createTestEmail",
+  ACCEPT = "/accept/";
 
 // view page class on div
 let cardMain = $(".card-main"),
@@ -4615,3 +4616,112 @@ function downloadFile(url) {
     },
   });
 }
+
+function Accept(id) {
+  let action = "update";
+  let checkAccess = isAccess(action, LAST_URL);
+
+  if (checkAccess[0].success && checkAccess[0].message == "Y") {
+    Swal.fire({
+      text: "Are you sure you want to receive all data ? ",
+      type: "warning",
+      showCancelButton: true,
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ok",
+      cancelButtonText: "Close",
+      showLoaderOnConfirm: true,
+      reverseButtons: true,
+      preConfirm: (generate) => {
+        return new Promise(function (resolve) {
+          let url = CURRENT_URL + ACCEPT + id;
+
+          $.getJSON(url, function (result) {
+            Swal.fire({
+              title: "Success !!",
+              text: "Your data has been process",
+              type: "success",
+              showConfirmButton: false,
+              timer: 1000,
+            });
+            reloadTable();
+          }).fail(function (jqXHR, textStatus, errorThrown) {
+            Swal.showValidationMessage(errorThrown);
+            resolve(false);
+            reloadTable();
+          });
+        });
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    });
+  } else if (checkAccess[0].success && checkAccess[0].message == "N") {
+    Toast.fire({
+      type: "error",
+      title: "You are role don't have permission, please reload !!",
+    });
+  } else {
+    Toast.fire({
+      type: "error",
+      title: checkAccess[0].message,
+    });
+  }
+}
+
+_tableLine.on("click", ".btn_accept", function (evt) {
+  evt.preventDefault();
+  const form = $(evt.currentTarget).closest("form");
+  const tr = _tableLine.$(this).closest("tr");
+  const row = _tableLine.row(tr);
+  let id = this.id;
+
+  let url = CURRENT_URL + "/acceptline/" + id;
+
+  let _this = $(this);
+  let oriElement = _this.html();
+
+  $(_this)
+    .html(
+      '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+    )
+    .prop("disabled", true);
+
+  if (id === "") {
+    setTimeout(function () {
+      row.remove().draw(false);
+      $(_this).html(oriElement).prop("disabled", false);
+    }, 100);
+  } else {
+    Swal.fire({
+      text: "Are you sure you want to receive data ? ? ",
+      type: "warning",
+      showCancelButton: true,
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ok",
+      cancelButtonText: "Close",
+      reverseButtons: true,
+    }).then((data) => {
+      if (data.value)
+        $.getJSON(url, function (result) {
+          if (result[0].success) {
+            Swal.fire({
+              title: "Success !!",
+              text: "Your data has been process",
+              type: "success",
+              showConfirmButton: false,
+              timer: 1000,
+            });
+
+            $(".btn_accept").css("display", "none");
+          } else {
+            Toast.fire({
+              type: "error",
+              title: result[0].message,
+            });
+          }
+        }).fail(function (jqXHR, exception) {
+          showError(jqXHR, exception);
+        });
+    });
+
+    $(_this).html(oriElement).prop("disabled", false);
+  }
+});

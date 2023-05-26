@@ -9,10 +9,16 @@ class Movement extends Entity
 	protected $trx_movement_id;
 	protected $documentno;
 	protected $movementdate;
+	protected $movementtype;
 	protected $docstatus;
 	protected $description;
+	protected $md_branch_id;
+	protected $md_branchto_id;
+	protected $md_division_id;
 	protected $created_by;
 	protected $updated_by;
+	protected $ref_movement_id;
+	protected $sys_wfscenario_id;
 
 	protected $dates   = [
 		'created_at',
@@ -98,5 +104,65 @@ class Movement extends Entity
 	public function setUpdatedBy($updated_by)
 	{
 		$this->attributes['updated_by'] = $updated_by;
+	}
+
+	public function getMovementType()
+	{
+		return $this->attributes['movementtype'];
+	}
+
+	public function setMovementType($movementtype)
+	{
+		$this->attributes['movementtype'] = $movementtype;
+	}
+
+	public function getBranchId()
+	{
+		return $this->attributes['md_branch_id'];
+	}
+
+	public function setBranchId($md_branch_id)
+	{
+		$this->attributes['md_branch_id'] = $md_branch_id;
+	}
+
+	public function getBranchToId()
+	{
+		return $this->attributes['md_branchto_id'];
+	}
+
+	public function setBranchToId($md_branchto_id)
+	{
+		$this->attributes['md_branchto_id'] = $md_branchto_id;
+	}
+
+	public function getDivisionId()
+	{
+		return $this->attributes['md_division_id'];
+	}
+
+	public function setDivisionId($md_division_id)
+	{
+		$this->attributes['md_division_id'] = $md_division_id;
+	}
+
+	public function getRefMovementId()
+	{
+		return $this->attributes['ref_movement_id'];
+	}
+
+	public function setRefMovementId($ref_movement_id)
+	{
+		$this->attributes['ref_movement_id'] = $ref_movement_id;
+	}
+
+	public function getWfScenarioId()
+	{
+		return $this->attributes['sys_wfscenario_id'];
+	}
+
+	public function setWfScenarioId($sys_wfscenario_id)
+	{
+		$this->attributes['sys_wfscenario_id'] = $sys_wfscenario_id;
 	}
 }

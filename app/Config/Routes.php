@@ -190,6 +190,9 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('movement/destroyLine/(:any)', 'Backend\Movement::destroyLine/$1');
     $routes->get('movement/getSeqCode', 'Backend\Movement::getSeqCode');
     $routes->get('movement/processIt', 'Backend\Movement::processIt');
+    $routes->get('movement/accept/(:any)', 'Backend\Movement::accept/$1');
+    $routes->match(['get', 'post'], 'movement/destroyAllLine', 'Backend\Movement::destroyAllLine');
+    $routes->get('movement/acceptline/(:any)', 'Backend\Movement::acceptLine/$1');
 
     $routes->add('inventory', 'Backend\Inventory::index');
     $routes->match(['get', 'post'], 'inventory/showAll', 'Backend\Inventory::showAll');
@@ -283,12 +286,12 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->post('opname/tableLine', 'Backend\Opname::tableLine');
     $routes->get('opname/destroyLine/(:any)', 'Backend\Opname::destroyLine/$1');
     $routes->get('opname/getSeqCode', 'Backend\Opname::getSeqCode');
-    $routes->get('opname/processIt', 'Backend\Opname::processIt');  
+    $routes->get('opname/processIt', 'Backend\Opname::processIt');
     $routes->get('opname/getAset', 'Backend\Opname::getAset');
-  
+
     $routes->add('rpt_quotation', 'Backend\Rpt_Quotation::index');
     $routes->match(['get', 'post'], 'rpt_quotation/showAll', 'Backend\Rpt_Quotation::showAll');
-  
+
     $routes->add('disposal', 'Backend\Disposal::index');
     $routes->match(['get', 'post'], 'disposal/showAll', 'Backend\Disposal::showAll');
     $routes->post('disposal/create', 'Backend\Disposal::create');

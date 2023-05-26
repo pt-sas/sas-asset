@@ -11,6 +11,11 @@
                 <th>No</th>
                 <th>Doc No</th>
                 <th>Date</th>
+                <th>Type</th>
+                <th>Reference No</th>
+                <th>Branch</th>
+                <th>Branch To</th>
+                <th>Division</th>
                 <th>Doc Status</th>
                 <th>Createdby</th>
                 <th>Description</th>

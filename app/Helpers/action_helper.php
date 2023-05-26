@@ -131,24 +131,41 @@ function notification($param)
  * @param string $str
  * @return void
  */
-function docStatus(string $str)
+function docStatus(string $str, string $type = null, ?int $total = 0, ?int $available = 0)
 {
-    $msg = "";
+    if ($str === "IP" && is_null($type)) {
+        $msg = '<center><span class="badge badge-info">In Progress</span></center>';
+    } else if ($str === "VO") {
+        $msg = '<center><span class="badge badge-primary">Voided</span></center>';
+    } else if ($str === "IN") {
+        $msg = '<center><span class="badge badge-danger">Invalid</span></center>';
+    } else if ($str === "AP") {
+        $msg = '<center><span class="badge badge-info">Approved</span></center>';
+    } else if ($str === "NA") {
+        $msg = '<center><span class="badge badge-black">Not Approved</span></center>';
+    } else if ($str === "DR") {
+        $msg = '<center><span class="badge badge-warning">Drafted</span></center>';
+    } else {
+        if (strtoupper($type) === "TERIMA") {
+            if ($total == 0 && $available == 0)
+                return 0;
 
-    if ($str === "CO")
-        $msg .= '<center><span class="badge badge-success">Completed</span></center>';
-    else if ($str === "IP")
-        $msg .= '<center><span class="badge badge-info">In Progress</span></center>';
-    else if ($str === "VO")
-        $msg .= '<center><span class="badge badge-primary">Voided</span></center>';
-    else if ($str === "IN")
-        $msg .= '<center><span class="badge badge-danger">Invalid</span></center>';
-    else if ($str === "AP")
-        $msg .= '<center><span class="badge badge-info">Approved</span></center>';
-    else if ($str === "NA")
-        $msg .= '<center><span class="badge badge-black">Not Approved</span></center>';
-    else
-        $msg .= '<center><span class="badge badge-warning">Drafted</span></center>';
+            $calculation = ($available / $total) * 100;
+
+            if ($calculation == 100) {
+                $msg = '<center><span class="badge badge-success">Completed</span></center>';
+            } else {
+                $detail = $calculation > 50 ? "$available from $total</div>" : "<span>$available from $total</span></div>";
+
+                $msg = '<center><div class="progress progress-lg">
+                        <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: ' . $calculation . '%" aria-valuenow="' . $available . '" aria-valuemin="0" aria-valuemax="' . $total . '">
+                        ' . $detail . '
+                    </div></center>';
+            }
+        } else {
+            $msg = '<center><span class="badge badge-success">Completed</span></center>';
+        }
+    }
 
     return $msg;
 }

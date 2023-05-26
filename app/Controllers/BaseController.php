@@ -814,4 +814,30 @@ class BaseController extends Controller
 
 		return $this;
 	}
+
+	public function setField($field, $value, array $data, $aField = null): array
+	{
+		$result = [];
+
+		foreach ($data as $key => $row) :
+			if (gettype($value) !== "array") {
+				if (isset($row->{$field}))
+					$row->{$field} = $value;
+
+				if ($field === $value && !is_null($aField))
+					$row->{$field} = $row->{$aField};
+			} else {
+				if (isset($row->{$field})) {
+					foreach ($value as $key2 => $val) :
+						if ($key == $key2)
+							$row->{$field} = $val->{$aField};
+					endforeach;
+				}
+			}
+
+			$result[] = $row;
+		endforeach;
+
+		return $result;
+	}
 }
