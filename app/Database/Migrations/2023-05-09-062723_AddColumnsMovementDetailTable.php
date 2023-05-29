@@ -11,6 +11,12 @@ class AddColumnsMovementDetailTable extends Migration
     public function up()
     {
         $fields = [
+            'ref_movement_detail_id' => [
+                'type'          => 'INT',
+                'after'         => 'trx_movement_id',
+                'constraint'    => 6,
+                'null'          => false
+            ],
             'isaccept'          => [
                 'type'          => 'CHAR',
                 'after'         => 'room_to',

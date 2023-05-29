@@ -11,6 +11,12 @@ class AddColumnsMovementTable extends Migration
     public function up()
     {
         $fields = [
+            'ref_movement_id'   => [
+                'type'          => 'INT',
+                'after'         => 'updated_by',
+                'constraint'    => 6,
+                'null'          => false
+            ],
             'movementtype'      => [
                 'type'          => 'VARCHAR',
                 'after'         => 'movementdate',
@@ -20,6 +26,12 @@ class AddColumnsMovementTable extends Migration
             'md_branch_id'      => [
                 'type'          => 'INT',
                 'after'         => 'docstatus',
+                'constraint'    => 6,
+                'null'          => false
+            ],
+            'md_branchto_id'      => [
+                'type'          => 'INT',
+                'after'         => 'md_branch_id',
                 'constraint'    => 6,
                 'null'          => false
             ],
