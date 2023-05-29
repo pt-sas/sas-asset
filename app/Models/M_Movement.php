@@ -15,6 +15,12 @@ class M_Movement extends Model
 		'movementdate',
 		'description',
 		'docstatus',
+		'movementtype',
+		'md_branch_id',
+		'md_branchto_id',
+		'md_division_id',
+		'sys_wfscenario_id',
+		'ref_movement_id',
 		'created_by',
 		'updated_by'
 	];
@@ -59,7 +65,11 @@ class M_Movement extends Model
 	public function getSelect()
 	{
 		$sql = $this->table . '.*,' .
-			'sys_user.name as createdby';
+			'sys_user.name as createdby,
+			bfrom.name as branch,
+			bto.name as branchto,
+			md_division.name as division,
+			ref.documentno as referenceno';
 
 		return $sql;
 	}
@@ -67,7 +77,11 @@ class M_Movement extends Model
 	public function getJoin()
 	{
 		$sql = [
-			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left')
+			$this->setDataJoin('trx_movement ref', 'ref.trx_movement_id = ' . $this->table . '.ref_movement_id', 'left'),
+			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left'),
+			$this->setDataJoin('md_branch bfrom', 'bfrom.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
+			$this->setDataJoin('md_branch bto', 'bto.md_branch_id = ' . $this->table . '.md_branchto_id', 'left'),
+			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_division_id', 'left')
 		];
 
 		return $sql;
@@ -82,12 +96,15 @@ class M_Movement extends Model
 		];
 	}
 
-	public function getInvNumber()
+	public function getInvNumber($type)
 	{
 		$month = date('m');
 
 		$this->builder->select('MAX(RIGHT(documentno,4)) AS documentno');
-		$this->builder->where("DATE_FORMAT(movementdate, '%m')", $month);
+		$this->builder->where([
+			"DATE_FORMAT(movementdate, '%m')" 	=> $month,
+			"movementtype"						=> $type
+		]);
 		$sql = $this->builder->get();
 
 		$code = "";
@@ -100,7 +117,9 @@ class M_Movement extends Model
 			$code = "0001";
 		}
 
-		$prefix = "MV" . date('ym') . $code;
+		$prefix = $type === "KIRIM" ? "MK" : "MT";
+
+		$prefix .= date('ym') . $code;
 
 		return $prefix;
 	}
