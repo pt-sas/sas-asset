@@ -381,7 +381,7 @@ class BaseController extends Controller
 
 			//? Check function is exists 
 			if (method_exists($model, 'doChangeValueField'))
-				$data = $model->doChangeValueField($data);
+				$data = $model->doChangeValueField($data, $this->getID());
 
 			//* Split data
 			$data = $this->doSplitData($data);
