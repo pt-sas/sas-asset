@@ -278,7 +278,7 @@ class Field
                 $icon = '<i class="fas fa-check fa-lg"></i>';
                 $title = 'Accept';
             } else {
-                $icon = '<i class="fas fa-times fa-lg"></i>';
+                $icon = '<i class="fas fa-trash-alt"></i>';
                 $title = 'Delete';
             }
 
