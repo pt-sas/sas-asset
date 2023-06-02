@@ -700,7 +700,7 @@ class Validation
     public $movement = [
         'documentno'                => [
             'label'                 => 'Document No',
-            'rules'                 => 'is_unique[trx_movement.documentno,trx_movement_id,{id}]',
+            'rules'                 => 'required|min_length[10]|max_length[10]|is_unique[trx_movement.documentno,trx_movement_id,{id}]',
             'errors'                => [
                 'is_unique' => 'This {field} already exists.',
                 'required'  => 'Please Insert the {field} first'
@@ -711,41 +711,6 @@ class Validation
             'rules'                 => 'required',
             'errors'                => [
                 'required'  => 'Please Insert the {field} first.'
-            ]
-        ],
-        'md_branch_id'              => [
-            'label'                 => 'Branch',
-            'rules'                 => 'required',
-            'errors'                => [
-                'required'  => 'Please Choose the {field} first.'
-            ]
-        ],
-        'movementtype'              => [
-            'label'                 => 'Movement Type',
-            'rules'                 => 'required',
-            'errors'                => [
-                'required'  => 'Please Choose the {field} first.'
-            ]
-        ],
-        'md_branchto_id'        => [
-            'label'             => 'Branch To',
-            'rules'             => 'required_based_field_value[movementtype, Kirim]',
-            'errors'            => [
-                'required_based_field_value' => 'Please Choose the field first.'
-            ]
-        ],
-        'md_division_id'        => [
-            'label'             => 'Division',
-            'rules'             => 'required',
-            'errors'            => [
-                'required' => 'Please Choose the field first.'
-            ]
-        ],
-        'line'                      => [
-            'label'                 => 'Movement Detail',
-            'rules'                 => 'required',
-            'errors'                => [
-                'required' => 'Please Insert the {field} first.'
             ]
         ],
         'detail.table.*.assetcode_line'  => [
@@ -775,37 +740,6 @@ class Validation
             'rules'                 => 'required',
             'errors'                => [
                 'required' => 'Please Choose the {field} Line'
-            ]
-        ]
-    ];
-
-    public $movementAddRow = [
-        'md_branch_id'              => [
-            'label'                 => 'Branch',
-            'rules'                 => 'required',
-            'errors'                => [
-                'required'  => 'Please Choose the {field} first.'
-            ]
-        ],
-        'movementtype'              => [
-            'label'                 => 'Movement Type',
-            'rules'                 => 'required',
-            'errors'                => [
-                'required'  => 'Please Choose the {field} first.'
-            ]
-        ],
-        'md_branchto_id'        => [
-            'label'             => 'Branch To',
-            'rules'             => 'required_based_field_value[movementtype, Kirim]',
-            'errors'            => [
-                'required_based_field_value' => 'Please Choose the field first.'
-            ]
-        ],
-        'md_division_id'        => [
-            'label'             => 'Division',
-            'rules'             => 'required',
-            'errors'            => [
-                'required' => 'Please Choose the field first.'
             ]
         ]
     ];
@@ -1377,6 +1311,75 @@ class Validation
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Insert the {field} Line'
+            ]
+        ]
+    ];
+
+    public $opname = [
+        'documentno'            => [
+            'label'             => 'Document No',
+            'rules'             => 'is_unique[trx_opname.documentno,trx_opname_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.'
+            ]
+        ],
+        'opnamedate'            => [
+            'label'             => 'Date Opname',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'md_branch_id'          => [
+            'label'             => 'Branch',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'md_room_id'            => [
+            'label'             => 'Room',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'md_employee_id'        => [
+            'label'             => 'Employee',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'line'                  => [
+            'label'             => 'Quotation Detail',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ]
+    ];
+
+    public $opname_scan = [
+        'md_branch_id'          => [
+            'label'             => 'Branch',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'md_room_id'            => [
+            'label'             => 'Room',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'md_employee_id'        => [
+            'label'             => 'Employee',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
             ]
         ]
     ];

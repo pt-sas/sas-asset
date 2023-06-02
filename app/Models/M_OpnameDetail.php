@@ -10,15 +10,14 @@ class M_OpnameDetail extends Model
 	protected $table      = 'trx_opname_detail';
 	protected $primaryKey = 'trx_opname_detail_id';
 	protected $allowedFields = [
-		'trx_quotation_id',
+		'trx_opname_id',
+		'assetcode',
 		'md_product_id',
-		'qtyentered',
-		'unitprice',
-		'lineamt',
-		'isspare',
-		'description',
-		'specification',
-		'md_employee_id',
+		'isbranch',
+		'isroom',
+		'isemployee',
+		'isnew',
+		'nocheck',
 		'created_by',
 		'updated_by'
 	];
@@ -42,15 +41,23 @@ class M_OpnameDetail extends Model
 	 * @param array $data Data
 	 * @return array
 	 */
-	public function doChangeValueField(array $data): array
+	public function doChangeValueField(array $data, int $foreignKey): array
 	{
-		$product = new M_Product($this->request);
 		$result = [];
 
-		foreach ($data as $row) :
-			$valPro = $product->where('name', $row['md_product_id'])->first();
+		foreach ($data as $key => $row) :
+			$row['isbranch'] = $row['isbranch'] ?? 'N';
+			$row['isroom'] = $row['isroom'] ?? 'N';
+			$row['isemployee'] = $row['isemployee'] ?? 'N';
 
-			$row['md_product_id'] = $valPro->getProductId();
+			if (!isset($row[$this->primaryKey]) && !empty($foreignKey)) {
+				$line = $this->where([
+					"trx_opname_id"	=> $foreignKey,
+					"assetcode"		=> $row['assetcode']
+				])->first();
+
+				$row[$this->primaryKey] = $line->{$this->primaryKey};
+			}
 
 			$result[] = $row;
 		endforeach;

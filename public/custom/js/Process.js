@@ -569,9 +569,14 @@ $(".save_form").click(function (evt) {
 
       let output = [];
       $.each(rows, function (i) {
-        let tag = $(this).find("input, select, button");
+        const tag = $(this).find("input, select, button, span");
+        const th = $(this).closest("table").find("th");
+        const tr = $(this).closest("tr");
+        const td = tr.find("td");
 
         let row = {};
+
+        //* Table cell from tag
         $.each(tag, function () {
           let className = this.className.split(/\s+/);
           let name = $(this).attr("name");
@@ -581,17 +586,26 @@ $(".save_form").click(function (evt) {
           //* Field containing class rupiah
           if (className.includes("rupiah")) value = replaceRupiah(this.value);
 
-          if ($(this).attr("type") !== "button") {
-            if ($(this).attr("type") !== "checkbox") {
-              row[name] = value;
-            } else {
-              row[name] = $(this).is(":checked") ? "Y" : "N";
-            }
+          if (this.type === "text" || this.type === "select-one") {
+            row[name] = value;
+          } else if (this.type === "checkbox") {
+            row[name] = $(this).is(":checked") ? "Y" : "N";
           } else {
             if (id !== "") row[name] = id;
             else row[name] = "";
 
             if (className.includes("reference-key")) row[name] = value; // Get value reference key
+          }
+        });
+
+        //* Table cell data
+        $.each(td, function (i, item) {
+          let txtValue = $(item).text();
+
+          if ($(item).children().length == 0 && txtValue) {
+            let name = $(th[i]).attr("field");
+
+            row[name] = txtValue;
           }
         });
 
@@ -755,8 +769,11 @@ $(".save_form").click(function (evt) {
           }
         }
       } else {
-        // Set attribute disabled based on default field
-        if (fieldReadOnly.includes(field[i].name))
+        //? Set attribute disabled based on default field or exist attribute edit-disabled
+        if (
+          fieldReadOnly.includes(field[i].name) ||
+          (setSave !== "add" && $(field[i]).attr("edit-disabled"))
+        )
           form
             .find(
               "input:checkbox[name=" +
@@ -3528,6 +3545,21 @@ $(document).ready(function (e) {
     const form = card.find("form");
     showFormData(form);
   }
+
+  $("[name='scan_assetcode']").scannerDetection({
+    timeBeforeScanTest: 100, // wait for the next character for upto 100ms
+    avgTimeByChar: 40, // it's not a barcode if a character takes longer than 100ms
+    preventDefault: true,
+    endChar: [13],
+    onComplete: function (barcode, qty) {
+      $("[name='scan_assetcode']").val(barcode).focus();
+    },
+    onError: function (string, qty) {
+      $("[name='scan_assetcode']").val(
+        $("[name='scan_assetcode']").val() + string
+      );
+    },
+  });
 });
 
 function showNotification() {

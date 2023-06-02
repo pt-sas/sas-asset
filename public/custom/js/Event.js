@@ -2083,3 +2083,242 @@ function destroyAllLine(field, id) {
     },
   });
 }
+
+/**
+ * Form Opname Scan
+ */
+$("#form_opname").on("keyup", "#scan_assetcode", function (evt) {
+  if (evt.key === "Enter" || evt.keyCode === 13) {
+    $(".btn_scan").click();
+  }
+});
+
+$(".btn_scan").click(function (evt) {
+  const form = $(this).closest("form");
+  let action = "create";
+  let checkAccess = isAccess(action, LAST_URL);
+
+  let formData = new FormData();
+
+  if (checkAccess[0].success && checkAccess[0].message == "Y") {
+    let _this = $(this);
+    let oriElement = _this.html();
+    let textElement = _this.text().trim();
+    let fieldScanAsset = form.find('input[name="scan_assetcode"]');
+
+    $.each(form, function () {
+      const formHeader = $(this).find(".row")[0];
+      field = $(formHeader).find("input, select, textarea").not(".line");
+    });
+
+    //* Form Header
+    for (let i = 0; i < field.length; i++) {
+      if (field[i].name !== "") {
+        let className = field[i].className.split(/\s+/);
+
+        //* Set field and value to formData
+        if (
+          field[i].type == "text" ||
+          field[i].type == "textarea" ||
+          field[i].type == "select-one" ||
+          field[i].type == "hidden"
+        )
+          formData.append(field[i].name, field[i].value);
+
+        //* Field type input radio
+        if (field[i].type == "radio") {
+          if (field[i].checked) {
+            formData.append(field[i].name, field[i].value);
+          }
+        }
+
+        //* Field type Multiple select
+        if (field[i].type === "select-multiple") {
+          formData.append(
+            field[i].name,
+            $("[name = " + field[i].name + "]").val()
+          );
+        }
+
+        //* Field type input checkbox
+        if (field[i].type == "checkbox") {
+          if (field[i].checked) {
+            formData.append(field[i].name, "Y");
+          } else {
+            formData.append(field[i].name, "N");
+          }
+        }
+
+        //* Field containing class datepicker
+        if (className.includes("datepicker")) {
+          let date = field[i].value;
+          let time = "00:00:00";
+
+          if (date !== "") {
+            let timeAndDate = moment(date + " " + time);
+            formData.append(field[i].name, timeAndDate._i);
+          }
+        }
+      }
+    }
+
+    const fAssetCode = _tableLine
+      .rows()
+      .nodes()
+      .to$()
+      .find('input[name="assetcode"]');
+
+    let status = false;
+
+    $.each(fAssetCode, function () {
+      let tr = $(this).closest("tr");
+
+      if (fieldScanAsset.val() === this.value) {
+        status = true;
+
+        let noc = parseInt(tr.find("td:eq(6)").text());
+
+        if (noc != 0) formData.append("noc", noc + 1);
+        else formData.append("noc", noc);
+      }
+    });
+
+    formData.append("status", status);
+
+    let url = CURRENT_URL + TABLE_LINE;
+
+    $.ajax({
+      url: url,
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      cache: false,
+      dataType: "JSON",
+      beforeSend: function () {
+        // $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
+        $(_this).prop("disabled", true);
+        $(".close_form").attr("disabled", true);
+        $(".save_form").attr("disabled", true);
+        loadingForm(form.prop("id"), "ios");
+      },
+      complete: function () {
+        // $(_this).html(oriElement).prop('disabled', false);
+        $(_this).prop("disabled", false);
+        $(".close_form").removeAttr("disabled");
+        $(".save_form").removeAttr("disabled");
+        hideLoadingForm(form.prop("id"));
+      },
+      success: function (result) {
+        if (result[0].success) {
+          let arrMsg = result[0].message;
+
+          form.find("select").prop("disabled", true);
+
+          if (arrMsg.new) {
+            _tableLine.row.add(arrMsg.new).draw(false);
+          }
+
+          if (arrMsg.edit) {
+            $.each(fAssetCode, function () {
+              let tr = $(this).closest("tr");
+
+              if (fieldScanAsset.val() === this.value) {
+                tr.find("td:eq(2)").html(arrMsg.edit.isbranch);
+                tr.find("td:eq(3)").html(arrMsg.edit.isroom);
+                tr.find("td:eq(4)").html(arrMsg.edit.isemployee);
+                tr.find("td:eq(5)").html(arrMsg.edit.isnew);
+                tr.find("td:eq(6)").html(arrMsg.edit.nocheck);
+              }
+            });
+          }
+
+          fieldScanAsset.val(null);
+          clearErrorForm(form);
+        } else if (result[0].error) {
+          errorForm(form, result);
+        } else {
+          Toast.fire({
+            type: "error",
+            title: result[0].message,
+          });
+
+          clearErrorForm(form);
+        }
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
+  } else if (checkAccess[0].success && checkAccess[0].message == "N") {
+    Toast.fire({
+      type: "warning",
+      title: "You are role don't have permission !!",
+    });
+  } else {
+    Toast.fire({
+      type: "error",
+      title: checkAccess[0].message,
+    });
+  }
+});
+
+$("#form_opname").on("change", "#md_employee_id", function (evt) {
+  const form = $(this).closest("form");
+  let formData = new FormData();
+
+  trx_opname_id = this.value;
+
+  formData.append("md_employee_id", trx_opname_id);
+
+  let url = SITE_URL + "/getDetailAsset";
+
+  if (trx_opname_id !== "" && setSave === "add") {
+    _tableLine.clear().draw(false);
+
+    $.ajax({
+      url: url,
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      cache: false,
+      dataType: "JSON",
+      beforeSend: function () {
+        $(".x_form").prop("disabled", true);
+        $(".close_form").prop("disabled", true);
+        loadingForm(form.prop("id"), "facebook");
+      },
+      complete: function () {
+        $(".x_form").removeAttr("disabled");
+        $(".close_form").removeAttr("disabled");
+        hideLoadingForm(form.prop("id"));
+      },
+      success: function (result) {
+        $("[name=scan_assetcode]").val(null);
+
+        if (result[0].success) {
+          let arrMsg = result[0].message;
+
+          if (arrMsg.line) {
+            if (form.find("table.tb_displayline").length > 0) {
+              let line = JSON.parse(arrMsg.line);
+
+              $.each(line, function (idx, elem) {
+                _tableLine.row.add(elem).draw(false);
+              });
+            }
+          }
+        } else {
+          Toast.fire({
+            type: "error",
+            title: result[0].message,
+          });
+        }
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
+  }
+});

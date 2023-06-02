@@ -13,8 +13,12 @@ class M_Opname extends Model
 		'documentno',
 		'opnamedate',
 		'docstatus',
+		'md_branch_id',
+		'md_room_id',
 		'md_employee_id',
 		'description',
+		'startdate',
+		'enddate',
 		'created_by',
 		'updated_by'
 	];
@@ -32,6 +36,8 @@ class M_Opname extends Model
 		'', // Number column
 		'trx_opname.documentno',
 		'trx_opname.opnamedate',
+		'md_branch.name',
+		'md_room.name',
 		'md_employee.name',
 		'trx_opname.docstatus',
 		'sys_user.name',
@@ -40,6 +46,8 @@ class M_Opname extends Model
 	protected $column_search = [
 		'trx_opname.documentno',
 		'trx_opname.opnamedate',
+		'md_branch.name',
+		'md_room.name',
 		'md_employee.name',
 		'trx_opname.docstatus',
 		'sys_user.name',
@@ -63,6 +71,8 @@ class M_Opname extends Model
 	{
 		$sql = $this->table . '.*,' .
 			'sys_user.name as createdby,
+			md_branch.name as branch,
+			md_room.name as room,
 			md_employee.name as employee';
 
 		return $sql;
@@ -72,6 +82,8 @@ class M_Opname extends Model
 	{
 		$sql = [
 			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left'),
+			$this->setDataJoin('md_branch', 'md_branch.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
+			$this->setDataJoin('md_room', 'md_room.md_room_id = ' . $this->table . '.md_room_id', 'left'),
 			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left')
 		];
 

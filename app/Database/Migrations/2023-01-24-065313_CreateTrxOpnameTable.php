@@ -19,8 +19,12 @@ class CreateTrxOpnameTable extends Migration
             'updated_by'            => ['type' => 'INT', 'constraint' => 6, 'null' => false],
             'documentno'            => ['type' => 'VARCHAR', 'constraint' => 60, 'null' => false],
             'opnamedate'            => ['type' => 'timestamp', 'null' => false],
+            'md_branch_id'          => ['type' => 'INT', 'constraint' => 6, 'null' => false],
+            'md_room_id'            => ['type' => 'INT', 'constraint' => 6, 'null' => false],
             'md_employee_id'        => ['type' => 'INT', 'constraint' => 6, 'null' => false],
             'docstatus'             => ['type' => 'CHAR', 'constraint' => 2, 'null' => false],
+            'startdate'             => ['type' => 'timestamp', 'null' => false],
+            'enddate'               => ['type' => 'timestamp', 'null' => false],
             'description'           => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false]
         ]);
         $this->forge->addKey('trx_opname_id', true);
