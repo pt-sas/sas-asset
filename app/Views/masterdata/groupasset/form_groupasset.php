@@ -38,7 +38,11 @@
                 <div class="form-group">
                     <?php foreach ($ref_list as $row) : ?>
                         <div class="custom-control custom-radio">
-                            <input type="radio" id="<?= strtolower($row->name) ?>" name="depreciationtype" class="custom-control-input" value="<?= $row->value ?>">
+                            <?php if ($row->value === "DB") : ?>
+                                <input type="radio" id="<?= strtolower($row->name) ?>" name="depreciationtype" class="custom-control-input" value="<?= $row->value ?>" checked>
+                            <?php else : ?>
+                                <input type="radio" id="<?= strtolower($row->name) ?>" name="depreciationtype" class="custom-control-input" value="<?= $row->value ?>">
+                            <?php endif; ?>
                             <label class="custom-control-label" for="<?= strtolower($row->name) ?>"><?= $row->name ?></label>
                         </div>
                     <?php endforeach; ?>
@@ -54,7 +58,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_sequence_id">Document Sequence <span class="required">*</span></label>
-                    <select class="form-control select-data" id="md_sequence_id" name="md_sequence_id" data-url="sequence/getList" default-id="<?= $sequence->getSequenceId() ?>" default-text="<?= $sequence->getName() ?>">
+                    <select class="form-control select-data" id="md_sequence_id" name="md_sequence_id" data-url="sequence/getList" default-id="<?= $sequence->getSequenceId() ?>" default-text="<?= $sequence->getName() ?>" disabled>
                         <option value="">Select Document Sequence</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_sequence_id"></small>
