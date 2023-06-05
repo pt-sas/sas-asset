@@ -422,50 +422,56 @@ $("#form_employee, #form_opname").on("change", "#md_branch_id", function (evt) {
       },
       dataType: "JSON",
       success: function (result) {
-        form.find('[name="md_room_id"]').append('<option value=""></option>');
+        if (result.length > 0) {
+          form.find('[name="md_room_id"]').append('<option value=""></option>');
 
-        let md_room_id = 0;
+          let md_room_id = 0;
 
-        $.each(option, function (i, item) {
-          if (item.fieldName == "md_room_id") md_room_id = item.label;
-        });
+          $.each(option, function (i, item) {
+            if (item.fieldName == "md_room_id") md_room_id = item.label;
+          });
 
-        if (!result[0].error) {
-          $.each(result, function (idx, item) {
-            if (form.find('[name="md_room_id"]').length > 0) {
-              if (md_room_id == item.id) {
-                form
-                  .find('[name="md_room_id"]')
-                  .append(
-                    '<option value="' +
-                      item.id +
-                      '" selected>' +
-                      item.text +
-                      "</option>"
-                  );
+          if (!result[0].error) {
+            $.each(result, function (idx, item) {
+              if (form.find('[name="md_room_id"]').length > 0) {
+                if (md_room_id == item.id) {
+                  form
+                    .find('[name="md_room_id"]')
+                    .append(
+                      '<option value="' +
+                        item.id +
+                        '" selected>' +
+                        item.text +
+                        "</option>"
+                    );
+                } else {
+                  form
+                    .find('[name="md_room_id"]')
+                    .append(
+                      '<option value="' +
+                        item.id +
+                        '">' +
+                        item.text +
+                        "</option>"
+                    );
+                }
               } else {
-                form
-                  .find('[name="md_room_id"]')
-                  .append(
-                    '<option value="' + item.id + '">' + item.text + "</option>"
-                  );
+                Swal.fire({
+                  type: "error",
+                  title: "Field is not found",
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
               }
-            } else {
-              Swal.fire({
-                type: "error",
-                title: "Field is not found",
-                showConfirmButton: false,
-                timer: 1500,
-              });
-            }
-          });
-        } else {
-          Swal.fire({
-            type: "error",
-            title: result[0].message,
-            showConfirmButton: false,
-            timer: 1500,
-          });
+            });
+          } else {
+            Swal.fire({
+              type: "error",
+              title: result[0].message,
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          }
         }
       },
       error: function (jqXHR, exception) {
