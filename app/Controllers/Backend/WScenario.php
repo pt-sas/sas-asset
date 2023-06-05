@@ -28,6 +28,7 @@ class WScenario extends BaseController
 
     public function index()
     {
+        $uri = $this->request->uri->getSegment(2);
         $menu = new M_Menu($this->request);
         $status = new M_Status($this->request);
 
@@ -36,7 +37,8 @@ class WScenario extends BaseController
             'status'    => $status->where([
                 'isactive'  => 'Y',
                 'isline'    => 'N'
-            ])->orderBy('name', 'ASC')
+            ])->like('menu_id', $uri)
+                ->orderBy('name', 'ASC')
                 ->findAll(),
         ];
 
