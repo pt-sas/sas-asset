@@ -2096,6 +2096,7 @@ function destroyAllLine(field, id) {
 $("#form_opname").on("keyup", "#scan_assetcode", function (evt) {
   if (evt.key === "Enter" || evt.keyCode === 13) {
     $(".btn_scan").click();
+    $(this).focus();
   }
 });
 
@@ -2108,154 +2109,155 @@ $(".btn_scan").click(function (evt) {
 
   if (checkAccess[0].success && checkAccess[0].message == "Y") {
     let _this = $(this);
-    let oriElement = _this.html();
-    let textElement = _this.text().trim();
     let fieldScanAsset = form.find('input[name="scan_assetcode"]');
 
-    $.each(form, function () {
-      const formHeader = $(this).find(".row")[0];
-      field = $(formHeader).find("input, select, textarea").not(".line");
-    });
+    if (fieldScanAsset.val() !== "") {
+      $.each(form, function () {
+        const formHeader = $(this).find(".row")[0];
+        field = $(formHeader).find("input, select, textarea").not(".line");
+      });
 
-    //* Form Header
-    for (let i = 0; i < field.length; i++) {
-      if (field[i].name !== "") {
-        let className = field[i].className.split(/\s+/);
+      //* Form Header
+      for (let i = 0; i < field.length; i++) {
+        if (field[i].name !== "") {
+          let className = field[i].className.split(/\s+/);
 
-        //* Set field and value to formData
-        if (
-          field[i].type == "text" ||
-          field[i].type == "textarea" ||
-          field[i].type == "select-one" ||
-          field[i].type == "hidden"
-        )
-          formData.append(field[i].name, field[i].value);
-
-        //* Field type input radio
-        if (field[i].type == "radio") {
-          if (field[i].checked) {
+          //* Set field and value to formData
+          if (
+            field[i].type == "text" ||
+            field[i].type == "textarea" ||
+            field[i].type == "select-one" ||
+            field[i].type == "hidden"
+          )
             formData.append(field[i].name, field[i].value);
+
+          //* Field type input radio
+          if (field[i].type == "radio") {
+            if (field[i].checked) {
+              formData.append(field[i].name, field[i].value);
+            }
+          }
+
+          //* Field type Multiple select
+          if (field[i].type === "select-multiple") {
+            formData.append(
+              field[i].name,
+              $("[name = " + field[i].name + "]").val()
+            );
+          }
+
+          //* Field type input checkbox
+          if (field[i].type == "checkbox") {
+            if (field[i].checked) {
+              formData.append(field[i].name, "Y");
+            } else {
+              formData.append(field[i].name, "N");
+            }
+          }
+
+          //* Field containing class datepicker
+          if (className.includes("datepicker")) {
+            let date = field[i].value;
+            let time = "00:00:00";
+
+            if (date !== "") {
+              let timeAndDate = moment(date + " " + time);
+              formData.append(field[i].name, timeAndDate._i);
+            }
           }
         }
+      }
 
-        //* Field type Multiple select
-        if (field[i].type === "select-multiple") {
-          formData.append(
-            field[i].name,
-            $("[name = " + field[i].name + "]").val()
-          );
+      const fAssetCode = _tableLine
+        .rows()
+        .nodes()
+        .to$()
+        .find('input[name="assetcode"]');
+
+      let status = false;
+
+      $.each(fAssetCode, function () {
+        let tr = $(this).closest("tr");
+
+        if (fieldScanAsset.val().toUpperCase() === this.value.toUpperCase()) {
+          status = true;
+
+          let noc = parseInt(tr.find("td:eq(6)").text());
+
+          if (noc != 0) formData.append("noc", noc + 1);
+          else formData.append("noc", noc);
         }
+      });
 
-        //* Field type input checkbox
-        if (field[i].type == "checkbox") {
-          if (field[i].checked) {
-            formData.append(field[i].name, "Y");
+      formData.append("status", status);
+
+      let url = CURRENT_URL + TABLE_LINE;
+
+      $.ajax({
+        url: url,
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        cache: false,
+        dataType: "JSON",
+        beforeSend: function () {
+          $(_this).prop("disabled", true);
+          $(".close_form").attr("disabled", true);
+          $(".save_form").attr("disabled", true);
+          loadingForm(form.prop("id"), "ios");
+        },
+        complete: function () {
+          $(_this).prop("disabled", false);
+          $(".close_form").removeAttr("disabled");
+          $(".save_form").removeAttr("disabled");
+          hideLoadingForm(form.prop("id"));
+        },
+        success: function (result) {
+          if (result[0].success) {
+            let arrMsg = result[0].message;
+
+            form.find("select").prop("disabled", true);
+
+            if (arrMsg.new) {
+              _tableLine.row.add(arrMsg.new).draw(false);
+            }
+
+            if (arrMsg.edit) {
+              $.each(fAssetCode, function () {
+                let tr = $(this).closest("tr");
+
+                if (
+                  fieldScanAsset.val().toUpperCase() ===
+                  this.value.toUpperCase()
+                ) {
+                  tr.find("td:eq(2)").html(arrMsg.edit.isbranch);
+                  tr.find("td:eq(3)").html(arrMsg.edit.isroom);
+                  tr.find("td:eq(4)").html(arrMsg.edit.isemployee);
+                  tr.find("td:eq(5)").html(arrMsg.edit.isnew);
+                  tr.find("td:eq(6)").html(arrMsg.edit.nocheck);
+                }
+              });
+            }
+
+            fieldScanAsset.val(null);
+            clearErrorForm(form);
+          } else if (result[0].error) {
+            errorForm(form, result);
           } else {
-            formData.append(field[i].name, "N");
-          }
-        }
-
-        //* Field containing class datepicker
-        if (className.includes("datepicker")) {
-          let date = field[i].value;
-          let time = "00:00:00";
-
-          if (date !== "") {
-            let timeAndDate = moment(date + " " + time);
-            formData.append(field[i].name, timeAndDate._i);
-          }
-        }
-      }
-    }
-
-    const fAssetCode = _tableLine
-      .rows()
-      .nodes()
-      .to$()
-      .find('input[name="assetcode"]');
-
-    let status = false;
-
-    $.each(fAssetCode, function () {
-      let tr = $(this).closest("tr");
-
-      if (fieldScanAsset.val() === this.value) {
-        status = true;
-
-        let noc = parseInt(tr.find("td:eq(6)").text());
-
-        if (noc != 0) formData.append("noc", noc + 1);
-        else formData.append("noc", noc);
-      }
-    });
-
-    formData.append("status", status);
-
-    let url = CURRENT_URL + TABLE_LINE;
-
-    $.ajax({
-      url: url,
-      type: "POST",
-      data: formData,
-      processData: false,
-      contentType: false,
-      cache: false,
-      dataType: "JSON",
-      beforeSend: function () {
-        // $(_this).html('<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' + textElement).prop('disabled', true);
-        $(_this).prop("disabled", true);
-        $(".close_form").attr("disabled", true);
-        $(".save_form").attr("disabled", true);
-        loadingForm(form.prop("id"), "ios");
-      },
-      complete: function () {
-        // $(_this).html(oriElement).prop('disabled', false);
-        $(_this).prop("disabled", false);
-        $(".close_form").removeAttr("disabled");
-        $(".save_form").removeAttr("disabled");
-        hideLoadingForm(form.prop("id"));
-      },
-      success: function (result) {
-        if (result[0].success) {
-          let arrMsg = result[0].message;
-
-          form.find("select").prop("disabled", true);
-
-          if (arrMsg.new) {
-            _tableLine.row.add(arrMsg.new).draw(false);
-          }
-
-          if (arrMsg.edit) {
-            $.each(fAssetCode, function () {
-              let tr = $(this).closest("tr");
-
-              if (fieldScanAsset.val() === this.value) {
-                tr.find("td:eq(2)").html(arrMsg.edit.isbranch);
-                tr.find("td:eq(3)").html(arrMsg.edit.isroom);
-                tr.find("td:eq(4)").html(arrMsg.edit.isemployee);
-                tr.find("td:eq(5)").html(arrMsg.edit.isnew);
-                tr.find("td:eq(6)").html(arrMsg.edit.nocheck);
-              }
+            Toast.fire({
+              type: "error",
+              title: result[0].message,
             });
+
+            clearErrorForm(form);
           }
-
-          fieldScanAsset.val(null);
-          clearErrorForm(form);
-        } else if (result[0].error) {
-          errorForm(form, result);
-        } else {
-          Toast.fire({
-            type: "error",
-            title: result[0].message,
-          });
-
-          clearErrorForm(form);
-        }
-      },
-      error: function (jqXHR, exception) {
-        showError(jqXHR, exception);
-      },
-    });
+        },
+        error: function (jqXHR, exception) {
+          showError(jqXHR, exception);
+        },
+      });
+    }
   } else if (checkAccess[0].success && checkAccess[0].message == "N") {
     Toast.fire({
       type: "warning",
