@@ -53,15 +53,16 @@ class WActivity extends BaseController
             $list = $this->model->getActivity();
 
             $result = [];
-            if (!empty($list)) {
+
+            if ($list) {
                 foreach ($list as $value) :
                     $row = [];
                     $ID = $value->sys_wfactivity_id;
                     $record_id = $value->record_id;
                     $table = $value->table;
-                    $menu = $value->menu;
-                    $node = 'Approval ' . ucwords($menu);
-                    $summary = ucwords($menu) . ' ' . $value->documentno . ': ' . $value->usercreated_by;
+                    $menu = ucwords($value->menu);
+                    $node = 'Approval ' . $menu;
+                    $summary = $menu . ' ' . $value->documentno . ': ' . $value->usercreated_by;
 
                     $row[] = $ID;
                     $row[] = $record_id;
@@ -71,11 +72,11 @@ class WActivity extends BaseController
                     $row[] = $summary;
                     $data[] = $row;
                 endforeach;
-
-                $result = [
-                    'data'              => $data
-                ];
             }
+
+            $result = [
+                'data'              => $data
+            ];
 
             return $this->response->setJSON($result);
         }
