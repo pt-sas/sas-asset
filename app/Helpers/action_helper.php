@@ -80,7 +80,7 @@ function replaceFormat(string $rupiah)
  */
 function formatRupiah(int $numeric)
 {
-    return number_format($numeric, 0, '', '.');
+    return number_format($numeric, 0, '', ',');
 }
 
 /**
