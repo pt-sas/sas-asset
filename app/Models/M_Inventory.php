@@ -204,7 +204,7 @@ class M_Inventory extends Model
 
 		$field = $this->find($rows['id'][0]);
 
-		if ($field->md_room_id != $post['md_room_id'] && $field->md_employee_id != $post['md_employee_id']) {
+		if ($field->md_room_id != $post['md_room_id'] || $field->md_employee_id != $post['md_employee_id']) {
 			$in = new stdClass();
 			$in->assetcode = $post['assetcode'];
 			$in->md_product_id = $post['md_product_id'];
@@ -228,8 +228,8 @@ class M_Inventory extends Model
 			$arrInvOut[] = $out;
 
 			$arrData = (array) array_merge(
-				(array) $arrInvIn,
-				(array) $arrInvOut
+				(array) $arrInvOut,
+				(array) $arrInvIn
 			);
 
 			$transaction->create($arrData);
