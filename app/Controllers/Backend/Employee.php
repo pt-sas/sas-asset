@@ -20,15 +20,7 @@ class Employee extends BaseController
 
     public function index()
     {
-        $user = new M_User($this->request);
-
-        $data = [
-            'user'        => $user->where('isactive', 'Y')
-                ->orderBy('name', 'ASC')
-                ->findAll()
-        ];
-
-        return $this->template->render('masterdata/employee/v_employee', $data);
+        return $this->template->render('masterdata/employee/v_employee');
     }
 
     public function showAll()
@@ -100,20 +92,24 @@ class Employee extends BaseController
     {
         $branch = new M_Branch($this->request);
         $division = new M_Division($this->request);
+        $user = new M_User($this->request);
 
         if ($this->request->isAJAX()) {
             try {
-                $list = $this->model->detail([], $this->model->table . '.' . $this->model->primaryKey, $id);
+                $list = $this->model->where($this->model->primaryKey, $id)->findAll();
 
-                $arrList = $list->getResult();
-                $rowBranch = $branch->find($arrList[0]->md_branch_id);
-                $rowDivision = $division->find($arrList[0]->md_division_id);
+                $rowBranch = $branch->find($list[0]->getBranchId());
+                $rowDivision = $division->find($list[0]->getDivisionId());
+                $rowUser = $user->find($list[0]->getUserId());
 
-                $arrList = $this->field->setDataSelect($branch->table, $list->getResult(), $branch->primaryKey, $rowBranch->getBranchId(), $rowBranch->getName());
-                $arrList = $this->field->setDataSelect($division->table, $list->getResult(), $division->primaryKey, $rowDivision->getDivisionId(), $rowDivision->getName());
+                $list = $this->field->setDataSelect($branch->table, $list, $branch->primaryKey, $rowBranch->getBranchId(), $rowBranch->getName());
+                $list = $this->field->setDataSelect($division->table, $list, $division->primaryKey, $rowDivision->getDivisionId(), $rowDivision->getName());
+
+                if (!empty($list[0]->getUserId()))
+                    $list = $this->field->setDataSelect($user->table, $list, $user->primaryKey, $rowUser->getUserId(), $rowUser->getName());
 
                 $result = [
-                    'header'   => $this->field->store($this->model->table, $arrList, $list)
+                    'header'   => $this->field->store($this->model->table, $list)
                 ];
 
                 $response = message('success', true, $result);

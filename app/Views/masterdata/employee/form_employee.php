@@ -63,18 +63,6 @@
                     </label>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label>Alert Recipient </label>
-                    <div class="select2-input select2-primary">
-                        <select class="form-control multiple-select" name="alert" multiple="multiple" style="width: 100%;">
-                            <?php foreach ($user as $row) : ?>
-                                <option value="<?= $row->sys_user_id; ?>"><?= $row->name; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-            </div>
         </div>
     </form>
 </div>
