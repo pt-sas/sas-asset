@@ -232,6 +232,11 @@ _tableInfo = $(".table_info").DataTable({
 _tableReport = $(".table_report")
   .DataTable({
     serverSide: true,
+    processing: true,
+    language: {
+      processing:
+        '<i class="fa fa-spinner fa-spin fa-10x fa-fw"></i><span> Processing...</span>',
+    },
     ajax: {
       url: CURRENT_URL + SHOWALL,
       type: "POST",
@@ -643,6 +648,7 @@ $(".save_form").click(function (evt) {
         hideLoadingForm(form.prop("id"));
       },
       success: function (result) {
+        console.log(result);
         if (result[0].success) {
           Toast.fire({
             type: "success",
