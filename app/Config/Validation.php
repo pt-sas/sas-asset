@@ -624,13 +624,6 @@ class Validation
                 'required'  => 'Please Insert the {field} first.'
             ]
         ],
-        'invoiceno'                 => [
-            'label'                 => 'Invoice No',
-            'rules'                 => 'required',
-            'errors'                => [
-                'required'  => 'Please Insert the {field} first.'
-            ]
-        ],
         'trx_quotation_id'          => [
             'label'                 => 'Quotation',
             'rules'                 => 'required|is_unique[trx_receipt.trx_quotation_id,trx_receipt_id,{id}]',
