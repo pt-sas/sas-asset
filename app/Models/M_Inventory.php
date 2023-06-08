@@ -137,6 +137,7 @@ class M_Inventory extends Model
 				'md_division_id'    		=> $row->md_division_id,
 				'md_room_id'     			=> $row->md_room_id,
 				'md_status_id'				=> $row->md_status_id,
+				'description'				=> $row->description,
 				'trx_receipt_id'			=> $row->trx_receipt_id,
 				'trx_receipt_detail_id'    	=> $row->trx_receipt_detail_id,
 				'created_at'    			=> date('Y-m-d H:i:s'),
