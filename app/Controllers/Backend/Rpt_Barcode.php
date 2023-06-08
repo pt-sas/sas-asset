@@ -134,13 +134,13 @@ class Rpt_Barcode extends BaseController
                 $pdf->write2DBarcode($value, 'QRCODE,L', 20, -5, 100, 100, $style, 'N');
                 $pdf->StartTransform();
                 $pdf->Rotate(90, 130, 90);
-                $pdf->Text(138, 80, $value);
+                $pdf->Text(135, 80, $value);
                 $pdf->StopTransform();
             } else {
                 $pdf->write2DBarcode($value, 'QRCODE,L', 170, -5, 100, 100, $style, 'N');
                 $pdf->StartTransform();
                 $pdf->Rotate(90, 280, 90);
-                $pdf->Text(288, 80, $value);
+                $pdf->Text(285, 80, $value);
                 $pdf->StopTransform();
 
                 $key += 1;

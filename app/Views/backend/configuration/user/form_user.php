@@ -38,14 +38,13 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label>Role <span class="required">*</span></label>
+                    <label>Role </label>
                     <div class="select2-input select2-primary">
                         <select class="form-control multiple-select" name="role" multiple="multiple" style="width: 100%;">
                             <?php foreach ($role as $row) : ?>
                                 <option value="<?= $row->sys_role_id; ?>"><?= $row->name; ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <small class="form-text text-danger" id="error_role"></small>
                     </div>
                 </div>
             </div>

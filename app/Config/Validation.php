@@ -102,21 +102,28 @@ class Validation
 
     public $user = [
         'username'          => [
-            'rules'         =>    'required|is_unique[sys_user.username,sys_user_id,{id}]',
+            'label'         => 'Username',
+            'rules'         => 'required|is_unique[sys_user.username,sys_user_id,{id}]',
             'errors'        => [
+                'required'  => 'Please Insert the {field} first',
                 'is_unique' => 'This {field} already exists.'
             ]
         ],
         'name'              => [
-            'rules'         =>    'required|is_unique[sys_user.name,sys_user_id,{id}]',
+            'label'         => 'Name',
+            'rules'         => 'required|is_unique[sys_user.name,sys_user_id,{id}]',
             'errors'        => [
+                'required'  => 'Please Insert the {field} first',
                 'is_unique' => 'This {field} already exists.'
             ]
         ],
-        'password'          => 'required',
-        'role.*'            => [
-            'label'         => 'role',
-            'rules'         => 'required'
+        'password'          => [
+            'label'         => 'Password',
+            'rules'         => 'required',
+            'errors'        => [
+                'required'  => 'Please Insert the {field} first'
+
+            ]
         ]
     ];
 
@@ -612,13 +619,6 @@ class Validation
         ],
         'docreference'              => [
             'label'                 => 'Document Reference',
-            'rules'                 => 'required',
-            'errors'                => [
-                'required'  => 'Please Insert the {field} first.'
-            ]
-        ],
-        'invoiceno'                 => [
-            'label'                 => 'Invoice No',
             'rules'                 => 'required',
             'errors'                => [
                 'required'  => 'Please Insert the {field} first.'

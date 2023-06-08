@@ -137,6 +137,7 @@ class M_Inventory extends Model
 				'md_division_id'    		=> $row->md_division_id,
 				'md_room_id'     			=> $row->md_room_id,
 				'md_status_id'				=> $row->md_status_id,
+				'description'				=> $row->description,
 				'trx_receipt_id'			=> $row->trx_receipt_id,
 				'trx_receipt_detail_id'    	=> $row->trx_receipt_detail_id,
 				'created_at'    			=> date('Y-m-d H:i:s'),
@@ -204,7 +205,7 @@ class M_Inventory extends Model
 
 		$field = $this->find($rows['id'][0]);
 
-		if ($field->md_room_id != $post['md_room_id'] && $field->md_employee_id != $post['md_employee_id']) {
+		if ($field->md_room_id != $post['md_room_id'] || $field->md_employee_id != $post['md_employee_id']) {
 			$in = new stdClass();
 			$in->assetcode = $post['assetcode'];
 			$in->md_product_id = $post['md_product_id'];
@@ -228,8 +229,8 @@ class M_Inventory extends Model
 			$arrInvOut[] = $out;
 
 			$arrData = (array) array_merge(
-				(array) $arrInvIn,
-				(array) $arrInvOut
+				(array) $arrInvOut,
+				(array) $arrInvIn
 			);
 
 			$transaction->create($arrData);
