@@ -700,10 +700,9 @@ class Validation
     public $movement = [
         'documentno'                => [
             'label'                 => 'Document No',
-            'rules'                 => 'required|min_length[10]|max_length[10]|is_unique[trx_movement.documentno,trx_movement_id,{id}]',
+            'rules'                 => 'is_unique[trx_movement.documentno,trx_movement_id,{id}]',
             'errors'                => [
-                'is_unique' => 'This {field} already exists.',
-                'required'  => 'Please Insert the {field} first'
+                'is_unique' => 'This {field} already exists.'
             ]
         ],
         'movementdate'              => [
@@ -711,6 +710,41 @@ class Validation
             'rules'                 => 'required',
             'errors'                => [
                 'required'  => 'Please Insert the {field} first.'
+            ]
+        ],
+        'movementtype'              => [
+            'label'                 => 'Movement Type',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required'  => 'Please Choose the {field} first.'
+            ]
+        ],
+        'md_branch_id'              => [
+            'label'                 => 'Branch',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required'  => 'Please Choose the {field} first.'
+            ]
+        ],
+        'md_branchto_id'            => [
+            'label'                 => 'Branch To',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required'  => 'Please Choose the {field} first.'
+            ]
+        ],
+        'md_division_id'            => [
+            'label'                 => 'Division',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required'  => 'Please Choose the {field} first.'
+            ]
+        ],
+        'line'                      => [
+            'label'                 => 'Movement Detail',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Insert the {field} first.'
             ]
         ],
         'detail.table.*.assetcode_line'  => [
@@ -1377,6 +1411,37 @@ class Validation
         ],
         'md_employee_id'        => [
             'label'             => 'Employee',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ]
+    ];
+
+    public $movementAddRow = [
+        'movementtype'          => [
+            'label'             => 'Movement Type',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'md_branch_id'          => [
+            'label'             => 'Branch',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'md_branchto_id'        => [
+            'label'             => 'Branch To',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'md_division_id'        => [
+            'label'             => 'Division',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Choose the {field} first'
