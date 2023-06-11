@@ -897,6 +897,13 @@ class Validation
             'errors'                => [
                 'required' => 'Please Choose the {field}'
             ]
+        ],
+        'pic' => [
+            'label'                 => 'PIC',
+            'rules'                 => 'required',
+            'errors'                => [
+                'required' => 'Please Choose the {field}'
+            ]
         ]
     ];
 

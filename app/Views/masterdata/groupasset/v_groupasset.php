@@ -15,6 +15,7 @@
                 <th>Initial Code</th>
                 <th>Useful Life</th>
                 <th>Depreciation Type</th>
+                <th>PIC</th>
                 <th>Active</th>
                 <th>Actions</th>
             </tr>
