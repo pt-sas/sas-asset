@@ -25,7 +25,8 @@ class Category extends BaseController
     {
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
-            $select = $this->model->findAll();
+            $select = $this->model->getSelect();
+            $join = $this->model->getJoin();
             $order = $this->model->column_order;
             $sort = $this->model->order;
             $search = $this->model->column_search;
@@ -33,7 +34,7 @@ class Category extends BaseController
             $data = [];
 
             $number = $this->request->getPost('start');
-            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search);
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join);
 
             foreach ($list as $value) :
                 $row = [];
@@ -46,6 +47,7 @@ class Category extends BaseController
                 $row[] = $value->value;
                 $row[] = $value->name;
                 $row[] = $value->initialcode;
+                $row[] = $value->groupasset;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
@@ -54,7 +56,7 @@ class Category extends BaseController
             $result = [
                 'draw'              => $this->request->getPost('draw'),
                 'recordsTotal'      => $this->datatable->countAll($table),
-                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join),
                 'data'              => $data
             ];
 

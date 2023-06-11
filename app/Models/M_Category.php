@@ -26,12 +26,14 @@ class M_Category extends Model
         'md_category.value',
         'md_category.name',
         'md_category.initialcode',
+        'md_groupasset.name',
         'md_category.isactive'
     ];
     protected $column_search = [
         'md_category.value',
         'md_category.name',
         'md_category.initialcode',
+        'md_groupasset.name',
         'md_category.isactive'
     ];
     protected $order = ['value' => 'ASC'];
@@ -45,6 +47,32 @@ class M_Category extends Model
         $this->db = db_connect();
         $this->request = $request;
         $this->builder = $this->db->table($this->table);
+    }
+
+    public function getSelect()
+    {
+        $sql = $this->table . '.*,
+        md_groupasset.name as groupasset';
+
+        return $sql;
+    }
+
+    public function getJoin()
+    {
+        $sql = [
+            $this->setDataJoin('md_groupasset', 'md_groupasset.md_groupasset_Id = ' . $this->table . '.md_groupasset_Id', 'left')
+        ];
+
+        return $sql;
+    }
+
+    private function setDataJoin($tableJoin, $columnJoin, $typeJoin = "inner")
+    {
+        return [
+            "tableJoin" => $tableJoin,
+            "columnJoin" => $columnJoin,
+            "typeJoin" => $typeJoin
+        ];
     }
 
     public function getSeqNumber()
