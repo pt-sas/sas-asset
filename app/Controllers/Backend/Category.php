@@ -4,6 +4,7 @@ namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
 use App\Models\M_Category;
+use App\Models\M_Employee;
 use App\Models\M_GroupAsset;
 use Config\Services;
 
@@ -48,6 +49,7 @@ class Category extends BaseController
                 $row[] = $value->name;
                 $row[] = $value->initialcode;
                 $row[] = $value->groupasset;
+                $row[] = $value->pic;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
@@ -88,15 +90,20 @@ class Category extends BaseController
     public function show($id)
     {
         $groupasset = new M_GroupAsset($this->request);
+        $employee = new M_Employee($this->request);
 
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
 
-                if (!empty($list[0]->getGroupAssetId())) {
-                    $rowGroup = $groupasset->find($list[0]->getGroupAssetId());
+                $rowGroup = $groupasset->find($list[0]->getGroupAssetId());
 
-                    $list = $this->field->setDataSelect($groupasset->table, $list, $groupasset->primaryKey, $rowGroup->getGroupAssetId(), $rowGroup->getName());
+                $list = $this->field->setDataSelect($groupasset->table, $list, $groupasset->primaryKey, $rowGroup->getGroupAssetId(), $rowGroup->getName());
+
+                if (!empty($list[0]->getPIC())) {
+                    $rowEmp = $employee->find($list[0]->getPIC());
+
+                    $list = $this->field->setDataSelect($employee->table, $list, "pic", $rowEmp->getEmployeeId(), $rowEmp->getName());
                 }
 
                 $result = [

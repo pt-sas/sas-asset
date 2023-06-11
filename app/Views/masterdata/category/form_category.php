@@ -32,6 +32,20 @@
                     <small class="form-text text-danger" id="error_md_groupasset_id"></small>
                 </div>
             </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="description">Description </label>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="pic">PIC </label>
+                    <select class="form-control select-data" id="pic" name="pic" data-url="employee/getList">
+                        <option value="">Select PIC</option>
+                    </select>
+                </div>
+            </div>
             <div class="col-md-2 mt-4">
                 <div class="form-check">
                     <label class="form-check-label">

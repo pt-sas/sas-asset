@@ -16,7 +16,8 @@ class M_Category extends Model
         'md_groupasset_id',
         'isactive',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'pic'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\Category';
@@ -27,6 +28,7 @@ class M_Category extends Model
         'md_category.name',
         'md_category.initialcode',
         'md_groupasset.name',
+        'md_employee.name',
         'md_category.isactive'
     ];
     protected $column_search = [
@@ -34,6 +36,7 @@ class M_Category extends Model
         'md_category.name',
         'md_category.initialcode',
         'md_groupasset.name',
+        'md_employee.name',
         'md_category.isactive'
     ];
     protected $order = ['value' => 'ASC'];
@@ -52,7 +55,8 @@ class M_Category extends Model
     public function getSelect()
     {
         $sql = $this->table . '.*,
-        md_groupasset.name as groupasset';
+        md_groupasset.name as groupasset,
+        md_employee.name as pic';
 
         return $sql;
     }
@@ -60,7 +64,8 @@ class M_Category extends Model
     public function getJoin()
     {
         $sql = [
-            $this->setDataJoin('md_groupasset', 'md_groupasset.md_groupasset_Id = ' . $this->table . '.md_groupasset_Id', 'left')
+            $this->setDataJoin('md_groupasset', 'md_groupasset.md_groupasset_Id = ' . $this->table . '.md_groupasset_Id', 'left'),
+            $this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.pic', 'left')
         ];
 
         return $sql;
