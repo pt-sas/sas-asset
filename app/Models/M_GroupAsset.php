@@ -31,6 +31,7 @@ class M_GroupAsset extends Model
         'md_groupasset.description',
         'md_groupasset.initialcode',
         'md_groupasset.usefullife',
+        'sys_ref_detail.name',
         'md_groupasset.isactive'
     ];
     protected $column_search = [
@@ -39,6 +40,7 @@ class M_GroupAsset extends Model
         'md_groupasset.description',
         'md_groupasset.initialcode',
         'md_groupasset.usefullife',
+        'sys_ref_detail.name',
         'md_groupasset.isactive'
     ];
     protected $order = ['value' => 'ASC'];
