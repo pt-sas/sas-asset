@@ -104,10 +104,10 @@ class M_Category extends Model
         return $number;
     }
 
-    public function getByProduct($id)
+    public function getByProduct($field, $param)
     {
         $this->builder->join('md_product', 'md_product.md_category_id = ' . $this->table . '.md_category_id', 'left');
-        $this->builder->where('md_product.md_product_id', $id);
+        $this->builder->where($field, $param);
         return $this->builder->get()->getRow();
     }
 }
