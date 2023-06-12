@@ -179,4 +179,32 @@ class Category extends BaseController
             return $this->response->setJSON($response);
         }
     }
+
+    public function getPic()
+    {
+        $groupasset = new M_GroupAsset($this->request);
+
+        if ($this->request->isAjax()) {
+            $post = $this->request->getVar();
+
+            try {
+                if (isset($post['name']))
+                    $row = $this->model->getByProduct('md_product.name', $post['name']);
+
+                if (isset($post['id']))
+                    $row = $this->model->getByProduct('md_product.md_product_id', $post['id']);
+
+                if (!$row->pic) {
+                    $val = $groupasset->find($row->md_groupasset_id);
+                    $response = $val->pic;
+                } else {
+                    $response = $row->pic;
+                }
+            } catch (\Exception $e) {
+                $response = message('error', false, $e->getMessage());
+            }
+
+            return $this->response->setJSON($response);
+        }
+    }
 }

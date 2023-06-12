@@ -4,10 +4,34 @@
 _tableLine.on("change", 'input[name="isspare"]', function (evt) {
   const tr = _tableLine.$(this).closest("tr");
 
-  tr.find('select[name="md_employee_id"]')
-    .val(null)
-    .change()
-    .removeAttr("disabled");
+  if ($(this).is(":checked")) {
+    let url = ADMIN_URL + "category/getPic";
+    let product = { name: tr.find('input[name="md_product_id"]').val() };
+
+    if (tr.find('select[name="md_product_id"]').length > 0)
+      product = { id: tr.find('select[name="md_product_id"]').val() };
+
+    $.ajax({
+      url: url,
+      type: "POST",
+      data: product,
+      dataType: "JSON",
+      success: function (response) {
+        tr.find('select[name="md_employee_id"]')
+          .val(response)
+          .change()
+          .attr("disabled", true);
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
+  } else {
+    tr.find('select[name="md_employee_id"]')
+      .val(null)
+      .change()
+      .removeAttr("disabled");
+  }
 
   if (tr.find('select[name="md_branch_id"]').length > 0) {
     tr.find('select[name="md_branch_id"]')
@@ -24,7 +48,10 @@ _tableLine.on("change", 'input[name="isspare"]', function (evt) {
   }
 
   if (tr.find('select[name="md_room_id"]').length > 0) {
-    tr.find('select[name="md_room_id"]').empty();
+    tr.find('select[name="md_room_id"]')
+      .empty()
+      .change()
+      .removeAttr("disabled");
   }
 });
 
@@ -2328,5 +2355,37 @@ $("#form_opname").on("change", "#md_employee_id", function (evt) {
         showError(jqXHR, exception);
       },
     });
+  }
+});
+
+_tableInfo.on("change", 'input[name="isspare"]', function (evt) {
+  const tr = _tableInfo.$(this).closest("tr");
+
+  if ($(this).is(":checked")) {
+    let url = ADMIN_URL + "category/getPic";
+    let product = tr.find("td:eq(1)").text();
+
+    $.ajax({
+      url: url,
+      type: "POST",
+      data: {
+        name: product,
+      },
+      dataType: "JSON",
+      success: function (response) {
+        tr.find('select[name="employee_id"]')
+          .val(response)
+          .change()
+          .attr("disabled", true);
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
+  } else {
+    tr.find('select[name="employee_id"]')
+      .val(null)
+      .change()
+      .removeAttr("disabled");
   }
 });
