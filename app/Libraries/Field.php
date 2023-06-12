@@ -272,12 +272,11 @@ class Field
                 $defaultValue = "";
             }
 
-            $class = $class ? 'btn-danger btn_delete' : "";
-
             if ($checked) {
                 $icon = '<i class="fas fa-check fa-lg"></i>';
                 $title = 'Accept';
             } else {
+                $class = $class . ' btn-danger btn_delete';
                 $icon = '<i class="fas fa-trash-alt"></i>';
                 $title = 'Delete';
             }
