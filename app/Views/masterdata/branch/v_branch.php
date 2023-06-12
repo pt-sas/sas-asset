@@ -12,7 +12,7 @@
                 <th>Branch Code</th>
                 <th>Name</th>
                 <th>Address</th>
-                <th>Leader</th>
+                <th>PIC</th>
                 <th>Telephone</th>
                 <th>Active</th>
                 <th>Actions</th>
