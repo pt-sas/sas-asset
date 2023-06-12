@@ -196,7 +196,7 @@ class GroupAsset extends BaseController
                 }
 
                 if (!empty($post['reference']))
-                    $value = $category->getByProduct($post['reference']);
+                    $value = $category->getByProduct('md_product.md_product_id', $post['reference']);
 
                 foreach ($list as $key => $row) :
                     $response[$key]['id'] = $row->getGroupAssetId();
