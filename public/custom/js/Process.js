@@ -4036,21 +4036,20 @@ function putFieldData(form, data) {
               .val(formatRupiah(label));
           } else {
             form
-              .find("input:text[name=" + fieldName + "]")
+              .find(
+                "input:text[name=" +
+                  fieldName +
+                  "], input:hidden[name=" +
+                  fieldName +
+                  "], textarea[name=" +
+                  fieldName +
+                  "], input:password[name=" +
+                  fieldName +
+                  "] "
+              )
               .not(".line")
               .val(label);
           }
-
-          form
-            .find(
-              "textarea[name=" +
-                fieldName +
-                "], input:password[name=" +
-                fieldName +
-                "]"
-            )
-            .not(".line")
-            .val(label);
 
           if (
             form.find("textarea.summernote[name=" + fieldName + "]").length >
