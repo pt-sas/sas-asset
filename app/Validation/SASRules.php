@@ -21,8 +21,8 @@ class SASRules
 
         // Check field is exists
         for ($i = 0; $i < count($list); $i++) {
-            if (isset($list[$i]['assetcode']) && $list[$i]['assetcode'] !== '') {
-                $array[] = $list[$i]['assetcode'];
+            if (isset($list[$i]['assetcode_line']) && $list[$i]['assetcode_line'] !== '') {
+                $array[] = $list[$i]['assetcode_line'];
             }
         }
 
