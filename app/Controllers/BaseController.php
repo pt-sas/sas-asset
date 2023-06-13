@@ -669,6 +669,8 @@ class BaseController extends Controller
 
 		foreach ($data as $value) :
 			if (empty($value[$this->primaryKey])) {
+				unset($value[$this->primaryKey]);
+
 				$result['insert'][] = $value;
 			} else {
 				$result['update'][] = $value;
