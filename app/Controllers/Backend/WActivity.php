@@ -60,9 +60,9 @@ class WActivity extends BaseController
                     $ID = $value->sys_wfactivity_id;
                     $record_id = $value->record_id;
                     $table = $value->table;
-                    $menu = ucwords($value->menu);
-                    $node = 'Approval ' . $menu;
-                    $summary = $menu . ' ' . $value->documentno . ': ' . $value->usercreated_by;
+                    $menu = $value->menu;
+                    $node = 'Approval ' . ucwords($menu);
+                    $summary = ucwords($menu) . ' ' . $value->documentno . ': ' . $value->usercreated_by;
 
                     $row[] = $ID;
                     $row[] = $record_id;
