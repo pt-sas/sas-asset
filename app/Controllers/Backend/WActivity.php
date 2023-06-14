@@ -12,6 +12,7 @@ use App\Models\M_WActivity;
 use App\Models\M_WEvent;
 use App\Models\M_WScenarioDetail;
 use App\Models\M_Transaction;
+use App\Models\M_Inventory;
 use App\Models\M_Room;
 use Config\Services;
 use Pusher\Pusher;
@@ -298,40 +299,51 @@ class WActivity extends BaseController
                         }
                     endforeach;
 
-                    // $arrMoveIn = [];
-                    // $arrMoveOut = [];
-                    // foreach ($line as $key => $value) :
-                    //     //? Data movement from
-                    //     $arrOut = new stdClass();
-                    //     $arrOut->assetcode = $value->assetcode;
-                    //     $arrOut->md_product_id = $value->md_product_id;
-                    //     $arrOut->md_employee_id = $value->employee_from;
-                    //     $arrOut->md_room_id = $value->room_from;
-                    //     $arrOut->transactiontype = $this->Movement_Out;
-                    //     $arrOut->transactiondate = date("Y-m-d");
-                    //     $arrOut->qtyentered = -1;
-                    //     $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
-                    //     $arrMoveOut[$key] = $arrOut;
+                    $inventory = new M_Inventory($this->request);
+                    $transaction = new M_Transaction();
 
-                    //     //? Data movement to
-                    //     $arrIn = new stdClass();
-                    //     $arrIn->assetcode = $value->assetcode;
-                    //     $arrIn->md_product_id = $value->md_product_id;
-                    //     $arrIn->md_employee_id = $value->employee_to;
-                    //     $arrIn->md_room_id = $transit->md_room_id;
-                    //     $arrIn->transactiontype = $this->Movement_In;
-                    //     $arrIn->transactiondate = date("Y-m-d");
-                    //     $arrIn->qtyentered = 1;
-                    //     $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
-                    //     $arrMoveIn[$key] = $arrIn;
-                    // endforeach;
+                    foreach ($line as $key => $value) :
+                        //? Data movement from
+                        $arrOut = new stdClass();
+                        $room = new M_Room($this->request);
+                        $transit = $room->where("name", "TRANSIT")->first();
 
-                    // $arrData = (array) array_merge(
-                    //     (array) $arrMoveIn,
-                    //     (array) $arrMoveOut
-                    // );
+                        $arrOut->assetcode = $value->assetcode;
+                        $arrOut->md_product_id = $value->md_product_id;
+                        $arrOut->md_employee_id = $value->employee_to;
+                        $arrOut->md_room_id = $transit->md_room_id;
+                        $arrOut->transactiontype = $this->Movement_Out;
+                        $arrOut->transactiondate = date("Y-m-d");
+                        $arrOut->qtyentered = -1;
+                        $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
+                        $arrMoveOut[$key] = $arrOut;
 
-                    // $transaction->create($arrData);
+                        //? Data movement to
+                        $arrIn = new stdClass();
+                        $arrIn->assetcode = $value->assetcode;
+                        $arrIn->md_product_id = $value->md_product_id;
+                        $arrIn->md_employee_id = $value->employee_to;
+                        $arrIn->md_branch_id = $value->branch_to;
+                        $arrIn->md_division_id = $value->division_to;
+                        $arrIn->md_room_id = $value->room_to;
+                        $arrIn->transactiontype = $this->Movement_In;
+                        $arrIn->transactiondate = date("Y-m-d");
+                        $arrIn->qtyentered = 1;
+                        $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
+                        $arrMoveIn[$key] = $arrIn;
+                    endforeach;
+
+                    $arrInv = (array) array_merge(
+                        (array) $arrMoveIn
+                    );
+
+                    $arrData = (array) array_merge(
+                        (array) $arrMoveOut,
+                        (array) $arrMoveIn
+                    );
+
+                    $inventory->edit($arrInv);
+                    $transaction->create($arrData);
                 }
             }
 

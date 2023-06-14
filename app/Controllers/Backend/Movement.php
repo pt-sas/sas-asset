@@ -100,7 +100,7 @@ class Movement extends BaseController
                 $row[] = docStatus($value->docstatus, $value->movementtype, $totalLine, $avaiLine);
                 $row[] = $value->createdby;
                 $row[] = $value->description;
-                $row[] = $this->template->tableButton($ID, $value->docstatus, $value->movementtype);
+                $row[] = $this->template->tableButton($ID, $value->docstatus);
                 $data[] = $row;
             endforeach;
 
@@ -228,7 +228,6 @@ class Movement extends BaseController
 
                         if ($_DocAction === $this->DOCSTATUS_Completed) {
                             //* Passing data to table transaction
-                            //* Passing data to table transaction
                             $arrMoveIn = [];
                             $arrMoveOut = [];
                             foreach ($line as $key => $value) :
@@ -267,8 +266,8 @@ class Movement extends BaseController
                             );
 
                             $arrData = (array) array_merge(
-                                (array) $arrMoveIn,
-                                (array) $arrMoveOut
+                                (array) $arrMoveOut,
+                                (array) $arrMoveIn
                             );
 
                             $inventory->edit($arrInv);
@@ -491,11 +490,14 @@ class Movement extends BaseController
 
                 $sessEmplo = $employee->where('sys_user_id', $this->session->get('sys_user_id'))->first();
 
-                if (($role || $sessEmplo && $row->employee_to == $sessEmplo->md_employee_id) && $move->getMovementType() === $this->Movement_Terima && $row->isaccept === "N") {
-                    $button = $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', 'btn-success btn_accept', null, null, true, null, $row->trx_movement_detail_id);
-                } else {
-                    $button = $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', null, null, null, null, null, $row->trx_movement_detail_id);
-                }
+                // if (($role || $sessEmplo && $row->employee_to == $sessEmplo->md_employee_id) && $move->getMovementType() === $this->Movement_Terima && $row->isaccept === "N") {
+                //     $button = $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', 'btn-success btn_accept', null, null, true, null, $row->trx_movement_detail_id);
+                // } else {
+                //     $button = $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', null, null, null, null, null, $row->trx_movement_detail_id);
+                // }
+
+                // if ($move->getMovementType() === $this->Movement_Kirim)
+                $button = $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', null, null, null, null, null, $row->trx_movement_detail_id);
 
                 //? Where clause inventory 
                 // $invWhere["md_branch_id"] = $row->branch_from;
