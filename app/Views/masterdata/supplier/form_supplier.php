@@ -22,10 +22,6 @@
                     <input type="text" class="form-control" id="owner" name="owner">
                     <small class="form-text text-danger" id="error_owner"></small>
                 </div>
-                <div class="form-group">
-                    <label for="email">Email </label>
-                    <input type="text" class="form-control" id="email" name="email">
-                </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
@@ -34,11 +30,17 @@
                     <small class="form-text text-danger" id="error_phone"></small>
                 </div>
             </div>
-            <div class="col-md-12">
+            <div class="col-md-6">
                 <div class="form-group">
                     <label for="address">Address <span class="required">*</span></label>
-                    <textarea type="text" class="form-control" id="address" name="address" rows="2"></textarea>
+                    <textarea type="text" class="form-control" id="address" name="address" rows="3"></textarea>
                     <small class="form-text text-danger" id="error_address"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="email">Email </label>
+                    <input type="text" class="form-control" id="email" name="email">
                 </div>
             </div>
             <div class="col-md-2">
