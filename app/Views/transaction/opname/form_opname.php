@@ -77,7 +77,7 @@
                                 <th>Branch</th>
                                 <th>Room</th>
                                 <th>Employee</th>
-                                <th field="isnew">New</th>
+                                <th>New</th>
                                 <th field="nocheck">NoC</th>
                                 <th class="text-center">Action</th>
                             </tr>
