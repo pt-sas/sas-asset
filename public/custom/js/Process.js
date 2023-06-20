@@ -571,11 +571,22 @@ $(".save_form").click(function (evt) {
     //? Check in form exists Table Line
     if (form.find("table.tb_displayline").length > 0) {
       const rows = _tableLine.rows().nodes().to$();
+      const th = $(rows).closest("table").find("th");
 
       let output = [];
+      let tableHead = [];
+
+      $.each(th, function (i, item) {
+        if ($(item).attr("field")) {
+          tableHead.push({
+            position: i,
+            name: $(item).attr("field"),
+          });
+        }
+      });
+
       $.each(rows, function (i) {
         const tag = $(this).find("input, select, button, span");
-        const th = $(this).closest("table").find("th");
         const tr = $(this).closest("tr");
         const td = tr.find("td");
 
@@ -595,7 +606,7 @@ $(".save_form").click(function (evt) {
             row[name] = value;
           } else if (this.type === "checkbox") {
             row[name] = $(this).is(":checked") ? "Y" : "N";
-          } else {
+          } else if (typeof name !== "undefined") {
             if (id !== "") row[name] = id;
             else row[name] = "";
 
@@ -607,11 +618,9 @@ $(".save_form").click(function (evt) {
         $.each(td, function (i, item) {
           let txtValue = $(item).text();
 
-          if ($(item).children().length == 0 && txtValue) {
-            let name = $(th[i]).attr("field");
-
-            row[name] = txtValue;
-          }
+          $.each(tableHead, function (idx, column) {
+            if (i == column.position) row[column.name] = txtValue;
+          });
         });
 
         output[i] = row;
