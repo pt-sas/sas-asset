@@ -32,6 +32,24 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
+                    <label for="pic">PIC <span class="required">*</span></label>
+                    <select class="form-control select-data" id="pic" name="pic" data-url="employee/getList">
+                        <option value="">Select PIC</option>
+                    </select>
+                    <small class="form-text text-danger" id="error_pic"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="md_sequence_id">Document Sequence <span class="required">*</span></label>
+                    <select class="form-control select-data" id="md_sequence_id" name="md_sequence_id" data-url="sequence/getList" default-id="<?= $sequence->getSequenceId() ?>" default-text="<?= $sequence->getName() ?>" disabled>
+                        <option value="">Select Document Sequence</option>
+                    </select>
+                    <small class="form-text text-danger" id="error_md_sequence_id"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
                     <label for="description">Description </label>
                     <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
                 </div>
