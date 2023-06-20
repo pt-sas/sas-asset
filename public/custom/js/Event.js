@@ -703,6 +703,8 @@ $("#form_inventory").on("change", "#md_product_id", function (evt) {
                   item.text +
                   "</option>"
               );
+
+              md_groupasset_id = 0;
             } else {
               $("#md_groupasset_id").append(
                 '<option value="' + item.id + '">' + item.text + "</option>"
@@ -839,6 +841,9 @@ $("#form_inventory").on("change", "#md_employee_id", function (evt) {
                   item.text +
                   "</option>"
               );
+
+              //TODO: Set md_division_id to zero after set selected
+              md_division_id = 0;
             } else {
               $("#md_division_id").append(
                 '<option value="' + item.id + '">' + item.text + "</option>"
