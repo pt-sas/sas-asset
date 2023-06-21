@@ -152,7 +152,7 @@ _tableLine = $(".tb_displayline").DataTable({
     );
   },
   lengthChange: false,
-  pageLength: 20,
+  paging: false,
   searching: false,
   ordering: false,
   autoWidth: false,
