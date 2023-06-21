@@ -38,6 +38,11 @@ class M_Movement extends Model
 		'', // Number column
 		'trx_movement.documentno',
 		'trx_movement.movementdate',
+		'sys_ref_detail.name',
+		'ref.documentno',
+		'bfrom.name',
+		'bto.name',
+		'md_division.name',
 		'trx_movement.docstatus',
 		'sys_user.name',
 		'trx_movement.description'
@@ -45,6 +50,11 @@ class M_Movement extends Model
 	protected $column_search = [
 		'trx_movement.documentno',
 		'trx_movement.movementdate',
+		'sys_ref_detail.name',
+		'ref.documentno',
+		'bfrom.name',
+		'bto.name',
+		'md_division.name',
 		'trx_movement.docstatus',
 		'sys_user.name',
 		'trx_movement.description'
@@ -69,19 +79,24 @@ class M_Movement extends Model
 			bfrom.name as branch,
 			bto.name as branchto,
 			md_division.name as division,
-			ref.documentno as referenceno';
+			ref.documentno as referenceno,
+			sys_ref_detail.name as move_type';
 
 		return $sql;
 	}
 
 	public function getJoin()
 	{
+		//* WF_Participant Type
+		$defaultID = 11;
+
 		$sql = [
 			$this->setDataJoin('trx_movement ref', 'ref.trx_movement_id = ' . $this->table . '.ref_movement_id', 'left'),
 			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left'),
 			$this->setDataJoin('md_branch bfrom', 'bfrom.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
 			$this->setDataJoin('md_branch bto', 'bto.md_branch_id = ' . $this->table . '.md_branchto_id', 'left'),
-			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_division_id', 'left')
+			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_division_id', 'left'),
+			$this->setDataJoin('sys_ref_detail', 'sys_ref_detail.sys_reference_id = ' . $defaultID . ' AND sys_ref_detail.value = ' . $this->table . '.movementtype', 'left')
 		];
 
 		return $sql;

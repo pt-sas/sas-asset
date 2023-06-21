@@ -92,7 +92,7 @@ class Movement extends BaseController
                 $row[] = $number;
                 $row[] = $value->documentno;
                 $row[] = format_dmy($value->movementdate, '-');
-                $row[] = $value->movementtype;
+                $row[] = $value->move_type;
                 $row[] = $value->referenceno;
                 $row[] = $value->branch;
                 $row[] = $value->branchto;
