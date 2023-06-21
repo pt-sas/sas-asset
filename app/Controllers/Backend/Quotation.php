@@ -111,6 +111,11 @@ class Quotation extends BaseController
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
                 $this->entity->setGrandTotal(arrSumField('lineamt', $table));
 
+                if ($this->isNew()) {
+                    $docNo = $this->model->getInvNumber('isinternaluse', 'N');
+                    $this->entity->setDocumentNo($docNo);
+                }
+
                 if (!$this->validation->run($post, 'quotation')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
@@ -282,20 +287,6 @@ class Quotation extends BaseController
         }
 
         return json_encode($table);
-    }
-
-    public function getSeqCode()
-    {
-        if ($this->request->isAJAX()) {
-            try {
-                $docNo = $this->model->getInvNumber('isinternaluse', 'N');
-                $response = message('success', true, $docNo);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
     }
 
     public function getList()
