@@ -140,8 +140,8 @@ class M_Receipt extends Model
 	{
 		$post = $this->request->getPost();
 
-		$yearMonth = date("ym", strtotime($post['quotationdate']));
-		$month = date("m", strtotime($post['quotationdate']));
+		$yearMonth = date("ym", strtotime($post['receiptdate']));
+		$month = date("m", strtotime($post['receiptdate']));
 
 		$this->builder->select('MAX(RIGHT(documentno,4)) AS documentno');
 		$this->builder->where("DATE_FORMAT(receiptdate, '%m')", $month);
