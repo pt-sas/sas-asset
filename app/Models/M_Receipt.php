@@ -138,7 +138,10 @@ class M_Receipt extends Model
 
 	public function getInvNumber()
 	{
-		$month = date('m');
+		$post = $this->request->getPost();
+
+		$yearMonth = date("ym", strtotime($post['quotationdate']));
+		$month = date("m", strtotime($post['quotationdate']));
 
 		$this->builder->select('MAX(RIGHT(documentno,4)) AS documentno');
 		$this->builder->where("DATE_FORMAT(receiptdate, '%m')", $month);
@@ -154,7 +157,7 @@ class M_Receipt extends Model
 			$code = "0001";
 		}
 
-		$prefix = "RC" . date('ym') . $code;
+		$prefix = "RC" . $yearMonth . $code;
 
 		return $prefix;
 	}

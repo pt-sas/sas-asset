@@ -117,6 +117,11 @@ class Receipt extends BaseController
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
                 $this->entity->setGrandTotal(arrSumField('unitprice', $table));
 
+                if ($this->isNew()) {
+                    $docNo = $this->model->getInvNumber();
+                    $this->entity->setDocumentNo($docNo);
+                }
+
                 if (!$this->validation->run($post, 'receipt')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
@@ -250,20 +255,6 @@ class Receipt extends BaseController
                 $result = $delete ? $grandTotal : false;
 
                 $response = message('success', true, $result);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
-    public function getSeqCode()
-    {
-        if ($this->request->isAJAX()) {
-            try {
-                $docNo = $this->model->getInvNumber();
-                $response = message('success', true, $docNo);
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }

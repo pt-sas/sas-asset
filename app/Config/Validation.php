@@ -586,7 +586,7 @@ class Validation
     public $receipt = [
         'documentno'                => [
             'label'                 => 'Document No',
-            'rules'                 => 'required|min_length[10]|max_length[10]|is_unique[trx_receipt.documentno,trx_receipt_id,{id}]',
+            'rules'                 => 'is_unique[trx_receipt.documentno,trx_receipt_id,{id}]',
             'errors'                => [
                 'is_unique' => 'This {field} already exists.',
                 'required'  => 'Please Insert the {field} first'
