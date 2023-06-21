@@ -959,7 +959,7 @@ class Validation
     public $internal = [
         'documentno'            => [
             'label'             => 'Document No',
-            'rules'             => 'required|min_length[10]|max_length[10]|is_unique[trx_quotation.documentno,trx_quotation_id,{id}]',
+            'rules'             => 'is_unique[trx_quotation.documentno,trx_quotation_id,{id}]',
             'errors'            => [
                 'is_unique'     => 'This {field} already exists.',
                 'required'      => 'Please Insert the {field} first.'
