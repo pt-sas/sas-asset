@@ -34,26 +34,26 @@ class M_WScenario extends Model
 	protected $column_order = [
 		'', // Hide column
 		'', // Number column
-		'm_wscenario.name',
-		'm_wscenario.lineno',
-		'm_wscenario.grandtotal',
-		'm_wscenario.menu',
+		'sys_wfscenario.name',
+		'sys_wfscenario.lineno',
+		'sys_wfscenario.grandtotal',
+		'sys_wfscenario.menu',
 		'md_status.name',
 		'md_branch.name',
 		'md_division.name',
-		'm_wscenario.description',
-		'm_wscenario.isactive'
+		'sys_wfscenario.description',
+		'sys_wfscenario.isactive'
 	];
 	protected $column_search = [
-		'm_wscenario.name',
-		'm_wscenario.lineno',
-		'm_wscenario.grandtotal',
-		'm_wscenario.menu',
+		'sys_wfscenario.name',
+		'sys_wfscenario.lineno',
+		'sys_wfscenario.grandtotal',
+		'sys_wfscenario.menu',
 		'md_status.name',
 		'md_branch.name',
 		'md_division.name',
-		'm_wscenario.description',
-		'm_wscenario.isactive'
+		'sys_wfscenario.description',
+		'sys_wfscenario.isactive'
 	];
 	protected $order = ['name' => 'ASC'];
 	protected $request;
