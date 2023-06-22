@@ -50,6 +50,7 @@ class Room extends BaseController
                 $row[] = $value->name;
                 $row[] = $value->branch;
                 $row[] = $value->userrep;
+                $row[] = $value->description;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
