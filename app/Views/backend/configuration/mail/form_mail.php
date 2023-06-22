@@ -27,7 +27,7 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="smtpcrypto">SMTP Crypto <span class="required">*</span></label>
+                    <label for="smtpcrypto">SMTP <span class="required">*</span></label>
                     <input type="text" class="form-control" id="smtpcrypto" name="smtpcrypto">
                     <small class="form-text text-danger" id="error_smtpcrypto"></small>
                 </div>
