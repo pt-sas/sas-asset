@@ -283,12 +283,12 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->post('opname/tableLine', 'Backend\Opname::tableLine');
     $routes->get('opname/destroyLine/(:any)', 'Backend\Opname::destroyLine/$1');
     $routes->get('opname/getSeqCode', 'Backend\Opname::getSeqCode');
-    $routes->get('opname/processIt', 'Backend\Opname::processIt');  
+    $routes->get('opname/processIt', 'Backend\Opname::processIt');
     $routes->get('opname/getAset', 'Backend\Opname::getAset');
-  
+
     $routes->add('rpt_quotation', 'Backend\Rpt_Quotation::index');
     $routes->match(['get', 'post'], 'rpt_quotation/showAll', 'Backend\Rpt_Quotation::showAll');
-  
+
     $routes->add('disposal', 'Backend\Disposal::index');
     $routes->match(['get', 'post'], 'disposal/showAll', 'Backend\Disposal::showAll');
     $routes->post('disposal/create', 'Backend\Disposal::create');
@@ -298,6 +298,9 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('disposal/destroyLine/(:any)', 'Backend\Disposal::destroyLine/$1');
     $routes->get('disposal/getSeqCode', 'Backend\Disposal::getSeqCode');
     $routes->get('disposal/processIt', 'Backend\Disposal::processIt');
+
+    $routes->add('rpt_asset', 'Backend\Rpt_Asset::index');
+    $routes->match(['get', 'post'], 'rpt_asset/showAll', 'Backend\Rpt_Asset::showAll');
 });
 
 /*
