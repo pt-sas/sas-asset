@@ -35,6 +35,9 @@ class Movement extends BaseController
     {
         $reference = new M_Reference($this->request);
 
+        $start_date = date('Y-m-d', strtotime('- 1 days'));
+        $end_date = date('Y-m-d');
+
         $data = [
             'today'         => date('Y-m-d'),
             'ref_list'      => $reference->findBy([
@@ -44,7 +47,8 @@ class Movement extends BaseController
             ], null, [
                 'field'     => 'sys_ref_detail.name',
                 'option'    => 'ASC'
-            ])->getResult()
+            ])->getResult(),
+            'date_range' => $start_date . ' - ' . $end_date
         ];
 
         return $this->template->render('transaction/movement/v_movement', $data);
