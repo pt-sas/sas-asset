@@ -13,6 +13,7 @@
                 <th>Branch</th>
                 <th>Division</th>
                 <th>Room</th>
+                <th>Description</th>
                 <th>Employee</th>
             </tr>
         </thead>
