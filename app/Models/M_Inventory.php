@@ -51,7 +51,8 @@ class M_Inventory extends Model
 		'md_room.name',
 		'md_employee.name',
 		'md_status.name',
-		'trx_inventory.isactive'
+		'trx_inventory.isactive',
+		'trx_inventory.isspare'
 	];
 	protected $column_search	= [
 		'trx_inventory.assetcode',
@@ -61,7 +62,8 @@ class M_Inventory extends Model
 		'md_room.name',
 		'md_employee.name',
 		'md_status.name',
-		'trx_inventory.isactive'
+		'trx_inventory.isactive',
+		'trx_inventory.isspare'
 	];
 	protected $order			= ['assetcode' => 'ASC'];
 	protected $db;
