@@ -22,8 +22,8 @@ class Role extends Seeder
             [
                 'created_by'    => 1,
                 'updated_by'    => 1,
-                'name'          => 'W_View_All_Movement',
-                'description'   => 'Role for view all transaction movement',
+                'name'          => 'W_View_All_Data',
+                'description'   => 'Role for view all data',
                 'ismanual'      => 'Y',
                 'iscanexport'   => 'N',
                 'iscanreport'   => 'N',
