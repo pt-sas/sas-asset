@@ -3,6 +3,7 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
+use App\Models\M_Employee;
 use App\Models\M_Inventory;
 use Config\Services;
 
@@ -16,7 +17,23 @@ class Rpt_Asset extends BaseController
 
     public function index()
     {
-        return $this->template->render('report/asset/v_asset');
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
+
+        $employee = null;
+
+        if (empty($role)) {
+            $mEmpl = new M_Employee($this->request);
+
+            $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())
+                ->orderBy('name', 'ASC')
+                ->first();
+        }
+
+        $data = [
+            'employee' => $employee
+        ];
+
+        return $this->template->render('report/asset/v_asset', $data);
     }
 
     public function showAll()
