@@ -191,12 +191,12 @@ class M_Quotation extends Model
 			$this->table . '.quotationdate,' .
 			$this->table . '.docstatus,' .
 			'md_status.name as status,
+			trx_quotation_detail.lineamt,
 			md_product.name as product,
 			trx_quotation_detail.qtyentered,
 			trx_quotation_detail.qtyreceipt,
 			trx_quotation_detail.unitprice,
-			trx_quotation_detail.lineamt,
-			md_employee.name as employee,' .
+			trx_quotation_detail.isspare,' .
 			$this->table . '.created_at';
 
 		return $sql;
@@ -208,8 +208,7 @@ class M_Quotation extends Model
 			$this->setDataJoin('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left'),
 			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
 			$this->setDataJoin('trx_quotation_detail', 'trx_quotation_detail.trx_quotation_id = ' . $this->table . '.trx_quotation_id', 'left'),
-			$this->setDataJoin('md_product', 'md_product.md_product_id = trx_quotation_detail.md_product_id', 'left'),
-			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left')
+			$this->setDataJoin('md_product', 'md_product.md_product_id = trx_quotation_detail.md_product_id', 'left')
 		];
 
 		return $sql;

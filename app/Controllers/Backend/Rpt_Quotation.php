@@ -55,15 +55,16 @@ class Rpt_Quotation extends BaseController
                     $row[] = $number;
                     $row[] = $value->documentno;
                     $row[] = $value->supplier;
-                    $row[] = $value->quotationdate;
-                    $row[] = $value->docstatus;
+                    $row[] = format_dmy($value->quotationdate, '-');
+                    $row[] = docStatus($value->docstatus);
                     $row[] = $value->status;
                     $row[] = $value->product;
                     $row[] = $value->qtyentered;
-                    $row[] = $value->qtyreceipt;
-                    $row[] = $value->unitprice;
-                    $row[] = $value->lineamt;
-                    $row[] = $value->employee;
+                    $row[] = formatRupiah($value->qtyreceipt);
+                    $row[] = formatRupiah($value->unitprice);
+                    $row[] = formatRupiah($value->lineamt);
+                    $row[] = active($value->isspare);
+
 
                     $data[] = $row;
                 endforeach;

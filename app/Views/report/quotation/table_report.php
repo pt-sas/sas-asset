@@ -8,12 +8,11 @@
                 <th>Quotation Date</th>
                 <th>Doc Status</th>
                 <th>Status</th>
+                <th>Product</th>
                 <th>Qty Entered</th>
                 <th>Qty Receipt</th>
                 <th>Unit Price</th>
                 <th>Line Amount</th>
-                <th>Product</th>
-                <th>Employee</th>
             </tr>
         </thead>
     </table>
