@@ -276,6 +276,7 @@ class M_Inventory extends Model
 					v_all_product.md_type_id,
 					v_all_product.mdt_name as type,
 					v_all_product.mdp_name as product,
+					v_all_product.vrt_name as variant,
 					trx_receipt.documentno as receipt';
 
 		return $sql;
@@ -289,7 +290,7 @@ class M_Inventory extends Model
 			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_division_id', 'left'),
 			$this->setDataJoin('md_room', 'md_room.md_room_id = ' . $this->table . '.md_room_id', 'left'),
 			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left'),
-			$this->setDataJoin('trx_receipt', 'trx_receipt.trx_receipt_id = ' . $this->table . '.trx_receipt_id', 'left'),
+			$this->setDataJoin('trx_receipt', 'trx_receipt.trx_receipt_id = ' . $this->table . '.trx_receipt_id', 'left')
 		];
 
 		return $sql;
