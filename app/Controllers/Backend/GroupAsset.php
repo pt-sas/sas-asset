@@ -120,10 +120,12 @@ class GroupAsset extends BaseController
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
 
                 $rowSeq = $sequence->find($list[0]->getSequenceId());
-                $rowEmp = $employee->find($list[0]->getPIC());
-
                 $list = $this->field->setDataSelect($sequence->table, $list, $sequence->primaryKey, $rowSeq->getSequenceId(), $rowSeq->getName());
-                $list = $this->field->setDataSelect($employee->table, $list, "pic", $rowEmp->getEmployeeId(), $rowEmp->getName());
+
+                if (!empty($list[0]->getPIC())) {
+                    $rowEmp = $employee->find($list[0]->getPIC());
+                    $list = $this->field->setDataSelect($employee->table, $list, "pic", $rowEmp->getEmployeeId(), $rowEmp->getName());
+                }
 
                 $result = [
                     'header'   => $this->field->store($this->model->table, $list)
