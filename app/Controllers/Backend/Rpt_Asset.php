@@ -3,10 +3,11 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
+use App\Models\M_Employee;
 use App\Models\M_Inventory;
 use Config\Services;
 
-class Rpt_AssetDetail extends BaseController
+class Rpt_Asset extends BaseController
 {
     public function __construct()
     {
@@ -16,16 +17,23 @@ class Rpt_AssetDetail extends BaseController
 
     public function index()
     {
-        $start_date = date('Y-m-d', strtotime('- 1 days'));
-        $start_created = date('Y-m-d');
-        $end_date = date('Y-m-d');
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
+
+        $employee = null;
+
+        if (empty($role)) {
+            $mEmpl = new M_Employee($this->request);
+
+            $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())
+                ->orderBy('name', 'ASC')
+                ->first();
+        }
 
         $data = [
-            'date_range' => $start_date . ' - ' . $end_date,
-            'date_created' => $start_created . ' - ' . $end_date
+            'employee' => $employee
         ];
 
-        return $this->template->render('report/assetdetail/v_assetdetail', $data);
+        return $this->template->render('report/asset/v_asset', $data);
     }
 
     public function showAll()
@@ -66,10 +74,6 @@ class Rpt_AssetDetail extends BaseController
                     $row[] = $value->room;
                     $row[] = $value->description;
                     $row[] = $value->employee;
-                    $row[] = formatRupiah($value->unitprice);
-                    $row[] = format_dmy($value->inventorydate, '-');
-                    $row[] = active($value->isactive);
-                    $row[] = active($value->isspare);
                     $data[] = $row;
 
                 endforeach;

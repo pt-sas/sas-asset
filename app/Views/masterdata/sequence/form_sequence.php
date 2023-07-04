@@ -8,10 +8,6 @@
                     <input type="text" class="form-control" id="name" name="name">
                     <small class="form-text text-danger" id="error_name"></small>
                 </div>
-                <div class="form-group">
-                    <label for="description">Description </label>
-                    <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
-                </div>
             </div>
             <div class="col-md-2 mt-4">
                 <div class="form-check">
@@ -29,6 +25,13 @@
                     </label>
                 </div>
             </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="description">Description </label>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="col-md-6"></div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="vformat">Value Format </label>
@@ -80,7 +83,7 @@
                     </label>
                     <small class="form-text text-danger" id="error_isgassetlevelsequence"></small>
                 </div>
-                <div class="form-check">
+                <!-- <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input" id="iscategorylevelsequence" name="iscategorylevelsequence" show-field="categorycolumn">
                         <span class="form-check-sign">Category Level</span>
@@ -97,17 +100,37 @@
                         <input type="checkbox" class="form-check-input" id="startnewmonth" name="startnewmonth">
                         <span class="form-check-sign">Restart sequence every Month</span>
                     </label>
-                </div>
+                </div> -->
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="gassetcolumn">Group Asset Column </label>
                     <input type="text" class="form-control" id="gassetcolumn" name="gassetcolumn">
                 </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="iscategorylevelsequence" name="iscategorylevelsequence" show-field="categorycolumn">
+                        <span class="form-check-sign">Category Level</span>
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6">
                 <div class="form-group">
                     <label for="categorycolumn">Category Column </label>
                     <input type="text" class="form-control" id="categorycolumn" name="categorycolumn">
                 </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="startnewyear" name="startnewyear" show-field="startnewmonth, datecolumn">
+                        <span class="form-check-sign">Restart sequence every Year</span>
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6">
                 <div class="form-group">
                     <label for="datecolumn">Date Column <span class="required">*</span></label>
                     <input type="text" class="form-control" id="datecolumn" name="datecolumn">
@@ -115,6 +138,12 @@
                 </div>
             </div>
             <div class="col-md-6">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="startnewmonth" name="startnewmonth">
+                        <span class="form-check-sign">Restart sequence every Month</span>
+                    </label>
+                </div>
                 <div class="form-group">
                     <label for="startno">Start No <span class="required">*</span></label>
                     <input type="text" class="form-control" id="startno" name="startno" value="<?= $startno ?>">

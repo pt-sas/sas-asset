@@ -422,7 +422,7 @@ function getOption(controller, field, tr, selected_id, ref_id = null) {
  */
 $("#form_employee, #form_opname").on("change", "#md_branch_id", function (evt) {
   let _this = $(this);
-  let url = ADMIN_URL + "room" + "/getList";
+  let url = ADMIN_URL + "room/getList";
   let value = this.value;
   const form = _this.closest("form");
 
@@ -514,7 +514,7 @@ $("#form_employee, #form_opname").on("change", "#md_branch_id", function (evt) {
 _tableLine.on("change", 'select[name="assetcode"]', function (evt) {
   const tr = _tableLine.$(this).closest("tr");
 
-  let url = ADMIN_URL + "inventory" + "/getAssetDetail";
+  let url = ADMIN_URL + "inventory/getAssetDetail";
   let value = this.value;
 
   $.ajax({
@@ -656,7 +656,7 @@ _tableLine.on("change", 'select[name="employee_to"]', function (evt) {
  */
 // Form Inventory
 $("#form_inventory").on("change", "#md_product_id", function (evt) {
-  let url = ORI_URL + "/sas/groupasset" + "/getList";
+  let url = ADMIN_URL + "/groupasset/getList";
   let value = this.value;
 
   $("#md_groupasset_id").empty();
@@ -728,7 +728,7 @@ $("#form_inventory").on("change", "#md_product_id", function (evt) {
 });
 
 $("#form_inventory").on("change", "#md_branch_id", function (evt) {
-  let url = ADMIN_URL + "room" + "/getList";
+  let url = ADMIN_URL + "room/getList";
   let value = this.value;
 
   $("#md_room_id").empty();
@@ -795,7 +795,7 @@ $("#form_inventory").on("change", "#md_branch_id", function (evt) {
 });
 
 $("#form_inventory").on("change", "#md_employee_id", function (evt) {
-  let url = ADMIN_URL + "division" + "/getList";
+  let url = ADMIN_URL + "division/getList";
   let value = this.value;
 
   $("#md_division_id").empty();
@@ -1401,7 +1401,7 @@ $(document).ready(function (e) {
 });
 
 $("#filter_inventory").on("change", '[name="md_branch_id"]', function (evt) {
-  let url = ADMIN_URL + "room" + "/getList";
+  let url = ADMIN_URL + "room/getList";
   let value = this.value;
 
   $('[name="md_room_id"]').empty();
@@ -1596,7 +1596,7 @@ $("#parameter_assetdetail").on(
   "change",
   '[name="md_branch_id"]',
   function (evt) {
-    let url = ADMIN_URL + "room" + "/getList";
+    let url = ADMIN_URL + "room/getList";
     let value = this.value;
 
     $('[name="md_room_id"]').empty();
@@ -1743,7 +1743,7 @@ $("#form_product, #form_product_info").on(
   function (evt) {
     const form = $(this).closest("form");
 
-    let url = ADMIN_URL + "subcategory" + "/getList";
+    let url = ADMIN_URL + "subcategory/getList";
     let value = this.value;
 
     $("#md_subcategory_id").empty();
@@ -1824,7 +1824,7 @@ $("#form_product, #form_product_info").on(
   function (evt) {
     const form = $(this).closest("form");
 
-    let url = ADMIN_URL + "type" + "/getList";
+    let url = ADMIN_URL + "type/getList";
     let value = this.value;
 
     $("#md_type_id").empty();
@@ -1899,7 +1899,7 @@ $("#form_product, #form_product_info").on(
 );
 
 $("#parameter_barcode").on("change", "#md_branch_id", function (evt) {
-  let url = ADMIN_URL + "room" + "/getList";
+  let url = ADMIN_URL + "room/getList";
   let value = this.value;
 
   $("#md_room_id").empty();

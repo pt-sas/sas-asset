@@ -13,6 +13,7 @@
                 <th>Name</th>
                 <th>Branch</th>
                 <th>Room Agent</th>
+                <th>Description</th>
                 <th>Active</th>
                 <th>Actions</th>
             </tr>

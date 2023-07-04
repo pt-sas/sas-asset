@@ -31,42 +31,51 @@ $routes->setAutoRoute(true);
 
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
+$routes->get('/', 'Backend\Dashboard::index', ['filter' => 'auth']);
+
 $routes->get('auth', 'Backend\Auth::index', ['filter' => 'auth']);
 
-$routes->get('logout', 'Backend\Auth::logout');
+$routes->post('auth/login', 'Backend\Auth::login');
 
-$routes->get('/', 'Backend\Dashboard::index', ['filter' => 'auth']);
+$routes->get('logout', 'Backend\Auth::logout');
 
 $routes->post('(:any)/AccessMenu/getAccess', 'Backend\AccessMenu::getAccess');
 
 $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->add('/', 'Backend\Dashboard::index');
 
-    $routes->post('(:any)/AccessMenu/getAccess', 'Backend\AccessMenu::getAccess');
+    $routes->post('(:any)/accessmenu/getAccess', 'Backend\AccessMenu::getAccess');
+
+    $routes->post('auth/changePassword', 'Backend\Auth::changePassword');
 
     $routes->add('user', 'Backend\User::index');
     $routes->match(['get', 'post'], 'user/showAll', 'Backend\User::showAll');
     $routes->post('user/create', 'Backend\User::create');
     $routes->get('user/show/(:any)', 'Backend\User::show/$1');
     $routes->get('user/destroy/(:any)', 'Backend\User::destroy/$1');
+    $routes->match(['get', 'post'], 'user/getList', 'Backend\User::getList');
 
     $routes->add('role', 'Backend\Role::index');
     $routes->match(['get', 'post'], 'role/showAll', 'Backend\Role::showAll');
     $routes->post('role/create', 'Backend\Role::create');
     $routes->get('role/show/(:any)', 'Backend\Role::show/$1');
     $routes->get('role/destroy/(:any)', 'Backend\Role::destroy/$1');
+    $routes->post('role/getUserRoleName', 'Backend\Role::getUserRoleName');
+    $routes->match(['get', 'post'], 'role/getList', 'Backend\Role::getList');
 
     $routes->add('menu', 'Backend\Menu::index');
     $routes->match(['get', 'post'], 'menu/showAll', 'Backend\Menu::showAll');
     $routes->post('menu/create', 'Backend\Menu::create');
     $routes->get('menu/show/(:any)', 'Backend\Menu::show/$1');
     $routes->get('menu/destroy/(:any)', 'Backend\Menu::destroy/$1');
+    $routes->match(['get', 'post'], 'menu/getList', 'Backend\Menu::getList');
 
     $routes->add('submenu', 'Backend\Submenu::index');
     $routes->match(['get', 'post'], 'submenu/showAll', 'Backend\Submenu::showAll');
     $routes->post('submenu/create', 'Backend\Submenu::create');
     $routes->get('submenu/show/(:any)', 'Backend\Submenu::show/$1');
     $routes->get('submenu/destroy/(:any)', 'Backend\Submenu::destroy/$1');
+    $routes->match(['get', 'post'], 'submenu/getList', 'Backend\Submenu::getList');
 
     $routes->add('brand', 'Backend\Brand::index');
     $routes->match(['get', 'post'], 'brand/showAll', 'Backend\Brand::showAll');
@@ -74,6 +83,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('brand/show/(:any)', 'Backend\Brand::show/$1');
     $routes->get('brand/destroy/(:any)', 'Backend\Brand::destroy/$1');
     $routes->get('brand/getSeqCode', 'Backend\Brand::getSeqCode');
+    $routes->match(['get', 'post'], 'brand/getList', 'Backend\Brand::getList');
 
     $routes->add('category', 'Backend\Category::index');
     $routes->match(['get', 'post'], 'category/showAll', 'Backend\Category::showAll');
@@ -81,6 +91,8 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('category/show/(:any)', 'Backend\Category::show/$1');
     $routes->get('category/destroy/(:any)', 'Backend\Category::destroy/$1');
     $routes->get('category/getSeqCode', 'Backend\Category::getSeqCode');
+    $routes->match(['get', 'post'], 'category/getList', 'Backend\Category::getList');
+    $routes->post('category/getPic', 'Backend\Category::getPic');
 
     $routes->add('subcategory', 'Backend\Subcategory::index');
     $routes->match(['get', 'post'], 'subcategory/showAll', 'Backend\Subcategory::showAll');
@@ -88,6 +100,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('subcategory/show/(:any)', 'Backend\Subcategory::show/$1');
     $routes->get('subcategory/destroy/(:any)', 'Backend\Subcategory::destroy/$1');
     $routes->get('subcategory/getSeqCode', 'Backend\Subcategory::getSeqCode');
+    $routes->match(['get', 'post'], 'subcategory/getList', 'Backend\Subcategory::getList');
 
     $routes->add('type', 'Backend\Type::index');
     $routes->match(['get', 'post'], 'type/showAll', 'Backend\Type::showAll');
@@ -95,6 +108,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('type/show/(:any)', 'Backend\Type::show/$1');
     $routes->get('type/destroy/(:any)', 'Backend\Type::destroy/$1');
     $routes->get('type/getSeqCode', 'Backend\Type::getSeqCode');
+    $routes->match(['get', 'post'], 'type/getList', 'Backend\Type::getList');
 
     $routes->add('variant', 'Backend\Variant::index');
     $routes->match(['get', 'post'], 'variant/showAll', 'Backend\Variant::showAll');
@@ -102,6 +116,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('variant/show/(:any)', 'Backend\Variant::show/$1');
     $routes->get('variant/destroy/(:any)', 'Backend\Variant::destroy/$1');
     $routes->get('variant/getSeqCode', 'Backend\Variant::getSeqCode');
+    $routes->match(['get', 'post'], 'variant/getList', 'Backend\Variant::getList');
 
     $routes->add('product', 'Backend\Product::index');
     $routes->match(['get', 'post'], 'product/showAll', 'Backend\Product::showAll');
@@ -109,6 +124,8 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('product/show/(:any)', 'Backend\Product::show/$1');
     $routes->get('product/destroy/(:any)', 'Backend\Product::destroy/$1');
     $routes->get('product/getSeqCode', 'Backend\Product::getSeqCode');
+    $routes->match(['get', 'post'], 'product/showProductInfo', 'Backend\Product::showProductInfo');
+    $routes->match(['get', 'post'], 'product/getList', 'Backend\Product::getList');
 
     $routes->add('branch', 'Backend\Branch::index');
     $routes->match(['get', 'post'], 'branch/showAll', 'Backend\Branch::showAll');
@@ -116,6 +133,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('branch/show/(:any)', 'Backend\Branch::show/$1');
     $routes->get('branch/destroy/(:any)', 'Backend\Branch::destroy/$1');
     $routes->get('branch/getSeqCode', 'Backend\Branch::getSeqCode');
+    $routes->match(['get', 'post'], 'branch/getList', 'Backend\Branch::getList');
 
     $routes->add('room', 'Backend\Room::index');
     $routes->match(['get', 'post'], 'room/showAll', 'Backend\Room::showAll');
@@ -123,6 +141,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('room/show/(:any)', 'Backend\Room::show/$1');
     $routes->get('room/destroy/(:any)', 'Backend\Room::destroy/$1');
     $routes->get('room/getSeqCode', 'Backend\Room::getSeqCode');
+    $routes->match(['get', 'post'], 'room/getList', 'Backend\Room::getList');
 
     $routes->add('division', 'Backend\Division::index');
     $routes->match(['get', 'post'], 'division/showAll', 'Backend\Division::showAll');
@@ -130,6 +149,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('division/show/(:any)', 'Backend\Division::show/$1');
     $routes->get('division/destroy/(:any)', 'Backend\Division::destroy/$1');
     $routes->get('division/getSeqCode', 'Backend\Division::getSeqCode');
+    $routes->match(['get', 'post'], 'division/getList', 'Backend\Division::getList');
 
     $routes->add('employee', 'Backend\Employee::index');
     $routes->match(['get', 'post'], 'employee/showAll', 'Backend\Employee::showAll');
@@ -137,6 +157,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('employee/show/(:any)', 'Backend\Employee::show/$1');
     $routes->get('employee/destroy/(:any)', 'Backend\Employee::destroy/$1');
     $routes->get('employee/getSeqCode', 'Backend\Employee::getSeqCode');
+    $routes->match(['get', 'post'], 'employee/getList', 'Backend\Employee::getList');
 
     $routes->add('supplier', 'Backend\Supplier::index');
     $routes->match(['get', 'post'], 'supplier/showAll', 'Backend\Supplier::showAll');
@@ -144,6 +165,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('supplier/show/(:any)', 'Backend\Supplier::show/$1');
     $routes->get('supplier/destroy/(:any)', 'Backend\Supplier::destroy/$1');
     $routes->get('supplier/getSeqCode', 'Backend\Supplier::getSeqCode');
+    $routes->match(['get', 'post'], 'supplier/getList', 'Backend\Supplier::getList');
 
     $routes->add('quotation', 'Backend\Quotation::index');
     $routes->match(['get', 'post'], 'quotation/showAll', 'Backend\Quotation::showAll');
@@ -154,6 +176,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('quotation/destroyLine/(:any)', 'Backend\Quotation::destroyLine/$1');
     $routes->get('quotation/getSeqCode', 'Backend\Quotation::getSeqCode');
     $routes->get('quotation/processIt', 'Backend\Quotation::processIt');
+    $routes->post('quotation/defaultLogic', 'Backend\Quotation::defaultLogic');
 
     $routes->add('receipt', 'Backend\Receipt::index');
     $routes->match(['get', 'post'], 'receipt/showAll', 'Backend\Receipt::showAll');
@@ -200,6 +223,8 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('inventory/show/(:any)', 'Backend\Inventory::show/$1');
     $routes->get('inventory/destroy/(:any)', 'Backend\Inventory::destroy/$1');
     $routes->get('inventory/getSeqCode', 'Backend\Inventory::getSeqCode');
+    $routes->get('inventory/getAssetDetail', 'Backend\Inventory::getAssetDetail');
+    $routes->get('inventory/getAssetCode', 'Backend\Inventory::getAssetCode');
 
     $routes->add('groupasset', 'Backend\GroupAsset::index');
     $routes->match(['get', 'post'], 'groupasset/showAll', 'Backend\GroupAsset::showAll');
@@ -301,6 +326,13 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('disposal/destroyLine/(:any)', 'Backend\Disposal::destroyLine/$1');
     $routes->get('disposal/getSeqCode', 'Backend\Disposal::getSeqCode');
     $routes->get('disposal/processIt', 'Backend\Disposal::processIt');
+
+    $routes->add('rpt_asset', 'Backend\Rpt_Asset::index');
+    $routes->match(['get', 'post'], 'rpt_asset/showAll', 'Backend\Rpt_Asset::showAll');
+
+    $routes->get('wactivity/showNotif', 'Backend\WActivity::showNotif');
+    $routes->post('wactivity/create', 'Backend\WActivity::create');
+    $routes->match(['get', 'post'], 'wactivity/showActivityInfo', 'Backend\WActivity::showActivityInfo');
 });
 
 /*

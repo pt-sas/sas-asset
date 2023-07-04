@@ -46,21 +46,27 @@ class M_Inventory extends Model
 		'', // Number column
 		'trx_inventory.assetcode',
 		'md_product.name',
+		'trx_inventory.inventorydate',
+		'trx_inventory.unitprice',
 		'md_branch.name',
 		'md_division.name',
 		'md_room.name',
 		'md_employee.name',
 		'md_status.name',
+		'trx_inventory.isspare',
 		'trx_inventory.isactive'
 	];
 	protected $column_search	= [
 		'trx_inventory.assetcode',
 		'md_product.name',
+		'trx_inventory.inventorydate',
+		'trx_inventory.unitprice',
 		'md_branch.name',
 		'md_division.name',
 		'md_room.name',
 		'md_employee.name',
 		'md_status.name',
+		'trx_inventory.isspare',
 		'trx_inventory.isactive'
 	];
 	protected $order			= ['assetcode' => 'ASC'];
@@ -266,6 +272,7 @@ class M_Inventory extends Model
 					md_branch.name as branch,
 					md_division.name as division,
 					md_room.name as room,
+					md_room.description,
 					md_employee.name as employee,
 					v_all_product.mdg_name as groupasset,
 					v_all_product.md_brand_id,

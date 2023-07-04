@@ -4,7 +4,7 @@
  * @author Oki Permana
  * @version 1.0
  */
-const ADMIN = "/backend/";
+const ADMIN = "/sas/";
 
 let ORI_URL = window.location.origin,
   CURRENT_URL = window.location.href,
@@ -61,6 +61,13 @@ const modalDialog = $(".modal-dialog"),
   modalTitle = $(".modal-title"),
   modalBody = $(".modal-body");
 
+$("#example")
+  .DataTable({
+    scrollY: 200,
+    scrollX: true,
+  })
+  .columns.adjust()
+  .draw();
 /**
  * Table Display
  */
@@ -1866,7 +1873,7 @@ $(".create_line").click(function (evt) {
         const target = $(e.target);
         const form = target.find("form");
 
-        let url = ADMIN_URL + "Product" + "/showProductInfo/?data=null";
+        let url = ADMIN_URL + "product/showProductInfo/?data=null";
 
         form[0].reset();
 
@@ -1932,7 +1939,7 @@ $(".btn_requery_info").click(function (evt) {
   const modalContent = target.closest(".modal-content");
   const form = modalContent.find("form");
 
-  let url = ADMIN_URL + "Product" + "/showProductInfo/?";
+  let url = ADMIN_URL + "product/showProductInfo/?";
   let formData = form.serialize();
 
   $(this).tooltip("hide");
@@ -2197,7 +2204,7 @@ $(".btn_login").click(function () {
 
   const form = $(this).closest("form");
 
-  let url = ADMIN_URL + "auth/login";
+  let url = CURRENT_URL + "/login";
 
   $.ajax({
     url: url,
@@ -2224,7 +2231,7 @@ $(".btn_login").click(function () {
           title: result[0].message,
         });
 
-        window.open(ORI_URL + "/sas", "_self");
+        window.open(ADMIN_URL, "_self");
       } else if (result[0].error) {
         errorForm(form, result);
       } else {
@@ -2267,7 +2274,7 @@ $(".save_form_pass").click(function (evt) {
   let _this = $(this);
   let oriElement = _this.html();
 
-  let url = ADMIN_URL + "auth/" + "changePassword";
+  let url = ADMIN_URL + "auth/changePassword";
 
   let formData = new FormData(form[0]);
 
@@ -3085,7 +3092,7 @@ function previewImage(input, id, src) {
  * @returns
  */
 function isAccess(input, last_url) {
-  let url = CURRENT_URL + "/AccessMenu/" + "getAccess";
+  let url = CURRENT_URL + "/accessmenu/getAccess";
   let value;
 
   $.ajax({
@@ -3382,6 +3389,14 @@ $(document).ready(function (e) {
   const cardMenu = parent.find(".card-action-menu");
   const actionMenu = cardMenu.attr("data-action-menu");
 
+  if (typeof actionMenu === "undefined" && actionMenu !== "F") {
+    //* Remove class is-loading
+    $(".main-panel").removeClass("is-loading");
+  } else {
+    const form = card.find("form");
+    showFormData(form);
+  }
+
   showNotification();
 
   // Enable pusher logging - don't include this in production
@@ -3552,14 +3567,6 @@ $(document).ready(function (e) {
     $(this).val("");
   });
 
-  if (typeof actionMenu === "undefined" && actionMenu !== "F") {
-    //* Remove class is-loading
-    $(".main-panel").removeClass("is-loading");
-  } else {
-    const form = card.find("form");
-    showFormData(form);
-  }
-
   $("[name='scan_assetcode']").scannerDetection({
     timeBeforeScanTest: 100, // wait for the next character for upto 100ms
     avgTimeByChar: 40, // it's not a barcode if a character takes longer than 100ms
@@ -3577,8 +3584,10 @@ $(document).ready(function (e) {
 });
 
 function showNotification() {
+  let url = ADMIN_URL + "wactivity/showNotif";
+
   $.ajax({
-    url: ADMIN_URL + "WActivity/showNotif",
+    url: url,
     type: "GET",
     dataType: "JSON",
     success: function (response) {
@@ -3694,7 +3703,7 @@ $(document).on("click", "input:checkbox", function () {
  * @returns
  */
 function checkExistUserRole(role) {
-  let url = ADMIN_URL + "Role/" + "getUserRoleName";
+  let url = ADMIN_URL + "role/getUserRoleName";
   let value;
 
   $.ajax({
@@ -4399,7 +4408,7 @@ $("#task_activity").click(function (e) {
     const target = $(e.target);
     const form = target.find("form");
 
-    let url = ADMIN_URL + "WActivity" + "/showActivityInfo";
+    let url = ADMIN_URL + "wactivity/showActivityInfo";
 
     form.find("input").prop("readonly", true);
     form.find('select[name="isanswer"]').hide();
@@ -4462,7 +4471,7 @@ $(".btn_ok_answer").click(function (evt) {
   const form = _this.closest("form");
 
   let formData = new FormData(form[0]);
-  let url = ADMIN_URL + "WActivity" + CREATE;
+  let url = ADMIN_URL + "wactivity" + CREATE;
 
   formData.append("id", ID);
 
@@ -4497,7 +4506,7 @@ $(".btn_ok_answer").click(function (evt) {
         form.find('select[name="isanswer"]').val("N").prop("disabled", true);
         form.find("button").prop("disabled", true);
 
-        url = ADMIN_URL + "WActivity" + "/showActivityInfo";
+        url = ADMIN_URL + "wactivity" + "/showActivityInfo";
         _tableApproval.ajax.url(url).load().columns.adjust();
       }
     },
@@ -4526,7 +4535,7 @@ $(".btn_record_info").click(function (evt) {
   sessionStorage.setItem("reloading", "true");
   sessionStorage.setItem("data", arrData);
 
-  window.open(ORI_URL + "/sas" + "/" + menu, "_self");
+  window.open(ADMIN_URL + menu, "_self");
 });
 
 window.onload = function () {

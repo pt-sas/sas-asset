@@ -15,10 +15,6 @@
                 <th>Room</th>
                 <th>Description</th>
                 <th>Employee</th>
-                <th>Unit Price</th>
-                <th>Date Inventory</th>
-                <th>Active</th>
-                <th>Spare</th>
             </tr>
         </thead>
     </table>
