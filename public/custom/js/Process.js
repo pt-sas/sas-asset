@@ -4,7 +4,7 @@
  * @author Oki Permana
  * @version 1.0
  */
-const ADMIN = "/backend/";
+const ADMIN = "/sas/";
 
 let ORI_URL = window.location.origin,
   CURRENT_URL = window.location.href,
@@ -45,7 +45,8 @@ const SHOWALL = "/showAll",
   IMPORT = "/import",
   TABLE_LINE = "/tableLine",
   DELETE_LINE = "/destroyLine/",
-  TEST_EMAIL = "/createTestEmail";
+  TEST_EMAIL = "/createTestEmail",
+  ACCEPT = "/accept/";
 
 // view page class on div
 let cardMain = $(".card-main"),
@@ -60,6 +61,13 @@ const modalDialog = $(".modal-dialog"),
   modalTitle = $(".modal-title"),
   modalBody = $(".modal-body");
 
+$("#example")
+  .DataTable({
+    scrollY: 200,
+    scrollX: true,
+  })
+  .columns.adjust()
+  .draw();
 /**
  * Table Display
  */
@@ -151,7 +159,7 @@ _tableLine = $(".tb_displayline").DataTable({
     );
   },
   lengthChange: false,
-  pageLength: 20,
+  paging: false,
   searching: false,
   ordering: false,
   autoWidth: false,
@@ -231,6 +239,11 @@ _tableInfo = $(".table_info").DataTable({
 _tableReport = $(".table_report")
   .DataTable({
     serverSide: true,
+    processing: true,
+    language: {
+      processing:
+        '<i class="fa fa-spinner fa-spin fa-10x fa-fw"></i><span> Processing...</span>',
+    },
     ajax: {
       url: CURRENT_URL + SHOWALL,
       type: "POST",
@@ -565,12 +578,28 @@ $(".save_form").click(function (evt) {
     //? Check in form exists Table Line
     if (form.find("table.tb_displayline").length > 0) {
       const rows = _tableLine.rows().nodes().to$();
+      const th = $(rows).closest("table").find("th");
 
       let output = [];
+      let tableHead = [];
+
+      $.each(th, function (i, item) {
+        if ($(item).attr("field")) {
+          tableHead.push({
+            position: i,
+            name: $(item).attr("field"),
+          });
+        }
+      });
+
       $.each(rows, function (i) {
-        let tag = $(this).find("input, select, button");
+        const tag = $(this).find("input, select, button, span");
+        const tr = $(this).closest("tr");
+        const td = tr.find("td");
 
         let row = {};
+
+        //* Table cell from tag
         $.each(tag, function () {
           let className = this.className.split(/\s+/);
           let name = $(this).attr("name");
@@ -580,18 +609,25 @@ $(".save_form").click(function (evt) {
           //* Field containing class rupiah
           if (className.includes("rupiah")) value = replaceRupiah(this.value);
 
-          if ($(this).attr("type") !== "button") {
-            if ($(this).attr("type") !== "checkbox") {
-              row[name] = value;
-            } else {
-              row[name] = $(this).is(":checked") ? "Y" : "N";
-            }
-          } else {
+          if (this.type === "text" || this.type === "select-one") {
+            row[name] = value;
+          } else if (this.type === "checkbox") {
+            row[name] = $(this).is(":checked") ? "Y" : "N";
+          } else if (typeof name !== "undefined") {
             if (id !== "") row[name] = id;
             else row[name] = "";
 
             if (className.includes("reference-key")) row[name] = value; // Get value reference key
           }
+        });
+
+        //* Table cell data
+        $.each(td, function (i, item) {
+          let txtValue = $(item).text();
+
+          $.each(tableHead, function (idx, column) {
+            if (i == column.position) row[column.name] = txtValue;
+          });
         });
 
         output[i] = row;
@@ -754,8 +790,11 @@ $(".save_form").click(function (evt) {
           }
         }
       } else {
-        // Set attribute disabled based on default field
-        if (fieldReadOnly.includes(field[i].name))
+        //? Set attribute disabled based on default field or exist attribute edit-disabled
+        if (
+          fieldReadOnly.includes(field[i].name) ||
+          (setSave !== "add" && $(field[i]).attr("edit-disabled"))
+        )
           form
             .find(
               "input:checkbox[name=" +
@@ -1834,7 +1873,7 @@ $(".create_line").click(function (evt) {
         const target = $(e.target);
         const form = target.find("form");
 
-        let url = ADMIN_URL + "Product" + "/showProductInfo/?data=null";
+        let url = ADMIN_URL + "product/showProductInfo/?data=null";
 
         form[0].reset();
 
@@ -1900,7 +1939,7 @@ $(".btn_requery_info").click(function (evt) {
   const modalContent = target.closest(".modal-content");
   const form = modalContent.find("form");
 
-  let url = ADMIN_URL + "Product" + "/showProductInfo/?";
+  let url = ADMIN_URL + "product/showProductInfo/?";
   let formData = form.serialize();
 
   $(this).tooltip("hide");
@@ -2165,7 +2204,7 @@ $(".btn_login").click(function () {
 
   const form = $(this).closest("form");
 
-  let url = ADMIN_URL + "auth/login";
+  let url = CURRENT_URL + "/login";
 
   $.ajax({
     url: url,
@@ -2192,7 +2231,7 @@ $(".btn_login").click(function () {
           title: result[0].message,
         });
 
-        window.open(ORI_URL + "/sas", "_self");
+        window.open(ADMIN_URL, "_self");
       } else if (result[0].error) {
         errorForm(form, result);
       } else {
@@ -2235,7 +2274,7 @@ $(".save_form_pass").click(function (evt) {
   let _this = $(this);
   let oriElement = _this.html();
 
-  let url = ADMIN_URL + "auth/" + "changePassword";
+  let url = ADMIN_URL + "auth/changePassword";
 
   let formData = new FormData(form[0]);
 
@@ -3053,7 +3092,7 @@ function previewImage(input, id, src) {
  * @returns
  */
 function isAccess(input, last_url) {
-  let url = CURRENT_URL + "/AccessMenu/" + "getAccess";
+  let url = CURRENT_URL + "/accessmenu/getAccess";
   let value;
 
   $.ajax({
@@ -3350,6 +3389,14 @@ $(document).ready(function (e) {
   const cardMenu = parent.find(".card-action-menu");
   const actionMenu = cardMenu.attr("data-action-menu");
 
+  if (typeof actionMenu === "undefined" && actionMenu !== "F") {
+    //* Remove class is-loading
+    $(".main-panel").removeClass("is-loading");
+  } else {
+    const form = card.find("form");
+    showFormData(form);
+  }
+
   showNotification();
 
   // Enable pusher logging - don't include this in production
@@ -3520,18 +3567,27 @@ $(document).ready(function (e) {
     $(this).val("");
   });
 
-  if (typeof actionMenu === "undefined" && actionMenu !== "F") {
-    //* Remove class is-loading
-    $(".main-panel").removeClass("is-loading");
-  } else {
-    const form = card.find("form");
-    showFormData(form);
-  }
+  $("[name='scan_assetcode']").scannerDetection({
+    timeBeforeScanTest: 100, // wait for the next character for upto 100ms
+    avgTimeByChar: 40, // it's not a barcode if a character takes longer than 100ms
+    preventDefault: true,
+    endChar: [13],
+    onComplete: function (barcode, qty) {
+      $("[name='scan_assetcode']").val(barcode).focus();
+    },
+    onError: function (string, qty) {
+      $("[name='scan_assetcode']").val(
+        $("[name='scan_assetcode']").val() + string
+      );
+    },
+  });
 });
 
 function showNotification() {
+  let url = ADMIN_URL + "wactivity/showNotif";
+
   $.ajax({
-    url: ADMIN_URL + "WActivity/showNotif",
+    url: url,
     type: "GET",
     dataType: "JSON",
     success: function (response) {
@@ -3647,7 +3703,7 @@ $(document).on("click", "input:checkbox", function () {
  * @returns
  */
 function checkExistUserRole(role) {
-  let url = ADMIN_URL + "Role/" + "getUserRoleName";
+  let url = ADMIN_URL + "role/getUserRoleName";
   let value;
 
   $.ajax({
@@ -3998,21 +4054,20 @@ function putFieldData(form, data) {
               .val(formatRupiah(label));
           } else {
             form
-              .find("input:text[name=" + fieldName + "]")
+              .find(
+                "input:text[name=" +
+                  fieldName +
+                  "], input:hidden[name=" +
+                  fieldName +
+                  "], textarea[name=" +
+                  fieldName +
+                  "], input:password[name=" +
+                  fieldName +
+                  "] "
+              )
               .not(".line")
               .val(label);
           }
-
-          form
-            .find(
-              "textarea[name=" +
-                fieldName +
-                "], input:password[name=" +
-                fieldName +
-                "]"
-            )
-            .not(".line")
-            .val(label);
 
           if (
             form.find("textarea.summernote[name=" + fieldName + "]").length >
@@ -4353,7 +4408,7 @@ $("#task_activity").click(function (e) {
     const target = $(e.target);
     const form = target.find("form");
 
-    let url = ADMIN_URL + "WActivity" + "/showActivityInfo";
+    let url = ADMIN_URL + "wactivity/showActivityInfo";
 
     form.find("input").prop("readonly", true);
     form.find('select[name="isanswer"]').hide();
@@ -4416,7 +4471,7 @@ $(".btn_ok_answer").click(function (evt) {
   const form = _this.closest("form");
 
   let formData = new FormData(form[0]);
-  let url = ADMIN_URL + "WActivity" + CREATE;
+  let url = ADMIN_URL + "wactivity" + CREATE;
 
   formData.append("id", ID);
 
@@ -4451,7 +4506,7 @@ $(".btn_ok_answer").click(function (evt) {
         form.find('select[name="isanswer"]').val("N").prop("disabled", true);
         form.find("button").prop("disabled", true);
 
-        url = ADMIN_URL + "WActivity" + "/showActivityInfo";
+        url = ADMIN_URL + "wactivity" + "/showActivityInfo";
         _tableApproval.ajax.url(url).load().columns.adjust();
       }
     },
@@ -4480,7 +4535,7 @@ $(".btn_record_info").click(function (evt) {
   sessionStorage.setItem("reloading", "true");
   sessionStorage.setItem("data", arrData);
 
-  window.open(ORI_URL + "/sas" + "/" + menu, "_self");
+  window.open(ADMIN_URL + menu, "_self");
 });
 
 window.onload = function () {
@@ -4615,3 +4670,112 @@ function downloadFile(url) {
     },
   });
 }
+
+function Accept(id) {
+  let action = "update";
+  let checkAccess = isAccess(action, LAST_URL);
+
+  if (checkAccess[0].success && checkAccess[0].message == "Y") {
+    Swal.fire({
+      text: "Are you sure you want to receive all data ? ",
+      type: "warning",
+      showCancelButton: true,
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ok",
+      cancelButtonText: "Close",
+      showLoaderOnConfirm: true,
+      reverseButtons: true,
+      preConfirm: (generate) => {
+        return new Promise(function (resolve) {
+          let url = CURRENT_URL + ACCEPT + id;
+
+          $.getJSON(url, function (result) {
+            Swal.fire({
+              title: "Success !!",
+              text: "Your data has been process",
+              type: "success",
+              showConfirmButton: false,
+              timer: 1000,
+            });
+            reloadTable();
+          }).fail(function (jqXHR, textStatus, errorThrown) {
+            Swal.showValidationMessage(errorThrown);
+            resolve(false);
+            reloadTable();
+          });
+        });
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    });
+  } else if (checkAccess[0].success && checkAccess[0].message == "N") {
+    Toast.fire({
+      type: "error",
+      title: "You are role don't have permission, please reload !!",
+    });
+  } else {
+    Toast.fire({
+      type: "error",
+      title: checkAccess[0].message,
+    });
+  }
+}
+
+_tableLine.on("click", ".btn_accept", function (evt) {
+  evt.preventDefault();
+  const form = $(evt.currentTarget).closest("form");
+  const tr = _tableLine.$(this).closest("tr");
+  const row = _tableLine.row(tr);
+  let id = this.id;
+
+  let url = CURRENT_URL + "/acceptline/" + id;
+
+  let _this = $(this);
+  let oriElement = _this.html();
+
+  $(_this)
+    .html(
+      '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+    )
+    .prop("disabled", true);
+
+  if (id === "") {
+    setTimeout(function () {
+      row.remove().draw(false);
+      $(_this).html(oriElement).prop("disabled", false);
+    }, 100);
+  } else {
+    Swal.fire({
+      text: "Are you sure you want to receive data ? ? ",
+      type: "warning",
+      showCancelButton: true,
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ok",
+      cancelButtonText: "Close",
+      reverseButtons: true,
+    }).then((data) => {
+      if (data.value)
+        $.getJSON(url, function (result) {
+          if (result[0].success) {
+            Swal.fire({
+              title: "Success !!",
+              text: "Your data has been process",
+              type: "success",
+              showConfirmButton: false,
+              timer: 1000,
+            });
+
+            $(".btn_accept").css("display", "none");
+          } else {
+            Toast.fire({
+              type: "error",
+              title: result[0].message,
+            });
+          }
+        }).fail(function (jqXHR, exception) {
+          showError(jqXHR, exception);
+        });
+    });
+
+    $(_this).html(oriElement).prop("disabled", false);
+  }
+});

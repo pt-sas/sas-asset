@@ -4,10 +4,34 @@
 _tableLine.on("change", 'input[name="isspare"]', function (evt) {
   const tr = _tableLine.$(this).closest("tr");
 
-  tr.find('select[name="md_employee_id"]')
-    .val(null)
-    .change()
-    .removeAttr("disabled");
+  if ($(this).is(":checked")) {
+    let url = ADMIN_URL + "category/getPic";
+    let product = { name: tr.find('input[name="md_product_id"]').val() };
+
+    if (tr.find('select[name="md_product_id"]').length > 0)
+      product = { id: tr.find('select[name="md_product_id"]').val() };
+
+    $.ajax({
+      url: url,
+      type: "POST",
+      data: product,
+      dataType: "JSON",
+      success: function (response) {
+        tr.find('select[name="md_employee_id"]')
+          .val(response)
+          .change()
+          .attr("disabled", true);
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
+  } else {
+    tr.find('select[name="md_employee_id"]')
+      .val(null)
+      .change()
+      .removeAttr("disabled");
+  }
 
   if (tr.find('select[name="md_branch_id"]').length > 0) {
     tr.find('select[name="md_branch_id"]')
@@ -24,7 +48,10 @@ _tableLine.on("change", 'input[name="isspare"]', function (evt) {
   }
 
   if (tr.find('select[name="md_room_id"]').length > 0) {
-    tr.find('select[name="md_room_id"]').empty();
+    tr.find('select[name="md_room_id"]')
+      .empty()
+      .change()
+      .removeAttr("disabled");
   }
 });
 
@@ -395,7 +422,7 @@ function getOption(controller, field, tr, selected_id, ref_id = null) {
  */
 $("#form_employee, #form_opname").on("change", "#md_branch_id", function (evt) {
   let _this = $(this);
-  let url = ADMIN_URL + "room" + "/getList";
+  let url = ADMIN_URL + "room/getList";
   let value = this.value;
   const form = _this.closest("form");
 
@@ -422,50 +449,56 @@ $("#form_employee, #form_opname").on("change", "#md_branch_id", function (evt) {
       },
       dataType: "JSON",
       success: function (result) {
-        form.find('[name="md_room_id"]').append('<option value=""></option>');
+        if (result.length > 0) {
+          form.find('[name="md_room_id"]').append('<option value=""></option>');
 
-        let md_room_id = 0;
+          let md_room_id = 0;
 
-        $.each(option, function (i, item) {
-          if (item.fieldName == "md_room_id") md_room_id = item.label;
-        });
+          $.each(option, function (i, item) {
+            if (item.fieldName == "md_room_id") md_room_id = item.label;
+          });
 
-        if (!result[0].error) {
-          $.each(result, function (idx, item) {
-            if (form.find('[name="md_room_id"]').length > 0) {
-              if (md_room_id == item.id) {
-                form
-                  .find('[name="md_room_id"]')
-                  .append(
-                    '<option value="' +
-                      item.id +
-                      '" selected>' +
-                      item.text +
-                      "</option>"
-                  );
+          if (!result[0].error) {
+            $.each(result, function (idx, item) {
+              if (form.find('[name="md_room_id"]').length > 0) {
+                if (md_room_id == item.id) {
+                  form
+                    .find('[name="md_room_id"]')
+                    .append(
+                      '<option value="' +
+                        item.id +
+                        '" selected>' +
+                        item.text +
+                        "</option>"
+                    );
+                } else {
+                  form
+                    .find('[name="md_room_id"]')
+                    .append(
+                      '<option value="' +
+                        item.id +
+                        '">' +
+                        item.text +
+                        "</option>"
+                    );
+                }
               } else {
-                form
-                  .find('[name="md_room_id"]')
-                  .append(
-                    '<option value="' + item.id + '">' + item.text + "</option>"
-                  );
+                Swal.fire({
+                  type: "error",
+                  title: "Field is not found",
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
               }
-            } else {
-              Swal.fire({
-                type: "error",
-                title: "Field is not found",
-                showConfirmButton: false,
-                timer: 1500,
-              });
-            }
-          });
-        } else {
-          Swal.fire({
-            type: "error",
-            title: result[0].message,
-            showConfirmButton: false,
-            timer: 1500,
-          });
+            });
+          } else {
+            Swal.fire({
+              type: "error",
+              title: result[0].message,
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          }
         }
       },
       error: function (jqXHR, exception) {
@@ -481,7 +514,7 @@ $("#form_employee, #form_opname").on("change", "#md_branch_id", function (evt) {
 _tableLine.on("change", 'select[name="assetcode"]', function (evt) {
   const tr = _tableLine.$(this).closest("tr");
 
-  let url = ADMIN_URL + "inventory" + "/getAssetDetail";
+  let url = ADMIN_URL + "inventory/getAssetDetail";
   let value = this.value;
 
   $.ajax({
@@ -623,7 +656,7 @@ _tableLine.on("change", 'select[name="employee_to"]', function (evt) {
  */
 // Form Inventory
 $("#form_inventory").on("change", "#md_product_id", function (evt) {
-  let url = ORI_URL + "/sas/groupasset" + "/getList";
+  let url = ADMIN_URL + "/groupasset/getList";
   let value = this.value;
 
   $("#md_groupasset_id").empty();
@@ -670,6 +703,8 @@ $("#form_inventory").on("change", "#md_product_id", function (evt) {
                   item.text +
                   "</option>"
               );
+
+              md_groupasset_id = 0;
             } else {
               $("#md_groupasset_id").append(
                 '<option value="' + item.id + '">' + item.text + "</option>"
@@ -693,7 +728,7 @@ $("#form_inventory").on("change", "#md_product_id", function (evt) {
 });
 
 $("#form_inventory").on("change", "#md_branch_id", function (evt) {
-  let url = ADMIN_URL + "room" + "/getList";
+  let url = ADMIN_URL + "room/getList";
   let value = this.value;
 
   $("#md_room_id").empty();
@@ -760,7 +795,7 @@ $("#form_inventory").on("change", "#md_branch_id", function (evt) {
 });
 
 $("#form_inventory").on("change", "#md_employee_id", function (evt) {
-  let url = ADMIN_URL + "division" + "/getList";
+  let url = ADMIN_URL + "division/getList";
   let value = this.value;
 
   $("#md_division_id").empty();
@@ -806,6 +841,9 @@ $("#form_inventory").on("change", "#md_employee_id", function (evt) {
                   item.text +
                   "</option>"
               );
+
+              //TODO: Set md_division_id to zero after set selected
+              md_division_id = 0;
             } else {
               $("#md_division_id").append(
                 '<option value="' + item.id + '">' + item.text + "</option>"
@@ -1363,7 +1401,7 @@ $(document).ready(function (e) {
 });
 
 $("#filter_inventory").on("change", '[name="md_branch_id"]', function (evt) {
-  let url = ADMIN_URL + "room" + "/getList";
+  let url = ADMIN_URL + "room/getList";
   let value = this.value;
 
   $('[name="md_room_id"]').empty();
@@ -1558,7 +1596,7 @@ $("#parameter_assetdetail").on(
   "change",
   '[name="md_branch_id"]',
   function (evt) {
-    let url = ADMIN_URL + "room" + "/getList";
+    let url = ADMIN_URL + "room/getList";
     let value = this.value;
 
     $('[name="md_room_id"]').empty();
@@ -1705,7 +1743,7 @@ $("#form_product, #form_product_info").on(
   function (evt) {
     const form = $(this).closest("form");
 
-    let url = ADMIN_URL + "subcategory" + "/getList";
+    let url = ADMIN_URL + "subcategory/getList";
     let value = this.value;
 
     $("#md_subcategory_id").empty();
@@ -1786,7 +1824,7 @@ $("#form_product, #form_product_info").on(
   function (evt) {
     const form = $(this).closest("form");
 
-    let url = ADMIN_URL + "type" + "/getList";
+    let url = ADMIN_URL + "type/getList";
     let value = this.value;
 
     $("#md_type_id").empty();
@@ -1861,7 +1899,7 @@ $("#form_product, #form_product_info").on(
 );
 
 $("#parameter_barcode").on("change", "#md_branch_id", function (evt) {
-  let url = ADMIN_URL + "room" + "/getList";
+  let url = ADMIN_URL + "room/getList";
   let value = this.value;
 
   $("#md_room_id").empty();
@@ -1950,5 +1988,409 @@ $("#form_disposal").on("change", "#disposaltype", function (e) {
         }
       });
     }
+  }
+});
+
+$("#form_movement").on(
+  "change",
+  "#md_branch_id, #movementtype, #md_branchto_id, #md_division_id",
+  function (evt) {
+    const form = $(this).closest("form");
+    const field = form.find("select");
+    const attrName = $(this).attr("name");
+    let value = this.value;
+    let fields = [];
+
+    if (attrName === "movementtype")
+      for (let i = 0; i < field.length; i++) {
+        if (typeof $(field[i]).attr("hide-field") !== "undefined")
+          fields = $(field[i])
+            .attr("hide-field")
+            .split(",")
+            .map((element) => element.trim());
+
+        if (fields.includes(field[i].name)) {
+          const select = form.find("select[name=" + field[i].name + "]");
+          let formGroup = select.closest(".form-group");
+
+          if (value === "KIRIM") {
+            formGroup.show();
+            $(".add_row").show();
+          } else if (value === "TERIMA") {
+            formGroup.hide();
+            $(".add_row").hide();
+          }
+
+          select.val(null).change();
+        }
+      }
+
+    if (setSave === "add") {
+      _tableLine.clear().draw(false);
+    }
+
+    // update data
+    $.each(option, function (idx, elem) {
+      if (elem.fieldName === attrName && setSave !== "add") {
+        if (
+          attrName === "movementtype" &&
+          value !== "" &&
+          value != elem.label &&
+          _tableLine.data().any()
+        ) {
+          Swal.fire({
+            title: "Delete?",
+            text: "Are you sure you want to change all data ? ",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            confirmButtonText: "Okay",
+            cancelButtonText: "Close",
+            reverseButtons: true,
+          }).then((data) => {
+            if (data.value) {
+              _tableLine.clear().draw(false);
+              destroyAllLine("trx_movement_id", ID);
+            } else {
+              form
+                .find("select[name=" + attrName + "]")
+                .val(elem.label)
+                .change();
+
+              if (elem.label === "Kirim") {
+                $("#md_branchto_id").closest(".form-group").show();
+                $(".add_row").show();
+                $("#md_branchto_id").val(option[2].option_ID).change();
+              } else if (value === "Terima") {
+                $("#md_branchto_id").closest(".form-group").hide();
+                $(".add_row").hide();
+                $("#md_branchto_id").val(null).change();
+              }
+            }
+          });
+        }
+
+        if (
+          attrName !== "movementtype" &&
+          value !== "" &&
+          value != elem.option_ID &&
+          _tableLine.data().any()
+        ) {
+          Swal.fire({
+            title: "Delete?",
+            text: "Are you sure you want to change all data ? ",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            confirmButtonText: "Okay",
+            cancelButtonText: "Close",
+            reverseButtons: true,
+          }).then((data) => {
+            if (data.value) {
+              _tableLine.clear().draw(false);
+              destroyAllLine("trx_movement_id", ID);
+            } else {
+              form
+                .find("select[name=" + attrName + "]")
+                .val(elem.option_ID)
+                .change();
+            }
+          });
+        }
+      }
+    });
+  }
+);
+
+function destroyAllLine(field, id) {
+  let url = CURRENT_URL + "/destroyAllLine";
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: {
+      trx_movement_id: id,
+    },
+    cache: false,
+    dataType: "JSON",
+    success: function (result) {
+      console.log(result);
+    },
+    error: function (jqXHR, exception) {
+      showError(jqXHR, exception);
+    },
+  });
+}
+
+/**
+ * Form Opname Scan
+ */
+$("#form_opname").on("keyup", "#scan_assetcode", function (evt) {
+  if (evt.key === "Enter" || evt.keyCode === 13) {
+    $(".btn_scan").click();
+    $(this).focus();
+  }
+});
+
+$(".btn_scan").click(function (evt) {
+  const form = $(this).closest("form");
+  let action = "create";
+  let checkAccess = isAccess(action, LAST_URL);
+
+  let formData = new FormData();
+
+  if (checkAccess[0].success && checkAccess[0].message == "Y") {
+    let _this = $(this);
+    let fieldScanAsset = form.find('input[name="scan_assetcode"]');
+
+    if (fieldScanAsset.val() !== "") {
+      $.each(form, function () {
+        const formHeader = $(this).find(".row")[0];
+        field = $(formHeader).find("input, select, textarea").not(".line");
+      });
+
+      //* Form Header
+      for (let i = 0; i < field.length; i++) {
+        if (field[i].name !== "") {
+          let className = field[i].className.split(/\s+/);
+
+          //* Set field and value to formData
+          if (
+            field[i].type == "text" ||
+            field[i].type == "textarea" ||
+            field[i].type == "select-one" ||
+            field[i].type == "hidden"
+          )
+            formData.append(field[i].name, field[i].value);
+
+          //* Field type input radio
+          if (field[i].type == "radio") {
+            if (field[i].checked) {
+              formData.append(field[i].name, field[i].value);
+            }
+          }
+
+          //* Field type Multiple select
+          if (field[i].type === "select-multiple") {
+            formData.append(
+              field[i].name,
+              $("[name = " + field[i].name + "]").val()
+            );
+          }
+
+          //* Field type input checkbox
+          if (field[i].type == "checkbox") {
+            if (field[i].checked) {
+              formData.append(field[i].name, "Y");
+            } else {
+              formData.append(field[i].name, "N");
+            }
+          }
+
+          //* Field containing class datepicker
+          if (className.includes("datepicker")) {
+            let date = field[i].value;
+            let time = "00:00:00";
+
+            if (date !== "") {
+              let timeAndDate = moment(date + " " + time);
+              formData.append(field[i].name, timeAndDate._i);
+            }
+          }
+        }
+      }
+
+      const fAssetCode = _tableLine
+        .rows()
+        .nodes()
+        .to$()
+        .find('input[name="assetcode"]');
+
+      let status = false;
+
+      $.each(fAssetCode, function () {
+        let tr = $(this).closest("tr");
+
+        if (fieldScanAsset.val().toUpperCase() === this.value.toUpperCase()) {
+          status = true;
+
+          let noc = parseInt(tr.find("td:eq(6)").text());
+
+          if (noc != 0) formData.append("noc", noc + 1);
+          else formData.append("noc", noc);
+        }
+      });
+
+      formData.append("status", status);
+
+      let url = CURRENT_URL + TABLE_LINE;
+
+      $.ajax({
+        url: url,
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        cache: false,
+        dataType: "JSON",
+        beforeSend: function () {
+          $(_this).prop("disabled", true);
+          $(".close_form").attr("disabled", true);
+          $(".save_form").attr("disabled", true);
+          loadingForm(form.prop("id"), "ios");
+        },
+        complete: function () {
+          $(_this).prop("disabled", false);
+          $(".close_form").removeAttr("disabled");
+          $(".save_form").removeAttr("disabled");
+          hideLoadingForm(form.prop("id"));
+        },
+        success: function (result) {
+          if (result[0].success) {
+            let arrMsg = result[0].message;
+
+            form.find("select").prop("disabled", true);
+
+            if (arrMsg.new) {
+              _tableLine.row.add(arrMsg.new).draw(false);
+            }
+
+            if (arrMsg.edit) {
+              $.each(fAssetCode, function () {
+                let tr = $(this).closest("tr");
+
+                if (
+                  fieldScanAsset.val().toUpperCase() ===
+                  this.value.toUpperCase()
+                ) {
+                  tr.find("td:eq(2)").html(arrMsg.edit.isbranch);
+                  tr.find("td:eq(3)").html(arrMsg.edit.isroom);
+                  tr.find("td:eq(4)").html(arrMsg.edit.isemployee);
+                  tr.find("td:eq(5)").html(arrMsg.edit.isnew);
+                  tr.find("td:eq(6)").html(arrMsg.edit.nocheck);
+                }
+              });
+            }
+
+            fieldScanAsset.val(null);
+            clearErrorForm(form);
+          } else if (result[0].error) {
+            errorForm(form, result);
+          } else {
+            Toast.fire({
+              type: "error",
+              title: result[0].message,
+            });
+
+            clearErrorForm(form);
+          }
+        },
+        error: function (jqXHR, exception) {
+          showError(jqXHR, exception);
+        },
+      });
+    }
+  } else if (checkAccess[0].success && checkAccess[0].message == "N") {
+    Toast.fire({
+      type: "warning",
+      title: "You are role don't have permission !!",
+    });
+  } else {
+    Toast.fire({
+      type: "error",
+      title: checkAccess[0].message,
+    });
+  }
+});
+
+$("#form_opname").on("change", "#md_employee_id", function (evt) {
+  const form = $(this).closest("form");
+  let formData = new FormData();
+
+  trx_opname_id = this.value;
+
+  formData.append("md_employee_id", trx_opname_id);
+
+  let url = SITE_URL + "/getDetailAsset";
+
+  if (trx_opname_id !== "" && setSave === "add") {
+    _tableLine.clear().draw(false);
+
+    $.ajax({
+      url: url,
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      cache: false,
+      dataType: "JSON",
+      beforeSend: function () {
+        $(".x_form").prop("disabled", true);
+        $(".close_form").prop("disabled", true);
+        loadingForm(form.prop("id"), "facebook");
+      },
+      complete: function () {
+        $(".x_form").removeAttr("disabled");
+        $(".close_form").removeAttr("disabled");
+        hideLoadingForm(form.prop("id"));
+      },
+      success: function (result) {
+        $("[name=scan_assetcode]").val(null);
+
+        if (result[0].success) {
+          let arrMsg = result[0].message;
+
+          if (arrMsg.line) {
+            if (form.find("table.tb_displayline").length > 0) {
+              let line = JSON.parse(arrMsg.line);
+
+              $.each(line, function (idx, elem) {
+                _tableLine.row.add(elem).draw(false);
+              });
+            }
+          }
+        } else {
+          Toast.fire({
+            type: "error",
+            title: result[0].message,
+          });
+        }
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
+  }
+});
+
+_tableInfo.on("change", 'input[name="isspare"]', function (evt) {
+  const tr = _tableInfo.$(this).closest("tr");
+
+  if ($(this).is(":checked")) {
+    let url = ADMIN_URL + "category/getPic";
+    let product = tr.find("td:eq(1)").text();
+
+    $.ajax({
+      url: url,
+      type: "POST",
+      data: {
+        name: product,
+      },
+      dataType: "JSON",
+      success: function (response) {
+        tr.find('select[name="employee_id"]')
+          .val(response)
+          .change()
+          .attr("disabled", true);
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
+  } else {
+    tr.find('select[name="employee_id"]')
+      .val(null)
+      .change()
+      .removeAttr("disabled");
   }
 });
