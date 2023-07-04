@@ -223,7 +223,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('inventory/show/(:any)', 'Backend\Inventory::show/$1');
     $routes->get('inventory/destroy/(:any)', 'Backend\Inventory::destroy/$1');
     $routes->get('inventory/getSeqCode', 'Backend\Inventory::getSeqCode');
-    $routes->get('inventory/getAssetDetail', 'Backend\Inventory::getAssetDetail');
+    $routes->post('inventory/getAssetDetail', 'Backend\Inventory::getAssetDetail');
     $routes->get('inventory/getAssetCode', 'Backend\Inventory::getAssetCode');
 
     $routes->add('groupasset', 'Backend\GroupAsset::index');
