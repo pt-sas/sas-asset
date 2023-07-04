@@ -60,6 +60,7 @@ class Rpt_AssetDetail extends BaseController
                     $row[] = $value->category;
                     $row[] = $value->subcategory;
                     $row[] = $value->type;
+                    $row[] = $value->variant;
                     $row[] = $value->product;
                     $row[] = $value->branch;
                     $row[] = $value->division;

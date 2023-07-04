@@ -9,6 +9,7 @@
                 <th>Category</th>
                 <th>Subcategory</th>
                 <th>Type</th>
+                <th>Variant</th>
                 <th>Product</th>
                 <th>Branch</th>
                 <th>Division</th>
