@@ -11,6 +11,8 @@
                 <th>No</th>
                 <th>Doc No</th>
                 <th>Date</th>
+                <th>Branch</th>
+                <th>Room</th>
                 <th>Employee</th>
                 <th>Doc Status</th>
                 <th>Createdby</th>

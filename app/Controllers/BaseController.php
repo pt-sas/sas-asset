@@ -381,7 +381,7 @@ class BaseController extends Controller
 
 			//? Check function is exists 
 			if (method_exists($model, 'doChangeValueField'))
-				$data = $model->doChangeValueField($data);
+				$data = $model->doChangeValueField($data, $this->getID());
 
 			//* Split data
 			$data = $this->doSplitData($data);
@@ -669,6 +669,8 @@ class BaseController extends Controller
 
 		foreach ($data as $value) :
 			if (empty($value[$this->primaryKey])) {
+				unset($value[$this->primaryKey]);
+
 				$result['insert'][] = $value;
 			} else {
 				$result['update'][] = $value;
@@ -813,5 +815,31 @@ class BaseController extends Controller
 		$this->allowedFields = $allowedFields;
 
 		return $this;
+	}
+
+	public function setField($field, $value, array $data, $aField = null): array
+	{
+		$result = [];
+
+		foreach ($data as $key => $row) :
+			if (gettype($value) !== "array") {
+				if (isset($row->{$field}))
+					$row->{$field} = $value;
+
+				if ($field === $value && !is_null($aField))
+					$row->{$field} = $row->{$aField};
+			} else {
+				if (isset($row->{$field})) {
+					foreach ($value as $key2 => $val) :
+						if ($key == $key2)
+							$row->{$field} = $val->{$aField};
+					endforeach;
+				}
+			}
+
+			$result[] = $row;
+		endforeach;
+
+		return $result;
 	}
 }

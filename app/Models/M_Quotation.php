@@ -105,7 +105,10 @@ class M_Quotation extends Model
 
 	public function getInvNumber($field, $where)
 	{
-		$month = date('m');
+		$post = $this->request->getPost();
+
+		$yearMonth = date("ym", strtotime($post['quotationdate']));
+		$month = date("m", strtotime($post['quotationdate']));
 
 		$this->builder->select('MAX(RIGHT(documentno,4)) AS documentno');
 		$this->builder->where("DATE_FORMAT(quotationdate, '%m')", $month);
@@ -128,7 +131,7 @@ class M_Quotation extends Model
 		if ($where === 'N')
 			$first = "QU";
 
-		$prefix = $first . date('ym') . $code;
+		$prefix = $first . $yearMonth . $code;
 
 		return $prefix;
 	}

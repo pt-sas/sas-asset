@@ -117,6 +117,11 @@ class Receipt extends BaseController
                 $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
                 $this->entity->setGrandTotal(arrSumField('unitprice', $table));
 
+                if ($this->isNew()) {
+                    $docNo = $this->model->getInvNumber();
+                    $this->entity->setDocumentNo($docNo);
+                }
+
                 if (!$this->validation->run($post, 'receipt')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
@@ -258,20 +263,6 @@ class Receipt extends BaseController
         }
     }
 
-    public function getSeqCode()
-    {
-        if ($this->request->isAJAX()) {
-            try {
-                $docNo = $this->model->getInvNumber();
-                $response = message('success', true, $docNo);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
     public function getDetailQuotation()
     {
         $quotation = new M_Quotation($this->request);
@@ -360,10 +351,10 @@ class Receipt extends BaseController
                         $this->field->fieldTable('input', 'text', 'residualvalue', 'rupiah', 'required', $rowQuo->getIsInternalUse() === 'N' ?: 'readonly', null, null, 0, 125),
                         $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', $rowQuo->getIsInternalUse() === 'N' ?: 'readonly', null, null, $row->unitprice, 125),
                         $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
-                        $this->field->fieldTable('select', 'text', 'md_employee_id', null, 'required', null, null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
-                        $this->field->fieldTable('select', null, 'md_branch_id', null, 'required', null, null, null, null, 200),
-                        $this->field->fieldTable('select', null, 'md_division_id', null, 'required', null, null, null, null, 200),
-                        $this->field->fieldTable('select', null, 'md_room_id', null, 'required', null, null, null, null, 250),
+                        $this->field->fieldTable('select', 'text', 'md_employee_id', null, 'required', $row->isspare === "Y" ? "readonly" : null, null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
+                        $this->field->fieldTable('select', null, 'md_branch_id', null, 'required', $row->isspare === "Y" ? "readonly" : null, null, null, null, 200),
+                        $this->field->fieldTable('select', null, 'md_division_id', null, 'required', $row->isspare === "Y" ? "readonly" : null, null, null, null, 200),
+                        $this->field->fieldTable('select', null, 'md_room_id', null, 'required', $row->isspare === "Y" ? "readonly" : null, null, null, null, 250),
                         $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
                         $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id', 'reference-key', null, null, null, null, $row->trx_quotation_detail_id, 0, 'value') // Manipulate Set id on the attribute value
                     ];

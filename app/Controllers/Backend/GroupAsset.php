@@ -4,6 +4,7 @@ namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
 use App\Models\M_Category;
+use App\Models\M_Employee;
 use App\Models\M_GroupAsset;
 use App\Models\M_Reference;
 use App\Models\M_Sequence;
@@ -67,6 +68,7 @@ class GroupAsset extends BaseController
                 $row[] = $value->initialcode;
                 $row[] = $value->usefullife;
                 $row[] = $value->depreciationtype;
+                $row[] = $value->pic;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
@@ -111,14 +113,17 @@ class GroupAsset extends BaseController
     public function show($id)
     {
         $sequence = new M_Sequence($this->request);
+        $employee = new M_Employee($this->request);
 
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
 
                 $rowSeq = $sequence->find($list[0]->getSequenceId());
+                $rowEmp = $employee->find($list[0]->getPIC());
 
                 $list = $this->field->setDataSelect($sequence->table, $list, $sequence->primaryKey, $rowSeq->getSequenceId(), $rowSeq->getName());
+                $list = $this->field->setDataSelect($employee->table, $list, "pic", $rowEmp->getEmployeeId(), $rowEmp->getName());
 
                 $result = [
                     'header'   => $this->field->store($this->model->table, $list)
@@ -191,7 +196,7 @@ class GroupAsset extends BaseController
                 }
 
                 if (!empty($post['reference']))
-                    $value = $category->getByProduct($post['reference']);
+                    $value = $category->getByProduct('md_product.md_product_id', $post['reference']);
 
                 foreach ($list as $key => $row) :
                     $response[$key]['id'] = $row->getGroupAssetId();

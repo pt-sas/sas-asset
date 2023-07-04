@@ -42,7 +42,7 @@ class M_ChangeLog extends Model
     public function insertLog($table, $column, $recordID, $oldValue, $newValue, $event)
     {
         $this->entity->setTable($table);
-        $this->entity->setCOlumn($column);
+        $this->entity->setColumn($column);
         $this->entity->setRecordId($recordID);
         $this->entity->setOldValue($oldValue);
         $this->entity->setNewValue($newValue);

@@ -20,7 +20,11 @@ class CreateTrxOpnameDetailTable extends Migration
             'trx_opname_id'         => ['type' => 'INT', 'constraint' => 6, 'null' => false],
             'assetcode'             => ['type' => 'VARCHAR', 'constraint' => 40, 'null' => false],
             'md_product_id'         => ['type' => 'INT', 'constraint' => 6, 'null' => false],
-            'status'                => ['type' => 'CHAR', 'constraint' => 2, 'null' => false]
+            'isbranch'              => ['type' => 'CHAR', 'constraint' => 1, 'null' => false, 'default' => 'N'],
+            'isroom'                => ['type' => 'CHAR', 'constraint' => 1, 'null' => false, 'default' => 'N'],
+            'isemployee'            => ['type' => 'CHAR', 'constraint' => 1, 'null' => false, 'default' => 'N'],
+            'isnew'                 => ['type' => 'CHAR', 'constraint' => 1, 'null' => false, 'default' => 'N'],
+            'nocheck'               => ['type' => 'NUMERIC', 'constraint' => 10, 'null' => false]
         ]);
         $this->forge->addKey('trx_opname_detail_id', true);
         $this->forge->createTable('trx_opname_detail', true);

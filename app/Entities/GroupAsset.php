@@ -17,6 +17,7 @@ class GroupAsset extends Entity
     protected $updated_by;
     protected $md_sequence_id;
     protected $depreciationtype;
+    protected $pic;
 
     protected $dates   = [
         'created_at',
@@ -142,5 +143,15 @@ class GroupAsset extends Entity
     public function setDepreciationType($depreciationtype)
     {
         $this->attributes['depreciationtype'] = $depreciationtype;
+    }
+
+    public function getPIC()
+    {
+        return $this->attributes['pic'];
+    }
+
+    public function setPIC($pic)
+    {
+        $this->attributes['pic'] = $pic;
     }
 }

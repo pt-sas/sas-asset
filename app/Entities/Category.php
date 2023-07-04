@@ -15,6 +15,7 @@ class Category extends Entity
 	protected $isactive;
 	protected $created_by;
 	protected $updated_by;
+	protected $pic;
 
 	protected $dates   = [
 		'created_at',
@@ -120,5 +121,15 @@ class Category extends Entity
 	public function setUpdatedBy($updated_by)
 	{
 		$this->attributes['updated_by'] = $updated_by;
+	}
+
+	public function getPIC()
+	{
+		return $this->attributes['pic'];
+	}
+
+	public function setPIC($pic)
+	{
+		$this->attributes['pic'] = $pic;
 	}
 }

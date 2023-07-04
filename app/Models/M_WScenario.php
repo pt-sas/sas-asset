@@ -15,6 +15,8 @@ class M_WScenario extends Model
 		'grandtotal',
 		'menu',
 		'md_status_id',
+		'md_branch_id',
+		'md_division_id',
 		'description',
 		'isactive',
 		'created_by',
@@ -32,22 +34,26 @@ class M_WScenario extends Model
 	protected $column_order = [
 		'', // Hide column
 		'', // Number column
-		'm_wscenario.name',
-		'm_wscenario.lineno',
-		'm_wscenario.grandtotal',
-		'm_wscenario.menu',
+		'sys_wfscenario.name',
+		'sys_wfscenario.lineno',
+		'sys_wfscenario.grandtotal',
+		'sys_wfscenario.menu',
 		'md_status.name',
-		'm_wscenario.description',
-		'm_wscenario.isactive'
+		'md_branch.name',
+		'md_division.name',
+		'sys_wfscenario.description',
+		'sys_wfscenario.isactive'
 	];
 	protected $column_search = [
-		'm_wscenario.name',
-		'm_wscenario.lineno',
-		'm_wscenario.grandtotal',
-		'm_wscenario.menu',
+		'sys_wfscenario.name',
+		'sys_wfscenario.lineno',
+		'sys_wfscenario.grandtotal',
+		'sys_wfscenario.menu',
 		'md_status.name',
-		'm_wscenario.description',
-		'm_wscenario.isactive'
+		'md_branch.name',
+		'md_division.name',
+		'sys_wfscenario.description',
+		'sys_wfscenario.isactive'
 	];
 	protected $order = ['name' => 'ASC'];
 	protected $request;
@@ -65,7 +71,9 @@ class M_WScenario extends Model
 	public function getSelect()
 	{
 		$sql = $this->table . '.*,' .
-			'md_status.name as status';
+			'md_status.name as status,
+			md_branch.name as branch,
+			md_division.name as division';
 
 		return $sql;
 	}
@@ -74,6 +82,8 @@ class M_WScenario extends Model
 	{
 		$sql = [
 			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
+			$this->setDataJoin('md_branch', 'md_branch.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
+			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_division_id', 'left'),
 		];
 
 		return $sql;
@@ -94,7 +104,7 @@ class M_WScenario extends Model
 		$scenarioDetail->where($this->primaryKey, $rows['id'])->delete();
 	}
 
-	public function getScenario(string $menu, int $md_groupasset_id, int $md_status_id, float $grandtotal)
+	public function getScenario(string $menu, int $md_groupasset_id = null, int $md_status_id = null, int $md_branch_id = null, int $md_division_id = null)
 	{
 		$this->builder->select('sys_wfscenario_id');
 		$this->builder->where('menu', $menu);
@@ -107,9 +117,17 @@ class M_WScenario extends Model
 			$this->builder->where('md_status_id', $md_status_id);
 		}
 
-		if (!empty($grandtotal)) {
-			$this->builder->where('grandtotal >=', $grandtotal);
+		if (!is_null($md_branch_id)) {
+			$this->builder->where('md_branch_id', $md_branch_id);
 		}
+
+		if (!is_null($md_division_id)) {
+			$this->builder->where('md_division_id', $md_division_id);
+		}
+
+		// if (!empty($grandtotal)) {
+		// 	$this->builder->where('grandtotal >=', $grandtotal);
+		// }
 
 		$this->builder->orderBy('lineno', 'DESC');
 

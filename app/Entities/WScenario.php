@@ -12,6 +12,8 @@ class WScenario extends Entity
     protected $grandtotal;
     protected $menu;
     protected $md_status_id;
+    protected $md_branch_id;
+    protected $md_division_id;
     protected $description;
     protected $isactive;
     protected $created_by;
@@ -71,6 +73,26 @@ class WScenario extends Entity
     public function setStatusId($md_status_id)
     {
         $this->attributes['md_status_id'] = $md_status_id;
+    }
+
+    public function getBranchId()
+    {
+        return $this->attributes['md_branch_id'];
+    }
+
+    public function setBranchId($md_branch_id)
+    {
+        $this->attributes['md_branch_id'] = $md_branch_id;
+    }
+
+    public function getDivisionId()
+    {
+        return $this->attributes['md_division_id'];
+    }
+
+    public function setDivisionId($md_division_id)
+    {
+        $this->attributes['md_division_id'] = $md_division_id;
     }
 
     public function getDescription()

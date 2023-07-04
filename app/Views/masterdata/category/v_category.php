@@ -12,6 +12,8 @@
                 <th>Category Code</th>
                 <th>Name</th>
                 <th>Initial Code</th>
+                <th>Group Asset</th>
+                <th>PIC</th>
                 <th>Active</th>
                 <th>Actions</th>
             </tr>

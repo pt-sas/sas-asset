@@ -87,31 +87,19 @@ class Inventory extends BaseController
 
     public function create()
     {
-        $employee = new M_Employee($this->request);
-
         if ($this->request->getMethod(true) === 'POST') {
             $post = $this->request->getVar();
 
             try {
                 $this->entity->fill($post);
 
-                if (!isset($post['id']))
+                if ($this->isNew()) {
                     $this->entity->setQtyEntered(1);
-
-                // ROOM RUANG IT - BARANG BAGUS
-                if ($post['md_room_id'] == 100040)
-                    $this->entity->setIsSpare('Y');
-                else if ($post['md_room_id'] == 100041) // ROOM RUANG IT - BARANG RUSAK
-                    $this->entity->setIsSpare('N');
-                else
-                    $this->entity->setIsSpare('N');
+                }
 
                 if (!$this->validation->run($post, 'inventory')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $row = $employee->find($post['md_employee_id']);
-                    $this->entity->setDivisionId($row->getDivisionId());
-
                     $response = $this->save();
                 }
             } catch (\Exception $e) {

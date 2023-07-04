@@ -16,6 +16,8 @@ class Template
     protected $isCreate = 'iscreate';
     protected $isUpdate = 'isupdate';
     protected $isDelete = 'isdelete';
+    protected $Movement_Kirim = 'KIRIM';
+    protected $Movement_Terima = 'TERIMA';
 
     public function __construct()
     {
@@ -69,7 +71,7 @@ class Template
         return $result;
     }
 
-    public function tableButton($btnID, $status = null)
+    public function tableButton($btnID, $status = null, $type = null)
     {
         $uri = $this->request->uri->getSegment(2);
         $allBtn = '';
@@ -82,8 +84,13 @@ class Template
 
         $btnDetail = '<a class="btn" onclick="Edit(' . "'" . $btnID . "'," . "'" . $status . "'" . ')" id="' . $btnID . '" data-status="' . $status . '" data-toggle="tooltip" title="Detail" data-original-title="Detail"><i class="fas fa-file text-info"></i></a>';
 
+        $btnAccept = '<a class="btn" onclick="Accept(' . "'" . $btnID . "'" . ')" data-toggle="tooltip" title="Accept" data-original-title="Detail"><i class="fas fa-check fa-lg text-success"></i></a>';
+
         $update = $this->access->checkCrud($uri, $this->isUpdate);
         $delete = $this->access->checkCrud($uri, $this->isDelete);
+
+        if ($update === 'Y' && strtoupper($type) === $this->Movement_Terima && ($status === 'DR' || $status === 'IP'))
+            $allBtn .= $btnAccept;
 
         if ($update === 'Y' && (empty($status) || $status === 'DR'))
             $allBtn .= $btnUpdate;

@@ -39,6 +39,22 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
+                    <label for="md_branch_id">Branch </label>
+                    <select class="form-control select-data" id="md_branch_id" name="md_branch_id" data-url="branch/getList">
+                        <option value="">Select Branch</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="md_division_id">Division </label>
+                    <select class="form-control select-data" id="md_division_id" name="md_division_id" data-url="division/getList">
+                        <option value="">Select Division</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
                     <label for="description">Description </label>
                     <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
                 </div>

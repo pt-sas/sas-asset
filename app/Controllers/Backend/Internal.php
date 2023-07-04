@@ -126,6 +126,11 @@ class Internal extends BaseController
                 $this->entity->setIsInternalUse('Y');
                 $this->entity->setGrandTotal(arrSumField('lineamt', $table));
 
+                if ($this->isNew()) {
+                    $docNo = $this->model->getInvNumber('isinternaluse', 'Y');
+                    $this->entity->setDocumentNo($docNo);
+                }
+
                 if (!$this->validation->run($post, 'internal')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
@@ -135,8 +140,7 @@ class Internal extends BaseController
                 $response = message('error', false, $e->getMessage());
             }
 
-            // return $this->response->setJSON($response);
-            return json_encode($response);
+            return $this->response->setJSON($response);
         }
     }
 
@@ -303,20 +307,6 @@ class Internal extends BaseController
         }
 
         return json_encode($table);
-    }
-
-    public function getSeqCode()
-    {
-        if ($this->request->isAJAX()) {
-            try {
-                $docNo = $this->model->getInvNumber('isinternaluse', 'Y');
-                $response = message('success', true, $docNo);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
     }
 
     public function defaultLogic()

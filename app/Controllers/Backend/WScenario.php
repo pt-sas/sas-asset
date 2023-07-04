@@ -9,8 +9,14 @@ use App\Models\M_Menu;
 use App\Models\M_NotificationText;
 use App\Models\M_Responsible;
 use App\Models\M_Status;
+use App\Models\M_Branch;
+use App\Models\M_Room;
+use App\Models\M_Division;
+use App\Models\M_Inventory;
+use App\Models\M_Transaction;
 use Config\Services;
 use Pusher\Pusher;
+use stdClass;
 
 class WScenario extends BaseController
 {
@@ -26,6 +32,7 @@ class WScenario extends BaseController
 
     public function index()
     {
+        $uri = $this->request->uri->getSegment(2);
         $menu = new M_Menu($this->request);
         $status = new M_Status($this->request);
 
@@ -34,15 +41,12 @@ class WScenario extends BaseController
             'status'    => $status->where([
                 'isactive'  => 'Y',
                 'isline'    => 'N'
-            ])->orderBy('name', 'ASC')
+            ])->like('menu_id', $uri)
+                ->orderBy('name', 'ASC')
                 ->findAll(),
         ];
 
         return $this->template->render('backend/configuration/wscenario/v_wscenario', $data);
-
-        // $this->sys_wfscenario_id = 1;
-        // $d = $this->getNextResponsible();
-        // dd($d);
     }
 
     public function showAll()
@@ -73,6 +77,8 @@ class WScenario extends BaseController
                 $row[] = $value->grandtotal;
                 $row[] = $value->menu;
                 $row[] = $value->status;
+                $row[] = $value->branch;
+                $row[] = $value->division;
                 $row[] = $value->description;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
@@ -121,10 +127,23 @@ class WScenario extends BaseController
 
     public function show($id)
     {
+        $branch = new M_Branch($this->request);
+        $division = new M_Division($this->request);
+
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
                 $detail = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
+
+                if (!empty($list[0]->getBranchId())) {
+                    $rowBranch = $branch->find($list[0]->getBranchId());
+                    $list = $this->field->setDataSelect($branch->table, $list, $branch->primaryKey, $rowBranch->getBranchId(), $rowBranch->getName());
+                }
+
+                if (!empty($list[0]->getDivisionId())) {
+                    $rowDivision = $division->find($list[0]->getDivisionId());
+                    $list = $this->field->setDataSelect($division->table, $list, $division->primaryKey, $rowDivision->getDivisionId(), $rowDivision->getName());
+                }
 
                 $result = [
                     'header'    => $this->field->store($this->model->table, $list),
@@ -237,7 +256,7 @@ class WScenario extends BaseController
             $trx = $this->model->find($trxID);
 
             if ($table === 'trx_quotation') {
-                $this->sys_wfscenario_id = $mWfs->getScenario($menu, $trx->getGroupAssetId(), $trx->getStatusId(), 0);
+                $this->sys_wfscenario_id = $mWfs->getScenario($menu, $trx->getGroupAssetId(), $trx->getStatusId());
 
                 if ($this->sys_wfscenario_id) {
                     $this->entity->setDocStatus($this->DOCSTATUS_Inprogress);
@@ -248,11 +267,82 @@ class WScenario extends BaseController
                     $this->entity->setWfScenarioId(0);
                 }
             }
+
+            if ($table === 'trx_movement') {
+                $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, $trx->md_branch_id, $trx->md_division_id);
+
+                if ($this->sys_wfscenario_id) {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Inprogress);
+                    $this->entity->setWfScenarioId($this->sys_wfscenario_id);
+                    $isWfscenario = true;
+                } else {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Completed);
+                    $this->entity->setWfScenarioId(0);
+
+                    $line = $this->modelDetail->where($primaryKey, $trxID)->findAll();
+                    $inventory = new M_Inventory($this->request);
+                    $transaction = new M_Transaction();
+
+                    $arrMoveIn = [];
+                    $arrMoveOut = [];
+
+                    $data = [
+                        'isaccept'                  => "Y",
+                        'updated_at'                => date('Y-m-d H:i:s'),
+                        'updated_by'                => session()->get('sys_user_id')
+                    ];
+
+                    $this->modelDetail->builder->where($primaryKey, $trxID)->update($data);
+
+                    foreach ($line as $key => $value) :
+                        //? Data movement from
+                        $arrOut = new stdClass();
+                        $room = new M_Room($this->request);
+                        $transit = $room->where("name", "TRANSIT")->first();
+
+                        $arrOut->assetcode = $value->assetcode;
+                        $arrOut->md_product_id = $value->md_product_id;
+                        $arrOut->md_employee_id = $value->employee_to;
+                        $arrOut->md_room_id = $transit->md_room_id;
+                        $arrOut->transactiontype = $this->Movement_Out;
+                        $arrOut->transactiondate = date("Y-m-d");
+                        $arrOut->qtyentered = -1;
+                        $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
+                        $arrMoveOut[$key] = $arrOut;
+
+                        //? Data movement to
+                        $arrIn = new stdClass();
+                        $arrIn->assetcode = $value->assetcode;
+                        $arrIn->md_product_id = $value->md_product_id;
+                        $arrIn->md_employee_id = $value->employee_to;
+                        $arrIn->md_branch_id = $value->branch_to;
+                        $arrIn->md_division_id = $value->division_to;
+                        $arrIn->md_room_id = $value->room_to;
+                        $arrIn->transactiontype = $this->Movement_In;
+                        $arrIn->transactiondate = date("Y-m-d");
+                        $arrIn->qtyentered = 1;
+                        $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
+                        $arrMoveIn[$key] = $arrIn;
+                    endforeach;
+
+                    $arrInv = (array) array_merge(
+                        (array) $arrMoveIn
+                    );
+
+                    $arrData = (array) array_merge(
+                        (array) $arrMoveOut,
+                        (array) $arrMoveIn
+                    );
+
+                    $inventory->edit($arrInv);
+                    $transaction->create($arrData);
+                }
+            }
         }
 
         $this->entity->setUpdatedBy($session->get('sys_user_id'));
         $this->entity->{$primaryKey} = $trxID;
-        $result = $this->save();
+        $result = $this->model->save($this->entity);
 
         if ($result && $isWfscenario) {
             $result = $cWfa->setActivity(null, $this->sys_wfscenario_id, $this->getScenarioResponsible($this->sys_wfscenario_id), $sessionUserId, $this->DOCSTATUS_Suspended, false, null, $table, $trxID, $menu);

@@ -19,7 +19,8 @@ class M_GroupAsset extends Model
         'created_by',
         'updated_by',
         'md_sequence_id',
-        'depreciationtype'
+        'depreciationtype',
+        'pic'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\GroupAsset';
@@ -31,6 +32,8 @@ class M_GroupAsset extends Model
         'md_groupasset.description',
         'md_groupasset.initialcode',
         'md_groupasset.usefullife',
+        'sys_ref_detail.name',
+        'md_employee.name',
         'md_groupasset.isactive'
     ];
     protected $column_search = [
@@ -39,6 +42,8 @@ class M_GroupAsset extends Model
         'md_groupasset.description',
         'md_groupasset.initialcode',
         'md_groupasset.usefullife',
+        'sys_ref_detail.name',
+        'md_employee.name',
         'md_groupasset.isactive'
     ];
     protected $order = ['value' => 'ASC'];
@@ -57,7 +62,8 @@ class M_GroupAsset extends Model
     public function getSelect()
     {
         $sql = $this->table . '.*,
-        sys_ref_detail.name as depreciationtype';
+        sys_ref_detail.name as depreciationtype,
+        md_employee.name as pic';
 
         return $sql;
     }
@@ -69,6 +75,7 @@ class M_GroupAsset extends Model
 
         $sql = [
             $this->setDataJoin('sys_ref_detail', 'sys_ref_detail.sys_reference_id = ' . $defaultID . ' AND sys_ref_detail.value = ' . $this->table . '.depreciationtype', 'left'),
+            $this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.pic', 'left')
         ];
 
         return $sql;
