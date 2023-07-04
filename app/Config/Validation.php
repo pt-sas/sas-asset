@@ -197,6 +197,13 @@ class Validation
                 'is_unique' => 'This {field} already exists.',
                 'required'    => 'Please Insert the {field} first'
             ]
+        ],
+        'address'              => [
+            'label'            => 'Address',
+            'rules'            => 'required',
+            'errors'        => [
+                'required'    => 'Please Insert the {field} first'
+            ]
         ]
     ];
 
@@ -1422,13 +1429,6 @@ class Validation
     ];
 
     public $movementAddRow = [
-        'movementtype'          => [
-            'label'             => 'Movement Type',
-            'rules'             => 'required',
-            'errors'            => [
-                'required'      => 'Please Choose the {field} first'
-            ]
-        ],
         'md_branch_id'          => [
             'label'             => 'Branch',
             'rules'             => 'required',
