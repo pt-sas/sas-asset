@@ -456,7 +456,11 @@ class Movement extends BaseController
                 //? Where Clause Employee to
                 $empWhere['isactive'] = 'Y';
                 $empWhere['md_branch_id'] = $post["md_branchto_id"];
-                $empWhere['md_division_id'] = $post["md_division_id"];
+
+                // Not ALL DIVISION
+                if ($post["md_division_id"] != 100022) {
+                    $empWhere['md_division_id'] = $post["md_division_id"];
+                }
 
                 //* Data Employee To 
                 $dataEmployeeTo = $employee->where($empWhere)->orderBy('name', 'ASC')->findAll();
@@ -474,7 +478,7 @@ class Movement extends BaseController
                     $this->field->fieldTable('select', null, 'division_to', null, null, 'readonly', null, null, null, 200),
                     $this->field->fieldTable('select', null, 'room_from', null, null, 'readonly', null, $dataRoom, null, 250, 'md_room_id', 'name'),
                     $this->field->fieldTable('select', null, 'room_to', null, 'required', null, null, null, null, 250),
-                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250)
+                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $post["md_division_id"], 250)
                 ];
             }
         }
@@ -487,7 +491,10 @@ class Movement extends BaseController
                 //? Where Clause Employee To
                 $empWhere['isactive'] = 'Y';
                 $empWhere['md_branch_id'] = $row->branch_to;
-                $empWhere['md_division_id'] = $row->division_to;
+
+                // Not ALL DIVISION
+                if ($move->getDivisionId() != 100022)
+                    $empWhere['md_division_id'] = $row->division_to;
 
                 //* Data Employee To 
                 $dataEmployeeTo = $employee->where($empWhere)->orderBy('name', 'ASC')->findAll();
