@@ -26,14 +26,17 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="movementtype">Movement Type <span class="required">*</span></label>
-                    <select class="form-control select2" id="movementtype" name="movementtype" hide-field="md_branchto_id">
+                    <label for="movementtype">Movement Type </label>
+                    <select class="form-control select2" id="movementtype" name="movementtype" disabled>
                         <option value="">Select Movement Type</option>
                         <?php foreach ($ref_list as $row) : ?>
-                            <option value="<?= $row->value ?>"><?= $row->name ?></option>
+                            <?php if ($row->value === "KIRIM") : ?>
+                                <option value="<?= $row->value ?>" selected><?= $row->name ?></option>
+                            <?php else : ?>
+                                <option value="<?= $row->value ?>"><?= $row->name ?></option>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </select>
-                    <small class="form-text text-danger" id="error_movementtype"></small>
                 </div>
             </div>
             <div class="col-md-6">
@@ -56,7 +59,7 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="md_division_id">Division <span class="required">*</span></label>
+                    <label for="md_division_id">Division To <span class="required">*</span></label>
                     <select class="form-control select-data" id="md_division_id" name="md_division_id" data-url="division/getList">
                         <option value="">Select Division</option>
                     </select>
