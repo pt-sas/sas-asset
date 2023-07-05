@@ -42,11 +42,15 @@ class Rpt_Depreciation extends BaseController
                 foreach ($list as $value) :
                     $row = [];
 
+                    $costPerMonth = $value->currentmonth != 0 ? ($value->costdepreciation / $value->currentmonth) : $value->costdepreciation;
+
                     $row[] = $value->assetcode;
+                    $row[] = $value->product;
                     $row[] = format_dmy($value->transactiondate, '-');
                     $row[] = $value->totalyear;
                     $row[] = $value->startyear;
                     $row[] = formatRupiah(round($value->costdepreciation, 2, PHP_ROUND_HALF_UP));
+                    $row[] = formatRupiah(round($costPerMonth, 2, PHP_ROUND_HALF_UP));
                     $row[] = formatRupiah(round($value->accumulateddepreciation, 2, PHP_ROUND_HALF_UP));
                     $row[] = formatRupiah(round($value->bookvalue, 2, PHP_ROUND_HALF_UP));
                     $row[] = $value->currentmonth;

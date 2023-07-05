@@ -3,12 +3,14 @@
         <thead>
             <tr>
                 <th>Asset Code</th>
+                <th>Product</th>
                 <th>Transaction Date</th>
                 <th>Useful Life</th>
                 <th>Year</th>
-                <th>Cost</th>
+                <th>Cost per Year</th>
+                <th>Cost per Month</th>
                 <th>Accumulated</th>
-                <th>Book Value</th>
+                <th>Book Value per Year</th>
                 <th>Current Month</th>
                 <th>Depreciation Type</th>
             </tr>

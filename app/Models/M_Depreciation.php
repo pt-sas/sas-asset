@@ -43,7 +43,8 @@ class M_Depreciation extends Model
     public function getSelect()
     {
         $sql = $this->table . '.*,
-        sys_ref_detail.name as depreciationtype';
+        sys_ref_detail.name as depreciationtype,
+        md_product.name as product';
 
         return $sql;
     }
@@ -55,6 +56,8 @@ class M_Depreciation extends Model
 
         $sql = [
             $this->setDataJoin('sys_ref_detail', 'sys_ref_detail.sys_reference_id = ' . $defaultID . ' AND sys_ref_detail.value = ' . $this->table . '.depreciationtype', 'left'),
+            $this->setDataJoin('trx_inventory', 'trx_inventory.assetcode = ' . $this->table . '.assetcode', 'left'),
+            $this->setDataJoin('md_product', 'md_product.md_product_id = trx_inventory.md_product_id', 'left'),
         ];
 
         return $sql;
