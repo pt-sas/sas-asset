@@ -177,6 +177,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('quotation/getSeqCode', 'Backend\Quotation::getSeqCode');
     $routes->get('quotation/processIt', 'Backend\Quotation::processIt');
     $routes->post('quotation/defaultLogic', 'Backend\Quotation::defaultLogic');
+    $routes->match(['get', 'post'], 'quotation/getList', 'Backend\Quotation::getList');
 
     $routes->add('receipt', 'Backend\Receipt::index');
     $routes->match(['get', 'post'], 'receipt/showAll', 'Backend\Receipt::showAll');
@@ -186,6 +187,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('receipt/destroyLine/(:any)', 'Backend\Receipt::destroyLine/$1');
     $routes->get('receipt/getSeqCode', 'Backend\Receipt::getSeqCode');
     $routes->get('receipt/processIt', 'Backend\Receipt::processIt');
+    $routes->match(['get', 'post'], 'receipt/getDetailQuotation', 'Backend\Receipt::getDetailQuotation');
 
     $routes->add('status', 'Backend\Status::index');
     $routes->match(['get', 'post'], 'status/showAll', 'Backend\Status::showAll');
