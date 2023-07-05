@@ -258,8 +258,8 @@ class Quotation extends BaseController
                     $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, $row[1]->qtyentered, 70),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, replaceFormat($row[2]->unitprice), 125),
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $lineamt, 125),
-                    $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, $row[3]->isspare ? 'checked' : null),
-                    $this->field->fieldTable('select', null, 'md_employee_id', null, 'required', null, null, $dataEmployee, !empty($row[4]->employee_id) ? $row[4]->employee_id : null, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, 'readonly', $row[3]->isspare ? 'checked' : null),
+                    $this->field->fieldTable('select', null, 'md_employee_id', null, 'required', !empty($row[4]->employee_id) ? 'readonly' : null, null, $dataEmployee, !empty($row[4]->employee_id) ? $row[4]->employee_id : null, 200, 'md_employee_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'specification', null, null, null, null, null, null, 250),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250),
                     $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id')
@@ -277,8 +277,8 @@ class Quotation extends BaseController
                     $this->field->fieldTable('input', 'text', 'qtyentered', 'number', 'required', null, null, null, $row->qtyentered, 70),
                     $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, $row->unitprice, 125),
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row->lineamt, 125),
-                    $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, null, null, null, $row->isspare),
-                    $this->field->fieldTable('select', null, 'md_employee_id', null, 'required', null, null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, 'readonly', null, null, $row->isspare),
+                    $this->field->fieldTable('select', null, 'md_employee_id', null, 'required', !empty($row[4]->employee_id) ? 'readonly' : null, null, $dataEmployee, $row->md_employee_id, 200, 'md_employee_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'specification', null, null, null, null, null, $row->specification, 250),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
                     $this->field->fieldTable('button', 'button', 'trx_quotation_detail_id', null, null, null, null, null, $row->trx_quotation_detail_id)

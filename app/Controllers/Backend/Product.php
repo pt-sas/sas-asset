@@ -9,6 +9,7 @@ use App\Models\M_Subcategory;
 use App\Models\M_Category;
 use App\Models\M_Brand;
 use App\Models\M_Employee;
+use App\Models\M_GroupAsset;
 use App\Models\M_Variant;
 use Config\Services;
 
@@ -255,6 +256,8 @@ class Product extends BaseController
     public function showProductInfo()
     {
         $employee = new M_Employee($this->request);
+        $groupasset = new M_GroupAsset($this->request);
+        $category = new M_Category($this->request);
 
         if ($this->request->isAjax()) {
             $get = $this->request->getGet();
@@ -272,13 +275,22 @@ class Product extends BaseController
                     $row = [];
                     $ID = $value->md_product_id;
 
+                    $cat = $category->getByProduct('md_product.md_product_id', $ID);
+
+                    if (!$cat->pic) {
+                        $val = $groupasset->find($cat->md_groupasset_id);
+                        $pic = $val->pic;
+                    } else {
+                        $pic = $cat->pic;
+                    }
+
                     $row[] = $ID;
                     $row[] = $this->field->fieldTable('input', 'checkbox', 'check_data', null, null, null, 'checked', null, $ID);
                     $row[] = $value->name;
                     $row[] = $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, null, null, null, null, 70);
                     $row[] = $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', null, $get['isfree'] === 'Y' ? 'readonly' : null, null, null, $get['isfree'] === 'Y' ? 0 : null, 125);
-                    $row[] = $this->field->fieldTable('input', 'checkbox', 'isspare');
-                    $row[] = $this->field->fieldTable('select', null, 'employee_id', null, null, null, null, $dataEmployee, null, 200, 'md_employee_id', 'name');
+                    $row[] = $this->field->fieldTable('input', 'checkbox', 'isspare', null, null, 'readonly', 'checked');
+                    $row[] = $this->field->fieldTable('select', null, 'employee_id', null, null, $pic ? 'readonly' : null, null, $dataEmployee, $pic, 200, 'md_employee_id', 'name');
                     $data[] = $row;
                 endforeach;
             }
