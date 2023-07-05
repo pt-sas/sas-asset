@@ -28,6 +28,7 @@ class M_Room extends Model
         'md_room.name',
         'md_branch.name',
         'sys_user.name',
+        'md_room.description',
         'md_room.isactive',
     ];
     protected $column_search = [
@@ -35,6 +36,7 @@ class M_Room extends Model
         'md_room.name',
         'md_branch.name',
         'sys_user.name',
+        'md_room.description',
         'md_room.isactive',
     ];
     protected $order = ['value' => 'ASC'];
