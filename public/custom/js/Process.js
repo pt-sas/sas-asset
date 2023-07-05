@@ -1785,6 +1785,23 @@ $(".add_row").click(function (evt) {
     let oriElement = _this.html();
     let textElement = _this.text().trim();
 
+    const field = form.find("input, textarea, select").not(".line");
+    const errorText = form.find("small");
+
+    for (let i = 0; i < field.length; i++) {
+      if (field[i].name !== "") {
+        form
+          .find(
+            "input:checkbox[name=" +
+              field[i].name +
+              "], select[name=" +
+              field[i].name +
+              "]"
+          )
+          .removeAttr("disabled");
+      }
+    }
+
     let formData = new FormData(form[0]);
 
     $.ajax({
@@ -1804,6 +1821,18 @@ $(".add_row").click(function (evt) {
               textElement
           )
           .prop("disabled", true);
+
+        for (let i = 0; i < fieldReadOnly.length; i++) {
+          form
+            .find(
+              "input:checkbox[name=" +
+                fieldReadOnly[i] +
+                "], select[name=" +
+                fieldReadOnly[i] +
+                "]"
+            )
+            .attr("disabled", true);
+        }
       },
       complete: function () {
         $(".close_form").removeAttr("disabled");
@@ -1815,6 +1844,27 @@ $(".add_row").click(function (evt) {
           errorForm(form, result);
         } else {
           _tableLine.row.add(result).draw(false);
+
+          for (let i = 0; i < field.length; i++) {
+            if (field[i].name !== "") {
+              form
+                .find(
+                  "input:checkbox[name=" +
+                    field[i].name +
+                    "], select[name=" +
+                    field[i].name +
+                    "]"
+                )
+                .closest(".form-group")
+                .removeClass("has-error");
+            }
+          }
+
+          // clear text error element small
+          for (let l = 0; l < errorText.length; l++) {
+            if (errorText[l].id !== "")
+              form.find("small[id=" + errorText[l].id + "]").html("");
+          }
         }
       },
       error: function (jqXHR, exception) {
