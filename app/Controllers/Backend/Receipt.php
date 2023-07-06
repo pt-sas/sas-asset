@@ -459,37 +459,33 @@ class Receipt extends BaseController
 
                 //* Use Full Life from group asset
                 $useFulLife = $group->getUsefulLife();
+                $useLength = $useFulLife;
+
+                //* book value of unitprice in inventory 
+                $bookValue = $val->getUnitPrice();
+
+                //* accumulated depreciation 
+                $accumulation = 0;
 
                 //? Check the date less than equal cut off date 
                 if ($currDate <= $dateCO) {
                     //? Check this month of january
                     $notFullMonth = $currMonth == 01 ? $fullMonth : ($fullMonth - $currMonth) + 1;
-
                     $remainMonth = ($fullMonth - $notFullMonth);
-
-                    $useLength = $useFulLife;
-
-                    if (!empty($remainMonth))
-                        $useLength = $useFulLife + 1;
                 }
 
-                //? Check month and date
-                if (($currMonth == 01 || $currMonth != 01) && $currDate > $dateCO) {
+                //? Check the date month than cut off date 
+                if ($currDate > $dateCO) {
                     $addMonth = strtotime("+1 months", strtotime($dateTrx));
                     $nextMonth = date('m', $addMonth);
 
                     //* Total month substract next month add current month to calculate 
                     $notFullMonth = ($fullMonth - $nextMonth) + 1;
                     $remainMonth = ($fullMonth - $notFullMonth);
-
-                    $useLength = $useFulLife + 1;
                 }
 
-                //* book value **Unitprice inventory 
-                $bookValue = $val->getUnitPrice();
-
-                //* accumulated depreciation 
-                $accumulation = 0;
+                if (!empty($remainMonth))
+                    $useLength = $useFulLife + 1;
 
                 //TODO: Method Straight Line 
                 $straightLine = ($bookValue / $useFulLife);
@@ -511,9 +507,16 @@ class Receipt extends BaseController
 
                     //* Index 1
                     if ($i == 1) {
+                        //? Check this month of december and date month than cut off date
+                        if ($currMonth == 12 && $currDate > $dateCO) {
+                            $addYear = addYear($dateTrx, $i);
+                            $year = date('Y', $addYear);
+                            $dateTrx = date('Y-m-d', $addYear);
+                        }
+
                         $calculate *= ($notFullMonth / $fullMonth);
 
-                        //? Set to check is not full month
+                        //* Set to check is not full month
                         $currentMonth = $notFullMonth;
 
                         $cost += $calculate;
@@ -558,7 +561,6 @@ class Receipt extends BaseController
                     $row['depreciationtype'] = $isType;
                     $row['created_by'] = $this->access->getSessionUser();
                     $row['updated_by'] = $this->access->getSessionUser();
-
                     $result[] = $row;
                 }
             endforeach;
