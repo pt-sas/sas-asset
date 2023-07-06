@@ -45,7 +45,7 @@ class AuthFilter implements FilterInterface
 				$checkMenu = $access->getMenu($uri2, "name");
 				$checkCrud = $access->checkCrud($uri2, $isView);
 
-				if (!empty($uri2) && $checkMenu) {
+				if (!empty($uri2)) {
 					if ($checkCrud) {
 						// same url and access is not Y
 						if ($previous_url === current_url() && $checkCrud !== 'Y') {
