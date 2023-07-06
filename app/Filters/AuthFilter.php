@@ -45,13 +45,13 @@ class AuthFilter implements FilterInterface
 				$checkMenu = $access->getMenu($uri2, "name");
 				$checkCrud = $access->checkCrud($uri2, $isView);
 
-				if (!empty($uri2)) {
+				if (!empty($uri2) && $checkMenu) {
 					if ($checkCrud) {
 						// same url and access is not Y
-						if ($previous_url === current_url() && $checkCrud !== 'Y') {
+						if ($previous_url === current_url() && $checkCrud !== 'Y' && !$request->isAjax()) {
 							session()->setFlashdata('error', "You are role don't have permission");
 							return redirect()->to(site_url('sas'));
-						} else if ($previous_url !== current_url() && $checkCrud !== 'Y') {
+						} else if ($previous_url !== current_url() && $checkCrud !== 'Y' && !$request->isAjax()) {
 							session()->setFlashdata('error', "You are role don't have permission");
 							return redirect()->back();
 						}
