@@ -335,6 +335,9 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('wactivity/showNotif', 'Backend\WActivity::showNotif');
     $routes->post('wactivity/create', 'Backend\WActivity::create');
     $routes->match(['get', 'post'], 'wactivity/showActivityInfo', 'Backend\WActivity::showActivityInfo');
+
+    $routes->add('rpt_depreciation_detail', 'Backend\Rpt_DepreciationDetail::index');
+    $routes->match(['get', 'post'], 'rpt_depreciation_detail/showAll', 'Backend\Rpt_DepreciationDetail::showAll');
 });
 
 /*
