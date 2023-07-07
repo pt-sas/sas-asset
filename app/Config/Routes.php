@@ -314,7 +314,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('opname/destroyLine/(:any)', 'Backend\Opname::destroyLine/$1');
     $routes->get('opname/getSeqCode', 'Backend\Opname::getSeqCode');
     $routes->get('opname/processIt', 'Backend\Opname::processIt');
-    $routes->get('opname/getAset', 'Backend\Opname::getAset');
+    $routes->post('opname/getDetailAsset', 'Backend\Opname::getDetailAsset');
 
     $routes->add('rpt_quotation', 'Backend\Rpt_Quotation::index');
     $routes->match(['get', 'post'], 'rpt_quotation/showAll', 'Backend\Rpt_Quotation::showAll');
