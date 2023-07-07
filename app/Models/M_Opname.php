@@ -127,4 +127,41 @@ class M_Opname extends Model
 		$mODetail = new M_OpnameDetail($this->request);
 		$mODetail->where($this->primaryKey, $rows['id'])->delete();
 	}
+
+	public function getSelectOpname()
+	{
+		$sql = $this->table . '.*,' .
+			'md_branch.name AS branch,
+			md_room.name AS room,
+			md_employee.name AS employee,
+			trx_opname_detail.assetcode,
+			trx_opname_detail.isbranch AS check_branch,
+			mdb.name AS branch_scan,
+			trx_opname_detail.isroom AS check_room,
+			mdr.name AS room_scan,
+			trx_opname_detail.isemployee AS check_employee,
+			mde.name AS employee_scan,
+			trx_opname_detail.isnew,
+			trx_opname_detail.nocheck AS noc,
+			sys_user.name AS opnamer';
+
+		return $sql;
+	}
+
+	public function getJoinOpname()
+	{
+		$sql = [
+			$this->setDataJoin('trx_opname_detail', 'trx_opname_detail.trx_opname_id = ' . $this->table . '.trx_opname_id'),
+			$this->setDataJoin('md_branch', 'md_branch.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
+			$this->setDataJoin('md_room', 'md_room.md_room_id = ' . $this->table . '.md_room_id', 'left'),
+			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left'),
+			$this->setDataJoin('trx_inventory', 'trx_opname_detail.assetcode = trx_inventory.assetcode', 'left'),
+			$this->setDataJoin('md_branch mdb', 'mdb.md_branch_id = trx_inventory.md_branch_id', 'left'),
+			$this->setDataJoin('md_room mdr', 'mdr.md_room_id = trx_inventory.md_room_id', 'left'),
+			$this->setDataJoin('md_employee mde', 'mde.md_employee_id = trx_inventory.md_employee_id', 'left'),
+			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left'),
+		];
+
+		return $sql;
+	}
 }

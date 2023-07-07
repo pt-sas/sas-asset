@@ -338,6 +338,9 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
 
     $routes->add('rpt_depreciation_detail', 'Backend\Rpt_DepreciationDetail::index');
     $routes->match(['get', 'post'], 'rpt_depreciation_detail/showAll', 'Backend\Rpt_DepreciationDetail::showAll');
+
+    $routes->add('rpt_opname', 'Backend\Rpt_Opname::index');
+    $routes->match(['get', 'post'], 'rpt_opname/showAll', 'Backend\Rpt_Opname::showAll');
 });
 
 /*
