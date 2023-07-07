@@ -21,6 +21,7 @@ class Inventory extends Entity
     protected $created_by;
     protected $updated_by;
     protected $md_groupasset_id;
+    protected $residualvalue;
 
     protected $dates   = [
         'created_at',
@@ -186,5 +187,15 @@ class Inventory extends Entity
     public function setGroupAssetId($md_groupasset_id)
     {
         $this->attributes['md_groupasset_id'] = $md_groupasset_id;
+    }
+
+    public function getResidualValue()
+    {
+        return $this->attributes['residualvalue'];
+    }
+
+    public function setResidualValue($residualvalue)
+    {
+        $this->attributes['residualvalue'] = $residualvalue;
     }
 }
