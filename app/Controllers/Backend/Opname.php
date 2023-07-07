@@ -222,13 +222,26 @@ class Opname extends BaseController
             $post = $this->request->getVar();
 
             try {
-                $detail = $mInv->where('md_employee_id', $post['md_employee_id'])->findAll();
+                if (!$this->validation->run($post, 'opname_scan')) {
+                    $response = $this->field->errorValidation($this->model->table, $post);
+                } else {
+                    $detail = $mInv->where([
+                        'md_employee_id'    => $post['md_employee_id'],
+                        'md_room_id'        => $post['md_room_id']
+                    ])->findAll();
 
-                $result = [
-                    'line'      => $this->tableLine(null, $detail)
-                ];
 
-                $response = message('success', true, $result);
+                    if ($detail) {
+                        $result = [
+                            'line'      => $this->tableLine(null, $detail)
+                        ];
+
+                        $response = message('success', true, $result);
+                    } else {
+                        $msg = 'Asset does not exist';
+                        $response = message('success', false, $msg);
+                    }
+                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }

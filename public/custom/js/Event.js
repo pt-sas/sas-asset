@@ -2305,17 +2305,20 @@ $(".btn_scan").click(function (evt) {
 
 $("#form_opname").on("change", "#md_employee_id", function (evt) {
   const form = $(this).closest("form");
-  let formData = new FormData();
+  let formData = new FormData(form[0]);
+  let _this = $(this);
 
   trx_opname_id = this.value;
 
   formData.append("md_employee_id", trx_opname_id);
 
-  let url = SITE_URL + "/getDetailAsset";
+  const field = form.find("input, textarea, select").not(".line");
+  const errorText = form.find("small");
 
   if (trx_opname_id !== "" && setSave === "add") {
     _tableLine.clear().draw(false);
 
+    let url = SITE_URL + "/getDetailAsset";
     $.ajax({
       url: url,
       type: "POST",
@@ -2348,12 +2351,38 @@ $("#form_opname").on("change", "#md_employee_id", function (evt) {
                 _tableLine.row.add(elem).draw(false);
               });
             }
+
+            for (let i = 0; i < field.length; i++) {
+              if (field[i].name !== "") {
+                form
+                  .find(
+                    "input[name=" +
+                      field[i].name +
+                      "], select[name=" +
+                      field[i].name +
+                      "]"
+                  )
+                  .closest(".form-group")
+                  .removeClass("has-error");
+              }
+
+              // clear text error element small
+              for (let l = 0; l < errorText.length; l++) {
+                if (errorText[l].id !== "")
+                  form.find("small[id=" + errorText[l].id + "]").html("");
+              }
+            }
           }
+        } else if (result[0].error) {
+          errorForm(form, result);
+          _this.val(null).change();
         } else {
           Toast.fire({
             type: "error",
             title: result[0].message,
           });
+
+          clearErrorForm(form);
         }
       },
       error: function (jqXHR, exception) {
