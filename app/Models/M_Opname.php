@@ -101,7 +101,10 @@ class M_Opname extends Model
 
 	public function getInvNumber()
 	{
-		$month = date('m');
+		$post = $this->request->getPost();
+
+		$yearMonth = date("ym", strtotime($post['opnamedate']));
+		$month = date("m", strtotime($post['opnamedate']));
 
 		$this->builder->select('MAX(RIGHT(documentno,4)) AS documentno');
 		$this->builder->where("DATE_FORMAT(opnamedate, '%m')", $month);
@@ -117,7 +120,7 @@ class M_Opname extends Model
 			$code = "0001";
 		}
 
-		$prefix = "OP" . date('ym') . $code;
+		$prefix = "OP" . $yearMonth . $code;
 
 		return $prefix;
 	}
