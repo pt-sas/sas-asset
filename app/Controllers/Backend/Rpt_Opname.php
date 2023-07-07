@@ -40,7 +40,7 @@ class Rpt_Opname extends BaseController
                 $select = $this->model->getSelectOpname();
                 $join = $this->model->getJoinOpname();
                 $order = $this->request->getPost('columns');
-                $sort = ['opnamedate', 'ASC'];
+                $sort = ['documentno' => 'ASC', 'opnamedate' => 'ASC'];
                 $search = $this->request->getPost('search');
 
                 $number = $this->request->getPost('start');
@@ -65,8 +65,7 @@ class Rpt_Opname extends BaseController
                     $row[] = $value->noc;
                     $row[] = $value->opnamer;
                     $row[] = date("d-m-Y H:i:s", strtotime($value->startdate));
-                    $row[] = date("d-m-Y H:i:s", strtotime($value->enddate));
-
+                    $row[] = !empty($value->enddate) ? date("d-m-Y H:i:s", strtotime($value->enddate)) : "";
                     $data[] = $row;
 
                 endforeach;
