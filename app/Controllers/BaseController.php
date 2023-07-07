@@ -524,9 +524,12 @@ class BaseController extends Controller
 	 * @param array $data
 	 * @return array
 	 */
-	protected function doStripLine(array $data): array
+	protected function doStripLine(array $data, $model = null): array
 	{
 		$result = [];
+
+		if (!is_null($model) && is_object($model))
+			$this->modelDetail = $model;
 
 		foreach ($data as $value) :
 			$data = (array) $value;
