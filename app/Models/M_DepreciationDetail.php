@@ -5,26 +5,29 @@ namespace App\Models;
 use CodeIgniter\Model;
 use CodeIgniter\HTTP\RequestInterface;
 
-class M_Depreciation extends Model
+class M_DepreciationDetail extends Model
 {
-    protected $table            = 'trx_depreciation';
-    protected $primaryKey       = 'trx_depreciation_id';
+    protected $table            = 'trx_depreciation_detail';
+    protected $primaryKey       = 'trx_depreciation_detail_id';
     protected $allowedFields    = [
         'assetcode',
         'transactiondate',
         'totalyear',
-        'startyear',
+        'period',
         'residualvalue',
         'costdepreciation',
+        'newcostdepreciation',
         'accumulateddepreciation',
+        'newaccumulateddepreciation',
         'bookvalue',
+        'newbookvalue',
         'currentmonth',
         'depreciationtype',
         'created_by',
         'updated_by'
     ];
     protected $useTimestamps    = true;
-    protected $returnType       = 'App\Entities\Depreciation';
+    protected $returnType       = 'App\Entities\DepreciationDetail';
     protected $request;
     protected $db;
     protected $builder;

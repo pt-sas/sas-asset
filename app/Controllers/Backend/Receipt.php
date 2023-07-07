@@ -12,6 +12,7 @@ use App\Models\M_Employee;
 use App\Models\M_Division;
 use App\Models\M_Branch;
 use App\Models\M_Depreciation;
+use App\Models\M_DepreciationDetail;
 use App\Models\M_GroupAsset;
 use App\Models\M_Inventory;
 use App\Models\M_Room;
@@ -435,12 +436,19 @@ class Receipt extends BaseController
         $inventory = new M_Inventory($this->request);
         $groupasset = new M_GroupAsset($this->request);
         $depreciation = new M_Depreciation($this->request);
+        $depreciationDetail = new M_DepreciationDetail($this->request);
 
         if (is_object($data) && $data) {
             $receiptID = $data->getReceiptId();
             $rowAsset = $inventory->where('trx_receipt_id', $receiptID)->findAll();
 
-            $result = [];
+            //* Full month in one year 
+            $fullMonth = 12;
+
+            //* Cut off date
+            $dateCO = 15;
+
+            $arrData = [];
             foreach ($rowAsset as $key => $val) :
                 $group = $groupasset->find($val->getGroupAssetId());
 
@@ -451,18 +459,13 @@ class Receipt extends BaseController
                 $currDate = date('d', $strDate);
                 $currMonth = date('m', $strDate);
 
-                //* Full month in one year 
-                $fullMonth = 12;
-
-                //* Cut off date
-                $dateCO = 15;
-
                 //* Use Full Life from group asset
                 $useFulLife = $group->getUsefulLife();
                 $useLength = $useFulLife;
 
                 //* book value of unitprice in inventory 
                 $bookValue = $val->getUnitPrice();
+                $residualValue = $val->getResidualValue();
 
                 //* accumulated depreciation 
                 $accumulation = 0;
@@ -476,7 +479,7 @@ class Receipt extends BaseController
 
                 //? Check the date month than cut off date 
                 if ($currDate > $dateCO) {
-                    $addMonth = strtotime("+1 months", strtotime($dateTrx));
+                    $addMonth = strtotime("+1 months", $strDate);
                     $nextMonth = date('m', $addMonth);
 
                     //* Total month substract next month add current month to calculate 
@@ -488,7 +491,7 @@ class Receipt extends BaseController
                     $useLength = $useFulLife + 1;
 
                 //TODO: Method Straight Line 
-                $straightLine = ($bookValue / $useFulLife);
+                $straightLine = (($bookValue - $residualValue) / $useFulLife);
 
                 for ($i = 0; $i <= $useLength; $i++) {
                     $row = [];
@@ -498,7 +501,7 @@ class Receipt extends BaseController
                     $year = date('Y', $strDate);
 
                     //TODO: Method Double Decline
-                    $doubleLine = (($bookValue / $useFulLife) * 2);
+                    $doubleLine = ((($bookValue - $residualValue) / $useFulLife) * 2);
 
                     $isType = $group->getDepreciationType();
 
@@ -551,21 +554,41 @@ class Receipt extends BaseController
                     }
 
                     $row['assetcode'] = $val->getAssetCode();
-                    $row['transactiondate'] = $dateTrx;
+                    $row['transactiondate'] = $val->getInventoryDate();
                     $row['totalyear'] = $useFulLife;
                     $row['startyear'] = $year;
+                    $row['residualvalue'] = round($residualValue, 2, PHP_ROUND_HALF_UP);
                     $row['costdepreciation'] = round($cost, 2, PHP_ROUND_HALF_UP);
                     $row['accumulateddepreciation'] = round($accumulation, 2, PHP_ROUND_HALF_UP);
                     $row['bookvalue'] = round($bookValue, 2, PHP_ROUND_HALF_UP);
                     $row['currentmonth'] = $currentMonth;
                     $row['depreciationtype'] = $isType;
+                    $row['unitprice'] = $val->getUnitPrice();
                     $row['created_by'] = $this->access->getSessionUser();
                     $row['updated_by'] = $this->access->getSessionUser();
-                    $result[] = $row;
+                    $arrData[] = $row;
                 }
             endforeach;
 
-            $result = $depreciation->doInsert($result);
+            $arrDetail = $this->createDepreceiationMonth($arrData);
+
+            $arrData = $this->doStripLine($arrData, $depreciation);
+            $arrDetail = $this->doStripLine($arrDetail, $depreciationDetail);
+
+            $depreciation->db->transBegin();
+
+            try {
+                //* Insert Table Depreciation 
+                $depreciation->doInsert($arrData);
+
+                //* Insert Table Depreciation Detail
+                $result = $depreciationDetail->doInsert($arrDetail);
+
+                $depreciation->db->transCommit();
+            } catch (\Exception $e) {
+                $depreciation->db->transRollback();
+                throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
+            }
 
             return $result;
         }
@@ -600,5 +623,83 @@ class Receipt extends BaseController
 
             return $this->response->setJSON($response);
         }
+    }
+
+    protected function createDepreceiationMonth($data)
+    {
+        //* Full month in one year 
+        $fullMonth = 12;
+
+        //* Cut off date
+        $dateCO = 15;
+
+        //* accumulated depreciation 
+        $accumulation = 0;
+
+        $arrDetail = [];
+        foreach ($data as $key => $val) :
+            //* Transaction Date 
+            $dateTrx = $val['transactiondate'];
+            $strDate = strtotime($dateTrx);
+            $currDate = date('d', $strDate);
+            $currMonth = date('m', $strDate);
+            $yearMonth = date('Y', $strDate);
+
+            $assetCode = $val['assetcode'];
+            $startYear = $val['startyear'];
+            $totalYear = $val['totalyear'];
+            $currentMonth = $val['currentmonth'];
+            $cost = $val['costdepreciation'];
+            $type = $val['depreciationtype'];
+            $residu = $val['residualvalue'];
+
+            if ($currentMonth != 0) {
+                $row = [];
+
+                $cost = ($cost / $currentMonth);
+
+                for ($i = 1; $i <= $currentMonth; $i++) {
+                    $bookValue = $val['unitprice'];
+
+                    if ($currentMonth != $fullMonth) {
+                        if ($startYear != $yearMonth) {
+                            $year = $startYear . "-01-01";
+                            $strDate = strtotime($year);
+                        }
+                    } else {
+                        $year = $startYear . "-01-01";
+                        $strDate = strtotime($year);
+                    }
+
+                    $increment = $i - 1;
+                    $period = date("m", strtotime("+" . $increment . " months", $strDate));
+                    $period = $startYear . "-" . $period;
+
+                    $accumulation += $cost;
+
+                    //? Check index first and strDate equal dateTrx or this month and cut off date
+                    if ($i == 1 && ($strDate == strtotime($dateTrx) || $currMonth == 01 && $currDate <= $dateCO || $currMonth == 12 && $currDate > $dateCO))
+                        $accumulation = $cost + 0;
+
+                    $bookValue -= $accumulation;
+
+                    $row['assetcode'] = $assetCode;
+                    $row['transactiondate'] = $dateTrx;
+                    $row['totalyear'] = $totalYear;
+                    $row['period'] = $period;
+                    $row['residualvalue'] = round($residu, 2, PHP_ROUND_HALF_UP);
+                    $row['costdepreciation'] = round($cost, 2, PHP_ROUND_HALF_UP);
+                    $row['accumulateddepreciation'] = round($accumulation, 2, PHP_ROUND_HALF_UP);
+                    $row['bookvalue'] = round($bookValue, 2, PHP_ROUND_HALF_UP);;
+                    $row['depreciationtype'] = $type;
+                    $row['currentmonth'] = $currentMonth;
+                    $row['created_by'] = $val['created_by'];
+                    $row['updated_by'] = $val['updated_by'];
+                    $arrDetail[] = $row;
+                }
+            }
+        endforeach;
+
+        return $arrDetail;
     }
 }
