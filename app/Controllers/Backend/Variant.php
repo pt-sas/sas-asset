@@ -22,43 +22,42 @@ class Variant extends BaseController
 
     public function showAll()
     {
-        // if ($this->request->getMethod(true) === 'POST') {
-        $table = $this->model->table;
-        $select = $this->model->findAll();
-        $order = $this->model->column_order;
-        $sort = $this->model->order;
-        $search = $this->model->column_search;
+        if ($this->request->getMethod(true) === 'POST') {
+            $table = $this->model->table;
+            $select = $this->model->findAll();
+            $order = $this->model->column_order;
+            $sort = $this->model->order;
+            $search = $this->model->column_search;
 
-        $data = [];
+            $data = [];
 
-        $number = $this->request->getPost('start');
-        $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search);
+            $number = $this->request->getPost('start');
+            $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search);
 
-        foreach ($list as $value) :
-            $row = [];
-            $ID = $value->md_variant_id;
+            foreach ($list as $value) :
+                $row = [];
+                $ID = $value->md_variant_id;
 
-            $number++;
+                $number++;
 
-            $row[] = $ID;
-            $row[] = $number;
-            $row[] = $value->value;
-            $row[] = $value->name;
-            $row[] = active($value->isactive);
-            $row[] = $this->template->tableButton($ID);
-            $data[] = $row;
-        endforeach;
+                $row[] = $ID;
+                $row[] = $number;
+                $row[] = $value->value;
+                $row[] = $value->name;
+                $row[] = active($value->isactive);
+                $row[] = $this->template->tableButton($ID);
+                $data[] = $row;
+            endforeach;
 
-        $result = [
-            'draw'              => $this->request->getPost('draw'),
-            'recordsTotal'      => $this->datatable->countAll($table),
-            'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search),
-            'data'              => $data
-        ];
+            $result = [
+                'draw'              => $this->request->getPost('draw'),
+                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search),
+                'data'              => $data
+            ];
 
-        // return $this->response->setJSON($select);
-        return json_encode($result);
-        // }
+            return $this->response->setJSON($result);
+        }
     }
 
     public function create()
