@@ -4,6 +4,7 @@
             <tr>
                 <th>No</th>
                 <th>Asset Code</th>
+                <th>License Plate</th>
                 <th>Group Asset</th>
                 <th>Brand</th>
                 <th>Category</th>
