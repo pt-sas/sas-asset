@@ -41,7 +41,13 @@ class Opname extends BaseController
             $order = $this->model->column_order;
             $sort = $this->model->order;
             $search = $this->model->column_search;
-            $where['trx_opname.created_by'] = $this->access->getSessionUser();
+
+            $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
+
+            $where = [];
+
+            if (!$role)
+                $where['trx_opname.created_by'] = $this->access->getSessionUser();
 
             $data = [];
 
