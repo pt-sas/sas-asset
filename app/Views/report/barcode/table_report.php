@@ -11,6 +11,7 @@
                     </div>
                 </th>
                 <th>Asset Code</th>
+                <th>Employee</th>
                 <th>No Receipt</th>
             </tr>
         </thead>
