@@ -1,7 +1,7 @@
 <?= $this->extend('backend/_partials/overview') ?>
 
 <?= $this->section('content'); ?>
-<form id="parameter_assetdetail">
+<form id="parameter_report">
     <div class="card-body">
         <div class="form-group row">
             <label for="md_groupasset_id" class="col-lg-3 col-md-3 col-sm-4 mt-sm-2 text-right">Group Asset </label>
