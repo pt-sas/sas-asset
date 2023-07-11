@@ -16,6 +16,12 @@
             </div>
         </div>
         <div class="form-group row">
+            <label for="md_category_id" class="col-lg-3 col-md-3 col-sm-4 mt-sm-2 text-right">Category </label>
+            <div class="col-lg-6 col-md-9 col-sm-8 select2-input select2-primary">
+                <select class="form-control multiple-select-category" name="md_category_id"></select>
+            </div>
+        </div>
+        <div class="form-group row">
             <label for="md_branch_id" class="col-lg-3 col-md-3 col-sm-4 mt-sm-2 text-right">Branch </label>
             <div class="col-lg-6 col-md-9 col-sm-8">
                 <select class="form-control select-branch" name="md_branch_id">
