@@ -1592,49 +1592,45 @@ $("#form_responsible").on("change", "#responsibletype", function (evt) {
   }
 });
 
-$("#parameter_assetdetail").on(
-  "change",
-  '[name="md_branch_id"]',
-  function (evt) {
-    let url = ADMIN_URL + "room/getList";
-    let value = this.value;
+$("#parameter_report").on("change", '[name="md_branch_id"]', function (evt) {
+  let url = ADMIN_URL + "room/getList";
+  let value = this.value;
 
-    $('[name="md_room_id"]').empty();
+  $('[name="md_room_id"]').empty();
 
-    // Set condition when clear or value zero
-    if (value !== "" && value !== "0") {
-      $.ajax({
-        url: url,
-        type: "POST",
-        cache: false,
-        data: {
-          reference: value,
-          key: "all",
-        },
-        dataType: "JSON",
-        success: function (result) {
-          if (!result[0].error) {
-            $.each(result, function (idx, item) {
-              $('[name="md_room_id"]').append(
-                '<option value="' + item.id + '">' + item.text + "</option>"
-              );
-            });
-          } else {
-            Swal.fire({
-              type: "error",
-              title: result[0].message,
-              showConfirmButton: false,
-              timer: 1500,
-            });
-          }
-        },
-        error: function (jqXHR, exception) {
-          showError(jqXHR, exception);
-        },
-      });
-    }
+  // Set condition when clear or value zero
+  if (value !== "" && value !== "0") {
+    $.ajax({
+      url: url,
+      type: "POST",
+      cache: false,
+      data: {
+        reference: value,
+        key: "all",
+      },
+      dataType: "JSON",
+      success: function (result) {
+        if (!result[0].error) {
+          $.each(result, function (idx, item) {
+            $('[name="md_room_id"]').append(
+              '<option value="' + item.id + '">' + item.text + "</option>"
+            );
+          });
+        } else {
+          Swal.fire({
+            type: "error",
+            title: result[0].message,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
   }
-);
+});
 
 $("#form_internaluse").on("click", '[name="isfrom"]', function (evt) {
   const target = $(evt.target);
@@ -1897,46 +1893,6 @@ $("#form_product, #form_product_info").on(
     }
   }
 );
-
-$("#parameter_barcode").on("change", "#md_branch_id", function (evt) {
-  let url = ADMIN_URL + "room/getList";
-  let value = this.value;
-
-  $("#md_room_id").empty();
-
-  // Set condition when clear or value zero
-  if (value !== "" && value !== "0") {
-    $.ajax({
-      url: url,
-      type: "POST",
-      cache: false,
-      data: {
-        reference: value,
-        key: "all",
-      },
-      dataType: "JSON",
-      success: function (result) {
-        if (!result[0].error) {
-          $.each(result, function (idx, item) {
-            $("#md_room_id").append(
-              '<option value="' + item.id + '">' + item.text + "</option>"
-            );
-          });
-        } else {
-          Swal.fire({
-            type: "error",
-            title: result[0].message,
-            showConfirmButton: false,
-            timer: 1500,
-          });
-        }
-      },
-      error: function (jqXHR, exception) {
-        showError(jqXHR, exception);
-      },
-    });
-  }
-});
 
 /**
  * Event Menu Disposal
