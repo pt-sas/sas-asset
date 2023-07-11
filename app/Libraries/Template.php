@@ -88,6 +88,7 @@ class Template
 
         $update = $this->access->checkCrud($uri, $this->isUpdate);
         $delete = $this->access->checkCrud($uri, $this->isDelete);
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
 
         if ($update === 'Y' && strtoupper($type) === $this->Movement_Terima && ($status === 'DR' || $status === 'IP'))
             $allBtn .= $btnAccept;
@@ -97,7 +98,7 @@ class Template
         else if ($update === 'Y' && (!empty($status) && $status !== 'DR'))
             $allBtn .= $btnDetail;
 
-        if ($update === 'Y' && (!empty($status) && $status === 'DR'))
+        if ($update === 'Y' && (!empty($status) && ($role && $status === 'CO') || $status === 'DR'))
             $allBtn .= $btnProcess;
 
         if ($delete === 'Y')
