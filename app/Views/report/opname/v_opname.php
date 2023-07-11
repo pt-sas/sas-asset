@@ -34,10 +34,10 @@
             </div>
         </div>
         <div class="form-group row">
-            <label for="opnamedate" class="col-lg-3 col-md-3 col-sm-4 mt-sm-2 text-right">Quotation Date</label>
+            <label for="opnamedate" class="col-lg-3 col-md-3 col-sm-4 mt-sm-2 text-right">Opname Date</label>
             <div class="col-lg-6 col-md-9 col-sm-8">
                 <div class="input-icon">
-                    <input type="text" class="form-control daterange" name="opnamedate" value="<?= $date_range ?>" placeholder="Date Quotation">
+                    <input type="text" class="form-control daterange" name="opnamedate" value="<?= $date_range ?>" placeholder="Opname Date">
                     <span class="input-icon-addon">
                         <i class="fas fa-calendar-alt"></i>
                     </span>

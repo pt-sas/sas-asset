@@ -71,7 +71,7 @@ class Rpt_Opname extends BaseController
                     $row[] = $value->room;
                     $row[] = $value->employee;
                     $row[] = $value->assetcode;
-                    $row[] = $value->assetcode;
+                    $row[] = $value->product;
                     $row[] = active($value->check_branch);
                     $row[] = $value->branch_scan;
                     $row[] = active($value->check_room);

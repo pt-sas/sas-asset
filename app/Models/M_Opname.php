@@ -146,7 +146,8 @@ class M_Opname extends Model
 			mde.name AS employee_scan,
 			trx_opname_detail.isnew,
 			trx_opname_detail.nocheck AS noc,
-			sys_user.name AS opnamer';
+			sys_user.name AS opnamer,
+			md_product.name AS product';
 
 		return $sql;
 	}
@@ -163,6 +164,7 @@ class M_Opname extends Model
 			$this->setDataJoin('md_room mdr', 'mdr.md_room_id = trx_inventory.md_room_id', 'left'),
 			$this->setDataJoin('md_employee mde', 'mde.md_employee_id = trx_inventory.md_employee_id', 'left'),
 			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left'),
+			$this->setDataJoin('md_product', 'md_product.md_product_id = trx_inventory.md_product_id', 'left'),
 		];
 
 		return $sql;

@@ -8,6 +8,7 @@
                 <th>Room</th>
                 <th>Employee Scan</th>
                 <th>Asset Code</th>
+                <th>Product</th>
                 <th>Check Branch</th>
                 <th>Branch True</th>
                 <th>Check Room</th>
