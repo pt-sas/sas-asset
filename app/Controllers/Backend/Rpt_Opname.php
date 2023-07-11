@@ -3,7 +3,7 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Opname;
+use App\Models\M_OpnameDetail;
 use App\Models\M_Employee;
 use Config\Services;
 
@@ -12,7 +12,7 @@ class Rpt_Opname extends BaseController
     public function __construct()
     {
         $this->request = Services::request();
-        $this->model = new M_Opname($this->request);
+        $this->model = new M_OpnameDetail($this->request);
     }
 
     public function index()
@@ -83,6 +83,7 @@ class Rpt_Opname extends BaseController
                     $row[] = $value->opnamer;
                     $row[] = date("d-m-Y H:i:s", strtotime($value->startdate));
                     $row[] = !empty($value->enddate) ? date("d-m-Y H:i:s", strtotime($value->enddate)) : "";
+                    $row[] = docStatus($value->docstatus);
                     $data[] = $row;
 
                 endforeach;

@@ -20,6 +20,7 @@
                 <th>Opnamer</th>
                 <th>Start Date</th>
                 <th>End Date</th>
+                <th>Doc Status</th>
             </tr>
         </thead>
     </table>
