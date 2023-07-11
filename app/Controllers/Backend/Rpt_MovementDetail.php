@@ -49,34 +49,36 @@ class Rpt_MovementDetail extends BaseController
                 $select = $this->model->getMovementDetail();
                 $join = $this->model->getJoinDetail();
                 $order = $this->request->getPost('columns');
-                $sort = ['documentno', 'ASC'];
+                $sort = ['documentno' => 'ASC'];
                 $search = $this->request->getPost('search');
+                $where['trx_movement.movementtype'] = $this->Movement_Kirim;
 
                 $number = $this->request->getPost('start');
-                $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join);
+                $list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, $join, $where);
 
                 foreach ($list as $value) :
                     $row = [];
 
+                    $row[] = $value->assetcode;
                     $row[] = $value->documentno;
                     $row[] = format_dmy($value->movementdate, '-');
-                    $row[] = $value->name;
-                    $row[] = $value->employeefrom;
-                    $row[] = $value->employeeto;
-                    $row[] = $value->divisionfrom;
-                    $row[] = $value->divisionto;
+                    $row[] = $value->no_terima;
+                    $row[] = !empty($value->tgl_terima) ? format_dmy($value->tgl_terima, '-') : "";
+                    $row[] = $value->product;
                     $row[] = $value->branchfrom;
                     $row[] = $value->branchto;
+                    $row[] = $value->divisionfrom;
+                    $row[] = $value->divisionto;
+                    $row[] = $value->employeefrom;
+                    $row[] = $value->employeeto;
                     $row[] = $value->roomfrom;
                     $row[] = $value->roomto;
                     $row[] = $value->status;
-
                     $data[] = $row;
-
                 endforeach;
 
-                $recordTotal = $this->datatable->countAll($table);
-                $recordsFiltered = $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join);
+                $recordTotal = $this->datatable->countAll($table, $select, $order, $sort, $search, $join, $where);
+                $recordsFiltered = $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join, $where);
             }
 
             $result = [

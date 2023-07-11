@@ -62,19 +62,20 @@ class M_MovementDetail extends Model
 
 	public function getMovementDetail()
 	{
-		$sql = '
-        trx_movement.documentno,
-        trx_movement.movementdate,
-        md_product.name,
-        md_employee.name AS employeefrom,
-        et.name AS employeeto,
-        md_division.name AS divisionfrom,
-        dt.name AS divisionto,
-        md_branch.name AS branchfrom,
-        bt.name AS branchto,
-        md_room.name AS roomfrom,
-        rt.name AS roomto,
-        md_status.name AS status';
+		$sql = $this->table . '.assetcode,' .
+			'trx_movement.*,
+			ref.documentno AS no_terima,
+			ref.movementdate AS tgl_terima,
+			md_product.name AS product,
+			mdef.name AS employeefrom,
+			mdet.name AS employeeto,
+			mdf.name AS divisionfrom,
+			mdt.name AS divisionto,
+			mbf.name AS branchfrom,
+			mbt.name AS branchto,
+			mrf.name AS roomfrom,
+			mrt.name AS roomto,
+			md_status.name AS status';
 
 		return $sql;
 	}
@@ -82,16 +83,17 @@ class M_MovementDetail extends Model
 	public function getJoinDetail()
 	{
 		$sql = [
-			$this->setDataJoin('trx_movement', 'trx_movement.trx_movement_id =' . $this->table . '.trx_movement_id', 'left'),
-			$this->setDataJoin('md_product', 'md_product.md_product_id =' . $this->table . '.md_product_id', 'left'),
-			$this->setDataJoin('md_employee', 'md_employee.md_employee_id =' . $this->table . '.employee_from', 'left'),
-			$this->setDataJoin('md_employee et', 'et.md_employee_id =' . $this->table . '.employee_to', 'left'),
-			$this->setDataJoin('md_division', 'md_division.md_division_id =' . $this->table . '.division_from', 'left'),
-			$this->setDataJoin('md_division dt', 'dt.md_division_id =' . $this->table . '.division_to', 'left'),
-			$this->setDataJoin('md_branch', 'md_branch.md_branch_id =' . $this->table . '.branch_from', 'left'),
-			$this->setDataJoin('md_branch bt', 'bt.md_branch_id =' . $this->table . '.branch_to', 'left'),
-			$this->setDataJoin('md_room', 'md_room.md_room_id =' . $this->table . '.room_from', 'left'),
-			$this->setDataJoin('md_room rt', 'md_room.md_room_id =' . $this->table . '.room_to', 'left'),
+			$this->setDataJoin('trx_movement', 'trx_movement.trx_movement_id =' . $this->table . '.trx_movement_id'),
+			$this->setDataJoin('trx_movement ref', 'trx_movement.trx_movement_id = ref.ref_movement_id', 'left'),
+			$this->setDataJoin('md_product', 'md_product.md_product_id = ' . $this->table . '.md_product_id', 'left'),
+			$this->setDataJoin('md_branch mbf', 'mbf.md_branch_id =' . $this->table . '.branch_from', 'left'),
+			$this->setDataJoin('md_branch mbt', 'mbt.md_branch_id =' . $this->table . '.branch_to', 'left'),
+			$this->setDataJoin('md_division mdf', 'mdf.md_division_id =' . $this->table . '.division_from', 'left'),
+			$this->setDataJoin('md_division mdt', 'mdt.md_division_id =' . $this->table . '.division_to', 'left'),
+			$this->setDataJoin('md_room mrf', 'mrf.md_room_id =' . $this->table . '.room_from', 'left'),
+			$this->setDataJoin('md_room mrt', 'mrt.md_room_id =' . $this->table . '.room_to', 'left'),
+			$this->setDataJoin('md_employee mdef', 'mdef.md_employee_id =' . $this->table . '.employee_from', 'left'),
+			$this->setDataJoin('md_employee mdet', 'mdet.md_employee_id =' . $this->table . '.employee_to', 'left'),
 			$this->setDataJoin('md_status', 'md_status.md_status_id =' . $this->table . '.md_status_id', 'left'),
 		];
 
