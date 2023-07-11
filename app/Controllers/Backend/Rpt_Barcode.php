@@ -65,7 +65,7 @@ class Rpt_Barcode extends BaseController
 
                 endforeach;
 
-                $recordTotal = $this->datatable->countAll($table);
+                $recordTotal = $this->datatable->countAll($table, $select, $order, $sort, $search);
                 $recordsFiltered = $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join);
             }
 

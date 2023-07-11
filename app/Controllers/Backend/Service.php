@@ -67,7 +67,7 @@ class Service extends BaseController
 
             $result = [
                 'draw'              => $this->request->getPost('draw'),
-                'recordsTotal'      => $this->datatable->countAll($table),
+                'recordsTotal'      => $this->datatable->countAll($table, $select, $order, $sort, $search),
                 'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, $join),
                 'data'              => $data
             ];
