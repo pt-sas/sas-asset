@@ -172,17 +172,10 @@ class Room extends BaseController
                     // condition post contain is numeric
                     if (preg_match('~[0-9]+~', $post['reference'])) {
                         if (isset($post['key']) && !empty($post['key'])) {
-                            if ($post['key'] == 'all')
-                                $list = $this->model->where([
-                                    'isactive'      => 'Y',
-                                    'md_branch_id'  => $post['reference']
-                                ])->orderBy('name', 'ASC')->findAll();
-                            else
-                                $list = $this->model->where([
-                                    'isactive'      => 'Y',
-                                    'value <>'      => 'RM00041',
-                                    'md_branch_id'  => $post['reference']
-                                ])->orderBy('name', 'ASC')->findAll();
+                            $list = $this->model->where([
+                                'isactive'      => 'Y',
+                                'md_branch_id'  => $post['reference']
+                            ])->orderBy('name', 'ASC')->findAll();
                         } else {
                             $value = $employee->find($post['reference']);
 
