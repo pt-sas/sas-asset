@@ -188,7 +188,6 @@ class Room extends BaseController
 
                             $list = $this->model->where([
                                 'isactive'      => 'Y',
-                                'value <>'      => 'RM00041',
                                 'md_branch_id'  => $value->getBranchId()
                             ])->orderBy('name', 'ASC')->findAll();
                         }
