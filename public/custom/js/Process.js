@@ -3490,6 +3490,13 @@ function initSelectData(select, field = null, id = null) {
     let defaultID = $(item).attr("default-id");
     let defaultText = $(item).attr("default-text");
 
+    let lastParam = "";
+
+    if (url.lastIndexOf("$") != -1) {
+      lastParam = url.substr(url.lastIndexOf("$") + 1);
+      url = url.substr(0, url.lastIndexOf("$") - 1);
+    }
+
     if (typeof url !== "undefined" && url !== "") {
       if (field !== null && id !== null)
         url = ADMIN_URL + url + "?" + field + "=" + id;
@@ -3510,6 +3517,7 @@ function initSelectData(select, field = null, id = null) {
           data: function (params) {
             return {
               search: params.term,
+              name: lastParam,
             };
           },
           processResults: function (data, page) {
