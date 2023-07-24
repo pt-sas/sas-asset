@@ -260,6 +260,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('reference/destroy/(:any)', 'Backend\Reference::destroy/$1');
     $routes->post('reference/tableLine', 'Backend\Reference::tableLine');
     $routes->get('reference/destroyLine/(:any)', 'Backend\Reference::destroyLine/$1');
+    $routes->match(['get', 'post'], 'reference/getList', 'Backend\Reference::getList');
 
     $routes->add('rpt_assetdetail', 'Backend\Rpt_AssetDetail::index');
     $routes->match(['get', 'post'], 'rpt_assetdetail/showAll', 'Backend\Rpt_AssetDetail::showAll');

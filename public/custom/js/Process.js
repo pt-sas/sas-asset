@@ -857,7 +857,6 @@ $(".save_form").click(function (evt) {
         hideLoadingForm(form.prop("id"));
       },
       success: function (result) {
-        console.log(result);
         if (result[0].success) {
           Toast.fire({
             type: "success",
@@ -1125,6 +1124,7 @@ function Edit(id, status, last_url) {
             hideLoadingForm(form.prop("id"));
           },
           success: function (result) {
+            console.log(result);
             if (result[0].success) {
               let arrMsg = result[0].message;
 
@@ -3087,6 +3087,7 @@ function clearForm(evt) {
             .removeClass("has-error");
         } else if (fieldReadOnly.length > 0) {
           // field is not readonly by default
+          console.log(fieldReadOnly);
           if (!fieldReadOnly.includes(field[i].name)) {
             form
               .find("select[name=" + field[i].name + "]")

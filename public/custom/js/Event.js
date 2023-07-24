@@ -1899,52 +1899,74 @@ $("#form_product, #form_product_info").on(
  */
 $("#form_disposal").on("change", "#disposaltype", function (e) {
   const form = $(this).closest("form");
-  const field = form.find("select");
   const tr = _tableLine.rows().nodes().to$("tr");
   let value = this.value;
-  let fields = [];
 
-  for (let i = 0; i < field.length; i++) {
-    if (typeof $(field[i]).attr("hide-field") !== "undefined")
-      fields = $(field[i])
-        .attr("hide-field")
-        .split(",")
-        .map((element) => element.trim());
+  if (setSave === "add") {
+    if (value === "SL") {
+      let select = form.find("select[name=md_supplier_id]");
+      select.closest(".form-group").show();
+      select.val(null).change();
 
-    if (fields.includes(field[i].name)) {
-      const select = form.find("select[name=" + field[i].name + "]");
-      let formGroup = select.closest(".form-group");
+      let input = form.find("input[name=sjkno], input[name=bpkno]");
+      input.closest(".form-group").show();
+      input.val(null);
 
-      if (setSave === "add") {
-        if (value === "SL") {
-          formGroup.show();
-          tr.find('input[name="unitprice"]').val(null);
-        } else {
-          formGroup.hide();
-          tr.find('input[name="unitprice"]').val(0);
-        }
+      input = form.find("input[name=bapno]");
+      input.closest(".form-group").hide();
+      input.val(null);
 
-        select.val(null).change();
-      }
+      tr.find('input[name="unitprice"]').val(null);
+    } else {
+      let select = form.find("select[name=md_supplier_id]");
+      select.closest(".form-group").hide();
+      select.val(null).change();
 
-      $.each(option, function (idx, elem) {
-        if (
-          setSave !== "add" &&
-          value != elem.label &&
-          _tableLine.data().any()
-        ) {
-          if (value === "SL") {
-            formGroup.show();
-            tr.find('input[name="unitprice"]').val(elem.label);
-          } else {
-            formGroup.hide();
-            tr.find('input[name="unitprice"]').val(0);
-            select.val(null).change();
-          }
-        }
-      });
+      let input = form.find("input[name=sjkno], input[name=bpkno]");
+      input.closest(".form-group").hide();
+      input.val(null);
+
+      input = form.find("input[name=bapno]");
+      input.closest(".form-group").show();
+      input.val(null);
+
+      tr.find('input[name="unitprice"]').val(0);
     }
   }
+
+  $.each(option, function (idx, elem) {
+    if (setSave !== "add" && _tableLine.data().any()) {
+      if (value === "SL") {
+        let select = form.find("select[name=md_supplier_id]");
+        select.closest(".form-group").show();
+        select.val(null).change();
+
+        let input = form.find("input[name=sjkno], input[name=bpkno]");
+        input.closest(".form-group").show();
+        input.val(null);
+
+        input = form.find("input[name=bapno]");
+        input.closest(".form-group").hide();
+        input.val(null);
+
+        tr.find('input[name="unitprice"]').val(elem.label);
+      } else {
+        let select = form.find("select[name=md_supplier_id]");
+        select.closest(".form-group").hide();
+        select.val(null).change();
+
+        let input = form.find("input[name=sjkno], input[name=bpkno]");
+        input.closest(".form-group").hide();
+        input.val(null);
+
+        input = form.find("input[name=bapno]");
+        input.closest(".form-group").show();
+        input.val(null);
+
+        tr.find('input[name="unitprice"]').val(0);
+      }
+    }
+  });
 });
 
 $("#form_movement").on(
@@ -1991,7 +2013,7 @@ $("#form_movement").on(
         if (
           attrName === "movementtype" &&
           value !== "" &&
-          value != elem.label &&
+          value != elem.option_ID &&
           _tableLine.data().any()
         ) {
           Swal.fire({
@@ -2264,7 +2286,7 @@ $("#form_opname").on("change", "#md_employee_id", function (evt) {
   let formData = new FormData(form[0]);
   let _this = $(this);
 
-  trx_opname_id = this.value;
+  let trx_opname_id = this.value;
 
   formData.append("md_employee_id", trx_opname_id);
 

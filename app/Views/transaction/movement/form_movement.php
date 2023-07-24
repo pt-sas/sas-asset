@@ -27,15 +27,8 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="movementtype">Movement Type </label>
-                    <select class="form-control select2" id="movementtype" name="movementtype" disabled>
+                    <select class="form-control select-data" id="movementtype" name="movementtype" data-url="reference/getList/$MovementType" default-id="<?= $ref_list->value ?>" default-text="<?= $ref_list->name ?>" disabled>
                         <option value="">Select Movement Type</option>
-                        <?php foreach ($ref_list as $row) : ?>
-                            <?php if ($row->value === "KIRIM") : ?>
-                                <option value="<?= $row->value ?>" selected><?= $row->name ?></option>
-                            <?php else : ?>
-                                <option value="<?= $row->value ?>"><?= $row->name ?></option>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
                     </select>
                 </div>
             </div>

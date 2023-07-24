@@ -15,6 +15,7 @@ use App\Models\M_Inventory;
 use App\Models\M_Status;
 use App\Models\M_Transaction;
 use App\Models\M_Reference;
+use App\Models\M_ReferenceDetail;
 use App\Models\M_WActivity;
 use App\Models\M_WEvent;
 use Config\Services;
@@ -44,10 +45,8 @@ class Movement extends BaseController
                 'sys_reference.name'              => 'MovementType',
                 'sys_reference.isactive'          => 'Y',
                 'sys_ref_detail.isactive'         => 'Y',
-            ], null, [
-                'field'     => 'sys_ref_detail.name',
-                'option'    => 'ASC'
-            ])->getResult(),
+                'sys_ref_detail.name'             => $this->Movement_Kirim
+            ])->getRow(),
             'date_range' => $start_date . ' - ' . $end_date
         ];
 
@@ -151,8 +150,7 @@ class Movement extends BaseController
                 $response = message('error', false, $e->getMessage());
             }
 
-            // return $this->response->setJSON($response);
-            return json_encode($response);
+            return $this->response->setJSON($response);
         }
     }
 
@@ -160,6 +158,7 @@ class Movement extends BaseController
     {
         $branch = new M_Branch($this->request);
         $division = new M_Division($this->request);
+        $refDetail = new M_ReferenceDetail($this->request);
 
         if ($this->request->isAJAX()) {
             try {
@@ -171,9 +170,11 @@ class Movement extends BaseController
                     $list = $this->field->setDataSelect($this->model->table, $list, "ref_movement_id", $rowRefMove->getRefMovementId(), $rowRefMove->getDocumentNo());
                 }
 
+                $rowMoveType = $refDetail->where("name", $list[0]->getMovementType())->first();
                 $rowBranch = $branch->find($list[0]->getBranchId());
                 $rowDivision = $division->find($list[0]->getDivisionId());
 
+                $list = $this->field->setDataSelect($refDetail->table, $list, "movementtype", $rowMoveType->getValue(), $rowMoveType->getName());
                 $list = $this->field->setDataSelect($branch->table, $list, $branch->primaryKey, $rowBranch->getBranchId(), $rowBranch->getName());
                 $list = $this->field->setDataSelect($division->table, $list, $division->primaryKey, $rowDivision->getDivisionId(), $rowDivision->getName());
 
