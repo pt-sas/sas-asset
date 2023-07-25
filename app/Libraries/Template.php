@@ -90,8 +90,9 @@ class Template
         $delete = $this->access->checkCrud($uri, $this->isDelete);
         $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
 
-        if ($update === 'Y' && strtoupper($type) === $this->Movement_Terima && ($status === 'DR' || $status === 'IP'))
-            $allBtn .= $btnAccept;
+        //? Belum di deploy 
+        // if ($update === 'Y' && strtoupper($type) === $this->Movement_Terima && ($status === 'DR' || $status === 'IP'))
+        //     $allBtn .= $btnAccept;
 
         if ($update === 'Y' && (empty($status) || $status === 'DR'))
             $allBtn .= $btnUpdate;
