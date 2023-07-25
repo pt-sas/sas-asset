@@ -115,10 +115,11 @@ class Receipt extends BaseController
 
             try {
                 $this->entity->fill($post);
-                $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
                 $this->entity->setGrandTotal(arrSumField('unitprice', $table));
 
                 if ($this->isNew()) {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+
                     $docNo = $this->model->getInvNumber();
                     $this->entity->setDocumentNo($docNo);
                 }

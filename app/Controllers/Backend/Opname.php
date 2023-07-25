@@ -100,10 +100,11 @@ class Opname extends BaseController
 
             try {
                 $this->entity->fill($post);
-                $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
 
                 //* Insert data
                 if ($this->isNew()) {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+
                     $docNo = $this->model->getInvNumber();
                     $this->entity->setDocumentNo($docNo);
                 }

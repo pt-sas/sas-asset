@@ -122,11 +122,12 @@ class Internal extends BaseController
 
             try {
                 $this->entity->fill($post);
-                $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-                $this->entity->setIsInternalUse('Y');
                 $this->entity->setGrandTotal(arrSumField('lineamt', $table));
 
                 if ($this->isNew()) {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+                    $this->entity->setIsInternalUse('Y');
+
                     $docNo = $this->model->getInvNumber('isinternaluse', 'Y');
                     $this->entity->setDocumentNo($docNo);
                 }
