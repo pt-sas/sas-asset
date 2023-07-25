@@ -731,9 +731,9 @@ class Validation
         ],
         'md_branchto_id'            => [
             'label'                 => 'Branch To',
-            'rules'                 => 'required',
+            'rules'                 => 'required_based_field_value[movementtype, KIRIM]',
             'errors'                => [
-                'required'  => 'Please Choose the {field} first.'
+                'required_based_field_value'      => 'Please Choose the field first.'
             ]
         ],
         'md_division_id'            => [
@@ -1326,6 +1326,27 @@ class Validation
             'rules'             => 'required_based_field_value[disposaltype, SL]',
             'errors'            => [
                 'required_based_field_value'      => 'Please Choose the {field} first.'
+            ]
+        ],
+        'bapno'                 => [
+            'label'             => 'BAP No',
+            'rules'             => 'required_based_field_value[disposaltype, WR]',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'sjkno'                 => [
+            'label'             => 'SJK No',
+            'rules'             => 'required_based_field_value[disposaltype, SL]',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'bpkno'                 => [
+            'label'             => 'BPK No',
+            'rules'             => 'required_based_field_value[disposaltype, SL]',
+            'errors'            => [
+                'required_based_field_value'      => 'Please Insert the {field} first.'
             ]
         ],
         'line'                  => [

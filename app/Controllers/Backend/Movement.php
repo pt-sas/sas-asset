@@ -133,10 +133,11 @@ class Movement extends BaseController
 
             try {
                 $this->entity->fill($post);
-                $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
 
                 //* Insert data
                 if ($this->isNew()) {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+
                     $docNo = $this->model->getInvNumber($post['movementtype']);
                     $this->entity->setDocumentNo($docNo);
                 }
@@ -167,7 +168,7 @@ class Movement extends BaseController
 
                 if (!empty($list[0]->getRefMovementId())) {
                     $rowRefMove = $this->model->find($list[0]->getRefMovementId());
-                    $list = $this->field->setDataSelect($this->model->table, $list, "ref_movement_id", $rowRefMove->getRefMovementId(), $rowRefMove->getDocumentNo());
+                    $list = $this->field->setDataSelect($this->model->table, $list, "ref_movement_id", $rowRefMove->getMovementId(), $rowRefMove->getDocumentNo());
                 }
 
                 $rowMoveType = $refDetail->where("name", $list[0]->getMovementType())->first();
@@ -479,7 +480,7 @@ class Movement extends BaseController
                     $this->field->fieldTable('select', null, 'division_to', null, null, 'readonly', null, null, null, 200),
                     $this->field->fieldTable('select', null, 'room_from', null, null, 'readonly', null, $dataRoom, null, 250, 'md_room_id', 'name'),
                     $this->field->fieldTable('select', null, 'room_to', null, 'required', null, null, null, null, 250),
-                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $post["md_division_id"], 250)
+                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250)
                 ];
             }
         }
@@ -531,7 +532,7 @@ class Movement extends BaseController
                     $this->field->fieldTable('select', null, 'division_from', null, null, 'readonly', null, $dataDivision, $row->division_from, 200, 'md_division_id', 'name'),
                     $this->field->fieldTable('select', null, 'division_to', null, null, 'readonly', null, $dataDivision, $row->division_to, 200, 'md_division_id', 'name'),
                     $this->field->fieldTable('select', null, 'room_from', null, null, 'readonly', null, $dataRoom, $row->room_from, 250, 'md_room_id', 'name'),
-                    $this->field->fieldTable('select', null, 'room_to', null, 'required', null, null, $dataRoom, $row->room_to, 250, 'md_room_id', 'name'),
+                    $this->field->fieldTable('select', null, 'room_to', 'updatable', 'required', null, null, $dataRoom, $row->room_to, 250, 'md_room_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250)
                 ];
             endforeach;

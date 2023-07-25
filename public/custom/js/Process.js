@@ -830,7 +830,7 @@ $(".save_form").click(function (evt) {
     }
 
     //* Set primary key on the property "id"
-    if (setSave === "update") formData.append("id", ID);
+    if (setSave !== "add") formData.append("id", ID);
 
     $.ajax({
       url: url,
@@ -986,7 +986,8 @@ $(".save_form").click(function (evt) {
         //? Set attribute disabled based on default field or exist attribute edit-disabled
         if (
           fieldReadOnly.includes(field[i].name) ||
-          (setSave !== "add" && $(field[i]).attr("edit-disabled"))
+          (setSave !== "add" && $(field[i]).attr("edit-disabled")) ||
+          setSave === "detail"
         )
           form
             .find(
@@ -1117,14 +1118,14 @@ function Edit(id, status, last_url) {
             loadingForm(form.prop("id"), "facebook");
           },
           complete: function () {
-            if (setSave !== "detail") $(".save_form").removeAttr("disabled");
+            if (setSave === "DR" || status === "IP")
+              $(".save_form").removeAttr("disabled");
 
             $(".x_form").removeAttr("disabled");
             $(".close_form").removeAttr("disabled");
             hideLoadingForm(form.prop("id"));
           },
           success: function (result) {
-            console.log(result);
             if (result[0].success) {
               let arrMsg = result[0].message;
 
@@ -1170,26 +1171,28 @@ function Edit(id, status, last_url) {
 
                     $.each(field, function (index, item) {
                       const tr = $(this).closest("tr");
+                      const className = item.className.split(/\s+/);
 
-                      if (item.type !== "text") {
-                        tr.find(
-                          "input:checkbox[name=" +
-                            item.name +
-                            "], select[name=" +
-                            item.name +
-                            "], input:radio[name=" +
-                            item.name +
-                            "]"
-                        ).prop("disabled", true);
-                      } else {
-                        tr.find(
-                          "input:text[name=" +
-                            item.name +
-                            "], textarea[name=" +
-                            item.name +
-                            "]"
-                        ).prop("readonly", true);
-                      }
+                      if (!className.includes("updatable"))
+                        if (item.type !== "text") {
+                          tr.find(
+                            "input:checkbox[name=" +
+                              item.name +
+                              "], select[name=" +
+                              item.name +
+                              "], input:radio[name=" +
+                              item.name +
+                              "]"
+                          ).prop("disabled", true);
+                        } else {
+                          tr.find(
+                            "input:text[name=" +
+                              item.name +
+                              "], textarea[name=" +
+                              item.name +
+                              "]"
+                          ).prop("readonly", true);
+                        }
                     });
                   } else {
                     // Button add row table line
@@ -3087,7 +3090,6 @@ function clearForm(evt) {
             .removeClass("has-error");
         } else if (fieldReadOnly.length > 0) {
           // field is not readonly by default
-          console.log(fieldReadOnly);
           if (!fieldReadOnly.includes(field[i].name)) {
             form
               .find("select[name=" + field[i].name + "]")

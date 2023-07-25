@@ -438,12 +438,10 @@ $("#form_employee, #form_opname").on("change", "#md_branch_id", function (evt) {
         key: "branch",
       },
       beforeSend: function () {
-        $(".save_form").attr("disabled", true);
         $(".close_form").attr("disabled", true);
         loadingForm(form.prop("id"), "pulse");
       },
       complete: function () {
-        $(".save_form").removeAttr("disabled");
         $(".close_form").removeAttr("disabled");
         hideLoadingForm(form.prop("id"));
       },
