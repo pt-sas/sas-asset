@@ -1118,7 +1118,12 @@ function Edit(id, status, last_url) {
             loadingForm(form.prop("id"), "facebook");
           },
           complete: function () {
-            if (setSave === "DR" || status === "IP")
+            if (
+              typeof status === "undefined" ||
+              status === "" ||
+              status === "DR" ||
+              status === "IP"
+            )
               $(".save_form").removeAttr("disabled");
 
             $(".x_form").removeAttr("disabled");
@@ -4599,7 +4604,7 @@ window.onload = function () {
 
   if (reloading) {
     sessionStorage.removeItem("reloading");
-    Edit(data.record_id, data.menu);
+    Edit(data.record_id, "IP", data.menu);
   }
 };
 
