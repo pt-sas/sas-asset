@@ -63,7 +63,9 @@ class WActivity extends BaseController
                     $table = $value->table;
                     $menu = $value->menu;
                     $node = 'Approval ' . ucwords($menu);
-                    $summary = ucwords($menu) . ' ' . $value->documentno . ': ' . $value->usercreated_by;
+
+                    $trx = $this->model->getDataTrx($table);
+                    $summary = ucwords($menu) . ' ' . $trx->documentno . ': ' . $trx->usercreated_by;
 
                     $row[] = $ID;
                     $row[] = $record_id;
@@ -455,7 +457,7 @@ class WActivity extends BaseController
 
     public function showNotif()
     {
-        $list = $this->model->countData();
+        $list = $this->model->getActivity("count");
         return json_encode($list);
     }
 

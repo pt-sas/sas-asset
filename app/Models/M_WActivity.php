@@ -62,65 +62,45 @@ class M_WActivity extends Model
 		return $role;
 	}
 
-	public function getActivity()
-	{
-		$list = $this->findAll();
-
-		$role = $this->getRole();
-
-		$sql = "";
-
-		if ($list) {
-			foreach ($list as $row) :
-				$this->builder->select($this->table . '.*,' .
-					$row->getTable() . '.documentno,
-			sys_user.name as usercreated_by');
-
-				$dataField = $this->db->getFieldData($row->table);
-
-				foreach ($dataField as $field) :
-					if ($field->primary_key == 1) {
-						$this->builder->join($row->getTable(), $row->getTable() . '.' . $field->name . '=' . $this->table . '.record_id');
-						$this->builder->join('sys_user', 'sys_user.sys_user_id = ' . $row->getTable() . '.created_by');
-					}
-				endforeach;
-
-				$this->builder->join('sys_wfresponsible', 'sys_wfresponsible.sys_wfresponsible_id = ' . $this->table . '.sys_wfresponsible_id');
-
-				// $role = $this->getResponsibleRole($row->getWfResponsibleId());
-
-				$this->builder->where([
-					$this->table . '.state'			=> 'OS',
-					$this->table . '.processed'		=> 'N'
-				]);
-
-				// Saat user mempunyai lebih dari 1 role approval, dokumen yg harus diapprove belum muncul
-				if (!empty($role))
-					$this->builder->whereIn('sys_wfresponsible.sys_role_id', $role);
-
-				$this->builder->orderBy($this->table . '.created_at', 'ASC');
-
-				$sql = $this->builder->get()->getResult();
-			endforeach;
-		}
-
-		return $sql;
-	}
-
-	public function countData()
+	public function getActivity(string $type = null)
 	{
 		$role = $this->getRole();
 
 		$this->builder->select($this->table . '.*');
-		$this->builder->join('sys_wfresponsible', 'sys_wfresponsible.sys_wfresponsible_id = ' . $this->table . '.sys_wfresponsible_id');
+		$this->builder->join('sys_wfresponsible', 'sys_wfresponsible.sys_wfresponsible_id = ' . $this->table . '.sys_wfresponsible_id', 'left');
 		$this->builder->where([
 			$this->table . '.state'			=> 'OS',
 			$this->table . '.processed'		=> 'N'
 		]);
 
+		// Saat user mempunyai lebih dari 1 role approval, dokumen yg harus diapprove belum muncul
 		if (!empty($role))
 			$this->builder->whereIn('sys_wfresponsible.sys_role_id', $role);
 
-		return $this->builder->countAllResults();
+		$this->builder->orderBy($this->table . '.created_at', 'ASC');
+
+		if (!is_null($type) && strtolower($type) === "count")
+			$sql = $this->builder->countAllResults();
+		else
+			$sql = $this->builder->get()->getResult();
+
+		return $sql;
+	}
+
+	public function getDataTrx(string $table)
+	{
+		$this->builder = $this->db->table($table);
+
+		$this->builder->select($table . '.*,
+						sys_user.name as usercreated_by');
+
+		$this->builder->join('sys_user', 'sys_user.sys_user_id = ' . $table . '.created_by');
+		$this->builder->where([
+			$table . ".docstatus" => "IP"
+		]);
+
+		$sql = $this->builder->get()->getRow();
+
+		return $sql;
 	}
 }
