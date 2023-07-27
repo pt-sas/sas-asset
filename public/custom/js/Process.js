@@ -1178,7 +1178,7 @@ function Edit(id, status, last_url) {
                       const tr = $(this).closest("tr");
                       const className = item.className.split(/\s+/);
 
-                      if (!className.includes("updatable"))
+                      if (!className.includes("updatable") || status !== "IP")
                         if (item.type !== "text") {
                           tr.find(
                             "input:checkbox[name=" +
