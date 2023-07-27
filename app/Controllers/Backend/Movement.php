@@ -470,15 +470,15 @@ class Movement extends BaseController
                 $table = [
                     $this->field->fieldTable('button', 'button', 'trx_movement_detail_id'),
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, null, 170, 'assetcode', 'assetcode'),
-                    $this->field->fieldTable('input', 'text', 'md_product_id', 'text-uppercase', 'required', 'readonly', null, null, null, 300),
+                    $this->field->fieldTable('input', 'text', 'md_product_id', null, 'required', 'readonly', null, null, null, 300),
                     $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, 'BAGUS', 150, 'md_status_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'employee_from', 'text-uppercase', 'required', 'readonly', null, null, null, 200),
+                    $this->field->fieldTable('input', 'text', 'employee_from', null, 'required', 'readonly', null, null, null, 200),
                     $this->field->fieldTable('select', null, 'employee_to', null, 'required', null, null, $dataEmployeeTo, null, 200, 'md_employee_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'branch_from', 'text-uppercase', 'required', 'readonly', null, null, null, 200),
+                    $this->field->fieldTable('input', 'text', 'branch_from', null, 'required', 'readonly', null, null, null, 200),
                     $this->field->fieldTable('select', null, 'branch_to', null, null, 'readonly', null, null, null, 200),
-                    $this->field->fieldTable('input', 'text', 'division_from', 'text-uppercase', 'required', 'readonly', null, null, null, 200),
+                    $this->field->fieldTable('input', 'text', 'division_from', null, 'required', 'readonly', null, null, null, 200),
                     $this->field->fieldTable('select', null, 'division_to', null, null, 'readonly', null, null, null, 200),
-                    $this->field->fieldTable('input', 'text', 'room_from', 'text-uppercase', 'required', 'readonly', null, null, null, 200),
+                    $this->field->fieldTable('input', 'text', 'room_from', null, 'required', 'readonly', null, null, null, 200),
                     $this->field->fieldTable('select', null, 'room_to', null, 'required', null, null, null, null, 250),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250)
                 ];
@@ -539,15 +539,15 @@ class Movement extends BaseController
                 $table[] = [
                     $button,
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
-                    $this->field->fieldTable('input', 'text', 'md_product_id', 'text-uppercase', 'required', 'readonly', null, null, $valPro->getName(), 300),
+                    $this->field->fieldTable('input', 'text', 'md_product_id', null, 'required', 'readonly', null, null, $valPro->getName(), 300),
                     $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'employee_from', 'text-uppercase', 'required', 'readonly', null, null, $valEmp->getName(), 200),
+                    $this->field->fieldTable('input', 'text', 'employee_from', null, 'required', 'readonly', null, null, $valEmp->getName(), 200),
                     $this->field->fieldTable('select', null, 'employee_to', null, 'required', $row->status === 'RUSAK' ? 'readonly' : null, null, $dataEmployeeTo, $row->employee_to, 200, 'md_employee_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'branch_from', 'text-uppercase', 'required', 'readonly', null, null, $valBranch->getName(), 200),
+                    $this->field->fieldTable('input', 'text', 'branch_from', null, 'required', 'readonly', null, null, $valBranch->getName(), 200),
                     $this->field->fieldTable('select', null, 'branch_to', null, null, 'readonly', null, $dataBranch, $row->branch_to, 200, 'md_branch_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'division_from', 'text-uppercase', 'required', 'readonly', null, null, $valDiv->getName(), 200),
+                    $this->field->fieldTable('input', 'text', 'division_from', null, 'required', 'readonly', null, null, $valDiv->getName(), 200),
                     $this->field->fieldTable('select', null, 'division_to', null, null, 'readonly', null, $dataDivision, $row->division_to, 200, 'md_division_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'room_from', 'text-uppercase', 'required', 'readonly', null, null, $valRoom->getName(), 200),
+                    $this->field->fieldTable('input', 'text', 'room_from', null, 'required', 'readonly', null, null, $valRoom->getName(), 200),
                     $this->field->fieldTable('select', null, 'room_to', 'updatable', 'required', null, null, $dataRoomTo, $row->room_to, 250, 'md_room_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250)
                 ];
