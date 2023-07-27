@@ -538,28 +538,38 @@ _tableLine.on("change", 'select[name="assetcode"]', function (evt) {
                 .change()
                 .prop("disabled", true);
             }
+          } else if (tr.find('input[name="md_product_id"]').length > 0) {
+            tr.find('input[name="md_product_id"]').val(item.md_product_id.name);
           }
 
           if (tr.find('select[name="employee_from"]').length > 0) {
             tr.find('select[name="employee_from"]')
               .val(item.md_employee_id)
               .change();
+          } else if (tr.find('input[name="employee_from"]').length > 0) {
+            tr.find('input[name="employee_from"]').val(item.employee_from.name);
           }
 
           if (tr.find('select[name="branch_from"]').length > 0) {
             tr.find('select[name="branch_from"]')
               .val(item.md_branch_id)
               .change();
+          } else if (tr.find('input[name="branch_from"]').length > 0) {
+            tr.find('input[name="branch_from"]').val(item.branch_from.name);
           }
 
           if (tr.find('select[name="division_from"]').length > 0) {
             tr.find('select[name="division_from"]')
               .val(item.md_division_id)
               .change();
+          } else if (tr.find('input[name="division_from"]').length > 0) {
+            tr.find('input[name="division_from"]').val(item.division_from.name);
           }
 
           if (tr.find('select[name="room_from"]').length > 0) {
             tr.find('select[name="room_from"]').val(item.md_room_id).change();
+          } else if (tr.find('input[name="room_from"]').length > 0) {
+            tr.find('input[name="room_from"]').val(item.room_from.name);
           }
         });
       } else {

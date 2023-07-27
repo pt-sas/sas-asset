@@ -108,4 +108,39 @@ class M_MovementDetail extends Model
 			"typeJoin" => $typeJoin
 		];
 	}
+
+	/**
+	 * Change value of field data
+	 *
+	 * @param array $data Data
+	 * @return array
+	 */
+	public function doChangeValueField(array $data): array
+	{
+		$product = new M_Product($this->request);
+		$branch = new M_Branch($this->request);
+		$employee = new M_Employee($this->request);
+		$division = new M_Division($this->request);
+		$room = new M_Room($this->request);
+
+		$result = [];
+
+		foreach ($data as $row) :
+			$valPro = $product->where('name', $row['md_product_id'])->first();
+			$valBranch = $branch->where('name', $row['branch_from'])->first();
+			$valEmp = $employee->where('name', $row['employee_from'])->first();
+			$valDiv = $division->where('name', $row['division_from'])->first();
+			$valRoom = $room->where('name', $row['room_from'])->first();
+
+			$row['md_product_id'] = $valPro->getProductId();
+			$row['employee_from'] = $valEmp->getEmployeeId();
+			$row['branch_from'] = $valBranch->getBranchId();
+			$row['division_from'] = $valDiv->getDivisionId();
+			$row['room_from'] = $valRoom->geRoomId();
+
+			$result[] = $row;
+		endforeach;
+
+		return $result;
+	}
 }

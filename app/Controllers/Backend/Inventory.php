@@ -6,7 +6,9 @@ use App\Controllers\BaseController;
 use App\Models\M_Inventory;
 use App\Models\M_Product;
 use App\Models\M_Branch;
+use App\Models\M_Division;
 use App\Models\M_Employee;
+use App\Models\M_Room;
 use App\Models\M_Status;
 use Config\Services;
 
@@ -157,11 +159,30 @@ class Inventory extends BaseController
 
     public function getAssetDetail()
     {
+        $product = new M_Product($this->request);
+        $branch = new M_Branch($this->request);
+        $employee = new M_Employee($this->request);
+        $division = new M_Division($this->request);
+        $room = new M_Room($this->request);
+
         if ($this->request->getMethod(true) === 'POST') {
             $post = $this->request->getVar();
 
             try {
                 $list = $this->model->where('assetcode', $post['assetcode'])->findAll();
+
+                $rowProduct = $product->find($list[0]->getProductId());
+                $rowBranch = $branch->find($list[0]->getBranchId());
+                $rowEmployee = $employee->find($list[0]->getEmployeeId());
+                $rowDivision = $division->find($list[0]->getDivisionId());
+                $rowRoom = $room->find($list[0]->getRoomId());
+
+                $list = $this->field->setDataSelect($product->table, $list, $product->primaryKey, $rowProduct->getProductId(), $rowProduct->getName());
+                $list = $this->field->setDataSelect($branch->table, $list, "branch_from", $rowBranch->getBranchId(), $rowBranch->getName());
+                $list = $this->field->setDataSelect($employee->table, $list, "employee_from", $rowEmployee->getEmployeeId(), $rowEmployee->getName());
+                $list = $this->field->setDataSelect($division->table, $list, "division_from", $rowDivision->getDivisionId(), $rowDivision->getName());
+                $list = $this->field->setDataSelect($room->table, $list, "room_from", $rowRoom->getRoomId(), $rowRoom->getName());
+
                 $response = message('success', true, $list);
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
