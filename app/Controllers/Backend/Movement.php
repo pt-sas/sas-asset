@@ -520,6 +520,16 @@ class Movement extends BaseController
                 //* Data Inventory 
                 $dataInventory = $inventory->where($invWhere)->orderBy('assetcode', 'ASC')->findAll();
 
+                //? Where clause room to 
+                $roomWhere['isactive'] = 'Y';
+                if ($move->getMovementType() === $this->Movement_Terima)
+                    $roomWhere['md_branch_id'] = $move->getBranchId();
+                else
+                    $roomWhere['md_branch_id'] = $move->getBranchToId();
+
+                //* Data Room To
+                $dataRoomTo = $room->where($roomWhere)->orderBy('name', 'ASC')->findAll();
+
                 $table[] = [
                     $button,
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
@@ -532,7 +542,7 @@ class Movement extends BaseController
                     $this->field->fieldTable('select', null, 'division_from', null, null, 'readonly', null, $dataDivision, $row->division_from, 200, 'md_division_id', 'name'),
                     $this->field->fieldTable('select', null, 'division_to', null, null, 'readonly', null, $dataDivision, $row->division_to, 200, 'md_division_id', 'name'),
                     $this->field->fieldTable('select', null, 'room_from', null, null, 'readonly', null, $dataRoom, $row->room_from, 250, 'md_room_id', 'name'),
-                    $this->field->fieldTable('select', null, 'room_to', 'updatable', 'required', null, null, $dataRoom, $row->room_to, 250, 'md_room_id', 'name'),
+                    $this->field->fieldTable('select', null, 'room_to', 'updatable', 'required', null, null, $dataRoomTo, $row->room_to, 250, 'md_room_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250)
                 ];
             endforeach;
