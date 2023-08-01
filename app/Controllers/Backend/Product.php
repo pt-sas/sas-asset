@@ -83,6 +83,8 @@ class Product extends BaseController
                 $post['name'] = $this->merge_name($post['md_brand_id'], $post['md_category_id'], $post['md_subcategory_id'], $post['md_type_id'], $post['md_variant_id']);
             }
 
+            $post['md_variant_id'] = $post['md_variant_id'] ?: NULL;
+
             try {
                 $this->entity->fill($post);
 
@@ -198,7 +200,6 @@ class Product extends BaseController
         $rowCategory = $category->find($category_id);
         $rowSubcategory = $subcategory->find($subcategory_id);
         $rowType = $type->find($type_id);
-        $rowVariant = $variant->find($variant_id);
 
         $text =  $rowBrand->getName() . $separator . $rowCategory->getName();
 
@@ -210,7 +211,8 @@ class Product extends BaseController
             $text .= $separator . $rowType->getName();
         }
 
-        if (!empty($rowVariant)) {
+        if (!empty($variant_id)) {
+            $rowVariant = $variant->find($variant_id);
             $text .= $separator . $rowVariant->getName();
         }
 
