@@ -34,20 +34,36 @@ class Movement extends BaseController
 
     public function index()
     {
-        $reference = new M_Reference($this->request);
+        $mRef = new M_Reference($this->request);
+        $mEmpl = new M_Employee($this->request);
+        $mBranch = new M_Branch($this->request);
 
         $start_date = date('Y-m-d', strtotime('- 1 days'));
         $end_date = date('Y-m-d');
 
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_Move_All_Data');
+        $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())
+            ->orderBy('name', 'ASC')
+            ->first();
+
+        $dataBranch = [];
+
+        if ($employee && (!$role || ($role && $employee->getBranchId() != 100001))) {
+            $branch = $mBranch->find($employee->getBranchId());
+            $dataBranch['id'] = $branch->getBranchId();
+            $dataBranch['text'] = $branch->getName();
+        }
+
         $data = [
             'today'         => date('Y-m-d'),
-            'ref_list'      => $reference->findBy([
+            'ref_list'      => $mRef->findBy([
                 'sys_reference.name'              => 'MovementType',
                 'sys_reference.isactive'          => 'Y',
                 'sys_ref_detail.isactive'         => 'Y',
                 'sys_ref_detail.name'             => $this->Movement_Kirim
             ])->getRow(),
-            'date_range' => $start_date . ' - ' . $end_date
+            'date_range'        => $start_date . ' - ' . $end_date,
+            'branch'            => $dataBranch,
         ];
 
         return $this->template->render('transaction/movement/v_movement', $data);
@@ -351,9 +367,11 @@ class Movement extends BaseController
             $this->entity->setDocumentNo($row->getDocumentNo());
             $this->entity->setRefMovementId($this->model->getInsertID());
             $this->entity->setMovementType($row->getMovementType());
+            $this->entity->setBranchId($row->getBranchId());
             $this->entity->setDocStatus($row->getDocStatus());
             $this->entity->setMovementId($row->getMovementId());
             $this->entity->setWfScenarioId($row->getWfScenarioId());
+            $this->entity->setCreatedBy($row->getCreatedBy());
             $this->save();
 
             //TODO: Update movement detail reference
@@ -404,9 +422,6 @@ class Movement extends BaseController
 
     public function tableLine($set = null, $detail = [])
     {
-        $post = $this->request->getVar();
-        $uri = $this->request->uri->getSegment(2);
-
         $product = new M_Product($this->request);
         $employee = new M_Employee($this->request);
         $division = new M_Division($this->request);
@@ -415,23 +430,22 @@ class Movement extends BaseController
         $inventory = new M_Inventory($this->request);
         $status = new M_Status($this->request);
 
-        //! Get data role W_View_All_Movement  
-        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Movement');
+        $post = $this->request->getVar();
+        $uri = $this->request->uri->getSegment(2);
 
-        //* Data Product 
-        $dataProduct = $product->where('isactive', 'Y')->findAll();
+        //! Get data role W_Move_All_Data
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_Move_All_Data');
 
-        //* Data Employee From 
-        $dataEmployee = $employee->where('isactive', 'Y')->findAll();
+        //! Get data Employee based on sys_user_id login 
+        $dataEmpl = $employee->where("sys_user_id", $this->access->getSessionUser())
+            ->orderBy('name', 'ASC')
+            ->first();
 
         //* Data Division
         $dataDivision = $division->where('isactive', 'Y')->orderBy('name', 'ASC')->findAll();
 
         //* Data Branch
         $dataBranch = $branch->where('isactive', 'Y')->orderBy('name', 'ASC')->findAll();
-
-        //* Data Room
-        $dataRoom = $room->where('isactive', 'Y')->orderBy('name', 'ASC')->findAll();
 
         //* Data Status
         $dataStatus = $status->where([
@@ -452,6 +466,10 @@ class Movement extends BaseController
                 $invWhere["md_branch_id"] = $post["md_branch_id"];
                 $invWhere['isactive'] = 'Y';
 
+                //? Doesn't have Role W_Move_All_Data
+                if ($dataEmpl && !$role)
+                    $invWhere["md_division_id"] = $dataEmpl->getDivisionId();
+
                 //* Data Inventory 
                 $dataInventory = $inventory->where($invWhere)->orderBy('assetcode', 'ASC')->findAll();
 
@@ -459,10 +477,9 @@ class Movement extends BaseController
                 $empWhere['isactive'] = 'Y';
                 $empWhere['md_branch_id'] = $post["md_branchto_id"];
 
-                // Not ALL DIVISION
-                if ($post["md_division_id"] != 100022) {
+                //? Not ALL DIVISION
+                if ($post["md_division_id"] != 100022)
                     $empWhere['md_division_id'] = $post["md_division_id"];
-                }
 
                 //* Data Employee To 
                 $dataEmployeeTo = $employee->where($empWhere)->orderBy('name', 'ASC')->findAll();
@@ -500,31 +517,30 @@ class Movement extends BaseController
                 $empWhere['isactive'] = 'Y';
                 $empWhere['md_branch_id'] = $row->branch_to;
 
-                // Not ALL DIVISION
+                //? Not ALL DIVISION
                 if ($move->getDivisionId() != 100022)
                     $empWhere['md_division_id'] = $row->division_to;
 
                 //* Data Employee To 
                 $dataEmployeeTo = $employee->where($empWhere)->orderBy('name', 'ASC')->findAll();
 
-                $sessEmplo = $employee->where('sys_user_id', $this->session->get('sys_user_id'))->first();
-
+                // $sessEmplo = $employee->where('sys_user_id', $this->session->get('sys_user_id'))->first();
                 // if (($role || $sessEmplo && $row->employee_to == $sessEmplo->md_employee_id) && $move->getMovementType() === $this->Movement_Terima && $row->isaccept === "N") {
                 //     $button = $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', 'btn-success btn_accept', null, null, true, null, $row->trx_movement_detail_id);
                 // } else {
                 //     $button = $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', null, null, null, null, null, $row->trx_movement_detail_id);
                 // }
 
-                // if ($move->getMovementType() === $this->Movement_Kirim)
-                $button = $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', null, null, null, null, null, $row->trx_movement_detail_id);
-
                 //? Where clause inventory 
-                // $invWhere["md_branch_id"] = $row->branch_from;
-
+                $invWhere['md_branch_id'] = $move->getBranchId();
                 $invWhere['isactive'] = 'Y';
+                $invOrWhere = [];
 
-                //* Data Inventory 
-                $dataInventory = $inventory->where($invWhere)->orderBy('assetcode', 'ASC')->findAll();
+                //? Doesn't have Role W_Move_All_Data
+                if ($dataEmpl && !$role) {
+                    $invWhere["md_division_id"] = $dataEmpl->getDivisionId();
+                    $invOrWhere["assetcode"] = $row->assetcode;
+                }
 
                 //? Where clause room to 
                 $roomWhere['isactive'] = 'Y';
@@ -533,11 +549,14 @@ class Movement extends BaseController
                 else
                     $roomWhere['md_branch_id'] = $move->getBranchToId();
 
+                //* Data Inventory 
+                $dataInventory = $inventory->where($invWhere)->orWhere($invOrWhere)->orderBy('assetcode', 'ASC')->findAll();
+
                 //* Data Room To
                 $dataRoomTo = $room->where($roomWhere)->orderBy('name', 'ASC')->findAll();
 
                 $table[] = [
-                    $button,
+                    $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', null, null, null, null, null, $row->trx_movement_detail_id),
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
                     $this->field->fieldTable('input', 'text', 'md_product_id', null, 'required', 'readonly', null, null, $valPro->getName(), 300),
                     $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),

@@ -35,8 +35,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_branch_id">Branch <span class="required">*</span></label>
-                    <select class="form-control select-data" id="md_branch_id" name="md_branch_id" data-url="branch/getList">
-                        <option value="">Select Branch</option>
+                    <select class="form-control select-data" id="md_branch_id" name="md_branch_id" data-url="branch/getList" default-id="<?= $branch ? $branch['id'] : "" ?>" default-text="<?= $branch ? $branch['text'] : "" ?>" <?= $branch ? "disabled" : "" ?>>
                     </select>
                     <small class="form-text text-danger" id="error_md_branch_id"></small>
                 </div>
@@ -52,15 +51,17 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
+                    <label for="description">Description </label>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
                     <label for="md_division_id">Division To <span class="required">*</span></label>
                     <select class="form-control select-data" id="md_division_id" name="md_division_id" data-url="division/getList">
                         <option value="">Select Division</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_division_id"></small>
-                </div>
-                <div class="form-group">
-                    <label for="description">Description </label>
-                    <textarea type="text" class="form-control" id="description" name="description" rows="4"></textarea>
                 </div>
             </div>
         </div>
