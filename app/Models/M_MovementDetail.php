@@ -136,7 +136,7 @@ class M_MovementDetail extends Model
 			$row['employee_from'] = $valEmp->getEmployeeId();
 			$row['branch_from'] = $valBranch->getBranchId();
 			$row['division_from'] = $valDiv->getDivisionId();
-			$row['room_from'] = $valRoom->geRoomId();
+			$row['room_from'] = $valRoom->getRoomId();
 
 			$result[] = $row;
 		endforeach;
