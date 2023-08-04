@@ -39,10 +39,16 @@ class User extends BaseController
 			$sort = $this->model->order;
 			$search = $this->model->column_search;
 
+			$where = [];
+
+			//? Session user SAS 
+			if ($this->access->getSessionUser() != 1)
+				$where['sys_user_id <>'] = 1;
+
 			$data = [];
 
 			$number = $this->request->getPost('start');
-			$list = $this->datatable->getDatatables($table, $select, $order, $sort, $search);
+			$list = $this->datatable->getDatatables($table, $select, $order, $sort, $search, [], $where);
 
 			foreach ($list as $value) :
 				$row = [];
@@ -63,8 +69,8 @@ class User extends BaseController
 
 			$result = [
 				'draw'              => $this->request->getPost('draw'),
-				'recordsTotal'      => $this->datatable->countAll($table, $select, $order, $sort, $search),
-				'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search),
+				'recordsTotal'      => $this->datatable->countAll($table, $select, $order, $sort, $search, [], $where),
+				'recordsFiltered'   => $this->datatable->countFiltered($table, $select, $order, $sort, $search, [], $where),
 				'data'              => $data
 			];
 

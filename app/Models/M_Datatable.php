@@ -72,7 +72,7 @@ class M_Datatable extends Model
 
     public function countAll($table, $select, $column_order, $order, $column_search, $join = [], $where = [])
     {
-        if (count($join) > 0)
+        if (count($join) > 0 || count($where) > 0)
             $this->getDatatablesQuery($table, $select, $column_order, $order, $column_search, $join, $where);
         else
             $this->builder = $this->db->table($table);
