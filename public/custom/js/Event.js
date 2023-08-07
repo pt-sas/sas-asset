@@ -1338,6 +1338,29 @@ $(document).ready(function (e) {
     },
   });
 
+  $(".select-assetcode").select2({
+    placeholder: "Select an option",
+    width: "100%",
+    theme: "bootstrap",
+    minimumInputLength: 2,
+    ajax: {
+      dataType: "JSON",
+      url: ADMIN_URL + "inventory/getAssetCode",
+      delay: 250,
+      data: function (params) {
+        return {
+          search: params.term,
+        };
+      },
+      processResults: function (data, page) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+
   $(".multiple-select-assetcode").select2({
     placeholder: "Select an option",
     width: "100%",
