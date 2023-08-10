@@ -87,8 +87,10 @@ class M_WActivity extends Model
 		return $sql;
 	}
 
-	public function getDataTrx(string $table)
+	public function getDataTrx(string $table, $id)
 	{
+		$fields = $this->db->getFieldData($table);
+
 		$this->builder = $this->db->table($table);
 
 		$this->builder->select($table . '.*,
@@ -98,6 +100,14 @@ class M_WActivity extends Model
 		$this->builder->where([
 			$table . ".docstatus" => "IP"
 		]);
+
+		foreach ($fields as $field) {
+			if ($field->primary_key == 1) {
+				$this->builder->where([
+					$table . "." . $field->name => $id
+				]);
+			}
+		}
 
 		$sql = $this->builder->get()->getRow();
 
