@@ -12,6 +12,7 @@
                 </th>
                 <th>Asset Code</th>
                 <th>Employee</th>
+                <th>Room</th>
                 <th>No Receipt</th>
             </tr>
         </thead>

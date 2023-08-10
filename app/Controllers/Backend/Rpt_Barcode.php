@@ -60,6 +60,7 @@ class Rpt_Barcode extends BaseController
                     $row[] = $checkbox;
                     $row[] = $value->assetcode;
                     $row[] = $value->employee;
+                    $row[] = $value->room;
                     $row[] = $value->receipt;
                     $data[] = $row;
 
