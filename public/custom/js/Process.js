@@ -1206,6 +1206,10 @@ function Edit(id, status, last_url) {
                     btnAction.css("display", "block");
                   }
                 }
+              }
+
+              if (arrMsg.role) {
+                let arrLine = arrMsg.role;
 
                 if (form.find("table.tb_tree").length > 0) {
                   for (let i = 0; i < arrLine.length; i++) {
@@ -2398,10 +2402,10 @@ $(".btn_ok_form").on("click", function (evt) {
     ],
   };
 
-  if (checkAll.length == 0) {
-    new $.fn.dataTable.Buttons(_tableReport, button);
-    _tableReport.buttons().container().appendTo($("#dt-button"));
+  new $.fn.dataTable.Buttons(_tableReport, button);
+  _tableReport.buttons().container().appendTo($("#dt-button"));
 
+  if (checkAll.length == 0) {
     $(".btn_print_qrcode").hide();
   }
 });
