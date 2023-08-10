@@ -177,5 +177,31 @@
                 </div>
             </div>
         </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Document Action Access</h4>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="text-right">
+                        <button type="button" name="button" class="btn btn-primary btn-sm btn-round ml-auto add_row" title="Add New"><i class="fa fa-plus fa-fw"></i> Add New</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group table-responsive">
+                    <table class="table table-hover tb_displayline" id="table_docaction_access" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th>Menu</th>
+                                <th>Reference List</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
     </form>
 </div>

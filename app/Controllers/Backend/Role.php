@@ -7,7 +7,9 @@ use App\Models\M_Role;
 use App\Models\M_Menu;
 use App\Models\M_Submenu;
 use App\Models\M_AccessMenu;
+use App\Models\M_DocAction;
 use App\Models\M_User;
+use App\Models\M_Reference;
 use Config\Services;
 
 class Role extends BaseController
@@ -17,6 +19,7 @@ class Role extends BaseController
 		$this->request = Services::request();
 		$this->model = new M_Role($this->request);
 		$this->entity = new \App\Entities\Role();
+		$this->modelDetail = new M_DocAction($this->request);
 	}
 
 	public function index()
@@ -85,6 +88,14 @@ class Role extends BaseController
 		if ($this->request->getMethod(true) === 'POST') {
 			$post = $this->request->getVar();
 
+			$table = json_decode($post['table']);
+
+			//! Mandatory property for detail validation
+			$post['line'] = countLine($table);
+			$post['detail'] = [
+				'table' => arrTableLine($table)
+			];
+
 			try {
 				$this->entity->fill($post);
 
@@ -108,11 +119,13 @@ class Role extends BaseController
 		if ($this->request->isAJAX()) {
 			try {
 				$list = $this->model->where($this->model->primaryKey, $id)->findAll();
-				$detail = $acessMenu->where($this->model->primaryKey, $id)->findAll();
+				$line = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
+				$accroles = $acessMenu->where($this->model->primaryKey, $id)->findAll();
 
 				$result = [
 					'header'	=> $this->field->store($this->model->table, $list),
-					'line'    	=> $this->field->store($acessMenu->table, $detail, 'table')
+					'line'    	=> $this->tableLine('edit', $line),
+					'role'		=> $this->field->store($acessMenu->table, $accroles, 'table')
 				];
 
 				$response = message('success', true, $result);
@@ -187,6 +200,66 @@ class Role extends BaseController
 					$response[$key]['id'] = $row->getRoleId();
 					$response[$key]['text'] = $row->getName();
 				endforeach;
+			} catch (\Exception $e) {
+				$response = message('error', false, $e->getMessage());
+			}
+
+			return $this->response->setJSON($response);
+		}
+	}
+
+	public function tableLine($set = null, $detail = [])
+	{
+		$mRef = new M_Reference($this->request);
+		$mSub = new M_Submenu($this->request);
+
+		//* Data Reference List 
+		$refList = $mRef->findBy([
+			'sys_reference.name'              => '_DocAction',
+			'sys_reference.isactive'          => 'Y',
+			'sys_ref_detail.isactive'         => 'Y',
+		], null, [
+			'field'     => 'sys_ref_detail.name',
+			'option'    => 'ASC'
+		])->getResult();
+
+		//* Data Menu 
+		$menu = $mSub->where([
+			'sys_menu_id'	=> 3,
+			'isactive'		=> 'Y'
+		])->orderBy('name', 'ASC')->findAll();
+
+		$table = [];
+
+		//? Create
+		if (empty($set)) {
+			$table = [
+				$this->field->fieldTable('select', null, 'menu', null, 'required', null, null, $menu, null, 170, 'name', 'name'),
+				$this->field->fieldTable('select', null, 'ref_list', null, 'required', null, null, $refList, null, 300, 'value', 'name'),
+				$this->field->fieldTable('button', 'button', 'sys_docaction_id')
+			];
+		}
+
+		//? Update
+		if (!empty($set) && count($detail) > 0) {
+			foreach ($detail as $row) :
+				$table[] = [
+					$this->field->fieldTable('select', null, 'menu', null, 'required', null, null, $menu, $row->menu, 170, 'name', 'name'),
+					$this->field->fieldTable('select', null, 'ref_list', null, 'required', null, null, $refList, $row->ref_list, 300, 'value', 'name'),
+					$this->field->fieldTable('button', 'button', 'sys_docaction_id', null, null, null, null, null, $row->sys_docaction_id)
+				];
+			endforeach;
+		}
+
+		return json_encode($table);
+	}
+
+	public function destroyLine($id)
+	{
+		if ($this->request->isAJAX()) {
+			try {
+				$result = $this->modelDetail->delete($id);
+				$response = message('success', true, $result);
 			} catch (\Exception $e) {
 				$response = message('error', false, $e->getMessage());
 			}

@@ -63,6 +63,8 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('role/destroy/(:any)', 'Backend\Role::destroy/$1');
     $routes->post('role/getUserRoleName', 'Backend\Role::getUserRoleName');
     $routes->match(['get', 'post'], 'role/getList', 'Backend\Role::getList');
+    $routes->post('role/tableLine', 'Backend\Role::tableLine');
+    $routes->get('role/destroyLine/(:any)', 'Backend\Role::destroyLine/$1');
 
     $routes->add('menu', 'Backend\Menu::index');
     $routes->match(['get', 'post'], 'menu/showAll', 'Backend\Menu::showAll');
