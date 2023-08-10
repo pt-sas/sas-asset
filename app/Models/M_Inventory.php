@@ -30,7 +30,8 @@ class M_Inventory extends Model
 		'md_status_id',
 		'isactive',
 		'created_by',
-		'updated_by'
+		'updated_by',
+		'numberplate'
 	];
 	protected $useTimestamps	= true;
 	protected $allowCallbacks	= true;
@@ -209,37 +210,39 @@ class M_Inventory extends Model
 
 		$post = $this->request->getVar();
 
-		$field = $this->find($rows['id'][0]);
+		if (isset($rows['id'])) {
+			$field = $this->find($rows['id'][0]);
 
-		if ($field->md_room_id != $post['md_room_id'] || $field->md_employee_id != $post['md_employee_id']) {
-			$in = new stdClass();
-			$in->assetcode = $post['assetcode'];
-			$in->md_product_id = $post['md_product_id'];
-			$in->transactiontype = $this->Inventory_In;
-			$in->transactiondate = date('Y-m-d');
-			$in->md_room_id = $post['md_room_id'];
-			$in->md_employee_id = $post['md_employee_id'];
-			$in->qtyentered = 1;
-			$in->trx_inventory_id = $rows['id'][0];
-			$arrInvIn[] = $in;
+			if ($field->md_room_id != $post['md_room_id'] || $field->md_employee_id != $post['md_employee_id']) {
+				$in = new stdClass();
+				$in->assetcode = $post['assetcode'];
+				$in->md_product_id = $post['md_product_id'];
+				$in->transactiontype = $this->Inventory_In;
+				$in->transactiondate = date('Y-m-d');
+				$in->md_room_id = $post['md_room_id'];
+				$in->md_employee_id = $post['md_employee_id'];
+				$in->qtyentered = 1;
+				$in->trx_inventory_id = $rows['id'][0];
+				$arrInvIn[] = $in;
 
-			$out = new stdClass();
-			$out->assetcode = $field->assetcode;
-			$out->md_product_id = $field->md_product_id;
-			$out->transactiontype = $this->Inventory_Out;
-			$out->transactiondate = date('Y-m-d');
-			$out->md_room_id = $field->md_room_id;
-			$out->md_employee_id = $field->md_employee_id;
-			$out->qtyentered = - ($field->qtyentered);
-			$out->trx_inventory_id = $rows['id'][0];
-			$arrInvOut[] = $out;
+				$out = new stdClass();
+				$out->assetcode = $field->assetcode;
+				$out->md_product_id = $field->md_product_id;
+				$out->transactiontype = $this->Inventory_Out;
+				$out->transactiondate = date('Y-m-d');
+				$out->md_room_id = $field->md_room_id;
+				$out->md_employee_id = $field->md_employee_id;
+				$out->qtyentered = - ($field->qtyentered);
+				$out->trx_inventory_id = $rows['id'][0];
+				$arrInvOut[] = $out;
 
-			$arrData = (array) array_merge(
-				(array) $arrInvOut,
-				(array) $arrInvIn
-			);
+				$arrData = (array) array_merge(
+					(array) $arrInvOut,
+					(array) $arrInvIn
+				);
 
-			$transaction->create($arrData);
+				$transaction->create($arrData);
+			}
 		}
 
 		return $rows;
