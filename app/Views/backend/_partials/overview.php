@@ -13,7 +13,14 @@
     <div class="main-panel is-loading">
       <div class="container">
         <div class="page-inner">
-          <?php if (!empty(session()->getFlashdata('error'))) : ?>
+          <?php if (session()->getFlashdata('success')) : ?>
+            <div class="alert alert-success">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <?= session()->getFlashdata('success'); ?>
+            </div>
+          <?php elseif (session()->getFlashdata('error')) : ?>
             <div class="alert alert-danger">
               <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
