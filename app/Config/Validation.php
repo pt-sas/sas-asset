@@ -97,6 +97,20 @@ class Validation
             'errors'        => [
                 'is_unique' => 'This {field} already exists.'
             ]
+        ],
+        'detail.table.*.menu_line'  => [
+            'label'             => 'Asset Code',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line'
+            ]
+        ],
+        'detail.table.*.ref_list_line'  => [
+            'label'             => 'Product',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} Line'
+            ]
         ]
     ];
 
@@ -1469,6 +1483,23 @@ class Validation
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Choose the {field} first'
+            ]
+        ]
+    ];
+
+    public $numberplate = [
+        'assetcode'             => [
+            'label'             => 'Asset Code',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ],
+        'numberplate'           => [
+            'label'             => 'Licence Plate',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first'
             ]
         ]
     ];
