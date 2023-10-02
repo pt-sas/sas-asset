@@ -16,6 +16,7 @@
                 <th>Room</th>
                 <th>Description</th>
                 <th>Employee</th>
+                <th>Spare</th>
             </tr>
         </thead>
     </table>

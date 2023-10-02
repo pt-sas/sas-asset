@@ -75,6 +75,7 @@ class Rpt_Asset extends BaseController
                     $row[] = $value->room;
                     $row[] = $value->description;
                     $row[] = $value->employee;
+                    $row[] = active($value->isspare);
                     $data[] = $row;
 
                 endforeach;
@@ -87,7 +88,8 @@ class Rpt_Asset extends BaseController
                 'draw'              => $this->request->getPost('draw'),
                 'recordsTotal'      => $recordTotal,
                 'recordsFiltered'   => $recordsFiltered,
-                'data'              => $data
+                'data'              => $data,
+                'form'              => $post
             ];
 
             return $this->response->setJSON($result);
