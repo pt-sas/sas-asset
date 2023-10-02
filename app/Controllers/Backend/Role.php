@@ -234,8 +234,8 @@ class Role extends BaseController
 		//? Create
 		if (empty($set)) {
 			$table = [
-				$this->field->fieldTable('select', null, 'menu', null, 'required', null, null, $menu, null, 170, 'name', 'name'),
-				$this->field->fieldTable('select', null, 'ref_list', null, 'required', null, null, $refList, null, 300, 'value', 'name'),
+				$this->field->fieldTable('select', null, 'menu', null, null, null, null, $menu, null, 170, 'url', 'name'),
+				$this->field->fieldTable('select', null, 'ref_list', null, null, null, null, $refList, null, 300, 'value', 'name'),
 				$this->field->fieldTable('button', 'button', 'sys_docaction_id')
 			];
 		}
@@ -244,8 +244,8 @@ class Role extends BaseController
 		if (!empty($set) && count($detail) > 0) {
 			foreach ($detail as $row) :
 				$table[] = [
-					$this->field->fieldTable('select', null, 'menu', null, 'required', null, null, $menu, $row->menu, 170, 'name', 'name'),
-					$this->field->fieldTable('select', null, 'ref_list', null, 'required', null, null, $refList, $row->ref_list, 300, 'value', 'name'),
+					$this->field->fieldTable('select', null, 'menu', null, null, null, null, $menu, $row->menu, 170, 'url', 'name'),
+					$this->field->fieldTable('select', null, 'ref_list', null, null, null, null, $refList, $row->ref_list, 300, 'value', 'name'),
 					$this->field->fieldTable('button', 'button', 'sys_docaction_id', null, null, null, null, null, $row->sys_docaction_id)
 				];
 			endforeach;
