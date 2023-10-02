@@ -203,6 +203,7 @@ class Inventory extends BaseController
                 if (isset($post['search'])) {
                     $list = $this->model->where('isactive', 'Y')
                         ->like('assetcode', $post['search'])
+                        ->orLike('numberplate', $post['search'])
                         ->orderBy('assetcode', 'ASC')
                         ->findAll();
                 } else {
@@ -213,7 +214,11 @@ class Inventory extends BaseController
 
                 foreach ($list as $key => $row) :
                     $response[$key]['id'] = $row->getAssetCode();
-                    $response[$key]['text'] = $row->getAssetCode();
+
+                    if (isset($post['plate']) && $row->getNumberPlate())
+                        $response[$key]['text'] = $row->getAssetCode() . " - " . $row->getNumberPlate();
+                    else
+                        $response[$key]['text'] = $row->getAssetCode();
                 endforeach;
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());

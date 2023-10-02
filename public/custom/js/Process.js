@@ -2347,18 +2347,20 @@ $(".btn_ok_form").on("click", function (evt) {
   let field = form
     .find("input, select")
     .map(function () {
-      let row = {};
+      if (typeof $(this).attr("name") !== "undefined") {
+        let row = {};
 
-      row["name"] = $(this).attr("name");
+        row["name"] = $(this).attr("name");
 
-      if (this.type !== "checkbox" && this.type !== "select-multiple")
-        row["value"] = this.value;
-      else if (this.type === "select-multiple") row["value"] = $(this).val();
-      else row["value"] = this.checked ? "Y" : "N";
+        if (this.type !== "checkbox" && this.type !== "select-multiple")
+          row["value"] = this.value;
+        else if (this.type === "select-multiple") row["value"] = $(this).val();
+        else row["value"] = this.checked ? "Y" : "N";
 
-      row["type"] = this.type;
+        row["type"] = this.type;
 
-      return row;
+        return row;
+      }
     })
     .get();
 
