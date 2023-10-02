@@ -277,6 +277,7 @@ class M_Inventory extends Model
 					md_room.name as room,
 					md_room.description,
 					md_employee.name as employee,
+					v_all_product.md_groupasset_id,
 					v_all_product.mdg_name as groupasset,
 					v_all_product.md_brand_id,
 					v_all_product.mdbd_name as brand,
