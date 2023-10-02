@@ -125,4 +125,40 @@ class M_Menu extends Model
 
         return $arrMenu;
     }
+
+    public function getMenuUrl()
+    {
+        $submenu = new M_Submenu($this->request);
+
+        $dataMenu = $this->where('isactive', 'Y')
+            ->orderBy('sequence', 'ASC')
+            ->findAll();
+
+        $arrMenu = [];
+
+        foreach ($dataMenu as $row) :
+            $result = [];
+            $menu_id = $row->sys_menu_id;
+
+            $data = $submenu->where([
+                'isactive'          => 'Y',
+                $this->primaryKey   => $menu_id
+            ])->orderBy('sequence', 'ASC')
+                ->findAll();
+
+            if ($data) {
+                foreach ($data as $row2) :
+                    $result['name'] = $row2->name;
+                    $result['url'] = $row2->url;
+                    $arrMenu[] = $result;
+                endforeach;
+            } else {
+                $result['name'] = $row->name;
+                $result['url'] = $row->url;
+                $arrMenu[] = $result;
+            }
+        endforeach;
+
+        return $arrMenu;
+    }
 }
