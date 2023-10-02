@@ -286,7 +286,7 @@ class BaseController extends Controller
 			endforeach;
 
 			//? Exist Property Table Line
-			if (isset($post['table'])) {
+			if (isset($post['table']) && json_decode($post['table'])) {
 				$arrLine = json_decode($post['table']);
 
 				//! Must be called saveBatch
