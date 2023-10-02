@@ -97,20 +97,6 @@ class Validation
             'errors'        => [
                 'is_unique' => 'This {field} already exists.'
             ]
-        ],
-        'detail.table.*.menu_line'  => [
-            'label'             => 'Asset Code',
-            'rules'             => 'required',
-            'errors'            => [
-                'required'      => 'Please Insert the {field} Line'
-            ]
-        ],
-        'detail.table.*.ref_list_line'  => [
-            'label'             => 'Product',
-            'rules'             => 'required',
-            'errors'            => [
-                'required'      => 'Please Choose the {field} Line'
-            ]
         ]
     ];
 
