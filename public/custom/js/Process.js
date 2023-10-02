@@ -1449,6 +1449,33 @@ _tableLine.on("click", ".btn_delete", function (evt) {
 });
 
 /**
+ * Get data document action access
+ * @param {*} status
+ * @param {*} url
+ * @returns
+ */
+function getDocAction(status, url) {
+  let result = [];
+
+  $.ajax({
+    type: "POST",
+    url: ADMIN_URL + "/docaction/getDocaction",
+    data: {
+      status: status,
+      url: url,
+    },
+    async: false,
+    cache: false,
+    dataType: "JSON",
+    success: function (response) {
+      result.push(response);
+    },
+  });
+
+  return result;
+}
+
+/**
  * Process Document Action
  * @param {*} id
  * @param {*} status
@@ -1457,21 +1484,20 @@ function docProcess(id, status) {
   let action = "update";
   let checkAccess = isAccess(action, LAST_URL);
 
-  let html =
-    '<div class="d-flex justify-content-center">' + '<select id="docaction">';
-
-  if (status === "DR") {
-    html +=
-      '<option value=""></option>' +
-      '<option value="CO">Complete</option>' +
-      '<option value="VO">Void</option>';
-  } else {
-    html += '<option value=""></option>' + '<option value="VO">Void</option>';
-  }
-
-  html += "</select>" + "</div>";
-
   if (checkAccess[0].success && checkAccess[0].message == "Y") {
+    let docAction = getDocAction(status, LAST_URL);
+    let html =
+      '<div class="d-flex justify-content-center">' + '<select id="docaction">';
+
+    html += '<option value=""></option>';
+
+    if (docAction[0].length > 0)
+      $.each(docAction[0], function (i, item) {
+        html += `<option value="${item.id}">${item.text}</option>`;
+      });
+
+    html += "</select>" + "</div>";
+
     Swal.fire({
       title: "Document Action",
       html: html,

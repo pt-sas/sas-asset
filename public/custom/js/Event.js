@@ -2457,3 +2457,5 @@ _tableInfo.on("change", 'input[name="isspare"]', function (evt) {
       .removeAttr("disabled");
   }
 });
+
+//test
