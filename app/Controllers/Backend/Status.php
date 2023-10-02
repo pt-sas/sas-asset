@@ -21,7 +21,7 @@ class Status extends BaseController
         $menu = new M_Menu($this->request);
 
         $data = [
-            'menu'      => $menu->getMenu()
+            'menu'      => $menu->getMenuUrl()
         ];
 
         return $this->template->render('masterdata/status/v_status', $data);

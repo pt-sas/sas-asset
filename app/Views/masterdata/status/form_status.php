@@ -28,7 +28,7 @@
                     <div class="select2-input select2-primary">
                         <select class="form-control multiple-select" name="menu_id" multiple="multiple" style="width: 100%;">
                             <?php foreach ($menu as $row) : ?>
-                                <option value="<?= $row; ?>"><?= $row; ?></option>
+                                <option value="<?= $row['url']; ?>"><?= $row['name']; ?></option>
                             <?php endforeach; ?>
                         </select>
                         <small class="form-text text-danger" id="error_menu_id"></small>
