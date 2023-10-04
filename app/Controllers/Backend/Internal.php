@@ -121,20 +121,26 @@ class Internal extends BaseController
             ];
 
             try {
-                $this->entity->fill($post);
-                $this->entity->setGrandTotal(arrSumField('lineamt', $table));
-
-                if ($this->isNew()) {
-                    $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-                    $this->entity->setIsInternalUse('Y');
-
-                    $docNo = $this->model->getInvNumber('isinternaluse', 'Y');
-                    $this->entity->setDocumentNo($docNo);
-                }
-
                 if (!$this->validation->run($post, 'internal')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
+                    if (empty($post['md_supplier_id']))
+                        unset($post['md_supplier_id']);
+
+                    if (empty($post['md_employee_id']))
+                        unset($post['md_employee_id']);
+
+                    $this->entity->fill($post);
+                    $this->entity->setGrandTotal(arrSumField('lineamt', $table));
+
+                    if ($this->isNew()) {
+                        $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+                        $this->entity->setIsInternalUse('Y');
+
+                        $docNo = $this->model->getInvNumber('isinternaluse', 'Y');
+                        $this->entity->setDocumentNo($docNo);
+                    }
+
                     $response = $this->save();
                 }
             } catch (\Exception $e) {
@@ -195,6 +201,8 @@ class Internal extends BaseController
 
     public function processIt()
     {
+        $cWfs = new WScenario();
+
         if ($this->request->isAJAX()) {
             $post = $this->request->getVar();
 
@@ -203,19 +211,16 @@ class Internal extends BaseController
 
             $row = $this->model->find($_ID);
 
+            $menu = $this->request->uri->getSegment(2);
+
             try {
-                if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
-                    $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->first();
-
-                    if ($line || (!$line && $_DocAction !== $this->DOCSTATUS_Completed)) {
-                        $this->entity->setDocStatus($_DocAction);
-                    } else if (!$line && $_DocAction === $this->DOCSTATUS_Completed) {
-                        $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
+                if ($row->getDocStatus() !== $this->DOCSTATUS_Completed) {
+                    if (!empty($_DocAction)) {
+                        $this->message = $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $_ID, $_DocAction, $menu, $this->session);
+                        $response = message('success', true, $this->message);
+                    } else {
+                        $response = message('error', true, 'Please Choose the Document Action first');
                     }
-
-                    $response = $this->save();
-                } else if (empty($_DocAction)) {
-                    $response = message('error', true, 'Please Choose the Document Action first');
                 } else {
                     $response = message('error', true, 'Please reload the Document');
                 }
