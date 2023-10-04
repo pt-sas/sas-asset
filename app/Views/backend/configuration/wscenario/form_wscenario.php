@@ -21,7 +21,7 @@
                     <select class="form-control select2" id="menu" name="menu">
                         <option value="">Select Menu</option>
                         <?php foreach ($menu as $row) : ?>
-                            <option value="<?= $row ?>"><?= $row ?></option>
+                            <option value="<?= $row['url']; ?>"><?= $row['name']; ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
