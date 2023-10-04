@@ -13,6 +13,7 @@ use App\Models\M_WEvent;
 use App\Models\M_WScenarioDetail;
 use App\Models\M_Transaction;
 use App\Models\M_Inventory;
+use App\Models\M_Menu;
 use App\Models\M_Room;
 use Config\Services;
 use Pusher\Pusher;
@@ -49,6 +50,8 @@ class WActivity extends BaseController
 
     public function showActivityInfo()
     {
+        $mMenu = new M_Menu($this->request);
+
         if ($this->request->isAjax()) {
             $data = [];
             $list = $this->model->getActivity();
@@ -62,10 +65,12 @@ class WActivity extends BaseController
                     $record_id = $value->record_id;
                     $table = $value->table;
                     $menu = $value->menu;
-                    $node = 'Approval ' . ucwords($menu);
+
+                    $menuName = $mMenu->getMenuBy($menu);
+                    $node = 'Approval ' . ucwords($menuName);
 
                     $trx = $this->model->getDataTrx($table, $record_id);
-                    $summary = ucwords($menu) . ' ' . $trx->documentno . ': ' . $trx->usercreated_by;
+                    $summary = ucwords($menuName) . ' ' . $trx->documentno . ': ' . $trx->usercreated_by;
 
                     $row[] = $ID;
                     $row[] = $record_id;
@@ -91,6 +96,7 @@ class WActivity extends BaseController
         $mWe = new M_WEvent($this->request);
         $mUser = new M_User($this->request);
         $cMail = new Mail();
+        $mMenu = new M_Menu($this->request);
 
         $this->entity->setWfScenarioId($sys_wfscenario_id);
         $this->entity->setTable($table);
@@ -98,6 +104,7 @@ class WActivity extends BaseController
         $this->entity->setMenu($menu);
 
         $user_id = $mWr->getUserByResponsible($sys_wfresponsible_id);
+        $menuName = $mMenu->getMenuBy($menu);
 
         if (empty($sys_wfactivity_id)) {
             $this->entity->setWfResponsibleId($sys_wfresponsible_id);
@@ -118,9 +125,9 @@ class WActivity extends BaseController
             $builder = $this->getBuilder($table);
             $builder->where($this->getPrimaryKey($table), $record_id);
             $sql = $builder->get()->getRow();
-            $subject = ucwords($menu) . "_" . $sql->documentno;
+            $subject = ucwords($menuName) . "_" . $sql->documentno;
             $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please approve document below.</span></p><div><br></div>';
-            $message .= "-----" . " " . ucwords($menu) . " ";
+            $message .= "-----" . " " . ucwords($menuName) . " ";
 
             if (isset($sql->grandtotal))
                 $message .= $sql->documentno . ": Approval Amount =" . formatRupiah($sql->grandtotal);
@@ -154,7 +161,7 @@ class WActivity extends BaseController
                 $list = $mEmployee->whereIn("md_employee_id", $listEmployee)->findAll();
 
                 $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please received asset.</span></p><div><br></div>';
-                $message .= "-----" . " " . ucwords($menu) . " ";
+                $message .= "-----" . " " . ucwords($menuName) . " ";
 
                 $message = new Html2Text($message);
                 $message = $message->getText();
@@ -197,9 +204,9 @@ class WActivity extends BaseController
                 $builder = $this->getBuilder($table);
                 $builder->where($this->getPrimaryKey($table), $record_id);
                 $sql = $builder->get()->getRow();
-                $subject = ucwords($menu) . "_" . $sql->documentno;
+                $subject = ucwords($menuName) . "_" . $sql->documentno;
                 $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please approve document below.</span></p><div><br></div>';
-                $message .= "-----" . " " . ucwords($menu) . " ";
+                $message .= "-----" . " " . ucwords($menuName) . " ";
 
                 if (isset($sql->grandtotal))
                     $message .= $sql->documentno . ": Approval Amount =" . formatRupiah($sql->grandtotal);
@@ -240,10 +247,10 @@ class WActivity extends BaseController
                 $builder = $this->getBuilder($table);
                 $builder->where($this->getPrimaryKey($table), $record_id);
                 $sql = $builder->get()->getRow();
-                $subject = ucwords($menu) . "_" . $sql->documentno;
+                $subject = ucwords($menuName) . "_" . $sql->documentno;
                 $message =  'Sudah Di Approve' . "<br>";
                 $message .= "---" . "<br>";
-                $message .= ucwords($menu) . " " . $sql->documentno . "<br>";
+                $message .= ucwords($menuName) . " " . $sql->documentno . "<br>";
 
                 if (isset($sql->grandtotal))
                     $message .= "Approval Amount = " . formatRupiah($sql->grandtotal) . "<br>";
@@ -287,7 +294,7 @@ class WActivity extends BaseController
                     $list = $mEmployee->whereIn("md_employee_id", $listEmployee)->findAll();
 
                     $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Sudah Di Terima.</span></p><div><br></div>';
-                    $message .= "-----" . " " . ucwords($menu) . " ";
+                    $message .= "-----" . " " . ucwords($menuName) . " ";
 
                     $message = new Html2Text($message);
                     $message = $message->getText();
@@ -366,6 +373,7 @@ class WActivity extends BaseController
         $mWe = new M_WEvent($this->request);
         $mUser = new M_User($this->request);
         $cMail = new Mail();
+        $mMenu = new M_Menu($this->request);
 
         if ($this->request->getMethod(true) === 'POST') {
             $post = $this->request->getVar();
@@ -375,6 +383,7 @@ class WActivity extends BaseController
 
             try {
                 $activity = $this->model->find($_ID);
+                $menuName = $mMenu->getMenuBy($activity->getMenu());
 
                 if ($isAnswer === 'Y') {
                     $eList = $mWe->where($this->model->primaryKey, $_ID)->orderBy('created_at', 'ASC')->findAll();
@@ -394,10 +403,10 @@ class WActivity extends BaseController
                     $builder = $this->getBuilder($activity->getTable());
                     $builder->where($this->getPrimaryKey($activity->getTable()), $activity->getRecordId());
                     $sql = $builder->get()->getRow();
-                    $subject = ucwords($activity->getMenu()) . "_" . $sql->documentno;
+                    $subject = ucwords($menuName) . "_" . $sql->documentno;
                     $message =  'Tidak Di Approve' . "<br>";
                     $message .= "---" . "<br>";
-                    $message .= ucwords($activity->getMenu()) . " " . $sql->documentno . "<br>";
+                    $message .= ucwords($menuName) . " " . $sql->documentno . "<br>";
 
                     if (isset($sql->grandtotal))
                         $message .= "Approval Amount = " . formatRupiah($sql->grandtotal) . "<br>";

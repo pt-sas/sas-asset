@@ -161,4 +161,25 @@ class M_Menu extends Model
 
         return $arrMenu;
     }
+
+    public function getMenuBy($url)
+    {
+        $submenu = new M_Submenu($this->request);
+
+        // Check uri segment from submenu
+        $sub = $submenu->where('url', $url)->first();
+
+        // Check uri segment from main menu
+        $parent = $this->where('url', $url)->first();
+
+        $result = "No Menu";
+
+        if ($sub) {
+            $result = $sub->name;
+        } else if ($parent) {
+            $result = $parent->name;
+        }
+
+        return $result;
+    }
 }

@@ -37,7 +37,7 @@ class WScenario extends BaseController
         $status = new M_Status($this->request);
 
         $data = [
-            'menu'      => $menu->getMenu(),
+            'menu'      => $menu->getMenuUrl(),
             'status'    => $status->where([
                 'isactive'  => 'Y',
                 'isline'    => 'N'
