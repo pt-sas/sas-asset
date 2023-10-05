@@ -88,7 +88,6 @@ class Template
 
         $update = $this->access->checkCrud($uri, $this->isUpdate);
         $delete = $this->access->checkCrud($uri, $this->isDelete);
-        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
 
         //? Belum di deploy 
         // if ($update === 'Y' && strtoupper($type) === $this->Movement_Terima && ($status === 'DR' || $status === 'IP'))
@@ -99,7 +98,7 @@ class Template
         else if ($update === 'Y' && (!empty($status) && $status !== 'DR'))
             $allBtn .= $btnDetail;
 
-        if ($update === 'Y' && (!empty($status) && ($role && $status === 'CO') || $status === 'DR'))
+        if ($update === 'Y' && !empty($status) && ($status === 'CO' || $status === 'DR' || $status === 'NA'))
             $allBtn .= $btnProcess;
 
         if ($delete === 'Y')
