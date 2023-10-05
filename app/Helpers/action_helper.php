@@ -136,7 +136,7 @@ function docStatus(string $str, string $type = null, ?int $total = 0, ?int $avai
     if ($str === "IP" && is_null($type)) {
         $msg = '<center><span class="badge badge-info">In Progress</span></center>';
     } else if ($str === "VO") {
-        $msg = '<center><span class="badge badge-primary">Voided</span></center>';
+        $msg = '<center><span class="badge badge-secondary">Voided</span></center>';
     } else if ($str === "IN") {
         $msg = '<center><span class="badge badge-danger">Invalid</span></center>';
     } else if ($str === "AP") {
