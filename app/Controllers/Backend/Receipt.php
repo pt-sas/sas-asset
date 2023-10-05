@@ -114,19 +114,25 @@ class Receipt extends BaseController
             ];
 
             try {
-                $this->entity->fill($post);
-                $this->entity->setGrandTotal(arrSumField('unitprice', $table));
-
-                if ($this->isNew()) {
-                    $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-
-                    $docNo = $this->model->getInvNumber();
-                    $this->entity->setDocumentNo($docNo);
-                }
-
                 if (!$this->validation->run($post, 'receipt')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
+                    if (empty($post['md_supplier_id']))
+                        unset($post['md_supplier_id']);
+
+                    if (empty($post['md_employee_id']))
+                        unset($post['md_employee_id']);
+
+                    $this->entity->fill($post);
+                    $this->entity->setGrandTotal(arrSumField('unitprice', $table));
+
+                    if ($this->isNew()) {
+                        $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+
+                        $docNo = $this->model->getInvNumber();
+                        $this->entity->setDocumentNo($docNo);
+                    }
+
                     $response = $this->save();
                 }
             } catch (\Exception $e) {
