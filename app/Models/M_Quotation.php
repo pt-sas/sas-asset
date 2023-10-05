@@ -151,7 +151,6 @@ class M_Quotation extends Model
 
 	public function checkExistQuotation($where = null, $like = [])
 	{
-
 		$sql = "SELECT q.*,
 			p.name as supplier,
 			e.name as employee
@@ -165,9 +164,12 @@ class M_Quotation extends Model
 								WHERE r.trx_quotation_id = q.trx_quotation_id
 								AND q.trx_quotation_id <> (SELECT re.trx_quotation_id 
 										FROM trx_receipt re 
-										WHERE re.trx_receipt_id = ?))";
+										WHERE re.trx_receipt_id = ?)
+								AND r.docstatus IN ('CO', 'DR'))";
 		} else {
-			$sql .= "AND NOT EXISTS(SELECT 1 FROM trx_receipt r WHERE r.trx_quotation_id = q.trx_quotation_id)";
+			$sql .= "AND NOT EXISTS(SELECT 1 FROM trx_receipt r 
+									WHERE r.trx_quotation_id = q.trx_quotation_id 
+									AND r.docstatus IN ('CO', 'DR'))";
 		}
 
 		if (count($like) > 0) {
