@@ -10,6 +10,7 @@ use App\Models\M_Product;
 use App\Models\M_Employee;
 use App\Models\M_Reference;
 use App\Models\M_Supplier;
+use App\Models\M_Receipt;
 use Config\Services;
 
 class Internal extends BaseController
@@ -202,6 +203,7 @@ class Internal extends BaseController
     public function processIt()
     {
         $cWfs = new WScenario();
+        $mReceipt = new M_Receipt($this->request);
 
         if ($this->request->isAJAX()) {
             $post = $this->request->getVar();
@@ -210,19 +212,29 @@ class Internal extends BaseController
             $_DocAction = $post['docaction'];
 
             $row = $this->model->find($_ID);
+            $receipt = $mReceipt->where('trx_quotation_id', $_ID)
+                ->whereIn('docstatus', [$this->DOCSTATUS_Drafted, $this->DOCSTATUS_Completed])->first();
 
             $menu = $this->request->uri->getSegment(2);
 
             try {
-                if ($row->getDocStatus() !== $this->DOCSTATUS_Completed) {
-                    if (!empty($_DocAction)) {
+                if (!empty($_DocAction)) {
+                    if ($_DocAction === $row->getDocStatus()) {
+                        $response = message('error', true, 'Please reload the Document');
+                    } else if ($_DocAction === $this->DOCSTATUS_Completed) {
                         $this->message = $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $_ID, $_DocAction, $menu, $this->session);
                         $response = message('success', true, $this->message);
+                    } else if ($_DocAction === $this->DOCSTATUS_Unlock && !$receipt) {
+                        $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+                        $response = $this->save();
+                    } else if ($receipt && ($_DocAction === $this->DOCSTATUS_Unlock || $_DocAction === $this->DOCSTATUS_Voided)) {
+                        $response = message('error', true, 'Cannot be processed');
                     } else {
-                        $response = message('error', true, 'Please Choose the Document Action first');
+                        $this->entity->setDocStatus($_DocAction);
+                        $response = $this->save();
                     }
                 } else {
-                    $response = message('error', true, 'Please reload the Document');
+                    $response = message('error', true, 'Please Choose the Document Action first');
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
