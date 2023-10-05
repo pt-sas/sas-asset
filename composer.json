@@ -15,7 +15,8 @@
         "psr/log": "^1.1",
         "tecnickcom/tcpdf": "^6.6",
         "html2text/html2text": "^4.3",
-        "pusher/pusher-php-server": "^7.2"
+        "pusher/pusher-php-server": "^7.2",
+        "daycry/cronjob": "^2.2"
     },
     "require-dev": {
         "codeigniter/coding-standard": "^1.1",
