@@ -82,6 +82,8 @@ class BaseController extends Controller
 	protected $DOCSTATUS_Suspended = "OS";
 	/** Aborted = AB */
 	protected $DOCSTATUS_Aborted = "AB";
+	/** Aborted = XL */
+	protected $DOCSTATUS_Unlock = "XL";
 	/** Inventory In */
 	protected $Inventory_In = 'I+';
 	/** Inventory Out */
