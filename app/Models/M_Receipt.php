@@ -90,6 +90,12 @@ class M_Receipt extends Model
 	protected $DOCSTATUS_Invalid = "IN";
 	/** In Progress = IP */
 	protected $DOCSTATUS_Inprogress = "IP";
+	/** Suspended = OS */
+	protected $DOCSTATUS_Suspended = "OS";
+	/** Aborted = AB */
+	protected $DOCSTATUS_Aborted = "AB";
+	/** Aborted = XL */
+	protected $DOCSTATUS_Unlock = "XL";
 	/** Inventory In */
 	protected $Inventory_In = 'I+';
 	/** Inventory Out */
@@ -280,7 +286,7 @@ class M_Receipt extends Model
 			$header = $this->find($post['id']);
 			$line = $receiptDetail->where($this->primaryKey, $post['id'])->findAll();
 
-			if (count($line) > 0) {
+			if (count($line) > 0 && $post['docaction'] === $this->DOCSTATUS_Completed) {
 				$data = $sequence->getDocumentNoFromSeq($header, $line);
 
 				//TODO: Insert Change Log 
