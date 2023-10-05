@@ -242,27 +242,27 @@ class WActivity extends BaseController
                     ];
 
                     $builder->where($this->getPrimaryKey($table), $record_id)->update($data);
+
+                    $builder = $this->getBuilder($table);
+                    $builder->where($this->getPrimaryKey($table), $record_id);
+                    $sql = $builder->get()->getRow();
+                    $subject = ucwords($menuName) . "_" . $sql->documentno;
+                    $message =  'Sudah Di Approve' . "<br>";
+                    $message .= "---" . "<br>";
+                    $message .= ucwords($menuName) . " " . $sql->documentno . "<br>";
+
+                    if (isset($sql->grandtotal))
+                        $message .= "Approval Amount = " . formatRupiah($sql->grandtotal) . "<br>";
+
+                    $message .= $sql->description;
+                    $message = new Html2Text($message);
+                    $message = $message->getText();
+
+                    $user = $mUser->find($sql->created_by);
+                    $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
+
+                    $this->toForwardAlert('sys_wfresponsible', $sys_wfresponsible_id, $subject, $message);
                 }
-
-                $builder = $this->getBuilder($table);
-                $builder->where($this->getPrimaryKey($table), $record_id);
-                $sql = $builder->get()->getRow();
-                $subject = ucwords($menuName) . "_" . $sql->documentno;
-                $message =  'Sudah Di Approve' . "<br>";
-                $message .= "---" . "<br>";
-                $message .= ucwords($menuName) . " " . $sql->documentno . "<br>";
-
-                if (isset($sql->grandtotal))
-                    $message .= "Approval Amount = " . formatRupiah($sql->grandtotal) . "<br>";
-
-                $message .= $sql->description;
-                $message = new Html2Text($message);
-                $message = $message->getText();
-
-                $user = $mUser->find($sql->created_by);
-                $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
-
-                $this->toForwardAlert('sys_wfresponsible', $sys_wfresponsible_id, $subject, $message);
 
                 if (isset($sql->movementtype) && $sql->movementtype === $this->Movement_Terima) {
                     $transaction = new M_Transaction($this->request);
@@ -394,11 +394,9 @@ class WActivity extends BaseController
 
                     $this->wfScenarioId = $activity->getWfScenarioId();
 
-                    $s = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Completed, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
-                    $response = $s;
+                    $response = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Completed, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
                 } else {
-                    $s = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Aborted, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
-                    $response = 'aborted';
+                    $response = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Aborted, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
 
                     $builder = $this->getBuilder($activity->getTable());
                     $builder->where($this->getPrimaryKey($activity->getTable()), $activity->getRecordId());
