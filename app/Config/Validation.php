@@ -629,10 +629,9 @@ class Validation
         ],
         'trx_quotation_id'          => [
             'label'                 => 'Quotation',
-            'rules'                 => 'required|is_unique[trx_receipt.trx_quotation_id,trx_receipt_id,{id}]',
+            'rules'                 => 'required',
             'errors'                => [
-                'required'  => 'Please Choose the {field} first.',
-                'is_unique' => 'This {field} already exists.'
+                'required'  => 'Please Choose the {field} first.'
             ]
         ],
         'md_supplier_id'            => [
