@@ -212,6 +212,7 @@ class Internal extends BaseController
             $_DocAction = $post['docaction'];
 
             $row = $this->model->find($_ID);
+            $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->first();
             $receipt = $mReceipt->where('trx_quotation_id', $_ID)
                 ->whereIn('docstatus', [$this->DOCSTATUS_Drafted, $this->DOCSTATUS_Completed])->first();
 
@@ -222,8 +223,13 @@ class Internal extends BaseController
                     if ($_DocAction === $row->getDocStatus()) {
                         $response = message('error', true, 'Please reload the Document');
                     } else if ($_DocAction === $this->DOCSTATUS_Completed) {
-                        $this->message = $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $_ID, $_DocAction, $menu, $this->session);
-                        $response = message('success', true, $this->message);
+                        if ($line) {
+                            $this->message = $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $_ID, $_DocAction, $menu, $this->session);
+                            $response = message('success', true, $this->message);
+                        } else {
+                            $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
+                            $response = $this->save();
+                        }
                     } else if ($_DocAction === $this->DOCSTATUS_Unlock && !$receipt) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
                         $response = $this->save();
