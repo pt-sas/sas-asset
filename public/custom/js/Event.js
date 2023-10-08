@@ -2027,7 +2027,7 @@ $("#form_disposal").on("change", "#disposaltype", function (e) {
 
 $("#form_movement").on(
   "change",
-  "#md_branch_id, #movementtype, #md_branchto_id, #md_division_id",
+  "#md_branch_id, #movementtype, #md_branchto_id, #md_divisionto_id",
   function (evt) {
     const form = $(this).closest("form");
     const field = form.find("select");
@@ -2457,5 +2457,3 @@ _tableInfo.on("change", 'input[name="isspare"]', function (evt) {
       .removeAttr("disabled");
   }
 });
-
-//test
