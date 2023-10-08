@@ -735,8 +735,8 @@ class Validation
                 'required_based_field_value'      => 'Please Choose the field first.'
             ]
         ],
-        'md_division_id'            => [
-            'label'                 => 'Division',
+        'md_divisionto_id'          => [
+            'label'                 => 'Division To',
             'rules'                 => 'required',
             'errors'                => [
                 'required'  => 'Please Choose the {field} first.'
@@ -1463,8 +1463,8 @@ class Validation
                 'required'      => 'Please Choose the {field} first'
             ]
         ],
-        'md_division_id'        => [
-            'label'             => 'Division',
+        'md_divisionto_id'        => [
+            'label'             => 'Division To',
             'rules'             => 'required',
             'errors'            => [
                 'required'      => 'Please Choose the {field} first'

@@ -15,10 +15,12 @@ class Movement extends Entity
 	protected $md_branch_id;
 	protected $md_branchto_id;
 	protected $md_division_id;
+	protected $md_divisionto_id;
 	protected $created_by;
 	protected $updated_by;
 	protected $ref_movement_id;
 	protected $sys_wfscenario_id;
+	protected $md_status_id;
 
 	protected $dates   = [
 		'created_at',
@@ -146,6 +148,16 @@ class Movement extends Entity
 		$this->attributes['md_division_id'] = $md_division_id;
 	}
 
+	public function getDivisionToId()
+	{
+		return $this->attributes['md_divisionto_id'];
+	}
+
+	public function setDivisionToId($md_divisionto_id)
+	{
+		$this->attributes['md_divisionto_id'] = $md_divisionto_id;
+	}
+
 	public function getRefMovementId()
 	{
 		return $this->attributes['ref_movement_id'];
@@ -164,5 +176,15 @@ class Movement extends Entity
 	public function setWfScenarioId($sys_wfscenario_id)
 	{
 		$this->attributes['sys_wfscenario_id'] = $sys_wfscenario_id;
+	}
+
+	public function getStatusId()
+	{
+		return $this->attributes['md_status_id'];
+	}
+
+	public function setStatusId($md_status_id)
+	{
+		$this->attributes['md_status_id'] = $md_status_id;
 	}
 }

@@ -143,4 +143,20 @@ class M_MovementDetail extends Model
 
 		return $result;
 	}
+
+	public function getEmployeeToArr($field, $arr_id, $employee_id, $column)
+	{
+		$list = $this->whereIn($field, $arr_id)
+			->where([
+				'employee_to'   => $employee_id
+			])->findAll();
+
+		$result = [];
+
+		foreach ($list as $value) :
+			$result[] = $value->{$column};
+		endforeach;
+
+		return $result;
+	}
 }

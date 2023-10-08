@@ -37,7 +37,9 @@ class Movement extends BaseController
         $mRef = new M_Reference($this->request);
         $mEmpl = new M_Employee($this->request);
         $mBranch = new M_Branch($this->request);
+        $status = new M_Status($this->request);
 
+        $uri = $this->request->uri->getSegment(2);
         $start_date = date('Y-m-d', strtotime('- 1 days'));
         $end_date = date('Y-m-d');
 
@@ -64,6 +66,12 @@ class Movement extends BaseController
             ])->getRow(),
             'date_range'        => $start_date . ' - ' . $end_date,
             'branch'            => $dataBranch,
+            'status'    => $status->where([
+                'isactive'  => 'Y',
+                'isline'    => 'N'
+            ])->like('menu_id', $uri)
+                ->orderBy('name', 'ASC')
+                ->findAll(),
         ];
 
         return $this->template->render('transaction/movement/v_movement', $data);
@@ -71,6 +79,8 @@ class Movement extends BaseController
 
     public function showAll()
     {
+        $mEmpl = new M_Employee($this->request);
+
         if ($this->request->getMethod(true) === 'POST') {
             $table = $this->model->table;
             $select = $this->model->getSelect();
@@ -80,10 +90,23 @@ class Movement extends BaseController
             $search = $this->model->column_search;
             $where = [];
 
+            $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())->first();
+
             //? Check is user exist role W_View_All_Movement 
-            // if (!$this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Movement')) {
-            //     $where['trx_movement.created_by'] = $this->access->getSessionUser();
-            // }
+            if (!$this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data')) {
+                $arrMove = $this->model->getColumnArr($this->model->primaryKey);
+                $arrLine = $this->modelDetail->getEmployeeToArr($this->model->primaryKey, $arrMove, $employee->getEmployeeId(), $this->model->primaryKey);
+
+                if ($arrLine) {
+                    $where['trx_movement.trx_movement_id'] = $arrLine;
+                    $where['trx_movement.created_by'] = [
+                        'condition' => 'OR',
+                        'value'     => $this->access->getSessionUser()
+                    ];
+                } else {
+                    $where['trx_movement.created_by'] = $this->access->getSessionUser();
+                }
+            }
 
             $data = [];
 
@@ -115,7 +138,8 @@ class Movement extends BaseController
                 $row[] = $value->referenceno;
                 $row[] = $value->branch;
                 $row[] = $value->branchto;
-                $row[] = $value->division;
+                $row[] = $value->divisionto;
+                $row[] = $value->status;
                 $row[] = docStatus($value->docstatus, $value->movementtype, $totalLine, $avaiLine);
                 $row[] = $value->createdby;
                 $row[] = $value->description;
@@ -136,6 +160,8 @@ class Movement extends BaseController
 
     public function create()
     {
+        $mEmpl = new M_Employee($this->request);
+
         if ($this->request->getMethod(true) === 'POST') {
             $post = $this->request->getVar();
 
@@ -148,19 +174,30 @@ class Movement extends BaseController
             ];
 
             try {
-                $this->entity->fill($post);
-
-                //* Insert data
-                if ($this->isNew()) {
-                    $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-
-                    $docNo = $this->model->getInvNumber($post['movementtype']);
-                    $this->entity->setDocumentNo($docNo);
-                }
-
                 if (!$this->validation->run($post, 'movement')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
+                    $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())->first();
+
+                    $division_id = $employee ? $employee->getDivisionId() : 100022;
+
+                    if (empty($post['ref_movement_id']))
+                        unset($post['ref_movement_id']);
+
+                    if (empty($post['md_status_id']))
+                        unset($post['ms_status_id']);
+
+                    $this->entity->fill($post);
+                    $this->entity->setDivisionId($division_id);
+
+                    //* Insert data
+                    if ($this->isNew()) {
+                        $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+
+                        $docNo = $this->model->getInvNumber($post['movementtype']);
+                        $this->entity->setDocumentNo($docNo);
+                    }
+
                     $response = $this->save();
                 }
             } catch (\Exception $e) {
@@ -189,11 +226,14 @@ class Movement extends BaseController
 
                 $rowMoveType = $refDetail->where("name", $list[0]->getMovementType())->first();
                 $rowBranch = $branch->find($list[0]->getBranchId());
-                $rowDivision = $division->find($list[0]->getDivisionId());
 
                 $list = $this->field->setDataSelect($refDetail->table, $list, "movementtype", $rowMoveType->getValue(), $rowMoveType->getName());
                 $list = $this->field->setDataSelect($branch->table, $list, $branch->primaryKey, $rowBranch->getBranchId(), $rowBranch->getName());
-                $list = $this->field->setDataSelect($division->table, $list, $division->primaryKey, $rowDivision->getDivisionId(), $rowDivision->getName());
+
+                if (!empty($list[0]->getBranchToId())) {
+                    $rowDivision = $division->find($list[0]->getDivisionToId());
+                    $list = $this->field->setDataSelect($division->table, $list, "md_divisionto_id", $rowDivision->getDivisionId(), $rowDivision->getName());
+                }
 
                 if (!empty($list[0]->getBranchToId())) {
                     $rowBranchTo = $branch->find($list[0]->getBranchToId());
@@ -234,48 +274,182 @@ class Movement extends BaseController
         $transaction = new M_Transaction();
 
         if ($this->request->isAJAX()) {
-            $_ID = $this->request->getGet('id');
-            $_DocAction = $this->request->getGet('docaction');
+            $post = $this->request->getVar();
 
-            $row = $this->model->find($_ID);
-
-            $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->findAll();
+            $_ID = $post['id'];
+            $_DocAction = $post['docaction'];
 
             try {
-                if (!empty($_DocAction) && $row->docstatus !== $_DocAction) {
-                    //* condition exist data line or not exist data line and docstatus not Completed
-                    if (count($line) > 0 || (count($line) == 0 && $_DocAction !== $this->DOCSTATUS_Completed)) {
+                $row = $this->model->find($_ID);
+                $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->findAll();
+                $imt = $this->model->where([
+                    'movementtype'      => $this->Movement_Terima,
+                    'ref_movement_id'   => $_ID,
+                    'docstatus <>'      => $this->DOCSTATUS_Voided
+                ])->first();
+
+                if (!empty($_DocAction)) {
+                    if ($_DocAction === $row->getDocStatus()) {
+                        $response = message('error', true, 'Please reload the Document');
+                    } else if ($_DocAction === $this->DOCSTATUS_Completed) {
+                        if ($line) {
+                            $this->entity->setDocStatus($this->DOCSTATUS_Completed);
+
+                            if ($row->getBranchId() != 100001 && $row->getBranchId() == $row->getBranchToId()) {
+                                $this->entity->setStatusId(100008);
+                            }
+
+                            if ($row->getBranchId() == 100001 && $row->getBranchId() == $row->getBranchToId() && $row->getDivisionId() == $row->getDivisionToId()) {
+                                $this->entity->setStatusId(100008);
+                            }
+
+                            $response = $this->save();
+
+                            $row = $this->model->find($_ID);
+
+                            if (empty($row->getStatusId())) {
+                                //* Passing data to table transaction
+                                $arrMoveIn = [];
+                                $arrMoveOut = [];
+                                foreach ($line as $key => $value) :
+                                    //? Data movement from
+                                    $arrOut = new stdClass();
+                                    $arrOut->assetcode = $value->assetcode;
+                                    $arrOut->md_product_id = $value->md_product_id;
+                                    $arrOut->md_employee_id = $value->employee_from;
+                                    $arrOut->md_room_id = $value->room_from;
+                                    $arrOut->transactiontype = $this->Movement_Out;
+                                    $arrOut->transactiondate = date("Y-m-d");
+                                    $arrOut->qtyentered = -1;
+                                    $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
+                                    $arrMoveOut[$key] = $arrOut;
+
+                                    //? Data movement to
+                                    $arrIn = new stdClass();
+                                    $room = new M_Room($this->request);
+                                    $transit = $room->where("name", "TRANSIT")->first();
+
+                                    $arrIn->assetcode = $value->assetcode;
+                                    $arrIn->md_product_id = $value->md_product_id;
+                                    $arrIn->md_employee_id = $value->employee_to;
+                                    $arrIn->md_branch_id = $value->branch_to;
+                                    $arrIn->md_division_id = $value->division_to;
+                                    $arrIn->md_room_id = $transit->md_room_id;
+                                    $arrIn->transactiontype = $this->Movement_In;
+                                    $arrIn->transactiondate = date("Y-m-d");
+                                    $arrIn->qtyentered = 1;
+                                    $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
+                                    $arrMoveIn[$key] = $arrIn;
+                                endforeach;
+
+                                $arrInv = (array) array_merge(
+                                    (array) $arrMoveIn
+                                );
+
+                                $arrData = (array) array_merge(
+                                    (array) $arrMoveOut,
+                                    (array) $arrMoveIn
+                                );
+
+                                $inventory->edit($arrInv);
+                                $transaction->create($arrData);
+
+                                $this->doMovementTerima($_ID, $_DocAction);
+                            } else {
+                                //* Passing data to table transaction
+                                $arrMoveIn = [];
+                                $arrMoveOut = [];
+                                foreach ($line as $key => $value) :
+                                    //? Data movement from
+                                    $arrOut = new stdClass();
+                                    $arrOut->assetcode = $value->assetcode;
+                                    $arrOut->md_product_id = $value->md_product_id;
+                                    $arrOut->md_employee_id = $value->employee_from;
+                                    $arrOut->md_room_id = $value->room_from;
+                                    $arrOut->transactiontype = $this->Movement_Out;
+                                    $arrOut->transactiondate = date("Y-m-d");
+                                    $arrOut->qtyentered = -1;
+                                    $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
+                                    $arrMoveOut[$key] = $arrOut;
+
+                                    //? Data movement to
+                                    $arrIn = new stdClass();
+
+                                    $arrIn->assetcode = $value->assetcode;
+                                    $arrIn->md_product_id = $value->md_product_id;
+                                    $arrIn->md_employee_id = $value->employee_to;
+                                    $arrIn->md_branch_id = $value->branch_to;
+                                    $arrIn->md_division_id = $value->division_to;
+                                    $arrIn->md_room_id = $value->room_to;
+                                    $arrIn->transactiontype = $this->Movement_In;
+                                    $arrIn->transactiondate = date("Y-m-d");
+                                    $arrIn->qtyentered = 1;
+                                    $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
+                                    $arrMoveIn[$key] = $arrIn;
+                                endforeach;
+
+                                $arrInv = (array) array_merge(
+                                    (array) $arrMoveIn
+                                );
+
+                                $arrData = (array) array_merge(
+                                    (array) $arrMoveOut,
+                                    (array) $arrMoveIn
+                                );
+
+                                $inventory->edit($arrInv);
+                                $transaction->create($arrData);
+                            }
+                        } else {
+                            $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
+                            $response = $this->save();
+                        }
+                    } else if ($_DocAction === $this->DOCSTATUS_Unlock && !$imt && $row->getMovementType() === $this->Movement_Kirim) {
+                        $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+                        $response = $this->save();
+                    } else if ($imt && ($_DocAction === $this->DOCSTATUS_Unlock || $_DocAction === $this->DOCSTATUS_Voided) && $row->getMovementType() === $this->Movement_Kirim) {
+                        $response = message('error', true, 'Please Void Movement Terima first');
+                    } else if ($_DocAction === $this->DOCSTATUS_Unlock && $row->getMovementType() === $this->Movement_Terima) {
+                        $response = message('error', true, 'Cannot be processed, please void this movement');
+                    } else {
                         $this->entity->setDocStatus($_DocAction);
                         $response = $this->save();
 
-                        if ($_DocAction === $this->DOCSTATUS_Completed) {
+                        if ($_DocAction === $this->DOCSTATUS_Voided && ($row->getMovementType() === $this->Movement_Kirim && !empty($row->getStatusId()) || $row->getMovementType() === $this->Movement_Terima)) {
                             //* Passing data to table transaction
                             $arrMoveIn = [];
                             $arrMoveOut = [];
                             foreach ($line as $key => $value) :
-                                //? Data movement from
+                                //? Data movement to
                                 $arrOut = new stdClass();
+
+                                if ($row->getDocStatus === $this->DOCSTATUS_NotApproved && $row->getMovementType() === $this->Movement_Terima) {
+                                    $room = new M_Room($this->request);
+                                    $transit = $room->where("name", "TRANSIT")->first();
+                                    $arrOut->md_room_id = $transit->md_room_id;
+                                }
+
+                                if ($row->getMovementType() === $this->Movement_Kirim || $row->getMovementType() === $this->Movement_Terima && $row->getDocStatus() === $this->DOCSTATUS_Completed) {
+                                    $arrOut->md_room_id = $value->room_to;
+                                }
+
                                 $arrOut->assetcode = $value->assetcode;
                                 $arrOut->md_product_id = $value->md_product_id;
-                                $arrOut->md_employee_id = $value->employee_from;
-                                $arrOut->md_room_id = $value->room_from;
+                                $arrOut->md_employee_id = $value->employee_to;
                                 $arrOut->transactiontype = $this->Movement_Out;
                                 $arrOut->transactiondate = date("Y-m-d");
                                 $arrOut->qtyentered = -1;
                                 $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
                                 $arrMoveOut[$key] = $arrOut;
 
-                                //? Data movement to
+                                //? Data movement from
                                 $arrIn = new stdClass();
-                                $room = new M_Room($this->request);
-                                $transit = $room->where("name", "TRANSIT")->first();
-
                                 $arrIn->assetcode = $value->assetcode;
                                 $arrIn->md_product_id = $value->md_product_id;
-                                $arrIn->md_employee_id = $value->employee_to;
-                                $arrIn->md_branch_id = $value->md_branch_id;
-                                $arrIn->md_division_id = $value->md_division_id;
-                                $arrIn->md_room_id = $transit->md_room_id;
+                                $arrIn->md_employee_id = $value->employee_from;
+                                $arrIn->md_branch_id = $value->branch_from;
+                                $arrIn->md_division_id = $value->division_from;
+                                $arrIn->md_room_id = $value->room_from;
                                 $arrIn->transactiontype = $this->Movement_In;
                                 $arrIn->transactiondate = date("Y-m-d");
                                 $arrIn->qtyentered = 1;
@@ -294,17 +468,10 @@ class Movement extends BaseController
 
                             $inventory->edit($arrInv);
                             $transaction->create($arrData);
-
-                            $this->doMovementTerima($_ID, $_DocAction);
                         }
-                    } else if (count($line) == 0 && $_DocAction === $this->DOCSTATUS_Completed) {
-                        $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
-                        $response = $this->save();
                     }
-                } else if (empty($_DocAction)) {
-                    $response = message('error', true, 'Please Choose the Document Action first');
                 } else {
-                    $response = message('error', true, 'Please reload the Document');
+                    $response = message('error', true, 'Please Choose the Document Action first');
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -332,7 +499,7 @@ class Movement extends BaseController
         $this->entity->setMovementType($this->Movement_Terima);
         $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
         $this->entity->setBranchId($row->getBranchToId());
-        $this->entity->setDivisionId($row->getDivisionId());
+        $this->entity->setDivisionId($row->getDivisionToId());
         $this->entity->setCreatedBy($this->access->getSessionUser());
         $this->entity->setUpdatedBy($this->access->getSessionUser());
         $this->model->save($this->entity);
@@ -477,9 +644,9 @@ class Movement extends BaseController
                 $empWhere['isactive'] = 'Y';
                 $empWhere['md_branch_id'] = $post["md_branchto_id"];
 
-                //? Not ALL DIVISION
-                if ($post["md_division_id"] != 100022)
-                    $empWhere['md_division_id'] = $post["md_division_id"];
+                //? Spesific Division from Branch To Sunter or Not ALL DIVISION
+                if ($post['md_branchto_id'] == 100001 || ($post['md_branchto_id'] != 100001 && $post["md_divisionto_id"] != 100022))
+                    $empWhere['md_division_id'] = $post["md_divisionto_id"];
 
                 //* Data Employee To 
                 $dataEmployeeTo = $employee->where($empWhere)->orderBy('name', 'ASC')->findAll();
@@ -517,8 +684,8 @@ class Movement extends BaseController
                 $empWhere['isactive'] = 'Y';
                 $empWhere['md_branch_id'] = $row->branch_to;
 
-                //? Not ALL DIVISION
-                if ($move->getDivisionId() != 100022)
+                //? Spesific Division from Branch To Sunter
+                if ($move->getBranchToId() == 100001 || ($move->getBranchToId() != 100001 && $move->getDivisionToId() != 100022))
                     $empWhere['md_division_id'] = $row->division_to;
 
                 //* Data Employee To 
@@ -538,7 +705,7 @@ class Movement extends BaseController
 
                 //? Doesn't have Role W_Move_All_Data
                 if ($dataEmpl && !$role) {
-                    $invWhere["md_division_id"] = $dataEmpl->getDivisionId();
+                    $invWhere["md_division_id"] = $move->getDivisionId();
                     $invOrWhere["assetcode"] = $row->assetcode;
                 }
 
@@ -550,7 +717,10 @@ class Movement extends BaseController
                     $roomWhere['md_branch_id'] = $move->getBranchToId();
 
                 //* Data Inventory 
-                $dataInventory = $inventory->where($invWhere)->orWhere($invOrWhere)->orderBy('assetcode', 'ASC')->findAll();
+                if ($move->getDocStatus() !== $this->DOCSTATUS_Completed)
+                    $dataInventory = $inventory->where($invWhere)->orWhere($invOrWhere)->orderBy('assetcode', 'ASC')->findAll();
+                else
+                    $dataInventory = $inventory->orderBy('assetcode', 'ASC')->findAll();
 
                 //* Data Room To
                 $dataRoomTo = $room->where($roomWhere)->orderBy('name', 'ASC')->findAll();

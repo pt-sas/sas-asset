@@ -32,8 +32,21 @@ class M_Datatable extends Model
         if (count($join) > 0)
             $this->setJoin($join);
 
-        if (count($where) > 0)
-            $this->builder->where($where);
+        if (count($where) > 0) {
+            foreach ($where as $key => $value) :
+                if (gettype($value) === "string") {
+                    $this->builder->where($key, $value);
+                }
+
+                if (gettype($value) === "array" && !isset($value['condition'])) {
+                    $this->builder->whereIn($key, $value);
+                }
+
+                if (gettype($value) === "array" && isset($value['condition']) && $value['condition'] === "OR") {
+                    $this->builder->orWhere($key, $value['value']);
+                }
+            endforeach;
+        }
 
         if (isset($post['form']))
             $this->filterDatatable($table, $post, $join);

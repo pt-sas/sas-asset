@@ -15,7 +15,8 @@
                 <th>Reference No</th>
                 <th>Branch</th>
                 <th>Branch To</th>
-                <th>Division</th>
+                <th>Division To</th>
+                <th>Status</th>
                 <th>Doc Status</th>
                 <th>Createdby</th>
                 <th>Description</th>

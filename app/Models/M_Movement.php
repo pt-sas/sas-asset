@@ -5,6 +5,7 @@ namespace App\Models;
 use CodeIgniter\Model;
 use CodeIgniter\HTTP\RequestInterface;
 use App\Models\M_MovementDetail;
+use stdClass;
 
 class M_Movement extends Model
 {
@@ -17,8 +18,10 @@ class M_Movement extends Model
 		'docstatus',
 		'movementtype',
 		'md_branch_id',
-		'md_branchto_id',
 		'md_division_id',
+		'md_branchto_id',
+		'md_divisionto_id',
+		'md_status_id',
 		'sys_wfscenario_id',
 		'ref_movement_id',
 		'created_by',
@@ -43,6 +46,7 @@ class M_Movement extends Model
 		'bfrom.name',
 		'bto.name',
 		'md_division.name',
+		'md_status.name',
 		'trx_movement.docstatus',
 		'sys_user.name',
 		'trx_movement.description'
@@ -55,6 +59,7 @@ class M_Movement extends Model
 		'bfrom.name',
 		'bto.name',
 		'md_division.name',
+		'md_status.name',
 		'trx_movement.docstatus',
 		'sys_user.name',
 		'trx_movement.description'
@@ -78,9 +83,10 @@ class M_Movement extends Model
 			'sys_user.name as createdby,
 			bfrom.name as branch,
 			bto.name as branchto,
-			md_division.name as division,
+			md_division.name as divisionto,
 			ref.documentno as referenceno,
-			sys_ref_detail.name as move_type';
+			sys_ref_detail.name as move_type,
+			md_status.name as status';
 
 		return $sql;
 	}
@@ -95,7 +101,8 @@ class M_Movement extends Model
 			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left'),
 			$this->setDataJoin('md_branch bfrom', 'bfrom.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
 			$this->setDataJoin('md_branch bto', 'bto.md_branch_id = ' . $this->table . '.md_branchto_id', 'left'),
-			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_division_id', 'left'),
+			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_divisionto_id', 'left'),
+			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
 			$this->setDataJoin('sys_ref_detail', 'sys_ref_detail.sys_reference_id = ' . $defaultID . ' AND sys_ref_detail.value = ' . $this->table . '.movementtype', 'left')
 		];
 
@@ -143,5 +150,77 @@ class M_Movement extends Model
 	{
 		$moveDetail = new M_MovementDetail($this->request);
 		$moveDetail->where($this->primaryKey, $rows['id'])->delete();
+	}
+
+	public function getColumnArr($column)
+	{
+		$list = $this->findAll();
+
+		$result = [];
+
+		foreach ($list as $value) :
+			$result[] = $value->{$column};
+		endforeach;
+
+		return $result;
+	}
+
+	public function createDetail($rows)
+	{
+		$mTransaction = new M_Transaction();
+		$mInventory = new M_Inventory($this->request);
+		$mMoveDetail = new M_MovementDetail($this->request);
+
+		if (isset($post['docaction'])) {
+			$row = $this->find($post['id']);
+			$line = $mMoveDetail->where($this->primaryKey, $post['id'])->findAll();
+
+			// if ($post['docaction'] === "VO" && $row->getMovementType() === "TERIMA") {
+			//* Passing data to table transaction
+			$arrMoveIn = [];
+			$arrMoveOut = [];
+			foreach ($line as $key => $value) :
+				//? Data movement to
+				$arrOut = new stdClass();
+				$arrOut->assetcode = $value->assetcode;
+				$arrOut->md_product_id = $value->md_product_id;
+				$arrOut->md_employee_id = $value->employee_to;
+				$arrOut->md_room_id = $value->room_to;
+				$arrOut->transactiontype = $this->Movement_Out;
+				$arrOut->transactiondate = date("Y-m-d");
+				$arrOut->qtyentered = -1;
+				$arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
+				$arrMoveOut[$key] = $arrOut;
+
+				//? Data movement from
+				$arrIn = new stdClass();
+				$arrIn->assetcode = $value->assetcode;
+				$arrIn->md_product_id = $value->md_product_id;
+				$arrIn->md_employee_id = $value->employee_from;
+				$arrIn->md_branch_id = $value->branch_from;
+				$arrIn->md_division_id = $value->division_from;
+				$arrIn->md_room_id = $value->room_from;
+				$arrIn->transactiontype = $this->Movement_In;
+				$arrIn->transactiondate = date("Y-m-d");
+				$arrIn->qtyentered = 1;
+				$arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
+				$arrMoveIn[$key] = $arrIn;
+			endforeach;
+
+			$arrInv = (array) array_merge(
+				(array) $arrMoveIn
+			);
+
+			$arrData = (array) array_merge(
+				(array) $arrMoveOut,
+				(array) $arrMoveIn
+			);
+
+			// $mInventory->edit($arrInv);
+			$mTransaction->create($arrData);
+			// }
+		}
+
+		return $rows;
 	}
 }

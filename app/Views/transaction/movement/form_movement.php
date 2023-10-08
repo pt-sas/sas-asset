@@ -42,6 +42,17 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
+                    <label for="md_status_id">Status </label>
+                    <select class="form-control select2" id="md_status_id" name="md_status_id" style="width: 100%;" disabled>
+                        <option value="">Select Status</option>
+                        <?php foreach ($status as $row) : ?>
+                            <option value="<?= $row->getStatusId() ?>"><?= $row->getName() ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
                     <label for="md_branchto_id">Branch To <span class="required">*</span></label>
                     <select class="form-control select-data" id="md_branchto_id" name="md_branchto_id" data-url="branch/getList">
                         <option value="">Select Branch</option>
@@ -51,17 +62,17 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="description">Description </label>
-                    <textarea type="text" class="form-control" id="description" name="description" rows="4"></textarea>
+                    <label for="md_divisionto_id">Division To <span class="required">*</span></label>
+                    <select class="form-control select-data" id="md_divisionto_id" name="md_divisionto_id" data-url="division/getList">
+                        <option value="">Select Division To</option>
+                    </select>
+                    <small class="form-text text-danger" id="error_md_divisionto_id"></small>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="md_division_id">Division To <span class="required">*</span></label>
-                    <select class="form-control select-data" id="md_division_id" name="md_division_id" data-url="division/getList">
-                        <option value="">Select Division</option>
-                    </select>
-                    <small class="form-text text-danger" id="error_md_division_id"></small>
+                    <label for="description">Description </label>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="4"></textarea>
                 </div>
             </div>
         </div>

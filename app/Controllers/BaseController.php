@@ -834,12 +834,10 @@ class BaseController extends Controller
 				if ($field === $value && !is_null($aField))
 					$row->{$field} = $row->{$aField};
 			} else {
-				if (isset($row->{$field})) {
-					foreach ($value as $key2 => $val) :
-						if ($key == $key2)
-							$row->{$field} = $val->{$aField};
-					endforeach;
-				}
+				foreach ($value as $key2 => $val) :
+					if ($key == $key2)
+						$row->{$field} = $val->{$aField};
+				endforeach;
 			}
 
 			$result[] = $row;

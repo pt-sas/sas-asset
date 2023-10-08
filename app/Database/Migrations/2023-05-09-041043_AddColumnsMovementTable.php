@@ -29,15 +29,21 @@ class AddColumnsMovementTable extends Migration
                 'constraint'    => 6,
                 'null'          => false
             ],
+            'md_division_id'    => [
+                'type'          => 'INT',
+                'after'         => 'md_branch_id',
+                'constraint'    => 6,
+                'null'          => false
+            ],
             'md_branchto_id'      => [
                 'type'          => 'INT',
                 'after'         => 'md_branch_id',
                 'constraint'    => 6,
                 'null'          => false
             ],
-            'md_division_id'    => [
+            'md_divisionto_id'  => [
                 'type'          => 'INT',
-                'after'         => 'md_branch_id',
+                'after'         => 'md_branchto_id',
                 'constraint'    => 6,
                 'null'          => false
             ],
@@ -54,7 +60,7 @@ class AddColumnsMovementTable extends Migration
 
     public function down()
     {
-        $fields = ['movementtype', 'md_branch_id', 'md_division_id', 'sys_wfscenario_id'];
+        $fields = ['movementtype', 'md_branch_id', 'md_division_id', 'md_branchto_id', 'md_divisionto_id', 'sys_wfscenario_id'];
 
         $this->forge->dropColumn('trx_movement', $fields);
     }
