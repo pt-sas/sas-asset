@@ -131,7 +131,7 @@ class M_Quotation extends Model
 		if ($where === 'N')
 			$first = "QU";
 
-		$prefix = $first . $yearMonth . $code;
+		$prefix = $first . $yearMonth . "-" . $code;
 
 		return $prefix;
 	}

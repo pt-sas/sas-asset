@@ -120,7 +120,10 @@ class M_Movement extends Model
 
 	public function getInvNumber($type)
 	{
-		$month = date('m');
+		$post = $this->request->getPost();
+
+		$yearMonth = date("ym", strtotime($post['movementdate']));
+		$month = date("m", strtotime($post['movementdate']));
 
 		$this->builder->select('MAX(RIGHT(documentno,4)) AS documentno');
 		$this->builder->where([
@@ -141,7 +144,7 @@ class M_Movement extends Model
 
 		$prefix = $type === "KIRIM" ? "MK" : "MT";
 
-		$prefix .= date('ym') . $code;
+		$prefix .= $yearMonth . "-" . $code;
 
 		return $prefix;
 	}

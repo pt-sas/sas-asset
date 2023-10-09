@@ -163,7 +163,7 @@ class M_Receipt extends Model
 			$code = "0001";
 		}
 
-		$prefix = "RC" . $yearMonth . $code;
+		$prefix = "RC" . $yearMonth . "-" . $code;
 
 		return $prefix;
 	}
