@@ -21,7 +21,7 @@ class M_Movement extends Model
 		'md_division_id',
 		'md_branchto_id',
 		'md_divisionto_id',
-		'md_status_id',
+		'movementstatus',
 		'sys_wfscenario_id',
 		'ref_movement_id',
 		'created_by',
@@ -102,7 +102,7 @@ class M_Movement extends Model
 			$this->setDataJoin('md_branch bfrom', 'bfrom.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
 			$this->setDataJoin('md_branch bto', 'bto.md_branch_id = ' . $this->table . '.md_branchto_id', 'left'),
 			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_divisionto_id', 'left'),
-			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
+			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.movementstatus', 'left'),
 			$this->setDataJoin('sys_ref_detail', 'sys_ref_detail.sys_reference_id = ' . $defaultID . ' AND sys_ref_detail.value = ' . $this->table . '.movementtype', 'left')
 		];
 

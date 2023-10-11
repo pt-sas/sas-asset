@@ -184,8 +184,8 @@ class Movement extends BaseController
                     if (empty($post['ref_movement_id']))
                         unset($post['ref_movement_id']);
 
-                    if (empty($post['md_status_id']))
-                        unset($post['ms_status_id']);
+                    if (empty($post['movementstatus']))
+                        unset($post['movementstatus']);
 
                     $this->entity->fill($post);
                     $this->entity->setDivisionId($division_id);
@@ -307,7 +307,7 @@ class Movement extends BaseController
 
                             $row = $this->model->find($_ID);
 
-                            if (empty($row->getStatusId())) {
+                            if (empty($row->getMovementStatus())) {
                                 //* Passing data to table transaction
                                 $arrMoveIn = [];
                                 $arrMoveOut = [];
@@ -415,7 +415,7 @@ class Movement extends BaseController
                         $this->entity->setDocStatus($_DocAction);
                         $response = $this->save();
 
-                        if ($_DocAction === $this->DOCSTATUS_Voided && ($row->getMovementType() === $this->Movement_Kirim && !empty($row->getStatusId()) || $row->getMovementType() === $this->Movement_Terima)) {
+                        if ($_DocAction === $this->DOCSTATUS_Voided && ($row->getMovementType() === $this->Movement_Kirim && !empty($row->getMovementStatus()) || $row->getMovementType() === $this->Movement_Terima)) {
                             //* Passing data to table transaction
                             $arrMoveIn = [];
                             $arrMoveOut = [];

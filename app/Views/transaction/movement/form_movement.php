@@ -42,8 +42,8 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="md_status_id">Status </label>
-                    <select class="form-control select2" id="md_status_id" name="md_status_id" style="width: 100%;" disabled>
+                    <label for="movementstatus">Status </label>
+                    <select class="form-control select2" id="movementstatus" name="movementstatus" style="width: 100%;" disabled>
                         <option value="">Select Status</option>
                         <?php foreach ($status as $row) : ?>
                             <option value="<?= $row->getStatusId() ?>"><?= $row->getName() ?></option>

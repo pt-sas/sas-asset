@@ -20,7 +20,7 @@ class Movement extends Entity
 	protected $updated_by;
 	protected $ref_movement_id;
 	protected $sys_wfscenario_id;
-	protected $md_status_id;
+	protected $movementstatus;
 
 	protected $dates   = [
 		'created_at',
@@ -178,13 +178,13 @@ class Movement extends Entity
 		$this->attributes['sys_wfscenario_id'] = $sys_wfscenario_id;
 	}
 
-	public function getStatusId()
+	public function getMovementStatus()
 	{
-		return $this->attributes['md_status_id'];
+		return $this->attributes['movementstatus'];
 	}
 
-	public function setStatusId($md_status_id)
+	public function setMovementStatus($movementstatus)
 	{
-		$this->attributes['md_status_id'] = $md_status_id;
+		$this->attributes['movementstatus'] = $movementstatus;
 	}
 }
