@@ -295,12 +295,14 @@ class Movement extends BaseController
                         if ($line) {
                             $this->entity->setDocStatus($this->DOCSTATUS_Completed);
 
+                            //* Set movement status Internal Move 
                             if ($row->getBranchId() != 100001 && $row->getBranchId() == $row->getBranchToId()) {
-                                $this->entity->setStatusId(100008);
+                                $this->entity->setMovementStatus(100008);
                             }
 
+                            //* Set movement status Internal Move
                             if ($row->getBranchId() == 100001 && $row->getBranchId() == $row->getBranchToId() && $row->getDivisionId() == $row->getDivisionToId()) {
-                                $this->entity->setStatusId(100008);
+                                $this->entity->setMovementStatus(100008);
                             }
 
                             $response = $this->save();
