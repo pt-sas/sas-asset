@@ -1459,7 +1459,7 @@ function getDocAction(status, url) {
 
   $.ajax({
     type: "POST",
-    url: ADMIN_URL + "/docaction/getDocaction",
+    url: ADMIN_URL + "docaction/getDocaction",
     data: {
       status: status,
       url: url,

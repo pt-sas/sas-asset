@@ -345,6 +345,8 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
 
     $routes->add('rpt_opname', 'Backend\Rpt_Opname::index');
     $routes->match(['get', 'post'], 'rpt_opname/showAll', 'Backend\Rpt_Opname::showAll');
+
+    $routes->post('docaction/getDocaction', 'Backend\DocAction::getDocaction');
 });
 
 /*
