@@ -194,7 +194,7 @@ class Movement extends BaseController
                     if ($this->isNew()) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
 
-                        $docNo = $this->model->getInvNumber($post['movementtype']);
+                        $docNo = $this->model->getInvNumber($post['movementtype'], $post['movementdate']);
                         $this->entity->setDocumentNo($docNo);
                     }
 
@@ -492,12 +492,13 @@ class Movement extends BaseController
         $row = $this->model->find($_ID);
         $detail = $this->modelDetail->where($this->model->primaryKey, $_ID)->findAll();
 
-        $docNo = $this->model->getInvNumber($this->Movement_Terima);
+        $movementDate = $row->getMovementDate();
+        $docNo = $this->model->getInvNumber($this->Movement_Terima, $movementDate);
 
         //TODO: Insert movement IMT 
         $this->entity->setDocumentNo($docNo);
         $this->entity->setRefMovementId($row->getMovementId());
-        $this->entity->setMovementDate($row->getMovementDate());
+        $this->entity->setMovementDate($movementDate);
         $this->entity->setMovementType($this->Movement_Terima);
         $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
         $this->entity->setBranchId($row->getBranchToId());

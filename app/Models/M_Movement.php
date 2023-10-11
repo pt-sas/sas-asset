@@ -118,12 +118,10 @@ class M_Movement extends Model
 		];
 	}
 
-	public function getInvNumber($type)
+	public function getInvNumber($type, $date)
 	{
-		$post = $this->request->getPost();
-
-		$yearMonth = date("ym", strtotime($post['movementdate']));
-		$month = date("m", strtotime($post['movementdate']));
+		$yearMonth = date("ym", strtotime($date));
+		$month = date("m", strtotime($date));
 
 		$this->builder->select('MAX(RIGHT(documentno,4)) AS documentno');
 		$this->builder->where([
