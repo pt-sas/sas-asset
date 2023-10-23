@@ -197,7 +197,7 @@ class Reference extends BaseController
                         ->like('name', $post['search'])
                         ->orderBy('name', 'ASC')
                         ->findAll();
-                } else if (isset($post['name'])) {
+                } else if (!empty($post['name'])) {
                     $first = $this->model->where('isactive', 'Y')
                         ->like('name', $post['name'])->first();
 
