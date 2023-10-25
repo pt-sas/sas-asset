@@ -41,7 +41,9 @@ class WScenario extends BaseController
         $data = [
             'menu'      => $menu->getMenuUrl(),
             'ref_list' => $mRef->findBy(
-                "sys_reference.name = 'MovementType' OR sys_reference.name = 'DisposalType' AND sys_reference.isactive = 'Y' AND sys_ref_detail.isactive = 'Y'",
+                "sys_reference.name IN ('MovementType','DisposalType') 
+                AND sys_reference.isactive = 'Y' 
+                AND sys_ref_detail.isactive = 'Y'",
                 null,
                 [
                     'field'     => 'sys_ref_detail.sys_ref_detail_id',
