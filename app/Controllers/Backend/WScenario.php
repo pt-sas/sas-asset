@@ -13,6 +13,7 @@ use App\Models\M_Branch;
 use App\Models\M_Room;
 use App\Models\M_Division;
 use App\Models\M_Inventory;
+use App\Models\M_Reference;
 use App\Models\M_Transaction;
 use Config\Services;
 use Pusher\Pusher;
@@ -35,15 +36,24 @@ class WScenario extends BaseController
         $uri = $this->request->uri->getSegment(2);
         $menu = new M_Menu($this->request);
         $status = new M_Status($this->request);
+        $mRef = new M_Reference($this->request);
 
         $data = [
             'menu'      => $menu->getMenuUrl(),
+            'ref_list' => $mRef->findBy(
+                "sys_reference.name = 'MovementType' OR sys_reference.name = 'DisposalType' AND sys_reference.isactive = 'Y' AND sys_ref_detail.isactive = 'Y'",
+                null,
+                [
+                    'field'     => 'sys_ref_detail.sys_ref_detail_id',
+                    'option'    => 'ASC'
+                ]
+            )->getResult(),
             'status'    => $status->where([
                 'isactive'  => 'Y',
                 'isline'    => 'N'
             ])->like('menu_id', $uri)
                 ->orderBy('name', 'ASC')
-                ->findAll(),
+                ->findAll()
         ];
 
         return $this->template->render('backend/configuration/wscenario/v_wscenario', $data);
@@ -79,6 +89,7 @@ class WScenario extends BaseController
                 $row[] = $value->status;
                 $row[] = $value->branch;
                 $row[] = $value->division;
+                $row[] = $value->scenariotype;
                 $row[] = $value->description;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
@@ -269,7 +280,7 @@ class WScenario extends BaseController
             }
 
             if ($table === 'trx_movement') {
-                $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, $trx->md_branch_id, $trx->md_division_id);
+                $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, $trx->md_branch_id, $trx->md_division_id, $trx->getMovementType());
 
                 if ($this->sys_wfscenario_id) {
                     $this->entity->setDocStatus($this->DOCSTATUS_Inprogress);

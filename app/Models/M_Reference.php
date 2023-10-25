@@ -93,6 +93,9 @@ class M_Reference extends Model
 		if (is_array($where) && !empty($where))
 			$this->builder->where($where);
 
+		if (!is_array($where) && !empty($where))
+			$this->builder->where($where);
+
 		if (!is_array($field) && !is_array($where) && !empty($field) && !empty($where))
 			$this->builder->where($field, $where);
 
