@@ -2086,6 +2086,13 @@ $("#form_movement").on(
       _tableLine.clear().draw(false);
     }
 
+    // Untuk mengakomodir kebutuhan divisi rusak 
+    if (attrName === "md_divisionto_id" && ($(this).find("option:selected").text() === "HRD-RUSAK" || $(this).find("option:selected").text() === "IT-RUSAK")) {
+      form.find("select[name=movementstatus]").attr("disabled", true).change(null);
+    } else {
+      form.find("select[name=movementstatus]").removeAttr("disabled", true);
+    }
+
     // update data
     $.each(option, function (idx, elem) {
       if (elem.fieldName === attrName && setSave !== "add") {
