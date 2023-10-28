@@ -22,6 +22,7 @@ class Inventory extends Entity
     protected $updated_by;
     protected $md_groupasset_id;
     protected $residualvalue;
+    protected $numberPlate;
 
     protected $dates   = [
         'created_at',
@@ -197,5 +198,25 @@ class Inventory extends Entity
     public function setResidualValue($residualvalue)
     {
         $this->attributes['residualvalue'] = $residualvalue;
+    }
+
+    public function getNumberPlate()
+    {
+        return $this->attributes['numberplate'];
+    }
+
+    public function setNumberPlate($numberPlate)
+    {
+        $this->attributes['numberplate'] = $numberPlate;
+    }
+
+    public function getIsNew()
+    {
+        return $this->attributes['isnew'];
+    }
+
+    public function setIsNew($isnew)
+    {
+        $this->attributes['isnew'] = $isnew;
     }
 }
