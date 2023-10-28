@@ -31,7 +31,8 @@ class M_Inventory extends Model
 		'isactive',
 		'created_by',
 		'updated_by',
-		'numberplate'
+		'numberplate',
+		'isnew'
 	];
 	protected $useTimestamps	= true;
 	protected $allowCallbacks	= true;
@@ -150,7 +151,8 @@ class M_Inventory extends Model
 				'created_at'    			=> date('Y-m-d H:i:s'),
 				'created_by'    			=> session()->get('sys_user_id'),
 				'updated_at'    			=> date('Y-m-d H:i:s'),
-				'updated_by'    			=> session()->get('sys_user_id')
+				'updated_by'    			=> session()->get('sys_user_id'),
+				'isnew'     				=> $row->isnew
 			];
 
 			$result = $this->builder->insert($data);
@@ -169,7 +171,8 @@ class M_Inventory extends Model
 				'md_division_id'    		=> $row->md_division_id,
 				'md_room_id'     			=> $row->md_room_id,
 				'updated_at'    			=> date('Y-m-d H:i:s'),
-				'updated_by'    			=> session()->get('sys_user_id')
+				'updated_by'    			=> session()->get('sys_user_id'),
+				'isnew'     				=> $row->isnew,
 			];
 
 			// //* ROOM RUANG IT - BARANG BAGUS
