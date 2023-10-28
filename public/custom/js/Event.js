@@ -571,7 +571,56 @@ _tableLine.on("change", 'select[name="assetcode"]', function (evt) {
           } else if (tr.find('input[name="room_from"]').length > 0) {
             tr.find('input[name="room_from"]').val(item.room_from.name);
           }
+
+          if (tr.find('input:checkbox[name="isnew"]').length > 0 && item.isnew === "Y") {
+            tr.find('input:checkbox[name="isnew"]').prop("checked", true);
+          } else {
+            tr.find('input:checkbox[name="isnew"]').prop("checked", false);
+          }
         });
+      } else if (!result[0].success) {
+        if (tr.find('select[name="md_product_id"]').length > 0) {
+            tr.find('select[name="md_product_id"]')
+              .val(null)
+              .change()
+              .prop("disabled", true);
+        } else if (tr.find('input[name="md_product_id"]').length > 0) {
+          tr.find('input[name="md_product_id"]').val(null);
+        }
+
+        if (tr.find('select[name="employee_from"]').length > 0) {
+          tr.find('select[name="employee_from"]')
+            .val(null)
+            .change();
+        } else if (tr.find('input[name="employee_from"]').length > 0) {
+          tr.find('input[name="employee_from"]').val(null);
+        }
+
+        if (tr.find('select[name="branch_from"]').length > 0) {
+          tr.find('select[name="branch_from"]')
+            .val(null)
+            .change();
+        } else if (tr.find('input[name="branch_from"]').length > 0) {
+          tr.find('input[name="branch_from"]').val(null);
+        }
+
+        if (tr.find('select[name="division_from"]').length > 0) {
+          tr.find('select[name="division_from"]')
+            .val(null)
+            .change();
+        } else if (tr.find('input[name="division_from"]').length > 0) {
+          tr.find('input[name="division_from"]').val(null);
+        }
+
+        if (tr.find('select[name="room_from"]').length > 0) {
+          tr.find('select[name="room_from"]').val(null).change();
+        } else if (tr.find('input[name="room_from"]').length > 0) {
+          tr.find('input[name="room_from"]').val(null);
+        }
+
+        if (tr.find('input:checkbox[name="isnew"]').length > 0) {
+          tr.find('input:checkbox[name="isnew"]').prop("checked", false);
+        }
       } else {
         Toast.fire({
           type: "error",

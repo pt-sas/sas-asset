@@ -169,21 +169,27 @@ class Inventory extends BaseController
             $post = $this->request->getVar();
 
             try {
-                $list = $this->model->where('assetcode', $post['assetcode'])->findAll();
+                $list = [];
 
-                $rowProduct = $product->find($list[0]->getProductId());
-                $rowBranch = $branch->find($list[0]->getBranchId());
-                $rowEmployee = $employee->find($list[0]->getEmployeeId());
-                $rowDivision = $division->find($list[0]->getDivisionId());
-                $rowRoom = $room->find($list[0]->getRoomId());
+                if (!empty($post['assetcode'])) {
+                    $list = $this->model->where('assetcode', $post['assetcode'])->findAll();
 
-                $list = $this->field->setDataSelect($product->table, $list, $product->primaryKey, $rowProduct->getProductId(), $rowProduct->getName());
-                $list = $this->field->setDataSelect($branch->table, $list, "branch_from", $rowBranch->getBranchId(), $rowBranch->getName());
-                $list = $this->field->setDataSelect($employee->table, $list, "employee_from", $rowEmployee->getEmployeeId(), $rowEmployee->getName());
-                $list = $this->field->setDataSelect($division->table, $list, "division_from", $rowDivision->getDivisionId(), $rowDivision->getName());
-                $list = $this->field->setDataSelect($room->table, $list, "room_from", $rowRoom->getRoomId(), $rowRoom->getName());
+                    $rowProduct = $product->find($list[0]->getProductId());
+                    $rowBranch = $branch->find($list[0]->getBranchId());
+                    $rowEmployee = $employee->find($list[0]->getEmployeeId());
+                    $rowDivision = $division->find($list[0]->getDivisionId());
+                    $rowRoom = $room->find($list[0]->getRoomId());
 
-                $response = message('success', true, $list);
+                    $list = $this->field->setDataSelect($product->table, $list, $product->primaryKey, $rowProduct->getProductId(), $rowProduct->getName());
+                    $list = $this->field->setDataSelect($branch->table, $list, "branch_from", $rowBranch->getBranchId(), $rowBranch->getName());
+                    $list = $this->field->setDataSelect($employee->table, $list, "employee_from", $rowEmployee->getEmployeeId(), $rowEmployee->getName());
+                    $list = $this->field->setDataSelect($division->table, $list, "division_from", $rowDivision->getDivisionId(), $rowDivision->getName());
+                    $list = $this->field->setDataSelect($room->table, $list, "room_from", $rowRoom->getRoomId(), $rowRoom->getName());
+
+                    $response = message('success', true, $list);
+                } else {
+                    $response = message('success', false, $list);
+                }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }

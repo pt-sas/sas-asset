@@ -56,6 +56,10 @@ class Movement extends BaseController
             $dataBranch['text'] = $branch->getName();
         }
 
+        //? Check exist role W_Not_Default_Status
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_Not_Default_Status');
+        $defaultRole = $role ? true : false;
+
         $data = [
             'today'         => date('Y-m-d'),
             'ref_list'      => $mRef->findBy([
@@ -72,6 +76,7 @@ class Movement extends BaseController
             ])->like('menu_id', $uri)
                 ->orderBy('name', 'ASC')
                 ->findAll(),
+            'default_role'  => $defaultRole
         ];
 
         return $this->template->render('transaction/movement/v_movement', $data);
@@ -339,6 +344,7 @@ class Movement extends BaseController
                                     $arrIn->md_room_id = $transit->md_room_id;
                                     $arrIn->transactiontype = $this->Movement_In;
                                     $arrIn->transactiondate = date("Y-m-d");
+                                    $arrIn->isnew = "N";
                                     $arrIn->qtyentered = 1;
                                     $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
                                     $arrMoveIn[$key] = $arrIn;
@@ -385,6 +391,7 @@ class Movement extends BaseController
                                     $arrIn->md_room_id = $value->room_to;
                                     $arrIn->transactiontype = $this->Movement_In;
                                     $arrIn->transactiondate = date("Y-m-d");
+                                    $arrIn->isnew = "N";
                                     $arrIn->qtyentered = 1;
                                     $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
                                     $arrMoveIn[$key] = $arrIn;
@@ -454,6 +461,7 @@ class Movement extends BaseController
                                 $arrIn->md_room_id = $value->room_from;
                                 $arrIn->transactiontype = $this->Movement_In;
                                 $arrIn->transactiondate = date("Y-m-d");
+                                $arrIn->isnew = $value->isnew;
                                 $arrIn->qtyentered = 1;
                                 $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
                                 $arrMoveIn[$key] = $arrIn;
@@ -627,6 +635,8 @@ class Movement extends BaseController
 
         $table = [];
 
+        $status = "BAGUS";
+
         //? Create
         if (empty($set)) {
             if (!$this->validation->run($post, 'movementAddRow')) {
@@ -640,6 +650,10 @@ class Movement extends BaseController
                 if ($dataEmpl && !$role)
                     $invWhere["md_division_id"] = $dataEmpl->getDivisionId();
 
+                //? Status is NEW ASSET 
+                if ($post['movementstatus'] == 100010)
+                    $invWhere["isnew"] = "Y";
+
                 //* Data Inventory 
                 $dataInventory = $inventory->where($invWhere)->orderBy('assetcode', 'ASC')->findAll();
 
@@ -647,8 +661,20 @@ class Movement extends BaseController
                 $empWhere['isactive'] = 'Y';
                 $empWhere['md_branch_id'] = $post["md_branchto_id"];
 
-                //? Spesific Division from Branch To Sunter or Not ALL DIVISION
-                if ($post['md_branchto_id'] == 100001 || ($post['md_branchto_id'] != 100001 && $post["md_divisionto_id"] != 100022))
+                if ($post['md_branchto_id'] == 100001) {
+                    //? Division To HRD-RUSAK - Santy-HRD
+                    if ($post['md_divisionto_id'] == 100023) {
+                        $empWhere['md_employee_id'] = 100193;
+                        $status = "RUSAK";
+                    } else if ($post['md_divisionto_id'] == 100024) { //? Division To IT-RUSAK - Wempy-IT
+                        $empWhere['md_employee_id'] = 100180;
+                        $status = "RUSAK";
+                    } else {
+                        $empWhere['md_division_id'] = $post["md_divisionto_id"];
+                    }
+                }
+
+                if ($post['md_branchto_id'] != 100001 && $post["md_divisionto_id"] != 100022)
                     $empWhere['md_division_id'] = $post["md_divisionto_id"];
 
                 //* Data Employee To 
@@ -658,7 +684,8 @@ class Movement extends BaseController
                     $this->field->fieldTable('button', 'button', 'trx_movement_detail_id'),
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, null, 170, 'assetcode', 'assetcode'),
                     $this->field->fieldTable('input', 'text', 'md_product_id', null, 'required', 'readonly', null, null, null, 300),
-                    $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, 'BAGUS', 150, 'md_status_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_status_id', null, 'required', 'readonly', null, $dataStatus, $status, 150, 'md_status_id', 'name'),
+                    $this->field->fieldTable('input', 'checkbox', 'isnew', null, null, 'readonly'),
                     $this->field->fieldTable('input', 'text', 'employee_from', null, 'required', 'readonly', null, null, null, 200),
                     $this->field->fieldTable('select', null, 'employee_to', null, 'required', null, null, $dataEmployeeTo, null, 200, 'md_employee_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'branch_from', null, 'required', 'readonly', null, null, null, 200),
@@ -688,7 +715,17 @@ class Movement extends BaseController
                 $empWhere['md_branch_id'] = $row->branch_to;
 
                 //? Spesific Division from Branch To Sunter
-                if ($move->getBranchToId() == 100001 || ($move->getBranchToId() != 100001 && $move->getDivisionToId() != 100022))
+                if ($move->getBranchToId() == 100001) {
+                    //? Division To HRD-RUSAK - Santy-HRD
+                    if ($move->getDivisionToId() == 100023)
+                        $empWhere['md_employee_id'] = 100193;
+                    else if ($move->getDivisionToId() == 100024) //? Division To IT-RUSAK - Wempy-IT
+                        $empWhere['md_employee_id'] = 100180;
+                    else
+                        $empWhere['md_division_id'] = $row->division_to;
+                }
+
+                if ($move->getBranchToId() != 100001 && $move->getDivisionToId() != 100022)
                     $empWhere['md_division_id'] = $row->division_to;
 
                 //* Data Employee To 
@@ -705,6 +742,10 @@ class Movement extends BaseController
                 $invWhere['md_branch_id'] = $move->getBranchId();
                 $invWhere['isactive'] = 'Y';
                 $invOrWhere = [];
+
+                //? Status is NEW ASSET 
+                if ($move->getMovementStatus() == 100010)
+                    $invWhere["isnew"] = "Y";
 
                 //? Doesn't have Role W_View_All_Data
                 if ($dataEmpl && !$role) {
@@ -732,7 +773,8 @@ class Movement extends BaseController
                     $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', null, null, null, null, null, $row->trx_movement_detail_id),
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
                     $this->field->fieldTable('input', 'text', 'md_product_id', null, 'required', 'readonly', null, null, $valPro->getName(), 300),
-                    $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
+                    $this->field->fieldTable('select', null, 'md_status_id', null, 'required', 'readonly', null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
+                    $this->field->fieldTable('input', 'checkbox', 'isnew', null, null, 'readonly', $row->isnew === "Y" ? 'checked' : null),
                     $this->field->fieldTable('input', 'text', 'employee_from', null, 'required', 'readonly', null, null, $valEmp->getName(), 200),
                     $this->field->fieldTable('select', null, 'employee_to', null, 'required', $row->status === 'RUSAK' ? 'readonly' : null, null, $dataEmployeeTo, $row->employee_to, 200, 'md_employee_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'branch_from', null, 'required', 'readonly', null, null, $valBranch->getName(), 200),
@@ -740,7 +782,7 @@ class Movement extends BaseController
                     $this->field->fieldTable('input', 'text', 'division_from', null, 'required', 'readonly', null, null, $valDiv->getName(), 200),
                     $this->field->fieldTable('select', null, 'division_to', null, null, 'readonly', null, $dataDivision, $row->division_to, 200, 'md_division_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'room_from', null, 'required', 'readonly', null, null, $valRoom->getName(), 200),
-                    $this->field->fieldTable('select', null, 'room_to', 'updatable', 'required', null, null, $dataRoomTo, $row->room_to, 250, 'md_room_id', 'name'),
+                    $this->field->fieldTable('select', null, 'room_to', 'updatable', 'required', null, null, $dataRoomTo, $row->room_to, 250, 'md_room_id', 'name, description'),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250)
                 ];
             endforeach;

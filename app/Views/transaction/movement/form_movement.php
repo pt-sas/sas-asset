@@ -94,6 +94,7 @@
                                 <th rowspan="2" class="text-center">Asset Code</th>
                                 <th rowspan="2" class="text-center">Product</th>
                                 <th rowspan="2" class="text-center">Status</th>
+                                <th rowspan="2" class="text-center">New</th>
                                 <th colspan="2" class="text-center">Employee</th>
                                 <th colspan="2" class="text-center">Branch</th>
                                 <th colspan="2" class="text-center">Division</th>
