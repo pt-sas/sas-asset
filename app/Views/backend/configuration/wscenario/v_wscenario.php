@@ -16,6 +16,7 @@
                 <th>Status</th>
                 <th>Branch</th>
                 <th>Division</th>
+                <th>Scenario Type</th>
                 <th>Description</th>
                 <th>Active</th>
                 <th>Actions</th>

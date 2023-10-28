@@ -90,7 +90,8 @@ class M_Reference extends Model
 
 	public function findBy($where = null, $field = null, $orderBy = [])
 	{
-		if (is_array($where) && !empty($where))
+		//* Check arg where if not null value
+		if (!empty($where))
 			$this->builder->where($where);
 
 		if (!is_array($field) && !is_array($where) && !empty($field) && !empty($where))

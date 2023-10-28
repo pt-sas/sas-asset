@@ -55,17 +55,29 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="description">Description </label>
-                    <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
                     <label for="grandtotal">Grand Total </label>
                     <input type="text" class="form-control number" id="grandtotal" name="grandtotal" value="0">
                 </div>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="scenariotype">Scenario Type </label>
+                    <select class="form-control select2" id="scenariotype" name="scenariotype">
+                        <option value="">Select Type</option>
+                        <?php foreach ($ref_list as $row) : ?>
+                            <option value="<?= $row->value ?>"><?= $row->name ?></option>
+                        <?php endforeach; ?>
+
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="description">Description </label>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="col-md-2 mt-4">
                 <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">
