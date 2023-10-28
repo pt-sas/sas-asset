@@ -36,19 +36,9 @@
                 <div class="form-group">
                     <label for="md_branch_id">Branch <span class="required">*</span></label>
                     <select class="form-control select-data" id="md_branch_id" name="md_branch_id" data-url="branch/getList" default-id="<?= $branch ? $branch['id'] : "" ?>" default-text="<?= $branch ? $branch['text'] : "" ?>" <?= $branch ? "disabled" : "" ?>>
+                        <option value="">Select Branch</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_branch_id"></small>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="movementstatus">Status </label>
-                    <select class="form-control select2" id="movementstatus" name="movementstatus" style="width: 100%;" disabled>
-                        <option value="">Select Status</option>
-                        <?php foreach ($status as $row) : ?>
-                            <option value="<?= $row->getStatusId() ?>"><?= $row->getName() ?></option>
-                        <?php endforeach; ?>
-                    </select>
                 </div>
             </div>
             <div class="col-md-6">
@@ -67,6 +57,17 @@
                         <option value="">Select Division To</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_divisionto_id"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="movementstatus">Status </label>
+                    <select class="form-control select2" id="movementstatus" name="movementstatus" style="width: 100%;" <?= !$default_role ? "disabled" : "" ?>>
+                        <option value="">Select Status</option>
+                        <?php foreach ($status as $row) : ?>
+                            <option value="<?= $row->getStatusId() ?>"><?= $row->getName() ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
             <div class="col-md-6">
