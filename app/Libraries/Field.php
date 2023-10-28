@@ -251,12 +251,21 @@ class Field
             if (is_array($list) && count($list) > 0) {
                 $element .= '<option value=""></option>';
 
+                $field2 = str_replace(" ", "", $field2);
+                $field2 = explode(",", $field2);
+
                 foreach ($list as $row) :
+                    if (count($field2) == 1)
+                        $fieldName = $row->{$field2[0]};
+
+                    if (count($field2) == 2)
+                        $fieldName = $row->{$field2[0]} . " (" . $row->{$field2[1]} . ")";
+
                     // Check default value is not null and default value equal $field
-                    if (!empty($defaultValue) && ((is_string($defaultValue) && strtoupper($defaultValue) == strtoupper($row->$field2)) || ($defaultValue == $row->$field)))
-                        $element .= '<option value="' . $row->$field . '" selected>' . $row->$field2 . '</option>';
+                    if (!empty($defaultValue) && ((is_string($defaultValue) && strtoupper($defaultValue) == strtoupper($row->{$field2[0]})) || ($defaultValue == $row->$field)))
+                        $element .= '<option value="' . $row->$field . '" selected>' . $fieldName . '</option>';
                     else
-                        $element .= '<option value="' . $row->$field . '">' . $row->$field2 . '</option>';
+                        $element .= '<option value="' . $row->$field . '">' . $fieldName . '</option>';
                 endforeach;
             }
 
