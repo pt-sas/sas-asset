@@ -12,7 +12,8 @@ class ReferenceDocAction extends Seeder
             'created_by'    => 1,
             'updated_by'    => 1,
             'name'          => '_DocAction',
-            'description'   => 'Document Action Type list'
+            'description'   => 'Document Action Type list',
+            'validationtype' => 'L'
         ];
 
         $this->db->table('sys_reference')->insert($reference);
