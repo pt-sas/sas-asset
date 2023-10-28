@@ -14,7 +14,7 @@
                 <th>Branch</th>
                 <th>Division</th>
                 <th>Room</th>
-                <th>Description</th>
+                <th>Room Name</th>
                 <th>Employee</th>
                 <th>Spare</th>
             </tr>
