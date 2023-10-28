@@ -168,7 +168,25 @@ class Room extends BaseController
             $response = [];
 
             try {
-                if (!empty($post['reference'])) {
+                if (isset($post['search'])) {
+                    if (!empty($post['name'])) {
+                        $list = $this->model->where('isactive', 'Y')
+                            ->like('name', $post['search'])
+                            ->like('name', $post['name'])
+                            ->orderBy('name', 'ASC')
+                            ->findAll();
+                    } else {
+                        $list = $this->model->where('isactive', 'Y')
+                            ->like('name', $post['search'])
+                            ->orderBy('name', 'ASC')
+                            ->findAll();
+                    }
+                } else if (isset($post['name'])) {
+                    $list = $this->model->where('isactive', 'Y')
+                        ->like('name', $post['name'])
+                        ->orderBy('name', 'ASC')
+                        ->findAll();
+                } else if (!empty($post['reference'])) {
                     // condition post contain is numeric
                     if (preg_match('~[0-9]+~', $post['reference'])) {
                         if (isset($post['key']) && !empty($post['key'])) {
@@ -184,20 +202,6 @@ class Room extends BaseController
                                 'md_branch_id'  => $value->getBranchId()
                             ])->orderBy('name', 'ASC')->findAll();
                         }
-                    } else {
-                        if ($post['reference'] === 'IT') {
-                            /**
-                             * RM00039 => IT
-                             * RM00040 => RUANG IT - BARANG BAGUS
-                             * RM00041 => RUANG IT - BARANG RUSAK
-                             */
-                            $ROOM_IT = ['RM00039', 'RM00040'];
-
-                            $list = $this->model->where('isactive', 'Y')
-                                ->whereIn('value', $ROOM_IT)
-                                ->orderBy('name', 'ASC')
-                                ->findAll();
-                        }
                     }
                 } else {
                     $list = $this->model->where('isactive', 'Y')
@@ -207,7 +211,7 @@ class Room extends BaseController
 
                 foreach ($list as $key => $row) :
                     $response[$key]['id'] = $row->getRoomId();
-                    $response[$key]['text'] = $row->getName();
+                    $response[$key]['text'] = $row->getName() . " (" . $row->getDescription() . ")";
 
                     if (!empty($post['reference']) && preg_match('~[0-9]+~', $post['reference']) && !isset($post['key']))
                         $response[$key]['key'] = $value->getRoomId();
