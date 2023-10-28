@@ -86,12 +86,18 @@ class M_WScenario extends Model
 
 	public function getJoin()
 	{
-		$defaultID = 11;
+		/**
+		 * Reference List
+		 * 10 -> Disposal Type
+		 * 11 -> Movement Type
+		 */
+		$defaultID = [10, 11];
+
 		$sql = [
 			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
 			$this->setDataJoin('md_branch', 'md_branch.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
 			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_division_id', 'left'),
-			$this->setDataJoin('sys_ref_detail', 'sys_ref_detail.sys_reference_id = ' . $defaultID . ' AND sys_ref_detail.value = ' . $this->table . '.scenariotype', 'left')
+			$this->setDataJoin('sys_ref_detail', 'sys_ref_detail.sys_reference_id IN (' . implode(",", $defaultID) . ') AND sys_ref_detail.value = ' . $this->table . '.scenariotype', 'left')
 		];
 
 		return $sql;
@@ -112,31 +118,40 @@ class M_WScenario extends Model
 		$scenarioDetail->where($this->primaryKey, $rows['id'])->delete();
 	}
 
-	public function getScenario(string $menu, int $md_groupasset_id = null, int $md_status_id = null, int $md_branch_id = null, int $md_division_id = null, String $scenariotype = null)
+	public function getScenario(string $menu, int $md_groupasset_id = null, int $md_status_id = null, int $md_branch_id = null, int $md_division_id = null, string $scenariotype = null)
 	{
 		$this->builder->select('sys_wfscenario_id');
 		$this->builder->where('menu', $menu);
 
 		if (!is_null($md_groupasset_id)) {
 			$this->builder->where('md_groupasset_id', $md_groupasset_id);
+		} else {
+			$this->builder->where('md_groupasset_id IS NULL');
 		}
 
 		if (!is_null($md_status_id)) {
 			$this->builder->where('md_status_id', $md_status_id);
+		} else {
+			$this->builder->where('md_status_id IS NULL');
 		}
 
 		if (!is_null($md_branch_id)) {
 			$this->builder->where('md_branch_id', $md_branch_id);
+		} else {
+			$this->builder->where('md_branch_id IS NULL');
 		}
 
 		if (!is_null($md_division_id)) {
 			$this->builder->where('md_division_id', $md_division_id);
+		} else {
+			$this->builder->where('md_division_id IS NULL');
 		}
 
 		if (!is_null($scenariotype)) {
 			$this->builder->where('scenariotype', $scenariotype);
+		} else {
+			$this->builder->where('scenariotype IS NULL');
 		}
-
 
 		// if (!empty($grandtotal)) {
 		// 	$this->builder->where('grandtotal >=', $grandtotal);
