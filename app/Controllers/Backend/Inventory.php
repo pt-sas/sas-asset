@@ -180,11 +180,13 @@ class Inventory extends BaseController
                     $rowDivision = $division->find($list[0]->getDivisionId());
                     $rowRoom = $room->find($list[0]->getRoomId());
 
+                    $roomName = $rowRoom->getName() . " (" . $rowRoom->getDescription() . ")";
+
                     $list = $this->field->setDataSelect($product->table, $list, $product->primaryKey, $rowProduct->getProductId(), $rowProduct->getName());
                     $list = $this->field->setDataSelect($branch->table, $list, "branch_from", $rowBranch->getBranchId(), $rowBranch->getName());
                     $list = $this->field->setDataSelect($employee->table, $list, "employee_from", $rowEmployee->getEmployeeId(), $rowEmployee->getName());
                     $list = $this->field->setDataSelect($division->table, $list, "division_from", $rowDivision->getDivisionId(), $rowDivision->getName());
-                    $list = $this->field->setDataSelect($room->table, $list, "room_from", $rowRoom->getRoomId(), $rowRoom->getName());
+                    $list = $this->field->setDataSelect($room->table, $list, "room_from", $rowRoom->getRoomId(), $roomName);
 
                     $response = message('success', true, $list);
                 } else {

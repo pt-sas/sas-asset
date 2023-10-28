@@ -653,6 +653,8 @@ class Movement extends BaseController
                 //? Status is NEW ASSET 
                 if ($post['movementstatus'] == 100010)
                     $invWhere["isnew"] = "Y";
+                else
+                    $invWhere["isnew"] = "N";
 
                 //* Data Inventory 
                 $dataInventory = $inventory->where($invWhere)->orderBy('assetcode', 'ASC')->findAll();
@@ -746,6 +748,8 @@ class Movement extends BaseController
                 //? Status is NEW ASSET 
                 if ($move->getMovementStatus() == 100010)
                     $invWhere["isnew"] = "Y";
+                else
+                    $invWhere["isnew"] = "N";
 
                 //? Doesn't have Role W_View_All_Data
                 if ($dataEmpl && !$role) {
@@ -769,6 +773,8 @@ class Movement extends BaseController
                 //* Data Room To
                 $dataRoomTo = $room->where($roomWhere)->orderBy('name', 'ASC')->findAll();
 
+                $roomFrom = $valRoom->getName() . " (" . $valRoom->getDescription() . ")";
+
                 $table[] = [
                     $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', null, null, null, null, null, $row->trx_movement_detail_id),
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
@@ -781,7 +787,7 @@ class Movement extends BaseController
                     $this->field->fieldTable('select', null, 'branch_to', null, null, 'readonly', null, $dataBranch, $row->branch_to, 200, 'md_branch_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'division_from', null, 'required', 'readonly', null, null, $valDiv->getName(), 200),
                     $this->field->fieldTable('select', null, 'division_to', null, null, 'readonly', null, $dataDivision, $row->division_to, 200, 'md_division_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'room_from', null, 'required', 'readonly', null, null, $valRoom->getName(), 200),
+                    $this->field->fieldTable('input', 'text', 'room_from', null, 'required', 'readonly', null, null, $roomFrom, 200),
                     $this->field->fieldTable('select', null, 'room_to', 'updatable', 'required', null, null, $dataRoomTo, $row->room_to, 250, 'md_room_id', 'name, description'),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250)
                 ];

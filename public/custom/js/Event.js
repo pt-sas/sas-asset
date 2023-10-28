@@ -2138,7 +2138,7 @@ $("#form_movement").on(
     // Untuk mengakomodir kebutuhan divisi rusak 
     if (attrName === "md_divisionto_id" && ($(this).find("option:selected").text() === "HRD-RUSAK" || $(this).find("option:selected").text() === "IT-RUSAK")) {
       form.find("select[name=movementstatus]").val(null).change().attr("disabled", true);
-    } else {
+    } else if (setSave !== "detail") {
       form.find("select[name=movementstatus]").removeAttr("disabled", true);
     }
 
