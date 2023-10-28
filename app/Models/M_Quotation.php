@@ -24,7 +24,8 @@ class M_Quotation extends Model
 		'docreference',
 		'isfrom',
 		'md_groupasset_id',
-		'sys_wfscenario_id'
+		'sys_wfscenario_id',
+		'quotationtype'
 	];
 	protected $useTimestamps        = true;
 	protected $returnType 			= 'App\Entities\Quotation';

@@ -41,7 +41,7 @@ class WScenario extends BaseController
         $data = [
             'menu'      => $menu->getMenuUrl(),
             'ref_list' => $mRef->findBy(
-                "sys_reference.name IN ('MovementType','DisposalType') 
+                "sys_reference.name IN ('MovementType','DisposalType', 'QuotationType') 
                 AND sys_reference.isactive = 'Y' 
                 AND sys_ref_detail.isactive = 'Y'",
                 null,
@@ -269,7 +269,10 @@ class WScenario extends BaseController
             $trx = $this->model->find($trxID);
 
             if ($table === 'trx_quotation') {
-                $this->sys_wfscenario_id = $mWfs->getScenario($menu, $trx->getGroupAssetId(), $trx->getStatusId());
+                if (empty($trx->getQuotationType()))
+                    $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, $trx->getStatusId());
+                else
+                    $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, $trx->getStatusId(), null, null, $trx->getQuotationType());
 
                 if ($this->sys_wfscenario_id) {
                     $this->entity->setDocStatus($this->DOCSTATUS_Inprogress);
@@ -277,7 +280,6 @@ class WScenario extends BaseController
                     $isWfscenario = true;
                 } else {
                     $this->entity->setDocStatus($this->DOCSTATUS_Completed);
-                    $this->entity->setWfScenarioId(0);
                 }
             }
 

@@ -22,6 +22,7 @@ class Quotation extends Entity
 	protected $isfrom;
 	protected $md_groupasset_id;
 	protected $sys_wfscenario_id;
+	protected $quotationtype;
 
 	protected $dates   = [
 		'created_at',
@@ -197,5 +198,15 @@ class Quotation extends Entity
 	public function setWfScenarioId($sys_wfscenario_id)
 	{
 		$this->attributes['sys_wfscenario_id'] = $sys_wfscenario_id;
+	}
+
+	public function getQuotationType()
+	{
+		return $this->attributes['quotationtype'];
+	}
+
+	public function setQuotationType($quotationtype)
+	{
+		$this->attributes['quotationtype'] = $quotationtype;
 	}
 }

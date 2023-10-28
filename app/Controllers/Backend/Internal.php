@@ -127,9 +127,13 @@ class Internal extends BaseController
                 } else {
                     if (empty($post['md_supplier_id']))
                         unset($post['md_supplier_id']);
+                    else
+                        $this->entity->setQuotationType("INTERNAL");
 
                     if (empty($post['md_employee_id']))
                         unset($post['md_employee_id']);
+                    else
+                        $this->entity->setQuotationType("FREE");
 
                     $this->entity->fill($post);
                     $this->entity->setGrandTotal(arrSumField('lineamt', $table));

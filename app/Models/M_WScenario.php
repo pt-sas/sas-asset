@@ -90,8 +90,9 @@ class M_WScenario extends Model
 		 * Reference List
 		 * 10 -> Disposal Type
 		 * 11 -> Movement Type
+		 * 13 -> Quotation Type
 		 */
-		$defaultID = [10, 11];
+		$defaultID = [10, 11, 13];
 
 		$sql = [
 			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
@@ -126,31 +127,31 @@ class M_WScenario extends Model
 		if (!is_null($md_groupasset_id)) {
 			$this->builder->where('md_groupasset_id', $md_groupasset_id);
 		} else {
-			$this->builder->where('md_groupasset_id IS NULL');
+			$this->builder->where('md_groupasset_id IS NULL OR md_groupasset_id = 0');
 		}
 
 		if (!is_null($md_status_id)) {
 			$this->builder->where('md_status_id', $md_status_id);
 		} else {
-			$this->builder->where('md_status_id IS NULL');
+			$this->builder->where('md_status_id IS NULL OR md_status_id = 0');
 		}
 
 		if (!is_null($md_branch_id)) {
 			$this->builder->where('md_branch_id', $md_branch_id);
 		} else {
-			$this->builder->where('md_branch_id IS NULL');
+			$this->builder->where('md_branch_id IS NULL OR md_branch_id = 0');
 		}
 
 		if (!is_null($md_division_id)) {
 			$this->builder->where('md_division_id', $md_division_id);
 		} else {
-			$this->builder->where('md_division_id IS NULL');
+			$this->builder->where('md_division_id IS NULL OR md_division_id = 0');
 		}
 
 		if (!is_null($scenariotype)) {
 			$this->builder->where('scenariotype', $scenariotype);
 		} else {
-			$this->builder->where('scenariotype IS NULL');
+			$this->builder->where('scenariotype IS NULL OR scenariotype = 0');
 		}
 
 		// if (!empty($grandtotal)) {
