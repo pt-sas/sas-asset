@@ -2050,7 +2050,7 @@ $("#form_disposal").on("change", "#disposaltype", function (e) {
 
 $("#form_movement").on(
   "change",
-  "#md_branch_id, #movementtype, #md_branchto_id, #md_divisionto_id",
+  "#md_branch_id, #movementtype, #md_branchto_id, #md_divisionto_id, #movementstatus",
   function (evt) {
     const form = $(this).closest("form");
     const field = form.find("select");
@@ -2088,7 +2088,7 @@ $("#form_movement").on(
 
     // Untuk mengakomodir kebutuhan divisi rusak 
     if (attrName === "md_divisionto_id" && ($(this).find("option:selected").text() === "HRD-RUSAK" || $(this).find("option:selected").text() === "IT-RUSAK")) {
-      form.find("select[name=movementstatus]").attr("disabled", true).change(null);
+      form.find("select[name=movementstatus]").val(null).change().attr("disabled", true);
     } else {
       form.find("select[name=movementstatus]").removeAttr("disabled", true);
     }
@@ -2137,7 +2137,7 @@ $("#form_movement").on(
         if (
           attrName !== "movementtype" &&
           value !== "" &&
-          value != elem.option_ID &&
+          (typeof elem.option_ID !== "undefined" && value != elem.option_ID || typeof elem.label !== "undefined" && value != elem.label) &&
           _tableLine.data().any()
         ) {
           Swal.fire({
@@ -2154,10 +2154,17 @@ $("#form_movement").on(
               _tableLine.clear().draw(false);
               destroyAllLine("trx_movement_id", ID);
             } else {
-              form
-                .find("select[name=" + attrName + "]")
-                .val(elem.option_ID)
-                .change();
+              if (typeof elem.option_ID !== "undefined")
+                form
+                  .find("select[name=" + attrName + "]")
+                  .val(elem.option_ID)
+                  .change();
+
+              if (typeof elem.label !== "undefined")
+                form
+                  .find("select[name=" + attrName + "]")
+                  .val(elem.label)
+                  .change();
             }
           });
         }
