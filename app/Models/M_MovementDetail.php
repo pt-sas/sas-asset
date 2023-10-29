@@ -131,7 +131,7 @@ class M_MovementDetail extends Model
 			$valBranch = $branch->where('name', $row['branch_from'])->first();
 			$valEmp = $employee->where('name', $row['employee_from'])->first();
 			$valDiv = $division->where('name', $row['division_from'])->first();
-			$valRoom = $room->where('name', $row['room_from'])->first();
+			$valRoom = $room->where('name', replaceStrBracket($row['room_from']))->first();
 
 			$row['md_product_id'] = $valPro->getProductId();
 			$row['employee_from'] = $valEmp->getEmployeeId();
