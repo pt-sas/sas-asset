@@ -214,3 +214,14 @@ function array_orderby()
     call_user_func_array('array_multisort', $args);
     return array_pop($args);
 }
+
+/**
+ * Remove string in the bracket
+ *
+ * @param [type] $rupiah
+ * @return int
+ */
+function replaceStrBracket(string $str)
+{
+    return trim(preg_replace("[\(.*?\)]", "", $str));
+}
