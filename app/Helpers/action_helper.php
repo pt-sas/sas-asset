@@ -133,7 +133,7 @@ function notification($param)
  */
 function docStatus(string $str, string $type = null, ?int $total = 0, ?int $available = 0)
 {
-    if ($str === "IP" && is_null($type)) {
+    if ($str === "IP" && (is_null($type) || strtoupper($type) !== "TERIMA")) {
         $msg = '<center><span class="badge badge-info">In Progress</span></center>';
     } else if ($str === "VO") {
         $msg = '<center><span class="badge badge-secondary">Voided</span></center>';
