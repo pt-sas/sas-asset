@@ -116,7 +116,8 @@ class M_Receipt extends Model
 			'md_supplier.name as supplier,
             md_status.name as status,
 			sys_user.name as createdby,
-			md_employee.name as employee';
+			md_employee.name as employee,
+			trx_quotation.documentno as noreference';
 
 		return $sql;
 	}
@@ -127,7 +128,8 @@ class M_Receipt extends Model
 			$this->setDataJoin('md_supplier', 'md_supplier.md_supplier_id = ' . $this->table . '.md_supplier_id', 'left'),
 			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.md_status_id', 'left'),
 			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left'),
-			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left')
+			$this->setDataJoin('md_employee', 'md_employee.md_employee_id = ' . $this->table . '.md_employee_id', 'left'),
+			$this->setDataJoin('trx_quotation', 'trx_quotation.trx_quotation_id = ' . $this->table . '.trx_quotation_id', 'left')
 		];
 
 		return $sql;

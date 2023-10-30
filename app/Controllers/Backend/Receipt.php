@@ -75,6 +75,7 @@ class Receipt extends BaseController
                 $row[] = $ID;
                 $row[] = $number;
                 $row[] = $value->documentno;
+                $row[] = $value->noreference;
                 $row[] = format_dmy($value->receiptdate, '-');
                 $row[] = !empty($value->md_supplier_id) ? $value->supplier : $value->employee;
                 $row[] = $value->status;
