@@ -14,6 +14,7 @@
                 <th>Type</th>
                 <th>Reference No</th>
                 <th>Branch</th>
+                <th>Division</th>
                 <th>Branch To</th>
                 <th>Division To</th>
                 <th>Status</th>
