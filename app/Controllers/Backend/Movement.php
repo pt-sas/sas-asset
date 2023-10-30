@@ -314,14 +314,12 @@ class Movement extends BaseController
                                 $this->entity->setMovementStatus(100008); //TODO: Set movement status SAME DIVISION
                             } else if ($row->getBranchId() == 100001 && $row->getBranchId() == $row->getBranchToId() && $row->getDivisionId() != $row->getDivisionToId() && $row->getMovementStatus() != 100010) {
                                 $this->entity->setMovementStatus(100009); //TODO: Set movement status DIFFERENT DIVISION
+                            } else if ($row->getBranchId() == 100001 && $row->getBranchId() != $row->getBranchToId() && $row->getDivisionId() != $row->getDivisionToId() && $row->getMovementStatus() != 100010) {
+                                $this->entity->setMovementStatus(100009); //TODO: Set movement status DIFFERENT DIVISION
                             }
 
-                            // $response = $this->save();
-                            // $response = $this->entity;
                             $this->message = $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $_ID, $_DocAction, $menu, $this->session);
                             $response = message('success', true, $this->message);
-
-                            // $row = $this->model->find($_ID);
                         } else {
                             $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
                             $response = $this->save();
