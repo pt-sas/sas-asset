@@ -46,6 +46,7 @@ class M_Receipt extends Model
 		'', // Hide column
 		'', // Number column
 		'trx_receipt.documentno',
+		'trx_quotation.documentno',
 		'trx_receipt.receiptdate',
 		'md_supplier.name' || 'md_employee.name',
 		'md_status.name',
@@ -59,8 +60,10 @@ class M_Receipt extends Model
 	];
 	protected $column_search = [
 		'trx_receipt.documentno',
+		'trx_quotation.documentno',
 		'trx_receipt.receiptdate',
 		'md_supplier.name',
+		'md_employee.name',
 		'md_status.name',
 		'trx_receipt.docreference',
 		'trx_receipt.invoiceno',
