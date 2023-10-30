@@ -50,14 +50,14 @@ class M_Quotation extends Model
 	];
 	protected $column_search = [
 		'trx_quotation.documentno',
-		'trx_quotation.description',
 		'trx_quotation.quotationdate',
-		'trx_quotation.docstatus',
-		'trx_quotation.grandtotal',
-		'md_supplier.name' || 'md_employee.name',
+		'md_supplier.name',
+		'md_employee.name',
 		'md_status.name',
+		'trx_quotation.grandtotal',
+		'trx_quotation.docstatus',
 		'sys_user.name',
-		'md_employee.name'
+		'trx_quotation.description'
 	];
 	protected $order = ['created_at' => 'DESC'];
 	protected $request;
