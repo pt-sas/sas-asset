@@ -142,6 +142,7 @@ class Movement extends BaseController
                 $row[] = $value->move_type;
                 $row[] = $value->referenceno;
                 $row[] = $value->branch;
+                $row[] = $value->division;
                 $row[] = $value->branchto;
                 $row[] = $value->divisionto;
                 $row[] = $value->status;
@@ -277,6 +278,7 @@ class Movement extends BaseController
     {
         $inventory = new M_Inventory($this->request);
         $transaction = new M_Transaction();
+        $cWfs = new WScenario();
 
         if ($this->request->isAJAX()) {
             $post = $this->request->getVar();
@@ -293,6 +295,8 @@ class Movement extends BaseController
                     'docstatus <>'      => $this->DOCSTATUS_Voided
                 ])->first();
 
+                $menu = $this->request->uri->getSegment(2);
+
                 if (!empty($_DocAction)) {
                     if ($_DocAction === $row->getDocStatus()) {
                         $response = message('error', true, 'Please reload the Document');
@@ -300,115 +304,24 @@ class Movement extends BaseController
                         if ($line) {
                             $this->entity->setDocStatus($this->DOCSTATUS_Completed);
 
-                            //* Set movement status Internal Move 
                             if ($row->getBranchId() != 100001 && $row->getBranchId() == $row->getBranchToId()) {
-                                $this->entity->setMovementStatus(100008);
+                                $this->entity->setMovementStatus(100008); //TODO: Set movement status SAME DIVISION
+                            } else if ($row->getBranchId() != 100001 && $row->getBranchId() != $row->getBranchToId() && $row->getMovementStatus() != 100010) {
+                                $this->entity->setMovementStatus(100009); //TODO: Set movement status DIFFERENT DIVISION
                             }
 
-                            //* Set movement status Internal Move
                             if ($row->getBranchId() == 100001 && $row->getBranchId() == $row->getBranchToId() && $row->getDivisionId() == $row->getDivisionToId()) {
-                                $this->entity->setMovementStatus(100008);
+                                $this->entity->setMovementStatus(100008); //TODO: Set movement status SAME DIVISION
+                            } else if ($row->getBranchId() == 100001 && $row->getBranchId() == $row->getBranchToId() && $row->getDivisionId() != $row->getDivisionToId() && $row->getMovementStatus() != 100010) {
+                                $this->entity->setMovementStatus(100009); //TODO: Set movement status DIFFERENT DIVISION
                             }
 
-                            $response = $this->save();
+                            // $response = $this->save();
+                            // $response = $this->entity;
+                            $this->message = $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $_ID, $_DocAction, $menu, $this->session);
+                            $response = message('success', true, $this->message);
 
-                            $row = $this->model->find($_ID);
-
-                            if (empty($row->getMovementStatus())) {
-                                //* Passing data to table transaction
-                                $arrMoveIn = [];
-                                $arrMoveOut = [];
-                                foreach ($line as $key => $value) :
-                                    //? Data movement from
-                                    $arrOut = new stdClass();
-                                    $arrOut->assetcode = $value->assetcode;
-                                    $arrOut->md_product_id = $value->md_product_id;
-                                    $arrOut->md_employee_id = $value->employee_from;
-                                    $arrOut->md_room_id = $value->room_from;
-                                    $arrOut->transactiontype = $this->Movement_Out;
-                                    $arrOut->transactiondate = date("Y-m-d");
-                                    $arrOut->qtyentered = -1;
-                                    $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
-                                    $arrMoveOut[$key] = $arrOut;
-
-                                    //? Data movement to
-                                    $arrIn = new stdClass();
-                                    $room = new M_Room($this->request);
-                                    $transit = $room->where("name", "TRANSIT")->first();
-
-                                    $arrIn->assetcode = $value->assetcode;
-                                    $arrIn->md_product_id = $value->md_product_id;
-                                    $arrIn->md_employee_id = $value->employee_to;
-                                    $arrIn->md_branch_id = $value->branch_to;
-                                    $arrIn->md_division_id = $value->division_to;
-                                    $arrIn->md_room_id = $transit->md_room_id;
-                                    $arrIn->transactiontype = $this->Movement_In;
-                                    $arrIn->transactiondate = date("Y-m-d");
-                                    $arrIn->isnew = "N";
-                                    $arrIn->qtyentered = 1;
-                                    $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
-                                    $arrMoveIn[$key] = $arrIn;
-                                endforeach;
-
-                                $arrInv = (array) array_merge(
-                                    (array) $arrMoveIn
-                                );
-
-                                $arrData = (array) array_merge(
-                                    (array) $arrMoveOut,
-                                    (array) $arrMoveIn
-                                );
-
-                                $inventory->edit($arrInv);
-                                $transaction->create($arrData);
-
-                                $this->doMovementTerima($_ID, $_DocAction);
-                            } else {
-                                //* Passing data to table transaction
-                                $arrMoveIn = [];
-                                $arrMoveOut = [];
-                                foreach ($line as $key => $value) :
-                                    //? Data movement from
-                                    $arrOut = new stdClass();
-                                    $arrOut->assetcode = $value->assetcode;
-                                    $arrOut->md_product_id = $value->md_product_id;
-                                    $arrOut->md_employee_id = $value->employee_from;
-                                    $arrOut->md_room_id = $value->room_from;
-                                    $arrOut->transactiontype = $this->Movement_Out;
-                                    $arrOut->transactiondate = date("Y-m-d");
-                                    $arrOut->qtyentered = -1;
-                                    $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
-                                    $arrMoveOut[$key] = $arrOut;
-
-                                    //? Data movement to
-                                    $arrIn = new stdClass();
-
-                                    $arrIn->assetcode = $value->assetcode;
-                                    $arrIn->md_product_id = $value->md_product_id;
-                                    $arrIn->md_employee_id = $value->employee_to;
-                                    $arrIn->md_branch_id = $value->branch_to;
-                                    $arrIn->md_division_id = $value->division_to;
-                                    $arrIn->md_room_id = $value->room_to;
-                                    $arrIn->transactiontype = $this->Movement_In;
-                                    $arrIn->transactiondate = date("Y-m-d");
-                                    $arrIn->isnew = "N";
-                                    $arrIn->qtyentered = 1;
-                                    $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
-                                    $arrMoveIn[$key] = $arrIn;
-                                endforeach;
-
-                                $arrInv = (array) array_merge(
-                                    (array) $arrMoveIn
-                                );
-
-                                $arrData = (array) array_merge(
-                                    (array) $arrMoveOut,
-                                    (array) $arrMoveIn
-                                );
-
-                                $inventory->edit($arrInv);
-                                $transaction->create($arrData);
-                            }
+                            // $row = $this->model->find($_ID);
                         } else {
                             $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
                             $response = $this->save();
@@ -491,7 +404,7 @@ class Movement extends BaseController
         }
     }
 
-    private function doMovementTerima($_ID, $_DocAction)
+    public function doMovementTerima($_ID, $_DocAction, $createdby)
     {
         $changeLog = new M_ChangeLog($this->request);
         $cWfs = new WScenario();
@@ -504,16 +417,18 @@ class Movement extends BaseController
         $docNo = $this->model->getInvNumber($this->Movement_Terima, $movementDate);
 
         //TODO: Insert movement IMT 
-        $this->entity->setDocumentNo($docNo);
-        $this->entity->setRefMovementId($row->getMovementId());
-        $this->entity->setMovementDate($movementDate);
-        $this->entity->setMovementType($this->Movement_Terima);
-        $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-        $this->entity->setBranchId($row->getBranchToId());
-        $this->entity->setDivisionId($row->getDivisionToId());
-        $this->entity->setCreatedBy($this->access->getSessionUser());
-        $this->entity->setUpdatedBy($this->access->getSessionUser());
-        $this->model->save($this->entity);
+        $terimaEntity = new \App\Entities\Movement();
+        $terimaEntity->setDocumentNo($docNo);
+        $terimaEntity->setRefMovementId($row->getMovementId());
+        $terimaEntity->setMovementDate($movementDate);
+        $terimaEntity->setMovementType($this->Movement_Terima);
+        $terimaEntity->setDocStatus($this->DOCSTATUS_Drafted);
+        $terimaEntity->setBranchId($row->getBranchToId());
+        $terimaEntity->setDivisionId($row->getDivisionToId());
+        $terimaEntity->setMovementStatus($row->getMovementStatus());
+        $terimaEntity->setCreatedBy($createdby);
+        $terimaEntity->setUpdatedBy($createdby);
+        $this->model->save($terimaEntity);
 
         $insertID = $this->model->getInsertID();
 
@@ -524,9 +439,9 @@ class Movement extends BaseController
             //TODO: Insert batch movement detail 
             $dataInsert = $this->setField("trx_movement_id", $insertID, $detail);
             $dataInsert = $this->setField("ref_movement_detail_id", "ref_movement_detail_id", $detail, "trx_movement_detail_id");
-            $dataInsert = $this->setField($this->createdByField, $this->access->getSessionUser(), $detail);
+            $dataInsert = $this->setField($this->createdByField, $createdby, $detail);
             $dataInsert = $this->setField($this->createdField, date("Y-m-d H:i:s"), $detail);
-            $dataInsert = $this->setField($this->updatedByField, $this->access->getSessionUser(), $detail);
+            $dataInsert = $this->setField($this->updatedByField, $createdby, $detail);
             $dataInsert = $this->setField($this->updatedField, date("Y-m-d H:i:s"), $detail);
             $this->modelDetail->insertBatch($dataInsert);
 
@@ -538,26 +453,34 @@ class Movement extends BaseController
                 $changeLog->insertLog($this->modelDetail->table, $this->modelDetail->primaryKey, $new->{$this->modelDetail->primaryKey}, null, $new->{$this->modelDetail->primaryKey}, $this->EVENTCHANGELOG_Insert);
             endforeach;
 
-            //TODO: Set scenario 
-            $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $insertID, $_DocAction, $menu, $this->session);
+            $this->entity = new \App\Entities\Movement();
 
             //TODO: Update movement reference
             $this->entity->setDocumentNo($row->getDocumentNo());
-            $this->entity->setRefMovementId($this->model->getInsertID());
+            $this->entity->setRefMovementId($insertID);
             $this->entity->setMovementType($row->getMovementType());
             $this->entity->setBranchId($row->getBranchId());
+            $this->entity->setDivisionId($row->getDivisionId());
+            $this->entity->setBranchToId($row->getBranchToId());
+            $this->entity->setDivisionToId($row->getDivisionToId());
             $this->entity->setDocStatus($row->getDocStatus());
             $this->entity->setMovementId($row->getMovementId());
             $this->entity->setWfScenarioId($row->getWfScenarioId());
+            $this->entity->setMovementStatus($row->getMovementStatus());
             $this->entity->setCreatedBy($row->getCreatedBy());
+            $this->entity->setUpdatedBy($createdby);
             $this->save();
 
             //TODO: Update movement detail reference
             $dataUpdate = $this->setField("trx_movement_id", $_ID, $detail);
             $dataUpdate = $this->setField("ref_movement_detail_id", $newData, $detail, "trx_movement_detail_id");
-            $dataUpdate = $this->setField($this->updatedByField, $this->access->getSessionUser(), $detail);
+            $dataUpdate = $this->setField($this->updatedByField, $createdby, $detail);
             $dataUpdate = $this->setField($this->updatedField, date("Y-m-d H:i:s"), $detail);
             $this->modelDetail->updateBatch($dataUpdate, $this->modelDetail->primaryKey);
+
+            //TODO: Set scenario 
+            $this->session = Services::session();
+            $cWfs->setScenario($terimaEntity, $this->model, $this->modelDetail, $insertID, $_DocAction, $menu, $this->session);
         }
 
         return $insertID;

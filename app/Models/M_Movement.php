@@ -82,8 +82,9 @@ class M_Movement extends Model
 		$sql = $this->table . '.*,' .
 			'sys_user.name as createdby,
 			bfrom.name as branch,
+			dfrom.name as division,
 			bto.name as branchto,
-			md_division.name as divisionto,
+			dto.name as divisionto,
 			ref.documentno as referenceno,
 			sys_ref_detail.name as move_type,
 			md_status.name as status';
@@ -101,7 +102,8 @@ class M_Movement extends Model
 			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left'),
 			$this->setDataJoin('md_branch bfrom', 'bfrom.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
 			$this->setDataJoin('md_branch bto', 'bto.md_branch_id = ' . $this->table . '.md_branchto_id', 'left'),
-			$this->setDataJoin('md_division', 'md_division.md_division_id = ' . $this->table . '.md_divisionto_id', 'left'),
+			$this->setDataJoin('md_division dfrom', 'dfrom.md_division_id = ' . $this->table . '.md_division_id', 'left'),
+			$this->setDataJoin('md_division dto', 'dto.md_division_id = ' . $this->table . '.md_divisionto_id', 'left'),
 			$this->setDataJoin('md_status', 'md_status.md_status_id = ' . $this->table . '.movementstatus', 'left'),
 			$this->setDataJoin('sys_ref_detail', 'sys_ref_detail.sys_reference_id = ' . $defaultID . ' AND sys_ref_detail.value = ' . $this->table . '.movementtype', 'left')
 		];

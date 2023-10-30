@@ -233,6 +233,9 @@ class WActivity extends BaseController
 
                     $builder->where($this->getPrimaryKey($table), $record_id)->update($data);
                 } else {
+                    $inventory = new M_Inventory($this->request);
+                    $transaction = new M_Transaction();
+
                     $state = $this->DOCSTATUS_Completed;
                     $processed = true;
                     $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
@@ -264,7 +267,6 @@ class WActivity extends BaseController
                     $this->toForwardAlert('sys_wfresponsible', $sys_wfresponsible_id, $subject, $message);
 
                     if (isset($sql->movementtype) && $sql->movementtype === $this->Movement_Terima) {
-                        $transaction = new M_Transaction($this->request);
                         $room = new M_Room($this->request);
                         $mMoveDetail = new M_MovementDetail($this->request);
                         $mEmployee = new M_Employee($this->request);
@@ -306,9 +308,6 @@ class WActivity extends BaseController
                                     $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
                             }
                         endforeach;
-
-                        $inventory = new M_Inventory($this->request);
-                        $transaction = new M_Transaction();
 
                         foreach ($line as $key => $value) :
                             //? Data movement from
@@ -363,6 +362,115 @@ class WActivity extends BaseController
             $this->entity->setUpdatedBy($user_by);
             $this->entity->setWfActivityId($sys_wfactivity_id);
             $result = $this->save($this->entity);
+
+            if ($result) {
+                if (isset($sql->movementtype) && $sql->movementtype === $this->Movement_Kirim) {
+                    $mMoveDetail = new M_MovementDetail($this->request);
+                    $cMove = new Movement();
+
+                    $line = $mMoveDetail->where([
+                        "trx_movement_id"   => $sql->trx_movement_id
+                    ])->findAll();
+
+                    //? Status not SAME DIVISION
+                    if ($sql->movementstatus == 100009 || $sql->movementstatus == 100010) {
+                        //* Passing data to table transaction
+                        $arrMoveIn = [];
+                        $arrMoveOut = [];
+                        foreach ($line as $key => $value) :
+                            //? Data movement from
+                            $arrOut = new stdClass();
+                            $arrOut->assetcode = $value->assetcode;
+                            $arrOut->md_product_id = $value->md_product_id;
+                            $arrOut->md_employee_id = $value->employee_from;
+                            $arrOut->md_room_id = $value->room_from;
+                            $arrOut->transactiontype = $this->Movement_Out;
+                            $arrOut->transactiondate = date("Y-m-d");
+                            $arrOut->qtyentered = -1;
+                            $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
+                            $arrMoveOut[$key] = $arrOut;
+
+                            //? Data movement to
+                            $arrIn = new stdClass();
+                            $room = new M_Room($this->request);
+                            $transit = $room->where("name", "TRANSIT")->first();
+
+                            $arrIn->assetcode = $value->assetcode;
+                            $arrIn->md_product_id = $value->md_product_id;
+                            $arrIn->md_employee_id = $value->employee_to;
+                            $arrIn->md_branch_id = $value->branch_to;
+                            $arrIn->md_division_id = $value->division_to;
+                            $arrIn->md_room_id = $transit->md_room_id;
+                            $arrIn->transactiontype = $this->Movement_In;
+                            $arrIn->transactiondate = date("Y-m-d");
+                            $arrIn->isnew = "N";
+                            $arrIn->qtyentered = 1;
+                            $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
+                            $arrMoveIn[$key] = $arrIn;
+                        endforeach;
+
+                        $arrInv = (array) array_merge(
+                            (array) $arrMoveIn
+                        );
+
+                        $arrData = (array) array_merge(
+                            (array) $arrMoveOut,
+                            (array) $arrMoveIn
+                        );
+
+                        $inventory->edit($arrInv);
+                        $transaction->create($arrData);
+
+                        // unset($this->entity);
+                        $cMove->doMovementTerima($record_id, $this->DOCSTATUS_Completed, $user_by);
+                    } else {
+                        //* Passing data to table transaction
+                        $arrMoveIn = [];
+                        $arrMoveOut = [];
+                        foreach ($line as $key => $value) :
+                            //? Data movement from
+                            $arrOut = new stdClass();
+                            $arrOut->assetcode = $value->assetcode;
+                            $arrOut->md_product_id = $value->md_product_id;
+                            $arrOut->md_employee_id = $value->employee_from;
+                            $arrOut->md_room_id = $value->room_from;
+                            $arrOut->transactiontype = $this->Movement_Out;
+                            $arrOut->transactiondate = date("Y-m-d");
+                            $arrOut->qtyentered = -1;
+                            $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
+                            $arrMoveOut[$key] = $arrOut;
+
+                            //? Data movement to
+                            $arrIn = new stdClass();
+
+                            $arrIn->assetcode = $value->assetcode;
+                            $arrIn->md_product_id = $value->md_product_id;
+                            $arrIn->md_employee_id = $value->employee_to;
+                            $arrIn->md_branch_id = $value->branch_to;
+                            $arrIn->md_division_id = $value->division_to;
+                            $arrIn->md_room_id = $value->room_to;
+                            $arrIn->transactiontype = $this->Movement_In;
+                            $arrIn->transactiondate = date("Y-m-d");
+                            $arrIn->isnew = "N";
+                            $arrIn->qtyentered = 1;
+                            $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
+                            $arrMoveIn[$key] = $arrIn;
+                        endforeach;
+
+                        $arrInv = (array) array_merge(
+                            (array) $arrMoveIn
+                        );
+
+                        $arrData = (array) array_merge(
+                            (array) $arrMoveOut,
+                            (array) $arrMoveIn
+                        );
+
+                        $inventory->edit($arrInv);
+                        $transaction->create($arrData);
+                    }
+                }
+            }
         }
 
         return $result;

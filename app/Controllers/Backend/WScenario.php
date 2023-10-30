@@ -284,7 +284,11 @@ class WScenario extends BaseController
             }
 
             if ($table === 'trx_movement') {
-                $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, $trx->md_branch_id, $trx->md_division_id, $trx->getMovementType());
+                if ($trx->getMovementType() === $this->Movement_Kirim && $this->entity->getMovementStatus() == 100009)
+                    $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, null, null, $trx->getMovementType());
+
+                if ($trx->getMovementType() === $this->Movement_Terima)
+                    $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, $trx->getBranchId(), $trx->getDivisionId(), $trx->getMovementType());
 
                 if ($this->sys_wfscenario_id) {
                     $this->entity->setDocStatus($this->DOCSTATUS_Inprogress);
@@ -292,65 +296,114 @@ class WScenario extends BaseController
                     $isWfscenario = true;
                 } else {
                     $this->entity->setDocStatus($this->DOCSTATUS_Completed);
-                    $this->entity->setWfScenarioId(0);
 
                     $line = $this->modelDetail->where($primaryKey, $trxID)->findAll();
                     $inventory = new M_Inventory($this->request);
                     $transaction = new M_Transaction();
 
-                    $arrMoveIn = [];
-                    $arrMoveOut = [];
+                    //? Status not SAME DIVISION
+                    if ($trx->getMovementType() === $this->Movement_Kirim && ($this->entity->getMovementStatus() == 100009 || $this->entity->getMovementStatus() == 100010)) {
+                        $cMove = new Movement();
+                        //* Passing data to table transaction
+                        $arrMoveIn = [];
+                        $arrMoveOut = [];
+                        foreach ($line as $key => $value) :
+                            //? Data movement from
+                            $arrOut = new stdClass();
+                            $arrOut->assetcode = $value->assetcode;
+                            $arrOut->md_product_id = $value->md_product_id;
+                            $arrOut->md_employee_id = $value->employee_from;
+                            $arrOut->md_room_id = $value->room_from;
+                            $arrOut->transactiontype = $this->Movement_Out;
+                            $arrOut->transactiondate = date("Y-m-d");
+                            $arrOut->qtyentered = -1;
+                            $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
+                            $arrMoveOut[$key] = $arrOut;
 
-                    $data = [
-                        'isaccept'                  => "Y",
-                        'updated_at'                => date('Y-m-d H:i:s'),
-                        'updated_by'                => session()->get('sys_user_id')
-                    ];
+                            //? Data movement to
+                            $arrIn = new stdClass();
+                            $room = new M_Room($this->request);
+                            $transit = $room->where("name", "TRANSIT")->first();
 
-                    $this->modelDetail->builder->where($primaryKey, $trxID)->update($data);
+                            $arrIn->assetcode = $value->assetcode;
+                            $arrIn->md_product_id = $value->md_product_id;
+                            $arrIn->md_employee_id = $value->employee_to;
+                            $arrIn->md_branch_id = $value->branch_to;
+                            $arrIn->md_division_id = $value->division_to;
+                            $arrIn->md_room_id = $transit->md_room_id;
+                            $arrIn->transactiontype = $this->Movement_In;
+                            $arrIn->transactiondate = date("Y-m-d");
+                            $arrIn->isnew = "N";
+                            $arrIn->qtyentered = 1;
+                            $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
+                            $arrMoveIn[$key] = $arrIn;
+                        endforeach;
 
-                    foreach ($line as $key => $value) :
-                        //? Data movement from
-                        $arrOut = new stdClass();
-                        $room = new M_Room($this->request);
-                        $transit = $room->where("name", "TRANSIT")->first();
+                        $arrInv = (array) array_merge(
+                            (array) $arrMoveIn
+                        );
 
-                        $arrOut->assetcode = $value->assetcode;
-                        $arrOut->md_product_id = $value->md_product_id;
-                        $arrOut->md_employee_id = $value->employee_to;
-                        $arrOut->md_room_id = $transit->md_room_id;
-                        $arrOut->transactiontype = $this->Movement_Out;
-                        $arrOut->transactiondate = date("Y-m-d");
-                        $arrOut->qtyentered = -1;
-                        $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
-                        $arrMoveOut[$key] = $arrOut;
+                        $arrData = (array) array_merge(
+                            (array) $arrMoveOut,
+                            (array) $arrMoveIn
+                        );
 
-                        //? Data movement to
-                        $arrIn = new stdClass();
-                        $arrIn->assetcode = $value->assetcode;
-                        $arrIn->md_product_id = $value->md_product_id;
-                        $arrIn->md_employee_id = $value->employee_to;
-                        $arrIn->md_branch_id = $value->branch_to;
-                        $arrIn->md_division_id = $value->division_to;
-                        $arrIn->md_room_id = $value->room_to;
-                        $arrIn->transactiontype = $this->Movement_In;
-                        $arrIn->transactiondate = date("Y-m-d");
-                        $arrIn->qtyentered = 1;
-                        $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
-                        $arrMoveIn[$key] = $arrIn;
-                    endforeach;
+                        $inventory->edit($arrInv);
+                        $transaction->create($arrData);
+                    } else {
+                        //* Passing data to table transaction
+                        $arrMoveIn = [];
+                        $arrMoveOut = [];
+                        foreach ($line as $key => $value) :
+                            //? Data movement from
+                            $arrOut = new stdClass();
+                            $arrOut->assetcode = $value->assetcode;
+                            $arrOut->md_product_id = $value->md_product_id;
+                            $arrOut->md_employee_id = $value->employee_from;
+                            $arrOut->md_room_id = $value->room_from;
+                            $arrOut->transactiontype = $this->Movement_Out;
+                            $arrOut->transactiondate = date("Y-m-d");
+                            $arrOut->qtyentered = -1;
+                            $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
+                            $arrMoveOut[$key] = $arrOut;
 
-                    $arrInv = (array) array_merge(
-                        (array) $arrMoveIn
-                    );
+                            //? Data movement to
+                            $arrIn = new stdClass();
 
-                    $arrData = (array) array_merge(
-                        (array) $arrMoveOut,
-                        (array) $arrMoveIn
-                    );
+                            $arrIn->assetcode = $value->assetcode;
+                            $arrIn->md_product_id = $value->md_product_id;
+                            $arrIn->md_employee_id = $value->employee_to;
+                            $arrIn->md_branch_id = $value->branch_to;
+                            $arrIn->md_division_id = $value->division_to;
+                            $arrIn->md_room_id = $value->room_to;
+                            $arrIn->transactiontype = $this->Movement_In;
+                            $arrIn->transactiondate = date("Y-m-d");
+                            $arrIn->isnew = "N";
+                            $arrIn->qtyentered = 1;
+                            $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
+                            $arrMoveIn[$key] = $arrIn;
+                        endforeach;
 
-                    $inventory->edit($arrInv);
-                    $transaction->create($arrData);
+                        $arrInv = (array) array_merge(
+                            (array) $arrMoveIn
+                        );
+
+                        $arrData = (array) array_merge(
+                            (array) $arrMoveOut,
+                            (array) $arrMoveIn
+                        );
+
+                        $inventory->edit($arrInv);
+                        $transaction->create($arrData);
+
+                        $data = [
+                            'isaccept'                  => "Y",
+                            'updated_at'                => date('Y-m-d H:i:s'),
+                            'updated_by'                => session()->get('sys_user_id')
+                        ];
+
+                        $this->modelDetail->builder->where($primaryKey, $trxID)->update($data);
+                    }
                 }
             }
         }
@@ -358,6 +411,10 @@ class WScenario extends BaseController
         $this->entity->setUpdatedBy($session->get('sys_user_id'));
         $this->entity->{$primaryKey} = $trxID;
         $result = $this->model->save($this->entity);
+
+        if ($table === 'trx_movement' && $trx->getMovementType() === $this->Movement_Kirim && ($this->entity->getMovementStatus() == 100009 || $this->entity->getMovementStatus() == 100010) && !$isWfscenario) {
+            $cMove->doMovementTerima($trxID, $docStatus, $session->get('sys_user_id'));
+        }
 
         if ($result && $isWfscenario) {
             $result = $cWfa->setActivity(null, $this->sys_wfscenario_id, $this->getScenarioResponsible($this->sys_wfscenario_id), $sessionUserId, $this->DOCSTATUS_Suspended, false, null, $table, $trxID, $menu);

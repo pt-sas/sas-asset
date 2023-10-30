@@ -122,7 +122,10 @@ class M_WScenario extends Model
 	public function getScenario(string $menu, int $md_groupasset_id = null, int $md_status_id = null, int $md_branch_id = null, int $md_division_id = null, string $scenariotype = null)
 	{
 		$this->builder->select('sys_wfscenario_id');
-		$this->builder->where('menu', $menu);
+		$this->builder->where([
+			'menu' 		=> $menu,
+			'isactive'	=> 'Y'
+		]);
 
 		if (!is_null($md_groupasset_id)) {
 			$this->builder->where('md_groupasset_id', $md_groupasset_id);
