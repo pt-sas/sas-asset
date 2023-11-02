@@ -395,12 +395,14 @@ class BaseController extends Controller
 				$dataInsert = $data['insert'];
 
 				//TODO: Insert header data 
-				if (empty($this->getID()))
+				if (empty($this->getID())) {
 					$result = $this->model->save($obj);
+					$lastInsertID = $this->model->getInsertID();
+				}
 
 				//* Set Foreign Key Field from header table 
 				$foreignKey = $this->model->primaryKey;
-				$dataInsert = $this->doSetField($foreignKey, $this->getID(), $dataInsert);
+				$dataInsert = $this->doSetField($foreignKey, $lastInsertID, $dataInsert);
 
 				//* Set Created_By Field 
 				$dataInsert = $this->doSetField($this->createdByField, $this->access->getSessionUser(), $dataInsert);
@@ -410,7 +412,7 @@ class BaseController extends Controller
 
 				//* Old data line 
 				$lineId = [];
-				$oldData = $model->where($foreignKey, $this->getID())->findAll();
+				$oldData = $model->where($foreignKey, $lastInsertID)->findAll();
 
 				//? Check old data is exist
 				if ($oldData)
@@ -424,10 +426,10 @@ class BaseController extends Controller
 				if ($result > 0) {
 					//? Check data line
 					if (empty($lineId)) {
-						$newData = $model->where($foreignKey, $this->getID())->findAll();
+						$newData = $model->where($foreignKey, $lastInsertID)->findAll();
 					} else {
 						$newData = $model->whereNotIn($this->primaryKey, $lineId)
-							->where($foreignKey, $this->getID())
+							->where($foreignKey, $lastInsertID)
 							->findAll();
 					}
 
@@ -635,7 +637,10 @@ class BaseController extends Controller
 		$post = $this->request->getVar();
 
 		//? Check property id or object primaryKey
-		if (isset($post['id']) || isset($this->entity->{$this->primaryKey}))
+		if ((isset($post['id']) && isset($this->entity->{$this->primaryKey})) ||
+			isset($post['id']) ||
+			isset($this->entity->{$this->primaryKey})
+		)
 			return false;
 
 		return true;
@@ -650,12 +655,12 @@ class BaseController extends Controller
 		//* Get Request POST From View 
 		$post = $this->request->getVar();
 
-		//? Check property id 
-		if (isset($post['id'])) {
+		//? Check property berdasarkan id dan entity primaryKey
+		if (isset($post['id']) && isset($this->entity->{$this->primaryKey})) {
+			return $this->entity->{$this->primaryKey};
+		} else if (isset($post['id'])) { //? Property id
 			return $post['id'];
-		} else if (!empty($this->model->getInsertID())) {
-			return $this->model->getInsertID();
-		} else if (isset($this->entity->{$this->primaryKey})) {
+		} else if (isset($this->entity->{$this->primaryKey})) { //? Entity primaryKey
 			return $this->entity->{$this->primaryKey};
 		}
 
