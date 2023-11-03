@@ -318,6 +318,9 @@ class Movement extends BaseController
                                 $this->entity->setMovementStatus(100009); //TODO: Set movement status DIFFERENT DIVISION
                             }
 
+                            if ($row->getMovementStatus() == 100010)
+                                $this->entity->setMovementStatus($row->getMovementStatus()); //TODO: Set movement status NEW ASSET
+
                             $this->message = $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $_ID, $_DocAction, $menu, $this->session);
                             $response = message('success', true, $this->message);
                         } else {
@@ -414,28 +417,25 @@ class Movement extends BaseController
         $movementDate = $row->getMovementDate();
         $docNo = $this->model->getInvNumber($this->Movement_Terima, $movementDate);
 
-        //TODO: Insert movement IMT 
-        $terimaEntity = new \App\Entities\Movement();
-        $terimaEntity->setDocumentNo($docNo);
-        $terimaEntity->setRefMovementId($row->getMovementId());
-        $terimaEntity->setMovementDate($movementDate);
-        $terimaEntity->setMovementType($this->Movement_Terima);
-        $terimaEntity->setDocStatus($this->DOCSTATUS_Drafted);
-        $terimaEntity->setBranchId($row->getBranchToId());
-        $terimaEntity->setDivisionId($row->getDivisionToId());
-        $terimaEntity->setMovementStatus($row->getMovementStatus());
-        $terimaEntity->setCreatedBy($createdby);
-        $terimaEntity->setUpdatedBy($createdby);
-        $this->model->save($terimaEntity);
+        //TODO: Insert movement IMT
+        $this->entity->setDocumentNo($docNo);
+        $this->entity->setRefMovementId($row->getMovementId());
+        $this->entity->setMovementDate($movementDate);
+        $this->entity->setMovementType($this->Movement_Terima);
+        $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+        $this->entity->setBranchId($row->getBranchToId());
+        $this->entity->setDivisionId($row->getDivisionToId());
+        $this->entity->setMovementStatus($row->getMovementStatus());
+        $this->entity->setCreatedBy($createdby);
+        $this->entity->setUpdatedBy($createdby);
+        $this->isNewRecord = true;
+        $this->save();
 
-        $insertID = $this->model->getInsertID();
+        $movementID = $this->insertID;
 
-        if ($insertID > 0) {
-            //TODO: Insert Change Log IMT
-            $changeLog->insertLog($this->model->table, $this->model->primaryKey, $insertID, null, $insertID, $this->EVENTCHANGELOG_Insert);
-
-            //TODO: Insert batch movement detail 
-            $dataInsert = $this->setField("trx_movement_id", $insertID, $detail);
+        if ($movementID > 0) {
+            //TODO: Insert batch movement detail IMT
+            $dataInsert = $this->setField("trx_movement_id", $movementID, $detail);
             $dataInsert = $this->setField("ref_movement_detail_id", "ref_movement_detail_id", $detail, "trx_movement_detail_id");
             $dataInsert = $this->setField($this->createdByField, $createdby, $detail);
             $dataInsert = $this->setField($this->createdField, date("Y-m-d H:i:s"), $detail);
@@ -444,29 +444,24 @@ class Movement extends BaseController
             $this->modelDetail->insertBatch($dataInsert);
 
             //* Get list data movement detail 
-            $newData = $this->modelDetail->where($this->model->primaryKey, $insertID)->findAll();
+            $newData = $this->modelDetail->where($this->model->primaryKey, $movementID)->findAll();
 
             //TODO: Insert Change Log movement detail
             foreach ($newData as $new) :
                 $changeLog->insertLog($this->modelDetail->table, $this->modelDetail->primaryKey, $new->{$this->modelDetail->primaryKey}, null, $new->{$this->modelDetail->primaryKey}, $this->EVENTCHANGELOG_Insert);
             endforeach;
 
-            $this->entity = new \App\Entities\Movement();
+            //TODO: Set scenario for IMT
+            $this->session = Services::session();
+            $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $movementID, $_DocAction, $menu, $this->session);
+            unset($this->entity);
 
             //TODO: Update movement reference
-            $this->entity->setDocumentNo($row->getDocumentNo());
-            $this->entity->setRefMovementId($insertID);
-            $this->entity->setMovementType($row->getMovementType());
-            $this->entity->setBranchId($row->getBranchId());
-            $this->entity->setDivisionId($row->getDivisionId());
-            $this->entity->setBranchToId($row->getBranchToId());
-            $this->entity->setDivisionToId($row->getDivisionToId());
-            $this->entity->setDocStatus($row->getDocStatus());
-            $this->entity->setMovementId($row->getMovementId());
-            $this->entity->setWfScenarioId($row->getWfScenarioId());
-            $this->entity->setMovementStatus($row->getMovementStatus());
-            $this->entity->setCreatedBy($row->getCreatedBy());
+            $this->entity = new \App\Entities\Movement();
+            $this->entity->setRefMovementId($movementID);
             $this->entity->setUpdatedBy($createdby);
+            $this->entity->setMovementId($_ID);
+            $this->isNewRecord = false;
             $this->save();
 
             //TODO: Update movement detail reference
@@ -475,13 +470,9 @@ class Movement extends BaseController
             $dataUpdate = $this->setField($this->updatedByField, $createdby, $detail);
             $dataUpdate = $this->setField($this->updatedField, date("Y-m-d H:i:s"), $detail);
             $this->modelDetail->updateBatch($dataUpdate, $this->modelDetail->primaryKey);
-
-            //TODO: Set scenario 
-            $this->session = Services::session();
-            $cWfs->setScenario($terimaEntity, $this->model, $this->modelDetail, $insertID, $_DocAction, $menu, $this->session);
         }
 
-        return $insertID;
+        return $movementID;
     }
 
     public function destroyLine($id)
@@ -661,23 +652,6 @@ class Movement extends BaseController
                 //     $button = $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', null, null, null, null, null, $row->trx_movement_detail_id);
                 // }
 
-                //? Where clause inventory 
-                $invWhere['md_branch_id'] = $move->getBranchId();
-                $invWhere['isactive'] = 'Y';
-                $invOrWhere = [];
-
-                //? Status is NEW ASSET 
-                if ($move->getMovementStatus() == 100010)
-                    $invWhere["isnew"] = "Y";
-                else
-                    $invWhere["isnew"] = "N";
-
-                //? Doesn't have Role W_View_All_Data
-                if ($dataEmpl && !$role) {
-                    $invWhere["md_division_id"] = $move->getDivisionId();
-                    $invOrWhere["assetcode"] = $row->assetcode;
-                }
-
                 //? Where clause room to 
                 $roomWhere['isactive'] = 'Y';
                 if ($move->getMovementType() === $this->Movement_Terima)
@@ -685,25 +659,44 @@ class Movement extends BaseController
                 else
                     $roomWhere['md_branch_id'] = $move->getBranchToId();
 
-                //* Data Inventory 
-                if ($move->getDocStatus() !== $this->DOCSTATUS_Completed)
-                    $dataInventory = $inventory->where($invWhere)->orWhere($invOrWhere)->orderBy('assetcode', 'ASC')->findAll();
-                else
-                    $dataInventory = $inventory->orderBy('assetcode', 'ASC')->findAll();
-
                 //* Data Room To
                 $dataRoomTo = $room->where($roomWhere)->orderBy('name', 'ASC')->findAll();
 
                 $roomFrom = $valRoom->getName() . " (" . $valRoom->getDescription() . ")";
 
+                //? Doesn't have Role W_View_All_Data
+                if ($dataEmpl && !$role) {
+                    $invWhere["md_division_id"] = $move->getDivisionId();
+                    $invOrWhere["assetcode"] = $row->assetcode;
+                }
+
+                //? Where clause inventory 
+                $invWhere['md_branch_id'] = $move->getBranchId();
+                $invWhere['isactive'] = 'Y';
+                $invOrWhere = [];
+
+                if ($move->getDocStatus() === $this->DOCSTATUS_Drafted) {
+                    if ($move->getMovementStatus() == 100010)
+                        $invWhere["isnew"] = "Y";
+                    else
+                        $invWhere["isnew"] = "N";
+
+                    //* Data Inventory
+                    $dataInventory = $inventory->where($invWhere)->orWhere($invOrWhere)->orderBy('assetcode', 'ASC')->findAll();
+
+                    $fieldAsset = $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode');
+                } else {
+                    $fieldAsset = $this->field->fieldTable('input', 'text', 'assetcode', 'unique', 'required', null, null, null, $row->assetcode, 170);
+                }
+
                 $table[] = [
                     $this->field->fieldTable('button', 'button', 'trx_movement_detail_id', null, null, null, null, null, $row->trx_movement_detail_id),
-                    $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
+                    $fieldAsset,
                     $this->field->fieldTable('input', 'text', 'md_product_id', null, 'required', 'readonly', null, null, $valPro->getName(), 300),
                     $this->field->fieldTable('select', null, 'md_status_id', null, 'required', 'readonly', null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
                     $this->field->fieldTable('input', 'checkbox', 'isnew', null, null, 'readonly', $row->isnew === "Y" ? 'checked' : null),
                     $this->field->fieldTable('input', 'text', 'employee_from', null, 'required', 'readonly', null, null, $valEmp->getName(), 200),
-                    $this->field->fieldTable('select', null, 'employee_to', null, 'required', $row->status === 'RUSAK' ? 'readonly' : null, null, $dataEmployeeTo, $row->employee_to, 200, 'md_employee_id', 'name'),
+                    $this->field->fieldTable('select', null, 'employee_to', 'updatable', 'required', $row->status === 'RUSAK' ? 'readonly' : null, null, $dataEmployeeTo, $row->employee_to, 200, 'md_employee_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'branch_from', null, 'required', 'readonly', null, null, $valBranch->getName(), 200),
                     $this->field->fieldTable('select', null, 'branch_to', null, null, 'readonly', null, $dataBranch, $row->branch_to, 200, 'md_branch_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'division_from', null, 'required', 'readonly', null, null, $valDiv->getName(), 200),

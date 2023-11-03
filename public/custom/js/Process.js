@@ -4565,7 +4565,7 @@ $(".btn_ok_answer").click(function (evt) {
   let formData = new FormData(form[0]);
   let url = ADMIN_URL + "wactivity" + CREATE;
 
-  formData.append("id", ID);
+  formData.append("record_id", ID);
 
   $.ajax({
     url: url,
