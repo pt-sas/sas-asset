@@ -414,7 +414,7 @@ class Movement extends BaseController
         $row = $this->model->find($_ID);
         $detail = $this->modelDetail->where($this->model->primaryKey, $_ID)->findAll();
 
-        $movementDate = $row->getMovementDate();
+        $movementDate = date('Y-m-d');
         $docNo = $this->model->getInvNumber($this->Movement_Terima, $movementDate);
 
         //TODO: Insert movement IMT
