@@ -266,7 +266,7 @@ class WScenario extends BaseController
         } else if ($docStatus === $this->DOCSTATUS_Voided) {
             $this->entity->setDocStatus($this->DOCSTATUS_Voided);
         } else if ($trxLine && $docStatus === $this->DOCSTATUS_Completed) {
-            $trx = $this->model->find($trxID);
+            $trx = $this->model->find($trxID);;
 
             if ($table === 'trx_quotation') {
                 if (empty($trx->getQuotationType()))
@@ -284,11 +284,13 @@ class WScenario extends BaseController
             }
 
             if ($table === 'trx_movement') {
+                $menu = "movement";
+
                 if ($trx->getMovementType() === $this->Movement_Kirim && $this->entity->getMovementStatus() == 100009)
                     $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, null, null, $trx->getMovementType());
 
                 if ($trx->getMovementType() === $this->Movement_Terima)
-                    $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, $trx->getBranchId(), $trx->getDivisionId(), $trx->getMovementType());
+                    $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, $trx->getMovementStatus(), $trx->getBranchId(), $trx->getDivisionId(), $trx->getMovementType());
 
                 if ($this->sys_wfscenario_id) {
                     $this->entity->setDocStatus($this->DOCSTATUS_Inprogress);
@@ -301,9 +303,8 @@ class WScenario extends BaseController
                     $inventory = new M_Inventory($this->request);
                     $transaction = new M_Transaction();
 
-                    //? Status not SAME DIVISION
+                    //? Status not DIFFERENT DIVISION or NEW ASSETS
                     if ($trx->getMovementType() === $this->Movement_Kirim && ($this->entity->getMovementStatus() == 100009 || $this->entity->getMovementStatus() == 100010)) {
-                        $cMove = new Movement();
                         //* Passing data to table transaction
                         $arrMoveIn = [];
                         $arrMoveOut = [];
@@ -333,7 +334,7 @@ class WScenario extends BaseController
                             $arrIn->md_room_id = $transit->md_room_id;
                             $arrIn->transactiontype = $this->Movement_In;
                             $arrIn->transactiondate = date("Y-m-d");
-                            $arrIn->isnew = "N";
+                            $arrIn->isnew = "Y";
                             $arrIn->qtyentered = 1;
                             $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
                             $arrMoveIn[$key] = $arrIn;
@@ -369,7 +370,6 @@ class WScenario extends BaseController
 
                             //? Data movement to
                             $arrIn = new stdClass();
-
                             $arrIn->assetcode = $value->assetcode;
                             $arrIn->md_product_id = $value->md_product_id;
                             $arrIn->md_employee_id = $value->employee_to;
@@ -413,6 +413,7 @@ class WScenario extends BaseController
         $result = $this->model->save($this->entity);
 
         if ($table === 'trx_movement' && $trx->getMovementType() === $this->Movement_Kirim && ($this->entity->getMovementStatus() == 100009 || $this->entity->getMovementStatus() == 100010) && !$isWfscenario) {
+            $cMove = new Movement();
             $cMove->doMovementTerima($trxID, $docStatus, $session->get('sys_user_id'));
         }
 

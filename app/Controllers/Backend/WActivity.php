@@ -40,10 +40,12 @@ class WActivity extends BaseController
 
         $result = false;
 
-        foreach ($alert as $val) :
-            if (!empty($val->email))
-                $result = $cMail->sendEmail($val->email, $subject, $message, null, "SAS Asset");
-        endforeach;
+        if ($alert) {
+            foreach ($alert as $val) :
+                if (!empty($val->email))
+                    $result = $cMail->sendEmail($val->email, $subject, $message, null, "SAS Asset");
+            endforeach;
+        }
 
         return $result;
     }
@@ -117,7 +119,7 @@ class WActivity extends BaseController
             $result = $this->model->save($this->entity);
 
             $sys_wfactivity_id = $this->model->getInsertID();
-            $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+            $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
 
             $resp = $mWr->find($sys_wfresponsible_id);
             $list = $mUser->detail(['sr.sys_role_id' => $resp->getRoleId()])->getResult();
@@ -180,7 +182,7 @@ class WActivity extends BaseController
                 $newWfResponsibleId = $this->getNextResponsible();
                 $user_id = $mWr->getUserByResponsible($newWfResponsibleId);
 
-                $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by, true);
+                $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by, true);
 
                 $sys_wfresponsible_id = $newWfResponsibleId;
                 $user = $mUser->find($user_by);
@@ -195,7 +197,7 @@ class WActivity extends BaseController
                 if ($state === $this->DOCSTATUS_Completed && $processed) {
                     $state = $this->DOCSTATUS_Suspended;
                     $processed = false;
-                    $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+                    $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
                 }
 
                 $resp = $mWr->find($sys_wfresponsible_id);
@@ -225,7 +227,7 @@ class WActivity extends BaseController
                 $builder = $this->model->db->table($table);
 
                 if ($state === $this->DOCSTATUS_Aborted && $processed) {
-                    $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+                    $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
 
                     $data = [
                         'docstatus' => $this->DOCSTATUS_NotApproved
@@ -233,12 +235,9 @@ class WActivity extends BaseController
 
                     $builder->where($this->getPrimaryKey($table), $record_id)->update($data);
                 } else {
-                    $inventory = new M_Inventory($this->request);
-                    $transaction = new M_Transaction();
-
                     $state = $this->DOCSTATUS_Completed;
                     $processed = true;
-                    $s = $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+                    $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
 
                     $data = [
                         'docstatus' => $state
@@ -265,93 +264,6 @@ class WActivity extends BaseController
                     $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
 
                     $this->toForwardAlert('sys_wfresponsible', $sys_wfresponsible_id, $subject, $message);
-
-                    if (isset($sql->movementtype) && $sql->movementtype === $this->Movement_Terima) {
-                        $room = new M_Room($this->request);
-                        $mMoveDetail = new M_MovementDetail($this->request);
-                        $mEmployee = new M_Employee($this->request);
-
-                        $detail = $mMoveDetail->where([
-                            "isaccept"          => "N",
-                            "trx_movement_id"   => $sql->trx_movement_id
-                        ])->findAll();
-
-                        $dataUpdate = $this->setField("isaccept", "Y", $detail);
-                        $dataUpdate = $this->setField($this->updatedByField, $user_id, $detail);
-                        $dataUpdate = $this->setField($this->updatedField, date("Y-m-d H:i:s"), $detail);
-                        $mMoveDetail->updateBatch($dataUpdate, $mMoveDetail->primaryKey);
-
-                        $line = $mMoveDetail->where([
-                            "trx_movement_id"   => $sql->trx_movement_id
-                        ])->findAll();
-
-                        $listEmployee = [];
-                        foreach ($line as $val) :
-                            $listEmployee[] = $val->employee_from;
-                        endforeach;
-
-                        $listEmployee = array_unique($listEmployee);
-
-                        $list = $mEmployee->whereIn("md_employee_id", $listEmployee)->findAll();
-
-                        $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Sudah Di Terima.</span></p><div><br></div>';
-                        $message .= "-----" . " " . ucwords($menuName) . " ";
-
-                        $message = new Html2Text($message);
-                        $message = $message->getText();
-
-                        foreach ($list as $row) :
-                            if (!empty($row->sys_user_id)) {
-                                $user = $mUser->find($row->sys_user_id);
-
-                                if (!empty($user->email))
-                                    $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
-                            }
-                        endforeach;
-
-                        foreach ($line as $key => $value) :
-                            //? Data movement from
-                            $arrOut = new stdClass();
-                            $room = new M_Room($this->request);
-                            $transit = $room->where("name", "TRANSIT")->first();
-
-                            $arrOut->assetcode = $value->assetcode;
-                            $arrOut->md_product_id = $value->md_product_id;
-                            $arrOut->md_employee_id = $value->employee_to;
-                            $arrOut->md_room_id = $transit->md_room_id;
-                            $arrOut->transactiontype = $this->Movement_Out;
-                            $arrOut->transactiondate = date("Y-m-d");
-                            $arrOut->qtyentered = -1;
-                            $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
-                            $arrMoveOut[$key] = $arrOut;
-
-                            //? Data movement to
-                            $arrIn = new stdClass();
-                            $arrIn->assetcode = $value->assetcode;
-                            $arrIn->md_product_id = $value->md_product_id;
-                            $arrIn->md_employee_id = $value->employee_to;
-                            $arrIn->md_branch_id = $value->branch_to;
-                            $arrIn->md_division_id = $value->division_to;
-                            $arrIn->md_room_id = $value->room_to;
-                            $arrIn->transactiontype = $this->Movement_In;
-                            $arrIn->transactiondate = date("Y-m-d");
-                            $arrIn->qtyentered = 1;
-                            $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
-                            $arrMoveIn[$key] = $arrIn;
-                        endforeach;
-
-                        $arrInv = (array) array_merge(
-                            (array) $arrMoveIn
-                        );
-
-                        $arrData = (array) array_merge(
-                            (array) $arrMoveOut,
-                            (array) $arrMoveIn
-                        );
-
-                        $inventory->edit($arrInv);
-                        $transaction->create($arrData);
-                    }
                 }
             }
 
@@ -361,19 +273,107 @@ class WActivity extends BaseController
             $this->entity->setProcessed($processed);
             $this->entity->setUpdatedBy($user_by);
             $this->entity->setWfActivityId($sys_wfactivity_id);
-            $result = $this->save($this->entity);
+            $result = $this->model->save($this->entity);
 
-            if ($result) {
-                if (isset($sql->movementtype) && $sql->movementtype === $this->Movement_Kirim) {
-                    $mMoveDetail = new M_MovementDetail($this->request);
-                    $cMove = new Movement();
+            if ($this->entity->getState() === $this->DOCSTATUS_Completed && isset($sql->movementtype)) {
+                $inventory = new M_Inventory($this->request);
+                $transaction = new M_Transaction();
+                $mMoveDetail = new M_MovementDetail($this->request);
+                $cMove = new Movement();
+
+                if ($sql->movementtype === $this->Movement_Terima) {
+                    $mEmployee = new M_Employee($this->request);
+
+                    $detail = $mMoveDetail->where([
+                        "isaccept"          => "N",
+                        "trx_movement_id"   => $sql->trx_movement_id
+                    ])->findAll();
+
+                    $dataUpdate = $this->setField("isaccept", "Y", $detail);
+                    $dataUpdate = $this->setField($this->updatedByField, $user_id, $detail);
+                    $dataUpdate = $this->setField($this->updatedField, date("Y-m-d H:i:s"), $detail);
+                    $mMoveDetail->updateBatch($dataUpdate, $mMoveDetail->primaryKey);
 
                     $line = $mMoveDetail->where([
                         "trx_movement_id"   => $sql->trx_movement_id
                     ])->findAll();
 
-                    //? Status not SAME DIVISION
-                    if ($sql->movementstatus == 100009 || $sql->movementstatus == 100010) {
+                    $listEmployee = [];
+                    foreach ($line as $val) :
+                        $listEmployee[] = $val->employee_from;
+                    endforeach;
+
+                    $listEmployee = array_unique($listEmployee);
+
+                    $list = $mEmployee->whereIn("md_employee_id", $listEmployee)->findAll();
+
+                    $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Sudah Di Terima.</span></p><div><br></div>';
+                    $message .= "-----" . " " . ucwords($menuName) . " ";
+
+                    $message = new Html2Text($message);
+                    $message = $message->getText();
+
+                    foreach ($list as $row) :
+                        if (!empty($row->sys_user_id)) {
+                            $user = $mUser->find($row->sys_user_id);
+
+                            if (!empty($user->email))
+                                $cMail->sendEmail($user->email, $subject, $message, null, "SAS Asset");
+                        }
+                    endforeach;
+
+                    foreach ($line as $key => $value) :
+                        //? Data movement from
+                        $arrOut = new stdClass();
+                        $mRoom = new M_Room($this->request);
+                        $transit = $mRoom->where("name", "TRANSIT")->first();
+
+                        $arrOut->assetcode = $value->assetcode;
+                        $arrOut->md_product_id = $value->md_product_id;
+                        $arrOut->md_employee_id = $value->employee_to;
+                        $arrOut->md_room_id = $transit->md_room_id;
+                        $arrOut->transactiontype = $this->Movement_Out;
+                        $arrOut->transactiondate = date("Y-m-d");
+                        $arrOut->qtyentered = -1;
+                        $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
+                        $arrMoveOut[$key] = $arrOut;
+
+                        //? Data movement to
+                        $arrIn = new stdClass();
+                        $arrIn->assetcode = $value->assetcode;
+                        $arrIn->md_product_id = $value->md_product_id;
+                        $arrIn->md_employee_id = $value->employee_to;
+                        $arrIn->md_branch_id = $value->branch_to;
+                        $arrIn->md_division_id = $value->division_to;
+                        $arrIn->md_room_id = $value->room_to;
+                        $arrIn->transactiontype = $this->Movement_In;
+                        $arrIn->transactiondate = date("Y-m-d");
+                        $arrIn->isnew = "Y";
+                        $arrIn->qtyentered = 1;
+                        $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
+                        $arrMoveIn[$key] = $arrIn;
+                    endforeach;
+
+                    $arrInv = (array) array_merge(
+                        (array) $arrMoveIn
+                    );
+
+                    $arrData = (array) array_merge(
+                        (array) $arrMoveOut,
+                        (array) $arrMoveIn
+                    );
+
+                    $inventory->edit($arrInv);
+                    $transaction->create($arrData);
+                }
+
+                if ($sql->movementtype === $this->Movement_Kirim) {
+                    $line = $mMoveDetail->where([
+                        "trx_movement_id"   => $sql->trx_movement_id
+                    ])->findAll();
+
+                    //? Status not DIFFERENT DIVISION
+                    if ($sql->movementstatus == 100009) {
                         //* Passing data to table transaction
                         $arrMoveIn = [];
                         $arrMoveOut = [];
@@ -421,53 +421,7 @@ class WActivity extends BaseController
                         $inventory->edit($arrInv);
                         $transaction->create($arrData);
 
-                        // unset($this->entity);
                         $cMove->doMovementTerima($record_id, $this->DOCSTATUS_Completed, $user_by);
-                    } else {
-                        //* Passing data to table transaction
-                        $arrMoveIn = [];
-                        $arrMoveOut = [];
-                        foreach ($line as $key => $value) :
-                            //? Data movement from
-                            $arrOut = new stdClass();
-                            $arrOut->assetcode = $value->assetcode;
-                            $arrOut->md_product_id = $value->md_product_id;
-                            $arrOut->md_employee_id = $value->employee_from;
-                            $arrOut->md_room_id = $value->room_from;
-                            $arrOut->transactiontype = $this->Movement_Out;
-                            $arrOut->transactiondate = date("Y-m-d");
-                            $arrOut->qtyentered = -1;
-                            $arrOut->trx_movement_detail_id = $value->trx_movement_detail_id;
-                            $arrMoveOut[$key] = $arrOut;
-
-                            //? Data movement to
-                            $arrIn = new stdClass();
-
-                            $arrIn->assetcode = $value->assetcode;
-                            $arrIn->md_product_id = $value->md_product_id;
-                            $arrIn->md_employee_id = $value->employee_to;
-                            $arrIn->md_branch_id = $value->branch_to;
-                            $arrIn->md_division_id = $value->division_to;
-                            $arrIn->md_room_id = $value->room_to;
-                            $arrIn->transactiontype = $this->Movement_In;
-                            $arrIn->transactiondate = date("Y-m-d");
-                            $arrIn->isnew = "N";
-                            $arrIn->qtyentered = 1;
-                            $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
-                            $arrMoveIn[$key] = $arrIn;
-                        endforeach;
-
-                        $arrInv = (array) array_merge(
-                            (array) $arrMoveIn
-                        );
-
-                        $arrData = (array) array_merge(
-                            (array) $arrMoveOut,
-                            (array) $arrMoveIn
-                        );
-
-                        $inventory->edit($arrInv);
-                        $transaction->create($arrData);
                     }
                 }
             }
@@ -486,7 +440,7 @@ class WActivity extends BaseController
         if ($this->request->getMethod(true) === 'POST') {
             $post = $this->request->getVar();
             $isAnswer = $post['isanswer'];
-            $_ID = $post['id'];
+            $_ID = $post['record_id'];
             $txtMsg = $post['textmsg'];
 
             try {
