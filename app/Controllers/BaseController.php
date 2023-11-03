@@ -158,6 +158,13 @@ class BaseController extends Controller
 	protected $allowedFields = [];
 
 	/**
+	 * Integer of field for get last insert id after insert
+	 *
+	 * @var int
+	 */
+	protected $insertID = 0;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param RequestInterface  $request
@@ -298,12 +305,13 @@ class BaseController extends Controller
 					$ok = $this->saveBatch('update', $this->modelDetail, $newV, $arrLine);
 			} else {
 				$ok = $this->model->save($newV);
+				$this->insertID = $this->model->getInsertID();
 			}
 
 			if ($ok) {
 				if ($newRecord) {
 					//TODO: Insert Change Log Header
-					$changeLog->insertLog($modelTable, $this->model->primaryKey, $this->getID(), null, $this->getID(), $this->EVENTCHANGELOG_Insert);
+					$changeLog->insertLog($modelTable, $this->model->primaryKey, $this->insertID, null, $this->insertID, $this->EVENTCHANGELOG_Insert);
 
 					$this->message = notification("insert");
 				} else {
@@ -397,12 +405,12 @@ class BaseController extends Controller
 				//TODO: Insert header data 
 				if (empty($this->getID())) {
 					$result = $this->model->save($obj);
-					$lastInsertID = $this->model->getInsertID();
+					$this->insertID = $this->model->getInsertID();
 				}
 
 				//* Set Foreign Key Field from header table 
 				$foreignKey = $this->model->primaryKey;
-				$dataInsert = $this->doSetField($foreignKey, $lastInsertID, $dataInsert);
+				$dataInsert = $this->doSetField($foreignKey, $this->insertID, $dataInsert);
 
 				//* Set Created_By Field 
 				$dataInsert = $this->doSetField($this->createdByField, $this->access->getSessionUser(), $dataInsert);
@@ -412,7 +420,7 @@ class BaseController extends Controller
 
 				//* Old data line 
 				$lineId = [];
-				$oldData = $model->where($foreignKey, $lastInsertID)->findAll();
+				$oldData = $model->where($foreignKey, $this->insertID)->findAll();
 
 				//? Check old data is exist
 				if ($oldData)
@@ -426,10 +434,10 @@ class BaseController extends Controller
 				if ($result > 0) {
 					//? Check data line
 					if (empty($lineId)) {
-						$newData = $model->where($foreignKey, $lastInsertID)->findAll();
+						$newData = $model->where($foreignKey, $this->insertID)->findAll();
 					} else {
 						$newData = $model->whereNotIn($this->primaryKey, $lineId)
-							->where($foreignKey, $lastInsertID)
+							->where($foreignKey, $this->insertID)
 							->findAll();
 					}
 
