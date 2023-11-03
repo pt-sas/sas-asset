@@ -316,6 +316,8 @@ class Movement extends BaseController
                                 $this->entity->setMovementStatus(100009); //TODO: Set movement status DIFFERENT DIVISION
                             } else if ($row->getBranchId() == 100001 && $row->getBranchId() != $row->getBranchToId() && $row->getDivisionId() != $row->getDivisionToId() && $row->getMovementStatus() != 100010) {
                                 $this->entity->setMovementStatus(100009); //TODO: Set movement status DIFFERENT DIVISION
+                            } else if ($row->getBranchId() == 100001 && $row->getBranchId() != $row->getBranchToId() && $row->getMovementStatus() != 100010) {
+                                $this->entity->setMovementStatus(100009); //TODO: Set movement status DIFFERENT DIVISION
                             }
 
                             if ($row->getMovementStatus() == 100010)
