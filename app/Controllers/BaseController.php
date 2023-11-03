@@ -165,6 +165,13 @@ class BaseController extends Controller
 	protected $insertID = 0;
 
 	/**
+	 * Boolean of field for identification record is new or update
+	 *
+	 * @var boolean
+	 */
+	protected $isNewRecord = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param RequestInterface  $request
@@ -645,11 +652,13 @@ class BaseController extends Controller
 		$post = $this->request->getVar();
 
 		//? Check property id or object primaryKey
-		if ((isset($post['id']) && isset($this->entity->{$this->primaryKey})) ||
-			isset($post['id']) ||
-			isset($this->entity->{$this->primaryKey})
-		)
+		if (((isset($post['id']) && isset($this->entity->{$this->primaryKey})) ||
+				isset($post['id']) ||
+				isset($this->entity->{$this->primaryKey}))
+			&& !$this->isNewRecord
+		) {
 			return false;
+		}
 
 		return true;
 	}
@@ -664,12 +673,13 @@ class BaseController extends Controller
 		$post = $this->request->getVar();
 
 		//? Check property berdasarkan id dan entity primaryKey
-		if (isset($post['id']) && isset($this->entity->{$this->primaryKey})) {
+		if ((isset($post['id']) && isset($this->entity->{$this->primaryKey}) ||
+				isset($this->entity->{$this->primaryKey}))
+			&& !$this->isNewRecord
+		) {
 			return $this->entity->{$this->primaryKey};
-		} else if (isset($post['id'])) { //? Property id
+		} else if (isset($post['id']) && !$this->isNewRecord) { //? Property id
 			return $post['id'];
-		} else if (isset($this->entity->{$this->primaryKey})) { //? Entity primaryKey
-			return $this->entity->{$this->primaryKey};
 		}
 
 		return 0;
