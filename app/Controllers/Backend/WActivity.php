@@ -72,7 +72,11 @@ class WActivity extends BaseController
                     $node = 'Approval ' . ucwords($menuName);
 
                     $trx = $this->model->getDataTrx($table, $record_id);
-                    $summary = ucwords($menuName) . ' ' . $trx->documentno . ': ' . $trx->usercreated_by;
+
+                    if ($trx)
+                        $summary = ucwords($menuName) . ' ' . $trx->documentno . ': ' . $trx->usercreated_by;
+                    else
+                        $summary = ucwords($menuName);
 
                     $row[] = $ID;
                     $row[] = $record_id;
