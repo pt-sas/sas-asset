@@ -287,7 +287,7 @@ class WScenario extends BaseController
                 $menu = "movement";
 
                 if ($trx->getMovementType() === $this->Movement_Kirim && $this->entity->getMovementStatus() == 100009)
-                    $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, null, null, $trx->getMovementType());
+                    $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, $trx->getBranchId(), $trx->getDivisionId(), $trx->getMovementType());
 
                 if ($trx->getMovementType() === $this->Movement_Terima)
                     $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, $trx->getMovementStatus(), $trx->getBranchId(), $trx->getDivisionId(), $trx->getMovementType());
