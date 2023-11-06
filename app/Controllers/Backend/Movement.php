@@ -579,10 +579,10 @@ class Movement extends BaseController
 
                 if ($post['md_branchto_id'] == 100001) {
                     //? Division To HRD-RUSAK - Santy-HRD
-                    if ($post['md_divisionto_id'] == 100023) {
+                    if ($post['md_divisionto_id'] == 100024) {
                         $empWhere['md_employee_id'] = 100193;
                         $status = "RUSAK";
-                    } else if ($post['md_divisionto_id'] == 100024) { //? Division To IT-RUSAK - Wempy-IT
+                    } else if ($post['md_divisionto_id'] == 100023) { //? Division To IT-RUSAK - Wempy-IT
                         $empWhere['md_employee_id'] = 100180;
                         $status = "RUSAK";
                     } else {
@@ -633,9 +633,9 @@ class Movement extends BaseController
                 //? Spesific Division from Branch To Sunter
                 if ($move->getBranchToId() == 100001) {
                     //? Division To HRD-RUSAK - Santy-HRD
-                    if ($move->getDivisionToId() == 100023)
+                    if ($move->getDivisionToId() == 100024)
                         $empWhere['md_employee_id'] = 100193;
-                    else if ($move->getDivisionToId() == 100024) //? Division To IT-RUSAK - Wempy-IT
+                    else if ($move->getDivisionToId() == 100023) //? Division To IT-RUSAK - Wempy-IT
                         $empWhere['md_employee_id'] = 100180;
                     else
                         $empWhere['md_division_id'] = $row->division_to;
