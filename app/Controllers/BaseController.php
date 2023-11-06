@@ -413,6 +413,8 @@ class BaseController extends Controller
 				if (empty($this->getID())) {
 					$result = $this->model->save($obj);
 					$this->insertID = $this->model->getInsertID();
+				} else {
+					$this->insertID = $this->getID();
 				}
 
 				//* Set Foreign Key Field from header table 
