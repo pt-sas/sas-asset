@@ -3,8 +3,8 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
+use App\Models\M_Barcode;
 use App\Models\M_Inventory;
-use TCPDF;
 use Config\Services;
 
 class Rpt_Barcode extends BaseController
@@ -84,86 +84,13 @@ class Rpt_Barcode extends BaseController
 
     public function print()
     {
+        $cBarcode = new Barcode();
+
         $post = $this->request->getPost();
+        $data = json_decode($post['assetcode']);
 
-        $width = 300;
-        $height = 95;
-        $pageLayout = array($width, $height); //  or array($height, $width) 
-        $pdf = new TCPDF('l', 'pt', $pageLayout, true, 'UTF-8', false);
-
-        // remove default header/footer
-        $pdf->setPrintHeader(false);
-        $pdf->setPrintFooter(false);
-
-        // set default monospaced font
-        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-        // set auto page breaks
-        $pdf->SetMargins(PDF_MARGIN_LEFT - 15, PDF_MARGIN_TOP - 29, PDF_MARGIN_RIGHT - 16);
-
-        // set auto page breaks
-        $pdf->SetAutoPageBreak(TRUE, 0);
-
-        // set image scale factor
-        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-        // set some language-dependent strings (optional)
-        if (@file_exists(dirname(__FILE__) . '/lang/eng.php')) {
-            require_once(dirname(__FILE__) . '/lang/eng.php');
-            $pdf->setLanguageArray($l);
-        }
-
-        // add a page
-        $pdf->AddPage();
-
-        $pdf->SetFont('helvetica', '', 10);
-
-        // set style for barcode
-        $style = array(
-            'border' => false,
-            'vpadding' => 'auto',
-            'hpadding' => 'auto',
-            'fgcolor' => array(0, 0, 0),
-            'bgcolor' => false, //array(255,255,255)
-            'module_width' => 1, // width of a single module in points
-            'module_height' => 1, // height of a single module in points
-        );
-
-        $list = json_decode($post['assetcode']);
-
-        foreach ($list as $key => $value) :
-            if ($key % 2 == 0) {
-                $pdf->write2DBarcode($value, 'QRCODE,L', 20, -5, 100, 100, $style, 'N');
-                $pdf->StartTransform();
-                $pdf->Rotate(90, 130, 90);
-                $pdf->Text(strlen($value) > 14 ? 127 : 135, 80, $value);
-                $pdf->StopTransform();
-            } else {
-                $pdf->write2DBarcode($value, 'QRCODE,L', 170, -5, 100, 100, $style, 'N');
-                $pdf->StartTransform();
-                $pdf->Rotate(90, 280, 90);
-                $pdf->Text(strlen($value) > 14 ? 277 : 285, 80, $value);
-                $pdf->StopTransform();
-
-                $key += 1;
-                $totalData = count($list);
-
-                if ($key < $totalData)
-                    $pdf->AddPage();
-            }
-        endforeach;
-
-        $path = FCPATH . 'uploads/';
-
-        if (!is_dir($path))
-            mkdir($path);
-
-        $fileName = 'qrcode_' . date('YmdHis') . '.pdf';
-
-        $pdf->Output($path . $fileName, 'F');
-
+        $fileName = $cBarcode->getLabelAsset($data);
         $path = base_url('uploads') . '/' . $fileName;
-
         return json_encode($path);
     }
 }
