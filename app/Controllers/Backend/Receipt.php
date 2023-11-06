@@ -18,6 +18,8 @@ use App\Models\M_Inventory;
 use App\Models\M_Room;
 use App\Models\M_Quotation;
 use App\Models\M_QuotationDetail;
+use App\Models\M_User;
+use Html2Text\Html2Text;
 use Config\Services;
 
 class Receipt extends BaseController
@@ -229,9 +231,13 @@ class Receipt extends BaseController
 
                     $response = $this->save();
 
-                    //? True and Not From internal 
-                    if ($response && $row->getIsInternalUse() === 'N' && $row->getStatusId() == 100000)
-                        $this->createDepreciation($row);
+                    if ($response) {
+                        $this->toForwardBarcode($_ID);
+
+                        //? True and Not From internal 
+                        if ($row->getIsInternalUse() === 'N' && $row->getStatusId() == 100000)
+                            $this->createDepreciation($row);
+                    }
                 } else if (empty($_DocAction)) {
                     $response = message('error', true, 'Please Choose the Document Action first');
                 } else {
@@ -709,5 +715,42 @@ class Receipt extends BaseController
         endforeach;
 
         return $arrDetail;
+    }
+
+    private function toForwardBarcode($id)
+    {
+        $cBarcode = new Barcode();
+        $cMail = new Mail();
+        $mUser = new M_User($this->request);
+
+        $assetCode = [];
+
+        $row = $this->model->find($id);
+        $line = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
+        $menu = $this->request->uri->getSegment(2);
+
+        foreach ($line as $val) {
+            if (isset($val->assetcode))
+                $assetCode[] = $val->assetcode;
+        }
+
+        $path = $cBarcode->getLabelAsset($assetCode);
+
+        $user = $mUser->detail([
+            "sr.name"       => "W_Admin_Print_Barcode",
+            "sr.isactive"   => "Y"
+        ])->getResult();
+
+        $subject = ucwords($menu) . "_" . $row->getDocumentNo();
+        $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please print the attached barcode.</span></p><div><br></div>';
+        $attach = FCPATH . 'uploads/' . $path;
+
+        $message = new Html2Text($message);
+        $message = $message->getText();
+
+        foreach ($user as $val) {
+            if (!empty($val->email))
+                $cMail->sendEmail($val->email, $subject, $message, null, "SAS Asset", $attach);
+        }
     }
 }

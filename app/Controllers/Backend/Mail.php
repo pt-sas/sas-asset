@@ -126,7 +126,8 @@ class Mail extends BaseController
         if ($email->send()) {
             $data = true;
         } else {
-            $data = $email->printDebugger(['headers']);
+            $data = false;
+            log_message('error', $email->printDebugger(['headers']));
         }
 
         return $data;
