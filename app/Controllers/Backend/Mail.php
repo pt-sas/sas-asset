@@ -99,7 +99,7 @@ class Mail extends BaseController
         }
     }
 
-    public function sendEmail($to, $subject, $message, $from = null, $yourName = null)
+    public function sendEmail($to, $subject, $message, $from = null, $yourName = null, $attach = null)
     {
         $row = $this->model->first();
 
@@ -111,12 +111,25 @@ class Mail extends BaseController
         if (is_null($yourName))
             $yourName = $row->getSmtpUser();
 
+        if (!is_null($attach)) {
+            $email->clear(true);
+            $email->attach($attach);
+        } else {
+            $email->clear();
+        }
+
         $email->setFrom($from, $yourName);
         $email->setTo($to);
         $email->setSubject($subject);
         $email->setMessage($message);
 
-        return $email->send();
+        if ($email->send()) {
+            $data = true;
+        } else {
+            $data = $email->printDebugger(['headers']);
+        }
+
+        return $data;
     }
 
     private function initializeEmail()
