@@ -737,9 +737,9 @@ class Validation
         ],
         'md_divisionto_id'          => [
             'label'                 => 'Division To',
-            'rules'                 => 'required',
+            'rules'                 => 'required_based_field_value[movementtype, KIRIM]',
             'errors'                => [
-                'required'  => 'Please Choose the {field} first.'
+                'required_based_field_value'  => 'Please Choose the {field} first.'
             ]
         ],
         'line'                      => [
