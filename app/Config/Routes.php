@@ -191,6 +191,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('receipt/getSeqCode', 'Backend\Receipt::getSeqCode');
     $routes->get('receipt/processIt', 'Backend\Receipt::processIt');
     $routes->match(['get', 'post'], 'receipt/getDetailQuotation', 'Backend\Receipt::getDetailQuotation');
+    $routes->match(['get', 'post'], 'receipt/getList', 'Backend\Receipt::getList');
 
     $routes->add('status', 'Backend\Status::index');
     $routes->match(['get', 'post'], 'status/showAll', 'Backend\Status::showAll');
