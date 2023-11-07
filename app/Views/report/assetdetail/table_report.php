@@ -13,7 +13,7 @@
                 <th>Branch</th>
                 <th>Division</th>
                 <th>Room</th>
-                <th>Description</th>
+                <th>Room Name</th>
                 <th>Employee</th>
                 <th>Unit Price</th>
                 <th>Date Inventory</th>
