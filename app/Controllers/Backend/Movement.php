@@ -183,10 +183,6 @@ class Movement extends BaseController
                 if (!$this->validation->run($post, 'movement')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())->first();
-
-                    $division_id = $employee ? $employee->getDivisionId() : 100022;
-
                     if (empty($post['ref_movement_id']))
                         unset($post['ref_movement_id']);
 
@@ -194,7 +190,6 @@ class Movement extends BaseController
                         unset($post['movementstatus']);
 
                     $this->entity->fill($post);
-                    $this->entity->setDivisionId($division_id);
 
                     //* Insert data
                     if ($this->isNew()) {
@@ -202,6 +197,10 @@ class Movement extends BaseController
 
                         $docNo = $this->model->getInvNumber($post['movementtype'], $post['movementdate']);
                         $this->entity->setDocumentNo($docNo);
+
+                        $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())->first();
+                        $division_id = $employee ? $employee->getDivisionId() : 100022;
+                        $this->entity->setDivisionId($division_id);
                     }
 
                     $response = $this->save();
