@@ -132,9 +132,9 @@ class Product extends BaseController
                 }
 
                 if (!empty($list[0]->getVariantId())) {
-                    $rowVariant = $type->getListVariant($variant->table . '.' . $variant->primaryKey, $list[0]->getVariantId())->getRow();
+                    $rowVariant = $variant->find($list[0]->getVariantId());
 
-                    $list = $this->field->setDataSelect($variant->table, $list, $variant->primaryKey, $rowVariant->md_type_id, $rowVariant->name . '_' . $rowVariant->subcategory);
+                    $list = $this->field->setDataSelect($variant->table, $list, $variant->primaryKey, $rowVariant->getVariantId(), $rowVariant->getName());
                 }
 
                 $result = [
