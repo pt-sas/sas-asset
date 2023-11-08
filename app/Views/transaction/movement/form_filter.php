@@ -6,6 +6,13 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
+                                <select class="form-control select-movementtype" name="movementtype">
+                                    <option value="0">All Movement Type</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
                                 <div class="input-icon">
                                     <input type="text" class="form-control daterange" name="movementdate" value="<?= $date_range ?>" placeholder="Date">
                                     <span class="input-icon-addon">
