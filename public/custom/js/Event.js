@@ -1394,7 +1394,7 @@ $(document).ready(function (e) {
     minimumInputLength: 2,
     ajax: {
       dataType: "JSON",
-      url: ADMIN_URL + "inventory/getAssetCode",
+      url: ADMIN_URL + "inventory/getList",
       delay: 250,
       data: function (params) {
         return {
@@ -1417,7 +1417,7 @@ $(document).ready(function (e) {
     minimumInputLength: 2,
     ajax: {
       dataType: "JSON",
-      url: ADMIN_URL + "inventory/getAssetCode",
+      url: ADMIN_URL + "inventory/getList",
       delay: 250,
       data: function (params) {
         return {
@@ -1426,7 +1426,6 @@ $(document).ready(function (e) {
         };
       },
       processResults: function (data, page) {
-        console.log(data);
         return {
           results: data,
         };
@@ -1442,7 +1441,7 @@ $(document).ready(function (e) {
     multiple: true,
     ajax: {
       dataType: "JSON",
-      url: ADMIN_URL + "inventory/getAssetCode",
+      url: ADMIN_URL + "inventory/getList",
       delay: 250,
       data: function (params) {
         return {
@@ -1540,6 +1539,29 @@ $(document).ready(function (e) {
         return {
           search: params.term,
           name: "MovementType",
+        };
+      },
+      processResults: function (data, page) {
+        return {
+          results: data,
+        };
+      },
+      cache: true,
+    },
+  });
+
+  $(".select-movementno").select2({
+    placeholder: "Select an option",
+    width: "100%",
+    theme: "bootstrap",
+    minimumInputLength: 2,
+    ajax: {
+      dataType: "JSON",
+      url: ADMIN_URL + "movement/getList",
+      delay: 250,
+      data: function (params) {
+        return {
+          search: params.term,
         };
       },
       processResults: function (data, page) {
