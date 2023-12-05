@@ -7,7 +7,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <div class="input-icon">
-                                    <input type="text" class="form-control daterange" name="receiptdate" value="<?= $date_range ?>" placeholder="Date">
+                                    <input type="text" class="form-control daterange" name="receiptdate" placeholder="Date">
                                     <span class="input-icon-addon">
                                         <i class="fas fa-calendar-alt"></i>
                                     </span>
