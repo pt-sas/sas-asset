@@ -307,7 +307,7 @@ class WScenario extends BaseController
                     $inventory = new M_Inventory($this->request);
                     $transaction = new M_Transaction();
 
-                    //? Status not DIFFERENT DIVISION or NEW ASSETS
+                    //? Status DIFFERENT DIVISION or NEW ASSETS
                     if ($trx->getMovementType() === $this->Movement_Kirim && ($this->entity->getMovementStatus() == 100009 || $this->entity->getMovementStatus() == 100010)) {
                         //* Passing data to table transaction
                         $arrMoveIn = [];

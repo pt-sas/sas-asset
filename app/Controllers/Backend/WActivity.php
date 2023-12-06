@@ -352,7 +352,7 @@ class WActivity extends BaseController
                         $arrIn->md_room_id = $value->room_to;
                         $arrIn->transactiontype = $this->Movement_In;
                         $arrIn->transactiondate = date("Y-m-d");
-                        $arrIn->isnew = "Y";
+                        $arrIn->isnew = "N";
                         $arrIn->qtyentered = 1;
                         $arrIn->trx_movement_detail_id = $value->trx_movement_detail_id;
                         $arrMoveIn[$key] = $arrIn;
