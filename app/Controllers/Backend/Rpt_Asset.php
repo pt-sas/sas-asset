@@ -3,6 +3,7 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
+use App\Models\M_Branch;
 use App\Models\M_Employee;
 use App\Models\M_Inventory;
 use Config\Services;
@@ -17,21 +18,21 @@ class Rpt_Asset extends BaseController
 
     public function index()
     {
-        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
+        $mEmpl = new M_Employee($this->request);
+        $mBranch = new M_Branch($this->request);
 
-        $employee = null;
+        $data = [];
 
-        if (empty($role)) {
-            $mEmpl = new M_Employee($this->request);
+        $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())->first();
+        $branch = $mBranch->where("md_branch_id", $employee->getBranchId())->first();
+        $roleViewAll = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
+        $roleViewMgrAll = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Mgr_Data');
 
-            $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())
-                ->orderBy('name', 'ASC')
-                ->first();
-        }
+        if (empty($roleViewAll) && empty($roleViewMgrAll))
+            $data["employee"] = $employee;
 
-        $data = [
-            'employee' => $employee
-        ];
+        if (empty($roleViewAll) && $roleViewMgrAll)
+            $data["branch"] = $branch;
 
         return $this->template->render('report/asset/v_asset', $data);
     }

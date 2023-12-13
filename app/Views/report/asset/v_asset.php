@@ -44,8 +44,11 @@
         <div class="form-group row">
             <label for="md_branch_id" class="col-lg-3 col-md-3 col-sm-4 mt-sm-2 text-right">Branch </label>
             <div class="col-lg-6 col-md-9 col-sm-8">
-                <select class="form-control select-branch" name="md_branch_id">
+                <select class="form-control select-branch" name="md_branch_id" <?= isset($branch) ? "disabled" : "" ?>>
                     <option value="">Select Branch</option>
+                    <?php if (isset($branch)) : ?>
+                        <option value="<?= $branch->getBranchId() ?>" selected><?= $branch->getName() ?></option>
+                    <?php endif; ?>
                 </select>
             </div>
         </div>
@@ -64,8 +67,8 @@
         <div class="form-group row">
             <label for="md_employee_id" class="col-lg-3 col-md-3 col-sm-4 mt-sm-2 text-right">Employee </label>
             <div class="col-lg-6 col-md-9 col-sm-8 select2-input select2-primary">
-                <select class="form-control multiple-select-employee" name="md_employee_id" <?= $employee ? "disabled" : "" ?>>
-                    <?php if ($employee) : ?>
+                <select class="form-control multiple-select-employee" name="md_employee_id" <?= isset($employee) ? "disabled" : "" ?>>
+                    <?php if (isset($employee)) : ?>
                         <option value="<?= $employee->getEmployeeId() ?>" selected><?= $employee->getName() ?></option>
                     <?php endif; ?>
                 </select>

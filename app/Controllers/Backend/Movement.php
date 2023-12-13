@@ -43,7 +43,7 @@ class Movement extends BaseController
         $start_date = date('Y-m-d', strtotime('- 1 days'));
         $end_date = date('Y-m-d');
 
-        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_Move_All_Data');
         $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())
             ->orderBy('name', 'ASC')
             ->first();
@@ -97,7 +97,7 @@ class Movement extends BaseController
 
             $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())->first();
 
-            //? Check is user exist role W_View_All_Movement 
+            //? Check is user exist role W_View_All_Movement
             if (!$this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data')) {
                 $arrMove = $this->model->getColumnArr($this->model->primaryKey);
                 $arrLine = $this->modelDetail->getEmployeeToArr($this->model->primaryKey, $arrMove, $employee->getEmployeeId(), $this->model->primaryKey);
@@ -111,6 +111,8 @@ class Movement extends BaseController
                 } else {
                     $where['trx_movement.created_by'] = $this->access->getSessionUser();
                 }
+
+                $where['trx_movement.md_branch_id'] = $employee->getBranchId();
             }
 
             $data = [];
@@ -524,8 +526,8 @@ class Movement extends BaseController
         $post = $this->request->getVar();
         $uri = $this->request->uri->getSegment(2);
 
-        //! Get data role W_View_All_Data
-        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
+        //! Get data role W_Move_All_Data
+        $role = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_Move_All_Data');
 
         //! Get data Employee based on sys_user_id login 
         $dataEmpl = $employee->where("sys_user_id", $this->access->getSessionUser())
@@ -559,7 +561,7 @@ class Movement extends BaseController
                 $invWhere["md_branch_id"] = $post["md_branch_id"];
                 $invWhere['isactive'] = 'Y';
 
-                //? Doesn't have Role W_View_All_Data
+                //? Doesn't have Role W_Move_All_Data
                 if ($dataEmpl && !$role)
                     $invWhere["md_division_id"] = $dataEmpl->getDivisionId();
 
@@ -665,7 +667,7 @@ class Movement extends BaseController
 
                 $roomFrom = $valRoom->getName() . " (" . $valRoom->getDescription() . ")";
 
-                //? Doesn't have Role W_View_All_Data
+                //? Doesn't have Role W_Move_All_Data
                 if ($dataEmpl && !$role) {
                     $invWhere["md_division_id"] = $move->getDivisionId();
                     $invOrWhere["assetcode"] = $row->assetcode;
