@@ -24,7 +24,10 @@ class Rpt_Asset extends BaseController
         $data = [];
 
         $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())->first();
-        $branch = $mBranch->where("md_branch_id", $employee->getBranchId())->first();
+
+        if (isset($employee))
+            $branch = $mBranch->where("md_branch_id", $employee->getBranchId())->first();
+
         $roleViewAll = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
         $roleViewMgrAll = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Mgr_Data');
 
