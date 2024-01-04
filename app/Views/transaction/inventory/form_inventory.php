@@ -2,11 +2,17 @@
     <form class="form-horizontal" id="form_inventory">
         <?= csrf_field(); ?>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <div class="form-group">
                     <label for="assetcode">Asset Code <span class="required">*</span></label>
                     <input type="text" class="form-control" id="assetcode" name="assetcode">
                     <small class="form-text text-danger" id="error_assetcode"></small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="numberplate">License Plate </label>
+                    <input type="text" class="form-control" id="numberplate" name="numberplate">
                 </div>
             </div>
             <div class="col-md-6">

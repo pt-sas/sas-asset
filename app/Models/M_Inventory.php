@@ -47,6 +47,7 @@ class M_Inventory extends Model
 		'', // Hide column
 		'', // Number column
 		'trx_inventory.assetcode',
+		'trx_inventory.numberplate',
 		'md_product.name',
 		'trx_inventory.inventorydate',
 		'trx_inventory.unitprice',
@@ -60,6 +61,7 @@ class M_Inventory extends Model
 	];
 	protected $column_search	= [
 		'trx_inventory.assetcode',
+		'trx_inventory.numberplate',
 		'md_product.name',
 		'trx_inventory.inventorydate',
 		'trx_inventory.unitprice',

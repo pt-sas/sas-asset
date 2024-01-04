@@ -10,6 +10,7 @@
                 <th>ID</th>
                 <th>No</th>
                 <th>Asset Code</th>
+                <th>License Plate</th>
                 <th>Product</th>
                 <th>Date</th>
                 <th>Unit Price</th>

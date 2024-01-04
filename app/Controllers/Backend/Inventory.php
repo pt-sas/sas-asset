@@ -62,6 +62,7 @@ class Inventory extends BaseController
                 $row[] = $ID;
                 $row[] = $number;
                 $row[] = $value->assetcode;
+                $row[] = $value->numberplate;
                 $row[] = $value->product;
                 $row[] = format_dmy($value->inventorydate, '-');
                 $row[] = formatRupiah($value->unitprice);
