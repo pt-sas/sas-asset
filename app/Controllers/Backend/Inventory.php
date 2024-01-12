@@ -72,6 +72,7 @@ class Inventory extends BaseController
                 $row[] = $value->employee;
                 $row[] = $value->status;
                 $row[] = active($value->isspare);
+                $row[] = $value->description;
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;

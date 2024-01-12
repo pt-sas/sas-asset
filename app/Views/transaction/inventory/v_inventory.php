@@ -20,6 +20,7 @@
                 <th>Employee</th>
                 <th>Status</th>
                 <th>Spare</th>
+                <th>Description</th>
                 <th>Active</th>
                 <th>Actions</th>
             </tr>

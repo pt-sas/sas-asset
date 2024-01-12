@@ -95,6 +95,13 @@
                     <small class="form-text text-danger" id="error_unitprice"></small>
                 </div>
             </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="description">Description </label>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="col-md-6"></div>
             <div class="col-md-1">
                 <div class="form-check">
                     <label class="form-check-label">

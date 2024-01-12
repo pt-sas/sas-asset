@@ -32,7 +32,8 @@ class M_Inventory extends Model
 		'created_by',
 		'updated_by',
 		'numberplate',
-		'isnew'
+		'isnew',
+		'description'
 	];
 	protected $useTimestamps	= true;
 	protected $allowCallbacks	= true;
@@ -57,6 +58,7 @@ class M_Inventory extends Model
 		'md_employee.name',
 		'md_status.name',
 		'trx_inventory.isspare',
+		'trx_inventory.description',
 		'trx_inventory.isactive'
 	];
 	protected $column_search	= [
@@ -71,6 +73,7 @@ class M_Inventory extends Model
 		'md_employee.name',
 		'md_status.name',
 		'trx_inventory.isspare',
+		'trx_inventory.description',
 		'trx_inventory.isactive'
 	];
 	protected $order			= ['assetcode' => 'ASC'];
