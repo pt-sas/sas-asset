@@ -64,10 +64,11 @@ class Rpt_AssetDetail extends BaseController
                     $row[] = $value->branch;
                     $row[] = $value->division;
                     $row[] = $value->room;
-                    $row[] = $value->description;
+                    $row[] = $value->room_desc;
                     $row[] = $value->employee;
                     $row[] = formatRupiah($value->unitprice);
                     $row[] = format_dmy($value->inventorydate, '-');
+                    $row[] = $value->description;
                     $row[] = active($value->isactive);
                     $row[] = active($value->isspare);
                     $data[] = $row;
