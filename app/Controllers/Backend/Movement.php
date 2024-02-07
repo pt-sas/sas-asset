@@ -349,7 +349,7 @@ class Movement extends BaseController
                                 //? Data movement to
                                 $arrOut = new stdClass();
 
-                                if ($row->getDocStatus === $this->DOCSTATUS_NotApproved && $row->getMovementType() === $this->Movement_Terima) {
+                                if ($row->getDocStatus() === $this->DOCSTATUS_NotApproved && $row->getMovementType() === $this->Movement_Terima) {
                                     $room = new M_Room($this->request);
                                     $transit = $room->where("name", "TRANSIT")->first();
                                     $arrOut->md_room_id = $transit->md_room_id;
@@ -384,16 +384,15 @@ class Movement extends BaseController
                                 $arrMoveIn[$key] = $arrIn;
                             endforeach;
 
-                            $arrInv = (array) array_merge(
-                                (array) $arrMoveIn
-                            );
+                            if ($row->getMovementType() === $this->Movement_Kirim) {
+                                $arrInv = (array) $arrMoveIn;
+                                $inventory->edit($arrInv);
 
-                            $arrData = (array) array_merge(
-                                (array) $arrMoveOut,
-                                (array) $arrMoveIn
-                            );
+                                $arrData = (array) $arrMoveIn;
+                            } else if ($row->getMovementType() === $this->Movement_Terima) {
+                                $arrData = (array) $arrMoveOut;
+                            }
 
-                            $inventory->edit($arrInv);
                             $transaction->create($arrData);
                         }
                     }
