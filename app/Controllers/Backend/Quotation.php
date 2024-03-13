@@ -333,7 +333,10 @@ class Quotation extends BaseController
                         $bp = $row->employee;
 
                     $response[$key]['id'] = $row->trx_quotation_id;
-                    $response[$key]['text'] = $row->documentno . ' - ' . $bp . ' - ' . format_dmy($row->quotationdate, '/') . ' - ' . $row->grandtotal;
+                    if ($bp)
+                        $response[$key]['text'] = $row->documentno . ' - ' . $bp . ' - ' . format_dmy($row->quotationdate, '/') . ' - ' . $row->grandtotal;
+                    else
+                        $response[$key]['text'] = $row->documentno . ' - ' . format_dmy($row->quotationdate, '/') . ' - ' . $row->grandtotal;
                 endforeach;
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());

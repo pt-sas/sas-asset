@@ -168,9 +168,7 @@ class Receipt extends BaseController
 
                     //* Field Supplier
                     $list = $this->field->setDataSelect($supplier->table, $list, $supplier->primaryKey, $rowSupplier->getSupplierId(), $rowSupplier->getName());
-                }
-
-                if (!empty($list[0]->getEmployeeId())) {
+                } else if (!empty($list[0]->getEmployeeId())) {
                     $rowEmployee = $employee->find($list[0]->getEmployeeId());
 
                     //* Field Quotation
@@ -178,6 +176,9 @@ class Receipt extends BaseController
                     $list = $this->field->setDataSelect($quotation->table, $list, $quotation->primaryKey, $rowQuotation->trx_quotation_id, $textQuot);
 
                     $list = $this->field->setDataSelect($employee->table, $list, $employee->primaryKey, $rowEmployee->getEmployeeId(), $rowEmployee->getName());
+                } else {
+                    $textQuot = $rowQuotation->documentno . ' - ' . format_dmy($rowQuotation->quotationdate, '/') . ' - ' . $rowQuotation->grandtotal;
+                    $list = $this->field->setDataSelect($quotation->table, $list, $quotation->primaryKey, $rowQuotation->trx_quotation_id, $textQuot);
                 }
 
                 $result = [
@@ -685,7 +686,11 @@ class Receipt extends BaseController
                         $strDate = strtotime($year);
                     }
 
-                    $increment = $i - 1;
+                    if ($currDate > $dateCO && $currentMonth == 01)
+                        $increment = $i;
+                    else
+                        $increment = $i - 1;
+
                     $period = date("m", strtotime("+" . $increment . " months", $strDate));
                     $period = $startYear . "-" . $period;
 

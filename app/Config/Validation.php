@@ -636,16 +636,16 @@ class Validation
         ],
         'md_supplier_id'            => [
             'label'                 => 'From',
-            'rules'                 => 'required_without[md_employee_id]',
+            'rules'                 => 'required_based_field_value[isfrom, S]',
             'errors'                => [
-                'required_without'  => 'Please Choose the {field} first.'
+                'required_based_field_value'  => 'Please Choose the {field} first.'
             ]
         ],
         'md_employee_id'            => [
             'label'                 => 'From',
-            'rules'                 => 'required_without[md_supplier_id]',
+            'rules'                 => 'required_based_field_value[isfrom, E]',
             'errors'                => [
-                'required_without'  => 'Please Choose the {field} first.'
+                'required_based_field_value'  => 'Please Choose the {field} first.'
             ]
         ],
         'line'                      => [
