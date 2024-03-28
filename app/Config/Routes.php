@@ -231,6 +231,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('inventory/getSeqCode', 'Backend\Inventory::getSeqCode');
     $routes->post('inventory/getAssetDetail', 'Backend\Inventory::getAssetDetail');
     $routes->get('inventory/getAssetCode', 'Backend\Inventory::getAssetCode');
+    $routes->get('inventory/getList', 'Backend\Inventory::getList');
 
     $routes->add('groupasset', 'Backend\GroupAsset::index');
     $routes->match(['get', 'post'], 'groupasset/showAll', 'Backend\GroupAsset::showAll');
