@@ -349,6 +349,14 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->match(['get', 'post'], 'rpt_opname/showAll', 'Backend\Rpt_Opname::showAll');
 
     $routes->post('docaction/getDocaction', 'Backend\DocAction::getDocaction');
+
+    $routes->add('spare-part', 'Backend\SparePart::index');
+    $routes->match(['get', 'post'], 'spare-part/showAll', 'Backend\SparePart::showAll');
+    $routes->post('spare-part/create', 'Backend\SparePart::create');
+    $routes->get('spare-part/show/(:any)', 'Backend\SparePart::show/$1');
+    $routes->get('spare-part/destroy/(:any)', 'Backend\SparePart::destroy/$1');
+    $routes->get('spare-part/getSeqCode', 'Backend\SparePart::getSeqCode');
+    $routes->match(['get', 'post'], 'spare-part/getList', 'Backend\SparePart::getList');
 });
 
 /*

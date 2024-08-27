@@ -1488,4 +1488,30 @@ class Validation
             ]
         ]
     ];
+
+    public $parts = [
+        'value'                 => [
+            'label'             => 'Part Code',
+            'rules'             => 'required|min_length[7]|max_length[7]|is_unique[md_sparepart.value,md_sparepart_id,{id}]',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.',
+                'required'      => 'Please Fill {field} first'
+            ]
+        ],
+        'name'                  => [
+            'label'             => 'Name',
+            'rules'             => 'required|is_exist[md_sparepart.name,md_sparepart_id,{id},md_product_id,{md_product_id}]',
+            'errors'            => [
+                'is_exist'      => 'This {field} already exists.',
+                'required'      => 'Please Insert the {field} first'
+            ]
+        ],
+        'md_product_id'         => [
+            'label'             => 'Product',
+            'rules'             => 'required',
+            'errors'            => [
+                'is_unique'     => 'This {field} already exists.'
+            ]
+        ],
+    ];
 }
