@@ -524,21 +524,22 @@ _tableLine.on("change", 'select[name="assetcode"]', function (evt) {
     },
     dataType: "JSON",
     success: function (result) {
+      console.log(result);
       if (result[0].success) {
         $.each(result[0].message, function (idx, item) {
-          if (tr.find('select[name="md_product_id"]').length > 0) {
+          if (tr.find('select[name="md_product_id"]').length) {
             if (value === "OTHER") {
               tr.find('select[name="md_product_id"]')
-                .val(item.md_product_id)
+                .val(item.md_product_id.id)
                 .change()
                 .removeAttr("disabled");
             } else {
               tr.find('select[name="md_product_id"]')
-                .val(item.md_product_id)
+                .val(item.md_product_id.id)
                 .change()
                 .prop("disabled", true);
             }
-          } else if (tr.find('input[name="md_product_id"]').length > 0) {
+          } else if (tr.find('input[name="md_product_id"]').length) {
             tr.find('input[name="md_product_id"]').val(item.md_product_id.name);
           }
 
@@ -572,7 +573,10 @@ _tableLine.on("change", 'select[name="assetcode"]', function (evt) {
             tr.find('input[name="room_from"]').val(item.room_from.name);
           }
 
-          if (tr.find('input:checkbox[name="isnew"]').length > 0 && item.isnew === "Y") {
+          if (
+            tr.find('input:checkbox[name="isnew"]').length > 0 &&
+            item.isnew === "Y"
+          ) {
             tr.find('input:checkbox[name="isnew"]').prop("checked", true);
           } else {
             tr.find('input:checkbox[name="isnew"]').prop("checked", false);
@@ -580,34 +584,28 @@ _tableLine.on("change", 'select[name="assetcode"]', function (evt) {
         });
       } else if (!result[0].success) {
         if (tr.find('select[name="md_product_id"]').length > 0) {
-            tr.find('select[name="md_product_id"]')
-              .val(null)
-              .change()
-              .prop("disabled", true);
+          tr.find('select[name="md_product_id"]')
+            .val(null)
+            .change()
+            .prop("disabled", true);
         } else if (tr.find('input[name="md_product_id"]').length > 0) {
           tr.find('input[name="md_product_id"]').val(null);
         }
 
         if (tr.find('select[name="employee_from"]').length > 0) {
-          tr.find('select[name="employee_from"]')
-            .val(null)
-            .change();
+          tr.find('select[name="employee_from"]').val(null).change();
         } else if (tr.find('input[name="employee_from"]').length > 0) {
           tr.find('input[name="employee_from"]').val(null);
         }
 
         if (tr.find('select[name="branch_from"]').length > 0) {
-          tr.find('select[name="branch_from"]')
-            .val(null)
-            .change();
+          tr.find('select[name="branch_from"]').val(null).change();
         } else if (tr.find('input[name="branch_from"]').length > 0) {
           tr.find('input[name="branch_from"]').val(null);
         }
 
         if (tr.find('select[name="division_from"]').length > 0) {
-          tr.find('select[name="division_from"]')
-            .val(null)
-            .change();
+          tr.find('select[name="division_from"]').val(null).change();
         } else if (tr.find('input[name="division_from"]').length > 0) {
           tr.find('input[name="division_from"]').val(null);
         }
@@ -2181,9 +2179,17 @@ $("#form_movement").on(
       _tableLine.clear().draw(false);
     }
 
-    // Untuk mengakomodir kebutuhan divisi rusak 
-    if (attrName === "md_divisionto_id" && ($(this).find("option:selected").text() === "HRD-RUSAK" || $(this).find("option:selected").text() === "IT-RUSAK")) {
-      form.find("select[name=movementstatus]").val(null).change().attr("disabled", true);
+    // Untuk mengakomodir kebutuhan divisi rusak
+    if (
+      attrName === "md_divisionto_id" &&
+      ($(this).find("option:selected").text() === "HRD-RUSAK" ||
+        $(this).find("option:selected").text() === "IT-RUSAK")
+    ) {
+      form
+        .find("select[name=movementstatus]")
+        .val(null)
+        .change()
+        .attr("disabled", true);
     } else {
       form.find("select[name=movementstatus]").removeAttr("disabled", true);
     }
@@ -2232,7 +2238,8 @@ $("#form_movement").on(
         if (
           attrName !== "movementtype" &&
           value !== "" &&
-          (typeof elem.option_ID !== "undefined" && value != elem.option_ID || typeof elem.label !== "undefined" && value != elem.label) &&
+          ((typeof elem.option_ID !== "undefined" && value != elem.option_ID) ||
+            (typeof elem.label !== "undefined" && value != elem.label)) &&
           _tableLine.data().any()
         ) {
           Swal.fire({
