@@ -18,7 +18,8 @@ class M_Service extends Model
         'grandtotal',
         'description',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'md_room_id'
     ];
     protected $useTimestamps    = true;
     protected $returnType       = 'App\Entities\Service';
@@ -92,7 +93,10 @@ class M_Service extends Model
 
     public function getInvNumber()
     {
-        $month = date('m');
+        $post = $this->request->getPost();
+
+        $yearMonth = date("ym", strtotime($post['servicedate']));
+        $month = date("m", strtotime($post['servicedate']));
 
         $this->builder->select('MAX(RIGHT(documentno,4)) AS documentno');
         $this->builder->where("DATE_FORMAT(servicedate, '%m')", $month);
@@ -108,7 +112,9 @@ class M_Service extends Model
             $code = "0001";
         }
 
-        $prefix = "SR" . date('ym') . $code;
+        $first = "SR";
+
+        $prefix = $first . $yearMonth . "-" . $code;
 
         return $prefix;
     }

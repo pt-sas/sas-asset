@@ -207,8 +207,13 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('service/destroy/(:any)', 'Backend\Service::destroy/$1');
     $routes->post('service/tableLine', 'Backend\Service::tableLine');
     $routes->get('service/destroyLine/(:any)', 'Backend\Service::destroyLine/$1');
+    $routes->match(['get', 'post'], 'service/destroyAllLine', 'Backend\Service::destroyAllLine');
     $routes->get('service/getSeqCode', 'Backend\Service::getSeqCode');
     $routes->get('service/processIt', 'Backend\Service::processIt');
+    $routes->post('service/part/create', 'Backend\ServicePart::create');
+    $routes->post('service/part/tableLine', 'Backend\ServicePart::tableLine');
+    $routes->get('service/part/show/(:any)', 'Backend\ServicePart::show/$1');
+    $routes->get('service/part/destroy/(:any)', 'Backend\ServicePart::destroy/$1');
 
     $routes->add('movement', 'Backend\Movement::index');
     $routes->match(['get', 'post'], 'movement/showAll', 'Backend\Movement::showAll');
@@ -357,6 +362,10 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('spare-part/destroy/(:any)', 'Backend\SparePart::destroy/$1');
     $routes->get('spare-part/getSeqCode', 'Backend\SparePart::getSeqCode');
     $routes->match(['get', 'post'], 'spare-part/getList', 'Backend\SparePart::getList');
+
+    $routes->post('docaction/getDocaction', 'Backend\DocAction::getDocaction');
+
+    $routes->add('depreciation', 'Backend\Depreciation::index');
 });
 
 /*

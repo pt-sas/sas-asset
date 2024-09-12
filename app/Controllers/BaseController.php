@@ -84,6 +84,8 @@ class BaseController extends Controller
 	protected $DOCSTATUS_Aborted = "AB";
 	/** Aborted = XL */
 	protected $DOCSTATUS_Unlock = "XL";
+	/** Prepare = PR */
+	protected $DOCSTATUS_Prepare = "PR";
 	/** Inventory In */
 	protected $Inventory_In = 'I+';
 	/** Inventory Out */
@@ -372,13 +374,15 @@ class BaseController extends Controller
 	 * @param array $data Data
 	 * @return boolean
 	 */
-	protected function saveBatch(string $event, $model, object $obj, array $data)
+	protected function saveBatch(string $event, $model, object $obj = null, array $data)
 	{
 		$changeLog = new M_ChangeLog($this->request);
 
 		$this->primaryKey = $model->primaryKey;
 
 		$result = false;
+
+		$arrDataHeader = [];
 
 		if (!is_array($data))
 			return false;
@@ -388,13 +392,22 @@ class BaseController extends Controller
 
 		if (!empty($this->allowedFields))
 			array_push($this->allowedFields, $this->primaryKey);
+		else
+			$this->setAllowedFields([
+				$this->primaryKey,
+				$this->createdField,
+				$this->createdByField,
+				$this->updatedField,
+				$this->updatedByField
+			]);
 
 		if (is_array($data)) {
 			//* Convert object to array 
-			$arrDataHeader = $this->transformDataToArray($obj, 'insert');
+			if (!is_null($obj))
+				$arrDataHeader = $this->transformDataToArray($obj, 'insert');
 
 			//* Must be called first so we don't
-			$data = $this->doStripLine($data);
+			$data = $this->doStripLine($data, $model);
 
 			//? Check function is exists 
 			if (method_exists($model, 'doChangeValueField'))
@@ -410,7 +423,7 @@ class BaseController extends Controller
 				$dataInsert = $data['insert'];
 
 				//TODO: Insert header data 
-				if (empty($this->getID())) {
+				if (empty($this->getID()) && !is_null($obj)) {
 					$result = $this->model->save($obj);
 					$this->insertID = $this->model->getInsertID();
 				} else {
@@ -545,7 +558,7 @@ class BaseController extends Controller
 	 * @param array $data
 	 * @return array
 	 */
-	protected function doStripLine(array $data, $model = null): array
+	protected function doStripLine(array $data, $model): array
 	{
 		$result = [];
 

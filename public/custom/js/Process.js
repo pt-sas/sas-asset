@@ -21,7 +21,8 @@ let ID,
   _tableInfo,
   formReport,
   _tableReport,
-  _tableApproval;
+  _tableApproval,
+  _tableServicePart;
 
 let clear = false;
 
@@ -348,6 +349,46 @@ _tableLine = $(".tb_displayline").DataTable({
   },
   initComplete: function (settings, json) {
     $(".tb_displayline").wrap(
+      "<div style='overflow:auto; width:100%; position:relative;'></div>"
+    );
+  },
+  lengthChange: false,
+  paging: false,
+  searching: false,
+  ordering: false,
+  autoWidth: false,
+});
+
+_tableServicePart = $(".tb_service_part").DataTable({
+  drawCallback: function (settings) {
+    $(this)
+      .find(".number")
+      .on("keypress keyup blur", function (evt) {
+        $(this).val(
+          $(this)
+            .val()
+            .replace(/[^\d-].+/, "")
+        );
+        if (
+          (evt.which < 48 && evt.which != 45) ||
+          (evt.which > 57 && evt.which != 189)
+        ) {
+          evt.preventDefault();
+        }
+      });
+    $(this).find(".select2").select2({
+      placeholder: "Select an option",
+      theme: "bootstrap",
+      allowClear: true,
+    });
+    $(this).find(".rupiah").autoNumeric("init", {
+      aSep: ".",
+      aDec: ",",
+      mDec: "0",
+    });
+  },
+  initComplete: function (settings, json) {
+    $(".tb_service_part").wrap(
       "<div style='overflow:auto; width:100%; position:relative;'></div>"
     );
   },
@@ -862,57 +903,44 @@ $(".save_form").click(function (evt) {
             type: "success",
             title: result[0].message,
           });
-
           if (actionMenu !== "F") {
             clearForm(evt);
-
             if (!cardForm.prop("classList").contains("modal")) {
               const parent = cardForm.closest(".container");
               const cardBody = parent.find(".card-body");
-
               $.each(cardBody, function (idx, elem) {
                 let className = elem.className.split(/\s+/);
-
                 if (className.includes("card-main")) {
                   $(this).css("display", "block");
-
                   // Remove breadcrumb list
                   let li = ul.find("li");
                   $.each(li, function (idx, elem) {
                     if (idx > 2) elem.remove();
                   });
-
                   if (parent.find("div.filter_page").length > 0) {
                     parent.find("div.filter_page").css("display", "block");
                   }
                 }
-
                 if (className.includes("card-form")) {
                   const cardHeader = parent.find(".card-header");
                   cardHeader.find("button").show();
                   $(this).css("display", "none");
                 }
               });
-
               cardBtn.css("display", "none");
-
               const cardHeader = parent.find(".card-header");
               const btnList = cardHeader.find("button").prop("classList");
-
               if (btnList.contains("new_form"))
                 cardHeader.find("button").css("display", "block");
             } else {
               modalForm.modal("hide");
             }
-
             cardTitle.html(oriTitle);
-
             //TODO: Call reloadTable();
             $(".btn_requery").click();
           } else {
             //TODO: Call function and set data
             showFormData(form);
-
             clearErrorForm(form);
           }
         } else if (result[0].error) {
@@ -928,7 +956,6 @@ $(".save_form").click(function (evt) {
             type: "error",
             title: result[0].message,
           });
-
           clearErrorForm(form);
         }
       },
@@ -1122,7 +1149,8 @@ function Edit(id, status, last_url) {
               typeof status === "undefined" ||
               status === "" ||
               status === "DR" ||
-              status === "IP"
+              status === "IP" ||
+              status === "PR"
             )
               $(".save_form").removeAttr("disabled");
 
@@ -1178,7 +1206,10 @@ function Edit(id, status, last_url) {
                       const tr = $(this).closest("tr");
                       const className = item.className.split(/\s+/);
 
-                      if (!className.includes("updatable") || status !== "IP")
+                      if (
+                        !className.includes("updatable") ||
+                        (status !== "IP" && status !== "PR")
+                      )
                         if (item.type !== "text") {
                           tr.find(
                             "input:checkbox[name=" +
@@ -1491,7 +1522,7 @@ function docProcess(id, status) {
 
     html += '<option value=""></option>';
 
-    if (docAction[0].length > 0)
+    if (docAction[0].length)
       $.each(docAction[0], function (i, item) {
         html += `<option value="${item.id}">${item.text}</option>`;
       });
@@ -2063,6 +2094,7 @@ $(".add_row").click(function (evt) {
                 fieldReadOnly[i] +
                 "]"
             )
+            .not(".line")
             .attr("disabled", true);
         }
       },
@@ -2871,7 +2903,10 @@ function errorForm(parent, data) {
       }
 
       // Check datatable line for get validation
-      if (parent.find("table.tb_displayline").length > 0) {
+      if (
+        parent.find("table.tb_displayline").length ||
+        parent.find("table.tb_service_part").length
+      ) {
         // Error validation for datatable line
         if (field === "line")
           Toast.fire({
@@ -2879,7 +2914,11 @@ function errorForm(parent, data) {
             title: labelMsg,
           });
 
-        const tdInput = _tableLine.rows().nodes().to$().find("input, select");
+        const table = parent.find("table.tb_displayline").length
+          ? _tableLine
+          : _tableServicePart;
+
+        const tdInput = table.rows().nodes().to$().find("input, select");
 
         let arrValue = [];
 

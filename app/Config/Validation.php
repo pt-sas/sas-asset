@@ -472,14 +472,20 @@ class Validation
     public $service = [
         'documentno'        => [
             'label'         => 'Document No',
-            'rules'         => 'required|is_unique[trx_service.documentno,trx_service_id,{id}]',
+            'rules'         => 'is_unique[trx_service.documentno,trx_service_id,{id}]',
             'errors'        => [
-                'is_unique' => 'This {field} already exists.',
-                'required'  => 'Please Insert the {field} first.'
+                'is_unique' => 'This {field} already exists.'
             ]
         ],
         'md_supplier_id'    => [
             'label'         => 'Supplier',
+            'rules'         => 'required',
+            'errors'        => [
+                'required'  => 'Please Insert the {field} first.'
+            ]
+        ],
+        'md_room_id'        => [
+            'label'         => 'Room',
             'rules'         => 'required',
             'errors'        => [
                 'required'  => 'Please Insert the {field} first.'
@@ -1513,5 +1519,39 @@ class Validation
                 'is_unique'     => 'This {field} already exists.'
             ]
         ],
+    ];
+
+    public $serviceParts = [
+        'line'                  => [
+            'label'             => 'Service Spare Part',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'detail.table.*.md_sparepart_id_line'  => [
+            'label'             => 'Spare Part',
+            'rules'             => 'required|is_exists_part',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line',
+                'is_exists_part' => 'The {field} duplicate value'
+            ]
+        ],
+        'detail.table.*.qtyentered_line'  => [
+            'label'             => 'Qty',
+            'rules'             => 'required|is_natural_no_zero',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line',
+                'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
+            ]
+        ],
+        'detail.table.*.unitprice_line'  => [
+            'label'             => 'Unit Price',
+            'rules'             => 'required|is_natural_no_zero',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line',
+                'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
+            ]
+        ]
     ];
 }

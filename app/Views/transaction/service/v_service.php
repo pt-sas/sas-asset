@@ -1,8 +1,9 @@
 <?= $this->extend('backend/_partials/overview') ?>
 
 <?= $this->section('content'); ?>
-
 <?= $this->include('transaction/service/form_service'); ?>
+<?= $this->include('transaction/service/modal_service'); ?>
+
 <div class="card-body card-main">
     <table class="table table-striped table-hover tb_display">
         <thead>

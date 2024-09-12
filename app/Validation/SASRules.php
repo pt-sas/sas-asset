@@ -105,4 +105,30 @@ class SASRules
 
         return true;
     }
+
+    public function is_exists_part()
+    {
+        $request = Services::request();
+
+        $post = $request->getVar();
+        $table = json_decode($post['table']);
+
+        $list = arrTableLine($table);
+        $array = [];
+
+        // Check field is exists
+        for ($i = 0; $i < count($list); $i++) {
+            if (isset($list[$i]['md_sparepart_id_line']) && $list[$i]['md_sparepart_id_line'] !== '') {
+                $array[] = $list[$i]['md_sparepart_id_line'];
+            }
+        }
+
+        // Check duplicate array
+        $result = array_duplicates($array);
+
+        if (empty(count($result)))
+            return true;
+
+        return false;
+    }
 }

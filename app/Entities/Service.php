@@ -12,6 +12,7 @@ class Service extends Entity
 	protected $grandtotal;
 	protected $docstatus;
 	protected $md_supplier_id;
+	protected $md_room_id;
 	protected $description;
 	protected $created_by;
 	protected $updated_by;
@@ -122,13 +123,13 @@ class Service extends Entity
 		$this->attributes['updated_by'] = $updated_by;
 	}
 
-	public function getIsInternalUse()
+	public function getRoomId()
 	{
-		return $this->attributes['isinternaluse'];
+		return $this->attributes['md_room_id'];
 	}
 
-	public function setIsInternalUse($isinternaluse)
+	public function setRoomId($md_room_id)
 	{
-		$this->attributes['isinternaluse'] = $isinternaluse;
+		$this->attributes['md_room_id'] = $md_room_id;
 	}
 }

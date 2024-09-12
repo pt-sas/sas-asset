@@ -5,14 +5,14 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="documentno">Document No <span class="required">*</span></label>
-                    <input type="text" class="form-control code" id="documentno" name="documentno" readonly>
+                    <input type="text" class="form-control" id="documentno" name="documentno" placeholder="[auto]" readonly>
                     <small class="form-text text-danger" id="error_documentno"></small>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_supplier_id">Supplier <span class="required">*</span></label>
-                    <select class="form-control select-data" id="md_supplier_id" name="md_supplier_id" data-url="supplier/getList">
+                    <select class="form-control select-data" id="md_supplier_id" name="md_supplier_id" data-url="supplier/getList/$SERVICE">
                         <option value="">Select Supplier</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_supplier_id"></small>
@@ -27,14 +27,23 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="grandtotal">Grand Total </label>
-                    <input type="text" class="form-control rupiah" id="grandtotal" name="grandtotal" readonly>
+                    <label for="md_room_id">Room <span class="required">*</span></label>
+                    <select class="form-control select-data" id="md_room_id" name="md_room_id" data-url="room/getList/$RUSAK">
+                        <option value="">Select Room</option>
+                    </select>
+                    <small class="form-text text-danger" id="error_md_division_id"></small>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="description">Description </label>
                     <textarea type="text" class="form-control" id="description" name="description" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="grandtotal">Grand Total </label>
+                    <input type="text" class="form-control rupiah" id="grandtotal" name="grandtotal" readonly>
                 </div>
             </div>
         </div>
@@ -53,7 +62,8 @@
                             <tr>
                                 <th class="text-center">Asset Code</th>
                                 <th class="text-center">Product</th>
-                                <th class="text-center">Unit Price</th>
+                                <th class="text-center">Parts</th>
+                                <th class="text-center">Line Amount</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Description</th>
                                 <th class="text-center">Action</th>

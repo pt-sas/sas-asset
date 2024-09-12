@@ -524,7 +524,6 @@ _tableLine.on("change", 'select[name="assetcode"]', function (evt) {
     },
     dataType: "JSON",
     success: function (result) {
-      console.log(result);
       if (result[0].success) {
         $.each(result[0].message, function (idx, item) {
           if (tr.find('select[name="md_product_id"]').length) {
@@ -2282,7 +2281,7 @@ function destroyAllLine(field, id) {
     url: url,
     type: "POST",
     data: {
-      trx_movement_id: id,
+      [field]: id,
     },
     cache: false,
     dataType: "JSON",
@@ -2595,4 +2594,558 @@ _tableInfo.on("change", 'input[name="isspare"]', function (evt) {
       .change()
       .removeAttr("disabled");
   }
+});
+
+_tableLine.on("click", ".btn_isdetail", function (evt) {
+  const tr = _tableLine.$(this).closest("tr");
+  let id = tr.find(".btn_delete").prop("id");
+  let assetcode = tr.find("select[name=assetcode]").val();
+  let product = tr.find("select[name=md_product_id] option:selected").text();
+
+  if (id !== "") {
+    $("#modal_service_part").modal({
+      backdrop: "static",
+      keyboard: false,
+    });
+
+    const form = $("#form_service_part");
+
+    form.find("input[name=assetcode]").val(assetcode);
+    form.find("input[name=product]").val(product);
+    form.find("input[name=id]").val(id);
+
+    let url = `${CURRENT_URL}/part${SHOW}${id}`;
+
+    $.ajax({
+      url: url,
+      type: "GET",
+      cache: false,
+      dataType: "JSON",
+      beforeSend: function () {
+        loadingForm("service_part_info", "facebook");
+      },
+      complete: function () {
+        hideLoadingForm("service_part_info");
+      },
+      success: function (result) {
+        if (result[0].success) {
+          let arrMsg = result[0].message;
+
+          // Show datatable line
+          if (arrMsg.line) {
+            let arrLine = arrMsg.line;
+
+            if (_tableServicePart.context.length) {
+              let line = JSON.parse(arrLine);
+
+              _tableServicePart.rows.add(line).draw(false);
+            }
+          }
+        } else {
+          Toast.fire({
+            type: "error",
+            title: result[0].message,
+          });
+        }
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
+  } else {
+    Toast.fire({
+      type: "error",
+      title: "Please Choose Asset Code First",
+    });
+  }
+});
+
+/**
+ * Event add row table service part
+ */
+$(".add_row_part").click(function (evt) {
+  const _this = $(this);
+  let form = $(evt.target).closest("form");
+
+  let oriElement = _this.html();
+  let textElement = _this.text().trim();
+
+  let formData = new FormData(form[0]);
+
+  let url = `${CURRENT_URL}/part/tableLine`;
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: formData,
+    processData: false,
+    contentType: false,
+    cache: false,
+    dataType: "JSON",
+    beforeSend: function () {
+      $(".btn_close_part").attr("disabled", true);
+      $(".btn_save_part").attr("disabled", true);
+      $(_this)
+        .html(
+          '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' +
+            textElement
+        )
+        .prop("disabled", true);
+    },
+    complete: function () {
+      $(".btn_close_part").removeAttr("disabled");
+      $(".btn_save_part").removeAttr("disabled");
+      $(_this).html(oriElement).prop("disabled", false);
+    },
+    success: function (result) {
+      _tableServicePart.row.add(result).draw(false);
+    },
+    error: function (jqXHR, exception) {
+      showError(jqXHR, exception);
+    },
+  });
+});
+
+/**
+ * Button Save Form Data Spare Part
+ *
+ */
+$(".save_form_part").click(function (evt) {
+  const _this = $(this);
+  const target = $(evt.target);
+  const modal = target.closest(".modal");
+  const modalBody = modal.find(".modal-body");
+  const form = modal.find("form");
+  let formData = new FormData();
+
+  let field;
+
+  //* Populate field form header
+  $.each(form, function () {
+    const formHeader = $(this).find(".row");
+    field = $(formHeader).find("input, select, textarea").not(".line");
+  });
+
+  //? Remove attribute disabled when submit data
+  for (let i = 0; i < field.length; i++) {
+    if (field[i].name !== "") {
+      let className = field[i].className.split(/\s+/);
+
+      //* Field containing class foreignkey
+      if (className.includes("foreignkey")) {
+        formData.append(field[i].name, $(field[i]).val());
+      }
+    }
+  }
+
+  //? Check in form exists Table Line
+  if (_tableServicePart.context.length) {
+    const rows = _tableServicePart.rows().nodes().to$();
+    const th = $(rows).closest("table").find("th");
+
+    let output = [];
+
+    $.each(rows, function (i) {
+      const tag = $(this).find("input, select, button, span");
+      const tr = $(this).closest("tr");
+      const td = tr.find("td");
+
+      if (tag.length) {
+        let row = {};
+
+        //* Table cell from tag
+        $.each(tag, function () {
+          let className = this.className.split(/\s+/);
+          let name = $(this).attr("name");
+          let value = this.value;
+          let id = $(this).attr("id");
+
+          //* Field containing class rupiah
+          if (className.includes("rupiah")) value = replaceRupiah(value);
+
+          if (
+            this.type === "text" ||
+            this.type === "select-one" ||
+            this.type === "hidden"
+          ) {
+            row[name] = value;
+          } else if (typeof name !== "undefined") {
+            if (id !== "") row[name] = id;
+            else row[name] = "";
+          }
+        });
+
+        output[i] = row;
+      }
+    });
+
+    formData.append("table", JSON.stringify(output));
+  }
+
+  let url = `${CURRENT_URL}/part${CREATE}`;
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: formData,
+    processData: false,
+    contentType: false,
+    cache: false,
+    dataType: "JSON",
+    beforeSend: function () {
+      $(".close_form_part").attr("disabled", true);
+      _this.attr("disabled", true);
+      loadingForm(modalBody.prop("id"), "facebook");
+    },
+    complete: function () {
+      $(".close_form_part").removeAttr("disabled");
+      _this.removeAttr("disabled");
+      hideLoadingForm(modalBody.prop("id"));
+    },
+    success: function (result) {
+      if (result[0].success) {
+        Toast.fire({
+          type: "success",
+          title: result[0].message,
+        });
+      } else if (result[0].error) {
+        errorForm(form, result);
+      } else {
+        Toast.fire({
+          type: "error",
+          title: result[0].message,
+        });
+      }
+    },
+    error: function (jqXHR, exception) {
+      showError(jqXHR, exception);
+    },
+  });
+});
+
+_tableServicePart.on("click", ".btn_delete", function (evt) {
+  evt.preventDefault();
+  const form = $(evt.currentTarget).closest("form");
+  const tr = _tableServicePart.$(this).closest("tr");
+  const row = _tableServicePart.row(tr);
+  let id = this.id;
+
+  let url = `${CURRENT_URL}/part${DELETE}${id}`;
+
+  let _this = $(this);
+  let oriElement = _this.html();
+
+  $(_this)
+    .html(
+      '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+    )
+    .prop("disabled", true);
+
+  if (id === "") {
+    setTimeout(function () {
+      row.remove().draw(false);
+      $(_this).html(oriElement).prop("disabled", false);
+    }, 100);
+  } else {
+    Swal.fire({
+      title: "Delete?",
+      text: "Are you sure to delete the selected data line ? ",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Ok",
+      cancelButtonText: "Close",
+      reverseButtons: true,
+    }).then((data) => {
+      if (data.value)
+        $.getJSON(url, function (result) {
+          if (result[0].success) {
+            Swal.fire({
+              title: "Deleted!",
+              text: "Your data has been deleted.",
+              type: "success",
+              showConfirmButton: false,
+              timer: 1000,
+            });
+
+            // Update field grand total
+            if (form.find('input[name="grandtotal"]').length)
+              form
+                .find('input[name="grandtotal"]')
+                .val(formatRupiah(result[0].message));
+
+            row.remove().draw(false);
+          } else {
+            Toast.fire({
+              type: "error",
+              title: result[0].message,
+            });
+          }
+        }).fail(function (jqXHR, exception) {
+          showError(jqXHR, exception);
+        });
+    });
+
+    $(_this).html(oriElement).prop("disabled", false);
+  }
+});
+
+/**
+ * Button close form
+ *
+ * @close_form_part button only in modal
+ */
+$(document).on("click", ".close_form_part", function (evt) {
+  let target = $(evt.currentTarget);
+
+  if (_tableLine.context.length) {
+    _tableLine.destroy();
+
+    _tableLine = $(".tb_displayline").DataTable({
+      drawCallback: function (settings) {
+        $(this)
+          .find(".number")
+          .on("keypress keyup blur", function (evt) {
+            $(this).val(
+              $(this)
+                .val()
+                .replace(/[^\d-].+/, "")
+            );
+            if (
+              (evt.which < 48 && evt.which != 45) ||
+              (evt.which > 57 && evt.which != 189)
+            ) {
+              evt.preventDefault();
+            }
+          });
+        $(this).find(".select2").select2({
+          placeholder: "Select an option",
+          theme: "bootstrap",
+          allowClear: true,
+        });
+        $(this).find(".rupiah").autoNumeric("init", {
+          aSep: ".",
+          aDec: ",",
+          mDec: "0",
+        });
+      },
+      initComplete: function (settings, json) {
+        $(".tb_displayline").wrap(
+          "<div style='overflow:auto; width:100%; position:relative;'></div>"
+        );
+      },
+      lengthChange: false,
+      paging: false,
+      searching: false,
+      ordering: false,
+      autoWidth: false,
+    });
+
+    _tableLine.clear().draw();
+
+    let url = CURRENT_URL + SHOW + ID;
+
+    $.ajax({
+      url: url,
+      type: "GET",
+      cache: false,
+      dataType: "JSON",
+      beforeSend: function () {
+        $(".save_form").prop("disabled", true);
+        $(".close_form").prop("disabled", true);
+        loadingForm("form_service", "facebook");
+      },
+      complete: function () {
+        $(".save_form").removeAttr("disabled");
+        $(".close_form").removeAttr("disabled");
+        hideLoadingForm("form_service");
+      },
+      success: function (result) {
+        if (result[0].success) {
+          let arrMsg = result[0].message;
+          let status = "DR";
+
+          if (arrMsg.header) {
+            let data = arrMsg.header;
+
+            for (let i = 0; i < data.length; i++) {
+              let fieldInput = data[i].field;
+              let label = data[i].label;
+
+              if (fieldInput === "docstatus") {
+                status = label;
+              }
+            }
+          }
+
+          // Show datatable line
+          if (arrMsg.line) {
+            let arrLine = arrMsg.line;
+
+            if (_tableLine.context.length) {
+              let line = JSON.parse(arrLine);
+              _tableLine.rows.add(line).draw(false);
+
+              let btnAction = _tableLine.rows().nodes().to$().find("button");
+
+              const field = _tableLine
+                .rows()
+                .nodes()
+                .to$()
+                .find("input, select");
+
+              /**
+               * Logic for set detail when status not draft
+               */
+              if (setSave === "detail" && status !== "DR") {
+                // Button add row table line
+                $(".add_row, .create_line").css("display", "none");
+
+                $.each(btnAction, function (index, item) {
+                  let className = item.className.split(/\s+/);
+
+                  if (className.includes("btn_accept") && status !== "IP")
+                    $(this).css("display", "none");
+
+                  if (className.includes("btn_delete"))
+                    $(this).css("display", "none");
+                });
+
+                $.each(field, function (index, item) {
+                  const tr = $(this).closest("tr");
+                  const className = item.className.split(/\s+/);
+
+                  if (
+                    !className.includes("updatable") ||
+                    (status !== "IP" && status !== "PR")
+                  )
+                    if (item.type !== "text") {
+                      tr.find(
+                        "input:checkbox[name=" +
+                          item.name +
+                          "], select[name=" +
+                          item.name +
+                          "], input:radio[name=" +
+                          item.name +
+                          "]"
+                      ).prop("disabled", true);
+                    } else {
+                      tr.find(
+                        "input:text[name=" +
+                          item.name +
+                          "], textarea[name=" +
+                          item.name +
+                          "]"
+                      ).prop("readonly", true);
+                    }
+                });
+              } else {
+                // Button add row table line
+                $(".add_row, .create_line").css("display", "block");
+
+                btnAction.css("display", "block");
+              }
+            }
+          }
+        } else {
+          Toast.fire({
+            type: "error",
+            title: result[0].message,
+          });
+        }
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
+  }
+
+  _tableServicePart.clear().draw();
+});
+
+_tableServicePart.on(
+  "keyup",
+  'input[name="qtyentered"], input[name="unitprice"]',
+  function (evt) {
+    const tr = _tableServicePart.$(this).closest("tr");
+
+    let value = this.value;
+    let lineamt,
+      qty,
+      unitprice = 0;
+
+    const referenceField = tr.find(
+      'input[name="qtyentered"], input[name="unitprice"]'
+    );
+
+    if (referenceField.length > 1) {
+      if ($(this).attr("name") == "unitprice") {
+        qty = replaceRupiah(tr.find('input[name="qtyentered"]').val());
+        value = replaceRupiah(this.value);
+
+        lineamt = value * qty;
+      }
+
+      if ($(this).attr("name") == "qtyentered") {
+        unitprice = replaceRupiah(tr.find('input[name="unitprice"]').val());
+
+        lineamt = value * unitprice;
+      }
+
+      tr.find('input[name="lineamt"]').val(formatRupiah(lineamt));
+    }
+  }
+);
+
+$("#form_service").on("change", "#md_room_id", function (evt) {
+  const form = $(this).closest("form");
+  const field = form.find("select");
+  const attrName = $(this).attr("name");
+  let value = this.value;
+  let fields = [];
+
+  if (setSave === "add") {
+    _tableLine.clear().draw(false);
+  }
+
+  // update data
+  $.each(option, function (idx, elem) {
+    if (elem.fieldName === attrName && setSave !== "add") {
+      if (
+        attrName === "md_room_id" &&
+        value !== "" &&
+        ((typeof elem.option_ID !== "undefined" && value != elem.option_ID) ||
+          (typeof elem.label !== "undefined" && value != elem.label)) &&
+        _tableLine.data().any()
+      ) {
+        Swal.fire({
+          title: "Delete?",
+          text: "Are you sure you want to change all data ? ",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          confirmButtonText: "Okay",
+          cancelButtonText: "Close",
+          reverseButtons: true,
+        }).then((data) => {
+          if (data.value) {
+            _tableLine.clear().draw(false);
+            destroyAllLine("trx_service_id", ID);
+          } else {
+            if (typeof elem.option_ID !== "undefined")
+              form
+                .find("select[name=" + attrName + "]")
+                .val(elem.option_ID)
+                .change();
+
+            if (typeof elem.label !== "undefined")
+              form
+                .find("select[name=" + attrName + "]")
+                .val(elem.label)
+                .change();
+          }
+        });
+      }
+    }
+  });
 });

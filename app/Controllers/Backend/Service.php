@@ -9,7 +9,8 @@ use App\Models\M_Product;
 use App\Models\M_Status;
 use App\Models\M_Supplier;
 use App\Models\M_Inventory;
-
+use App\Models\M_Room;
+use App\Models\M_ServicePart;
 use Config\Services;
 
 class Service extends BaseController
@@ -90,13 +91,19 @@ class Service extends BaseController
             ];
 
             try {
-                $this->entity->fill($post);
-                $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-                $this->entity->setGrandTotal(arrSumField('unitprice', $table));
-
                 if (!$this->validation->run($post, 'service')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
+                    $this->entity->fill($post);
+                    $this->entity->setGrandTotal(arrSumField('lineamt', $table));
+
+                    if ($this->isNew()) {
+                        $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+
+                        $docNo = $this->model->getInvNumber();
+                        $this->entity->setDocumentNo($docNo);
+                    }
+
                     $response = $this->save();
                 }
             } catch (\Exception $e) {
@@ -109,16 +116,21 @@ class Service extends BaseController
 
     public function show($id)
     {
-        $supplier = new M_Supplier($this->request);
+        $mSupplier = new M_Supplier($this->request);
+        $mRoom = new M_Room($this->request);
 
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
                 $detail = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
 
-                $rowSupplier = $supplier->find($list[0]->getSupplierId());
+                $rowSupplier = $mSupplier->find($list[0]->getSupplierId());
 
-                $list = $this->field->setDataSelect($supplier->table, $list, $supplier->primaryKey, $rowSupplier->getSupplierId(), $rowSupplier->getName());
+                $list = $this->field->setDataSelect($mSupplier->table, $list, $mSupplier->primaryKey, $rowSupplier->getSupplierId(), $rowSupplier->getName());
+
+                $rowRoom = $mRoom->find($list[0]->getRoomId());
+
+                $list = $this->field->setDataSelect($mRoom->table, $list, $mRoom->primaryKey, $rowRoom->getRoomId(), $rowRoom->getName());
 
                 $result = [
                     'header'    => $this->field->store($this->model->table, $list),
@@ -185,22 +197,27 @@ class Service extends BaseController
             $_DocAction = $post['docaction'];
 
             $row = $this->model->find($_ID);
+            $serviceOnDelivery = $this->modelDetail->where($this->model->primaryKey, $_ID)
+                ->whereIn('md_status_id', [100004, 100005])
+                ->first();
 
             try {
-                if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
-                    $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->first();
-
-                    if ($line || (!$line && $_DocAction !== $this->DOCSTATUS_Completed)) {
-                        $this->entity->setDocStatus($_DocAction);
-                    } else if (!$line && $_DocAction === $this->DOCSTATUS_Completed) {
-                        $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
+                if (!empty($_DocAction)) {
+                    if ($_DocAction === $row->getDocStatus()) {
+                        $response = message('error', true, 'Please reload the Document');
+                    } else if ($_DocAction === $this->DOCSTATUS_Completed) {
+                        if (is_null($serviceOnDelivery)) {
+                            $this->entity->setDocStatus($this->DOCSTATUS_Completed);
+                            $response = $this->save();
+                        } else {
+                            $response = message('error', true, 'Please change the status on line');
+                        }
+                    } else if ($_DocAction === $this->DOCSTATUS_Prepare) {
+                        $this->entity->setDocStatus($this->DOCSTATUS_Prepare);
+                        $response = $this->save();
                     }
-
-                    $response = $this->save();
-                } else if (empty($_DocAction)) {
-                    $response = message('error', true, 'Please Choose the Document Action first');
                 } else {
-                    $response = message('error', true, 'Please reload the Document');
+                    $response = message('error', true, 'Please Choose the Document Action first');
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -212,14 +229,14 @@ class Service extends BaseController
 
     public function tableLine($set = null, $detail = [])
     {
-        $uri = $this->request->uri->getSegment(2);
         $inventory = new M_Inventory($this->request);
         $product = new M_Product($this->request);
         $status = new M_Status($this->request);
 
-        $dataInventory = $inventory->where('isactive', 'Y')
-            ->orderBy('assetcode', 'ASC')
-            ->findAll();
+        $post = $this->request->getVar();
+
+        $uri = $this->request->uri->getSegment(2);
+
         $dataProduct = $product->where('isactive', 'Y')->findAll();
         $dataStatus = $status->where([
             'isactive'  => 'Y',
@@ -230,13 +247,27 @@ class Service extends BaseController
 
         $table = [];
 
+        $subQuery = $this->model->builder->select('trx_service_detail.assetcode')
+            ->join('trx_service_detail', 'trx_service_detail.trx_service_id = trx_service.trx_service_id')
+            ->whereIn('trx_service_detail.md_status_id', [100004, 100005])
+            ->where('trx_service_detail.assetcode = trx_inventory.assetcode')
+            ->getCompiledSelect();
+
+
         //? Create
         if (empty($set)) {
+            $dataInventory = $inventory->where('isactive', 'Y')
+                ->where('md_room_id', $post['md_room_id'])
+                ->where("NOT EXISTS ($subQuery)", null, false) // Raw SQL for NOT EXISTS
+                ->orderBy('assetcode', 'ASC')
+                ->findAll();
+
             $table = [
-                $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, null, 170, 'assetcode', 'assetcode'),
+                $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, null, 200, 'assetcode', 'assetcode'),
                 $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
-                $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, null, 125),
-                $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, 'On Service', 150, 'md_status_id', 'name'),
+                "",
+                $this->field->fieldTable('input', 'text', 'lineamt', 'number', 'required', 'readonly', null, null, null, 250),
+                $this->field->fieldTable('select', null, 'md_status_id', null, 'required', 'readonly', null, $dataStatus, 'On Delivery', 150, 'md_status_id', 'name'),
                 $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250),
                 $this->field->fieldTable('button', 'button', 'trx_service_detail_id')
             ];
@@ -244,12 +275,30 @@ class Service extends BaseController
 
         //? Update
         if (!empty($set) && count($detail) > 0) {
+            $service = $this->model->find($detail[0]->trx_service_id);
+
+            if ($service->getDocStatus() === $this->DOCSTATUS_Prepare) {
+                $btnDetail = '<div class="form-group">';
+                $btnDetail .= '<button type="button" title="Detail" class="btn btn-sm btn-round line btn-info btn_isdetail numeric" id="" name="isdetail" value="0">';
+                $btnDetail .= '<i class="fas fa-th-list"></i>';
+                $btnDetail .= '</button>';
+                $btnDetail .= '</div>';
+            } else {
+                $btnDetail = "";
+            }
+
             foreach ($detail as $row) :
+                $dataInventory = $inventory->where('isactive', 'Y')
+                    ->where('md_room_id', $service->md_room_id)
+                    ->orderBy('assetcode', 'ASC')
+                    ->findAll();
+
                 $table[] = [
-                    $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
+                    $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 200, 'assetcode', 'assetcode'),
                     $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', null, null, null, null, $row->unitprice, 125),
-                    $this->field->fieldTable('select', null, 'md_status_id', null, 'required', null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
+                    $btnDetail,
+                    $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row->lineamt, 250),
+                    $this->field->fieldTable('select', null, 'md_status_id', $service->getDocStatus() === $this->DOCSTATUS_Prepare ? 'updatable' : null, 'required', $service->getDocStatus() === $this->DOCSTATUS_Drafted ? 'readonly' : null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
                     $this->field->fieldTable('button', 'button', 'trx_service_detail_id', null, null, null, null, null, $row->trx_service_detail_id)
                 ];
@@ -259,12 +308,19 @@ class Service extends BaseController
         return json_encode($table);
     }
 
-    public function getSeqCode()
+    public function destroyAllLine()
     {
         if ($this->request->isAJAX()) {
+            $post = $this->request->getVar();
+
             try {
-                $docNo = $this->model->getInvNumber();
-                $response = message('success', true, $docNo);
+                $result = $this->modelDetail->where($this->model->primaryKey, $post['trx_service_id'])->first();
+
+                //? Exists data movement detail
+                if ($result)
+                    $result = $this->modelDetail->where($this->model->primaryKey, $post['trx_service_id'])->delete();
+
+                $response = message('success', true, $result);
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
