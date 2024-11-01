@@ -124,6 +124,6 @@ class CronJob extends \Daycry\CronJob\Config\CronJob
 
         // $schedule->call( function() { do something.... } )->everyMonday()->named( 'foo' )
 
-        $schedule->url(env("app.baseURL") . "cron-approved")->named("CronApproved")->daily("11:59 pm");
+        $schedule->url(env("app.baseURL") . "cron-approved")->named("CronApproved")->daily("11:50 pm");
     }
 }
