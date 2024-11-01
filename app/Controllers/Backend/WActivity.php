@@ -14,6 +14,7 @@ use App\Models\M_WScenarioDetail;
 use App\Models\M_Transaction;
 use App\Models\M_Inventory;
 use App\Models\M_Menu;
+use App\Models\M_Movement;
 use App\Models\M_Room;
 use Config\Services;
 use Pusher\Pusher;
@@ -76,7 +77,7 @@ class WActivity extends BaseController
                     if ($trx)
                         $summary = ucwords($menuName) . ' ' . $trx->documentno . ': ' . $trx->usercreated_by;
                     else
-                        $summary = ucwords($menuName);
+                        $summary = ucwords($menuName) . ' ' . $record_id;
 
                     $row[] = $ID;
                     $row[] = $record_id;
@@ -551,5 +552,31 @@ class WActivity extends BaseController
         endforeach;
 
         return $field;
+    }
+
+    public function doApproved()
+    {
+        $mMovement = new M_Movement($this->request);
+
+        $this->session->set([
+            'sys_user_id'       => 100000,
+        ]);
+
+        $where = 'ADDDATE(sys_wfactivity.created_at, INTERVAL 3 DAY) <= NOW()';
+        $where .= " AND sys_wfactivity.table = 'trx_movement'";
+
+        $list = $this->model->getActivity(null, $where);
+
+        if ($list) {
+            foreach ($list as $row) {
+                $move = $mMovement->where([
+                    'trx_movement_id'   => $row->record_id,
+                    'docstatus'         => "{$this->DOCSTATUS_Inprogress}"
+                ])->first();
+
+                if ($move->movementtype === $this->Movement_Terima)
+                    $this->setActivity($row->sys_wfactivity_id, $row->sys_wfscenario_id, $row->sys_wfresponsible_id, session()->get('sys_user_id'), $this->DOCSTATUS_Completed, true, "Approved By System", $row->table, $row->record_id, $row->menu);
+            }
+        }
     }
 }

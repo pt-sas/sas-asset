@@ -42,6 +42,8 @@ $routes->get('logout', 'Backend\Auth::logout');
 
 $routes->post('(:any)/AccessMenu/getAccess', 'Backend\AccessMenu::getAccess');
 
+$routes->get('cron-approved', 'Backend\WActivity::doApproved');
+
 $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->add('/', 'Backend\Dashboard::index');
 

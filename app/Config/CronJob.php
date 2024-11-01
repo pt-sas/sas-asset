@@ -56,7 +56,7 @@ class CronJob extends \Daycry\CronJob\Config\CronJob
     | Connect to a database group for logging, etc.
     |
     */
-    public string $databaseGroup = 'default';
+    public ?string $databaseGroup = null;
 
     /*
     |--------------------------------------------------------------------------
@@ -123,5 +123,7 @@ class CronJob extends \Daycry\CronJob\Config\CronJob
         // $schedule->shell('cp foo bar')->daily( '11:00 pm' );
 
         // $schedule->call( function() { do something.... } )->everyMonday()->named( 'foo' )
+
+        $schedule->url(env("app.baseURL") . "cron-approved")->named("CronApproved")->daily("11:59 pm");
     }
 }
