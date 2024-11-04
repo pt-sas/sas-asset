@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Database\Migrations;
+namespace App\Database\Seeds;
 
-use CodeIgniter\Database\Migration;
+use CodeIgniter\Database\Seeder;
 
-class UserSystem extends Migration
+class UserSystem extends Seeder
 {
-    public function up()
+    public function run()
     {
         $data = [
             'sys_user_id'   => 100000,
@@ -18,10 +18,5 @@ class UserSystem extends Migration
         ];
 
         $this->db->table('sys_user')->insert($data);
-    }
-
-    public function down()
-    {
-        //
     }
 }
