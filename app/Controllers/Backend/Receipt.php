@@ -648,9 +648,6 @@ class Receipt extends BaseController
         //* Cut off date
         $dateCO = 15;
 
-        //* accumulated depreciation 
-        $accumulation = 0;
-
         $arrDetail = [];
         foreach ($data as $key => $val) :
             //* Transaction Date 
@@ -664,31 +661,38 @@ class Receipt extends BaseController
             $startYear = $val['startyear'];
             $totalYear = $val['totalyear'];
             $currentMonth = $val['currentmonth'];
+            $accumulation = $val['accumulateddepreciation'];
             $cost = $val['costdepreciation'];
             $type = $val['depreciationtype'];
             $residu = $val['residualvalue'];
 
             if ($currentMonth != 0) {
+                $i = 1;
                 $row = [];
+
+                //* accumulated depreciation 
+                if ($i == 1)
+                    $accumulation = ($accumulation - $cost);
 
                 $cost = ($cost / $currentMonth);
 
-                for ($i = 1; $i <= $currentMonth; $i++) {
-                    $bookValue = $val['unitprice'];
-
-                    if ($currentMonth != $fullMonth) {
-                        if ($startYear != $yearMonth) {
-                            $year = $startYear . "-01-01";
-                            $strDate = strtotime($year);
-                        }
-                    } else {
+                if ($currentMonth != $fullMonth) {
+                    if ($startYear != $yearMonth) {
                         $year = $startYear . "-01-01";
                         $strDate = strtotime($year);
                     }
+                } else {
+                    $year = $startYear . "-01-01";
+                    $strDate = strtotime($year);
+                }
 
-                    if ($currDate > $dateCO && $currentMonth == 01)
+                for ($i; $i <= $currentMonth; $i++) {
+                    $bookValue = $val['unitprice'];
+
+                    if ($currDate > $dateCO)
                         $increment = $i;
-                    else
+
+                    if ($strDate !== strtotime($dateTrx) || $currDate <= $dateCO)
                         $increment = $i - 1;
 
                     $period = date("m", strtotime("+" . $increment . " months", $strDate));
@@ -697,7 +701,7 @@ class Receipt extends BaseController
                     $accumulation += $cost;
 
                     //? Check index first and strDate equal dateTrx or this month and cut off date
-                    if ($i == 1 && ($strDate == strtotime($dateTrx) || $currMonth == 01 && $currDate <= $dateCO || $currMonth == 12 && $currDate > $dateCO))
+                    if ($i == 1 && $currentMonth != $currMonth && ($strDate == strtotime($dateTrx) || ($strDate == strtotime($dateTrx) && $currMonth == 01 && $currDate <= $dateCO) || $currMonth == 12 && $currDate > $dateCO))
                         $accumulation = $cost + 0;
 
                     $bookValue -= $accumulation;
@@ -709,7 +713,7 @@ class Receipt extends BaseController
                     $row['residualvalue'] = round($residu, 2, PHP_ROUND_HALF_UP);
                     $row['costdepreciation'] = round($cost, 2, PHP_ROUND_HALF_UP);
                     $row['accumulateddepreciation'] = round($accumulation, 2, PHP_ROUND_HALF_UP);
-                    $row['bookvalue'] = round($bookValue, 2, PHP_ROUND_HALF_UP);;
+                    $row['bookvalue'] = round($bookValue, 2, PHP_ROUND_HALF_UP);
                     $row['depreciationtype'] = $type;
                     $row['currentmonth'] = $currentMonth;
                     $row['created_by'] = $val['created_by'];
