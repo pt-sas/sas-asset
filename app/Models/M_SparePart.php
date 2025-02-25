@@ -12,7 +12,12 @@ class M_SparePart extends Model
     protected $allowedFields    = [
         'value',
         'name',
-        'md_product_id',
+        'product_category_id',
+        'md_brand_id',
+        'md_category_id',
+        'md_subcategory_id',
+        'md_type_id',
+        'md_variant_id',
         'isactive',
         'created_by',
         'updated_by',
@@ -24,13 +29,13 @@ class M_SparePart extends Model
         '', // Number column
         'md_sparepart.value',
         'md_sparepart.name',
-        'md_product.name',
+        'pc.name',
         'md_sparepart.isactive'
     ];
     protected $column_search    = [
         'md_sparepart.value',
         'md_sparepart.name',
-        'md_product.name',
+        'pc.name',
         'md_sparepart.isactive'
     ];
     protected $order            = ['value' => 'ASC'];
@@ -49,7 +54,7 @@ class M_SparePart extends Model
     public function getSelect()
     {
         $sql = $this->table . '.*,
-            md_product.name as product';
+            pc.name as category';
 
         return $sql;
     }
@@ -57,7 +62,12 @@ class M_SparePart extends Model
     public function getJoin()
     {
         $sql = [
-            $this->setDataJoin('md_product', 'md_product.md_product_id = ' . $this->table . '.md_product_id', 'left')
+            $this->setDataJoin('md_category pc', 'pc.md_category_id = ' . $this->table . '.product_category_id', 'left'),
+            $this->setDataJoin('md_brand pb', 'pb.md_brand_id = ' . $this->table . '.md_brand_id', 'left'),
+            $this->setDataJoin('md_category psc', 'psc.md_category_id = ' . $this->table . '.md_category_id', 'left'),
+            $this->setDataJoin('md_type pt', 'pt.md_type_id = ' . $this->table . '.md_type_id', 'left'),
+            $this->setDataJoin('md_variant pv', 'pv.md_variant_id = ' . $this->table . '.md_variant_id', 'left')
+
         ];
 
         return $sql;
