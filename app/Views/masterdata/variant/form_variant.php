@@ -16,7 +16,7 @@
                     <small class="form-text text-danger" id="error_name"></small>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-2 mt-4">
                 <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input active" id="isactive" name="isactive">
@@ -24,6 +24,16 @@
                     </label>
                 </div>
             </div>
+            <?php if ($partField) { ?>
+            <div class="col-md-2 mt-4">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="ismasterpart" name="ismasterpart" hidden>
+                        <span class="form-check-sign">Master Part</span>
+                    </label>
+                </div>
+            </div>
+            <?php } ?>
         </div>
     </form>
 </div>

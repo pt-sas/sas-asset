@@ -14,7 +14,8 @@ class M_Variant extends Model
         'name',
         'isactive',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'ismasterpart'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\Variant';

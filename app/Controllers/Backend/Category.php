@@ -19,7 +19,14 @@ class Category extends BaseController
 
     public function index()
     {
-        return $this->template->render('masterdata/category/v_category');
+        $rolePartAdm = $this->access->getUserRoleName($this->session->get('sys_user_id'), 'W_IT_Admin');
+        $masterpartField = !is_null($rolePartAdm) ? true : false;
+
+        $data = [
+            'partField' => $masterpartField
+        ];
+
+        return $this->template->render('masterdata/category/v_category', $data);
     }
 
     public function showAll()
@@ -158,12 +165,23 @@ class Category extends BaseController
 
             try {
                 if (isset($post['search'])) {
-                    $list = $this->model->where('isactive', 'Y')
-                        ->like('name', $post['search'])
+                    if (!empty($post['name'])) {
+                        $list = $this->model->where(['isactive' => 'Y', 'ismasterpart' => 'Y'])
+                            ->like('name', $post['search'])
+                            ->orderBy('name', 'ASC')
+                            ->findAll();
+                    } else {
+                        $list = $this->model->where(['isactive' => 'Y', 'ismasterpart' => 'N'])
+                            ->like('name', $post['search'])
+                            ->orderBy('name', 'ASC')
+                            ->findAll();
+                    }
+                } else if (!empty($post['name'])) {
+                    $list = $this->model->where(['isactive' => 'Y', 'ismasterpart' => 'Y'])
                         ->orderBy('name', 'ASC')
                         ->findAll();
                 } else {
-                    $list = $this->model->where('isactive', 'Y')
+                    $list = $this->model->where(['isactive' => 'Y', 'ismasterpart' => 'N'])
                         ->orderBy('name', 'ASC')
                         ->findAll();
                 }
