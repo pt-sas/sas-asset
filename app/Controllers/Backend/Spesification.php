@@ -3,30 +3,24 @@
 namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
-use App\Models\M_Category;
-use App\Models\M_Employee;
-use App\Models\M_GroupAsset;
+use App\Models\M_Inventory;
+use App\Models\M_Product;
+use App\Models\M_SparePart;
+use App\Models\M_Spesification;
 use Config\Services;
 
-class Category extends BaseController
+class Spesification extends BaseController
 {
     public function __construct()
     {
         $this->request = Services::request();
-        $this->model = new M_Category($this->request);
-        $this->entity = new \App\Entities\Category();
+        $this->model = new M_Spesification($this->request);
+        $this->entity = new \App\Entities\Spesification();
     }
 
     public function index()
     {
-        $rolePartAdm = $this->access->getUserRoleName($this->session->get('sys_user_id'), 'W_IT_Admin');
-        $masterpartField = !is_null($rolePartAdm) ? true : false;
-
-        $data = [
-            'partField' => $masterpartField
-        ];
-
-        return $this->template->render('masterdata/category/v_category', $data);
+        return $this->template->render('transaction/spesification/v_spesification');
     }
 
     public function showAll()
@@ -46,18 +40,16 @@ class Category extends BaseController
 
             foreach ($list as $value) :
                 $row = [];
-                $ID = $value->md_category_id;
+                $ID = $value->trx_spesification_id;
 
                 $number++;
 
                 $row[] = $ID;
                 $row[] = $number;
-                $row[] = $value->value;
-                $row[] = $value->name;
-                $row[] = $value->initialcode;
-                $row[] = $value->groupasset;
-                $row[] = $value->pic;
-                $row[] = active($value->isactive);
+                $row[] = $value->assetcode;
+                $row[] = $value->product;
+                $row[] = $value->description;
+                $row[] = $value->created_by;
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
             endforeach;
@@ -81,7 +73,7 @@ class Category extends BaseController
             try {
                 $this->entity->fill($post);
 
-                if (!$this->validation->run($post, 'category')) {
+                if (!$this->validation->run($post, 'spesification')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
                     $response = $this->save();
@@ -96,21 +88,46 @@ class Category extends BaseController
 
     public function show($id)
     {
-        $groupasset = new M_GroupAsset($this->request);
-        $employee = new M_Employee($this->request);
+        $mInventory = new M_Inventory($this->request);
+        $mSparePart = new M_SparePart($this->request);
+        $mProduct = new M_Product($this->request);
 
         if ($this->request->isAJAX()) {
             try {
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
 
-                $rowGroup = $groupasset->find($list[0]->getGroupAssetId());
+                $rowAssetCode = $mInventory->find($list[0]->getInventoryId());
 
-                $list = $this->field->setDataSelect($groupasset->table, $list, $groupasset->primaryKey, $rowGroup->getGroupAssetId(), $rowGroup->getName());
+                $list = $this->field->setDataSelect($mInventory->table, $list, $mInventory->primaryKey, $rowAssetCode->getInventoryId(), $rowAssetCode->getAssetCode());
 
-                if (!empty($list[0]->getPIC())) {
-                    $rowEmp = $employee->find($list[0]->getPIC());
+                if (!empty($list[0]->getProcessorId())) {
+                    $rowProcessor = $mSparePart->find($list[0]->getProcessorId());
+                    $list = $this->field->setDataSelect($mSparePart->table, $list, 'processor_id', $rowProcessor->getSparePartId(), $rowProcessor->getName());
+                }
 
-                    $list = $this->field->setDataSelect($employee->table, $list, "pic", $rowEmp->getEmployeeId(), $rowEmp->getName());
+                if (!empty($list[0]->getMotherboardId())) {
+                    $rowMotherboard = $mSparePart->find($list[0]->getMotherBoardId());
+                    $list = $this->field->setDataSelect($mSparePart->table, $list, 'motherboard_id', $rowMotherboard->getSparePartId(), $rowMotherboard->getName());
+                }
+
+                if (!empty($list[0]->getVideoGraphicId())) {
+                    $rowVGA = $mSparePart->find($list[0]->getVideoGraphicId());
+                    $list = $this->field->setDataSelect($mSparePart->table, $list, 'video_graphic_id', $rowVGA->getSparePartId(), $rowVGA->getName());
+                }
+
+                if (!empty($list[0]->getCaseId())) {
+                    $rowCase = $mSparePart->find($list[0]->getCaseId());
+                    $list = $this->field->setDataSelect($mSparePart->table, $list, 'case_id', $rowCase->getSparePartId(), $rowCase->getName());
+                }
+
+                if (!empty($list[0]->getPowerSupplyId())) {
+                    $rowPSU = $mSparePart->find($list[0]->getPowerSupplyId());
+                    $list = $this->field->setDataSelect($mSparePart->table, $list, 'power_supply_id', $rowPSU->getSparePartId(), $rowPSU->getName());
+                }
+
+                if (!empty($list[0]->getOperationId())) {
+                    $rowOS = $mProduct->find($list[0]->getOperationId());
+                    $list = $this->field->setDataSelect($mSparePart->table, $list, 'operation_id', $rowOS->getProductId(), $rowOS->getName());
                 }
 
                 $result = [
@@ -140,22 +157,6 @@ class Category extends BaseController
         }
     }
 
-    public function getSeqCode()
-    {
-        if ($this->request->isAJAX()) {
-            try {
-                $number = $this->model->getSeqNumber();
-                $docno = "CT" . $number;
-
-                $response = message('success', true, $docno);
-            } catch (\Exception $e) {
-                $response = message('error', false, $e->getMessage());
-            }
-
-            return $this->response->setJSON($response);
-        }
-    }
-
     public function getList()
     {
         if ($this->request->isAjax()) {
@@ -165,30 +166,19 @@ class Category extends BaseController
 
             try {
                 if (isset($post['search'])) {
-                    if (!empty($post['name'])) {
-                        $list = $this->model->where(['isactive' => 'Y', 'ismasterpart' => 'Y'])
-                            ->like('name', $post['search'])
-                            ->orderBy('name', 'ASC')
-                            ->findAll();
-                    } else {
-                        $list = $this->model->where(['isactive' => 'Y', 'ismasterpart' => 'N'])
-                            ->like('name', $post['search'])
-                            ->orderBy('name', 'ASC')
-                            ->findAll();
-                    }
-                } else if (!empty($post['name'])) {
-                    $list = $this->model->where(['isactive' => 'Y', 'ismasterpart' => 'Y'])
-                        ->orderBy('name', 'ASC')
+                    $list = $this->model->where('isactive', 'Y')
+                        ->like('assetcode', $post['search'])
+                        ->orderBy('assetcode', 'ASC')
                         ->findAll();
                 } else {
-                    $list = $this->model->where(['isactive' => 'Y', 'ismasterpart' => 'N'])
-                        ->orderBy('name', 'ASC')
+                    $list = $this->model->where('isactive', 'Y')
+                        ->orderBy('assetcode', 'ASC')
                         ->findAll();
                 }
 
                 foreach ($list as $key => $row) :
-                    $response[$key]['id'] = $row->getCategoryId();
-                    $response[$key]['text'] = $row->getName();
+                    $response[$key]['id'] = $row->getAssetCode();
+                    $response[$key]['text'] = $row->getAssetCode();
                 endforeach;
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -198,25 +188,20 @@ class Category extends BaseController
         }
     }
 
-    public function getPic()
+    public function getProduct()
     {
-        $groupasset = new M_GroupAsset($this->request);
+        $mInventory = new M_Inventory($this->request);
+        $mProduct = new M_Product($this->request);
 
         if ($this->request->isAjax()) {
             $post = $this->request->getVar();
 
             try {
-                if (isset($post['name']))
-                    $row = $this->model->getByProduct('md_product.name', $post['name']);
+                if (isset($post['trx_inventory_id']) && $post['trx_inventory_id'] != 0) {
+                    $inventory = $mInventory->find($post['trx_inventory_id']);
+                    $product = $mProduct->find($inventory->getProductId());
 
-                if (isset($post['id']))
-                    $row = $this->model->getByProduct('md_product.md_product_id', $post['id']);
-
-                if (!$row->pic) {
-                    $val = $groupasset->find($row->md_groupasset_id);
-                    $response = $val->pic;
-                } else {
-                    $response = $row->pic;
+                    $response = ['product' => $product->getName()];
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());

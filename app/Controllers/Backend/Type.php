@@ -18,7 +18,14 @@ class Type extends BaseController
 
     public function index()
     {
-        return $this->template->render('masterdata/type/v_type');
+        $rolePartAdm = $this->access->getUserRoleName($this->session->get('sys_user_id'), 'W_IT_Admin');
+        $masterpartField = !is_null($rolePartAdm) ? true : false;
+
+        $data = [
+            'partField' => $masterpartField
+        ];
+
+        return $this->template->render('masterdata/type/v_type', $data);
     }
 
     public function showAll()
@@ -93,7 +100,7 @@ class Type extends BaseController
                 $list = $this->model->where($this->model->primaryKey, $id)->findAll();
 
                 if (!empty($list[0]->getSubCategoryId())) {
-                    $rowSub = $sub->getListSub($sub->table . '.' . $sub->primaryKey, $list[0]->getSubCategoryId())->getRow();
+                    $rowSub = $sub->getListSub([$sub->table . '.' . $sub->primaryKey => $list[0]->getSubCategoryId()])->getRow();
 
                     $list = $this->field->setDataSelect($sub->table, $list, $sub->primaryKey, $rowSub->md_subcategory_id, $rowSub->name . '_' . $rowSub->category);
                 }
@@ -156,14 +163,20 @@ class Type extends BaseController
 
             try {
                 if (isset($post['search'])) {
-                    $list = $this->model->getListType('md_type.isactive', 'Y', ['md_type.name', $post['search']], ['name', 'ASC'])->getResult();
+                    if (!empty($post['name'])) {
+                        $list = $this->model->getListType(['md_type.isactive' => 'Y', 'md_type.ismasterpart' => 'Y'], ['md_type.name', $post['search']], ['name', 'ASC'])->getResult();
+                    } else {
+                        $list = $this->model->getListType(['md_type.isactive' => 'Y', 'md_type.ismasterpart' => 'N'], ['md_type.name', $post['search']], ['name', 'ASC'])->getResult();
+                    }
                 } else if (isset($post['reference']) && !empty($post['reference'])) {
                     $list = $this->model->where([
                         'isactive'              => 'Y',
                         'md_subcategory_id'     => $post['reference']
                     ])->orderBy('name', 'ASC')->findAll();
+                } else if (!empty($post['name'])) {
+                    $list = $this->model->getListType(['md_type.isactive' => 'Y', 'md_type.ismasterpart' => 'Y'], [], ['md_type.name', 'ASC'])->getResult();
                 } else {
-                    $list = $this->model->getListType('md_type.isactive', 'Y', [], ['md_type.name', 'ASC'])->getResult();
+                    $list = $this->model->getListType(['md_type.isactive' => 'Y', 'md_type.ismasterpart' => 'N'], [], ['md_type.name', 'ASC'])->getResult();
                 }
 
                 if (count($list) > 0) {

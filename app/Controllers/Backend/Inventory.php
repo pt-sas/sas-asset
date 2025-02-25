@@ -207,14 +207,27 @@ class Inventory extends BaseController
         if ($this->request->isAjax()) {
             $post = $this->request->getVar();
 
+            // TODO : This Variable for Getting Asset Code with Category CPU (100004) Or LAPTOP (100038) For Spesification
+            $categoryPC = [100004, 100038];
+
             $response = [];
 
             try {
                 if (isset($post['search'])) {
-                    $list = $this->model->where('isactive', 'Y')
-                        ->like('assetcode', $post['search'])
-                        ->orLike('numberplate', $post['search'])
-                        ->orderBy('assetcode', 'ASC')
+                    if (!empty($post['name'])) {
+                        $list = $this->model->where(['trx_inventory.isactive' => 'Y'])->whereIn('md_product.md_category_id', $categoryPC)->like('assetcode', $post['search'])
+                            ->orderBy('assetcode', 'ASC')->join('md_product', 'trx_inventory.md_product_id = md_product.md_product_id')
+                            ->findAll();
+                    } else {
+                        $list = $this->model->where('isactive', 'Y')
+                            ->like('assetcode', $post['search'])
+                            ->orLike('numberplate', $post['search'])
+                            ->orderBy('assetcode', 'ASC')
+                            ->findAll();
+                    }
+                } else if (!empty($post['name'])) {
+                    $list = $this->model->where(['trx_inventory.isactive' => 'Y'])->whereIn('md_product.md_category_id', $categoryPC)
+                        ->orderBy('assetcode', 'ASC')->join('md_product', 'trx_inventory.md_product_id = md_product.md_product_id')
                         ->findAll();
                 } else {
                     $list = $this->model->where('isactive', 'Y')
@@ -223,7 +236,7 @@ class Inventory extends BaseController
                 }
 
                 foreach ($list as $key => $row) :
-                    $response[$key]['id'] = $row->getAssetCode();
+                    $response[$key]['id'] = $row->getInventoryId();
 
                     if (isset($post['plate']) && $row->getNumberPlate())
                         $response[$key]['text'] = $row->getAssetCode() . " - " . $row->getNumberPlate();

@@ -13,6 +13,7 @@ class Variant extends Entity
     protected $isactive;
     protected $created_by;
     protected $updated_by;
+    protected $ismasterpart;
 
     protected $dates   = [
         'created_at',
@@ -98,5 +99,15 @@ class Variant extends Entity
     public function setUpdatedBy($updated_by)
     {
         $this->attributes['updated_by'] = $updated_by;
+    }
+
+    public function getIsMasterPart()
+    {
+        return $this->attributes['ismasterpart'];
+    }
+
+    public function setIsMasterPart($ismasterpart)
+    {
+        $this->attributes['ismasterpart'] = $ismasterpart;
     }
 }

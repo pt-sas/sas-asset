@@ -16,6 +16,7 @@ class Category extends Entity
 	protected $created_by;
 	protected $updated_by;
 	protected $pic;
+	protected $ismasterpart;
 
 	protected $dates   = [
 		'created_at',
@@ -131,5 +132,15 @@ class Category extends Entity
 	public function setPIC($pic)
 	{
 		$this->attributes['pic'] = $pic;
+	}
+
+	public function getIsMasterPart()
+	{
+		return $this->attributes['ismasterpart'];
+	}
+
+	public function setIsMasterPart($ismasterpart)
+	{
+		$this->attributes['ismasterpart'] = $ismasterpart;
 	}
 }
