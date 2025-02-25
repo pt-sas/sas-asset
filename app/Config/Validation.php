@@ -1512,11 +1512,39 @@ class Validation
                 'required'      => 'Please Insert the {field} first'
             ]
         ],
-        'md_product_id'         => [
-            'label'             => 'Product',
+        'md_brand_id'        => [
+            'label'            => 'Brand',
+            'rules'            =>    'required',
+            'errors'        => [
+                'required'    => 'Please Choose the {field} first'
+            ]
+        ],
+        'md_category_id'    => [
+            'label'            => 'Category',
+            'rules'            =>    'required',
+            'errors'        => [
+                'required'    => 'Please Choose the {field} first'
+            ]
+        ],
+        'md_subcategory_id'    => [
+            'label'            => 'Subcategory',
+            'rules'            => 'required',
+            'errors'        => [
+                'required'    => 'Please Choose the {field} first'
+            ]
+        ],
+        'md_type_id'        => [
+            'label'            => 'Type',
+            'rules'            => 'required',
+            'errors'        => [
+                'required'    => 'Please Choose the {field} first'
+            ]
+        ],
+        'product_category_id'         => [
+            'label'             => 'Product Category',
             'rules'             => 'required',
             'errors'            => [
-                'is_unique'     => 'This {field} already exists.'
+                'required'     => 'Please Fill {field} first'
             ]
         ],
     ];
@@ -1553,5 +1581,33 @@ class Validation
                 'is_natural_no_zero'    => 'The {field} field must only contain digits and must be greater than zero Line'
             ]
         ]
+    ];
+
+    public $spesification = [
+        'trx_inventory_id' => [
+            'label' => 'assetcode',
+            'rules' => 'required|is_unique[trx_spesification.trx_inventory_id,trx_spesification_id,{id}]',
+            'errors' => [
+                'required'      => 'Please Insert the {field} first.',
+                'is_unique'     => 'This {field} already exists.'
+            ]
+        ]
+    ];
+
+    public $spec_detail = [
+        'line'                  => [
+            'label'             => 'Memory Line',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} first.'
+            ]
+        ],
+        'detail.table.*.md_sparepart_id_line'  => [
+            'label'             => 'Spare Part',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Insert the {field} Line',
+            ]
+        ],
     ];
 }

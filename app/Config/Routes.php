@@ -367,7 +367,22 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
 
     $routes->post('docaction/getDocaction', 'Backend\DocAction::getDocaction');
 
-    $routes->add('depreciation', 'Backend\Depreciation::index');
+    $routes->add('spesification', 'Backend\Spesification::index');
+    $routes->match(['get', 'post'], 'spesification/showAll', 'Backend\Spesification::showAll');
+    $routes->post('spesification/create', 'Backend\Spesification::create');
+    $routes->get('spesification/show/(:any)', 'Backend\Spesification::show/$1');
+    $routes->get('spesification/destroy/(:any)', 'Backend\Spesification::destroy/$1');
+    $routes->post('spesification/getProduct', 'Backend\Spesification::getProduct');
+
+    $routes->post('memory/create', 'Backend\Memory::create');
+    $routes->get('memory/show/(:any)', 'Backend\Memory::show/$1');
+    $routes->get('memory/destroy/(:any)', 'Backend\Memory::destroy/$1');
+    $routes->post('memory/tableLine', 'Backend\Memory::tableLine');
+
+    $routes->post('storage/create', 'Backend\Storage::create');
+    $routes->get('storage/show/(:any)', 'Backend\Storage::show/$1');
+    $routes->get('storage/destroy/(:any)', 'Backend\Storage::destroy/$1');
+    $routes->post('storage/tableLine', 'Backend\Storage::tableLine');
 });
 
 /*
