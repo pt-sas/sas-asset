@@ -1506,7 +1506,7 @@ class Validation
         ],
         'name'                  => [
             'label'             => 'Name',
-            'rules'             => 'required|is_exist[md_sparepart.name,md_sparepart_id,{id},md_product_id,{md_product_id}]',
+            'rules'             => 'required|is_exist[md_sparepart.name,md_sparepart_id,{id},product_category_id,{product_category_id}]',
             'errors'            => [
                 'is_exist'      => 'This {field} already exists.',
                 'required'      => 'Please Insert the {field} first'
