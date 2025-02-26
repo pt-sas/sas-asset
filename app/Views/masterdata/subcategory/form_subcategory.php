@@ -33,14 +33,15 @@
                 </div>
             </div>
             <?php if ($partField) { ?>
-            <div class="col-md-2 mt-4">
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" id="ismasterpart" name="ismasterpart" hidden>
-                        <span class="form-check-sign">Master Part</span>
-                    </label>
+                <div class="col-md-2 mt-4">
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input type="checkbox" class="form-check-input" id="ismasterpart" name="ismasterpart"
+                                data-target="md_category_id" hidden>
+                            <span class="form-check-sign">Master Part</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
             <?php } ?>
         </div>
     </form>
