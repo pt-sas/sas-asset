@@ -152,7 +152,7 @@ class Variant extends BaseController
 
             try {
                 if (isset($post['search'])) {
-                    if (isset($post['name'])) {
+                    if (isset($post['name']) && !empty($post['name'])) {
                         $list = $this->model->where(['isactive' => 'Y', 'ismasterpart' => 'Y'])
                             ->like('name', $post['search'])
                             ->orderBy('name', 'ASC')
@@ -163,7 +163,7 @@ class Variant extends BaseController
                             ->orderBy('name', 'ASC')
                             ->findAll();
                     }
-                } else if (isset($post['name'])) {
+                } else if (isset($post['name']) && !empty($post['name'])) {
                     $list = $this->model->where(['isactive' => 'Y', 'ismasterpart' => 'Y'])
                         ->orderBy('name', 'ASC')
                         ->findAll();
