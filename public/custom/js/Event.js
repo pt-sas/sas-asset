@@ -1904,7 +1904,7 @@ $("#form_barcode").on("change", "#iswithtext", function (evt) {
 /**
  * Event Listener Product Form
  */
-$("#form_product, #form_product_info").on(
+$("#form_product, #form_product_info, #form_parts").on(
   "change",
   "#md_category_id",
   function (evt) {
@@ -1985,7 +1985,7 @@ $("#form_product, #form_product_info").on(
   }
 );
 
-$("#form_product, #form_product_info").on(
+$("#form_product, #form_product_info, #form_parts").on(
   "change",
   "#md_subcategory_id",
   function (evt) {

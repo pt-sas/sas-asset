@@ -120,13 +120,13 @@ class Product extends BaseController
                 $list = $this->field->setDataSelect($category->table, $list, $category->primaryKey, $rowCategory->getCategoryId(), $rowCategory->getName());
 
                 if (!empty($list[0]->getSubCategoryId())) {
-                    $rowSub = $sub->getListSub($sub->table . '.' . $sub->primaryKey, $list[0]->getSubCategoryId())->getRow();
+                    $rowSub = $sub->getListSub([$sub->table . '.' . $sub->primaryKey => $list[0]->getSubCategoryId()])->getRow();
 
                     $list = $this->field->setDataSelect($sub->table, $list, $sub->primaryKey, $rowSub->md_subcategory_id, $rowSub->name . '_' . $rowSub->category);
                 }
 
                 if (!empty($list[0]->getTypeId())) {
-                    $rowType = $type->getListType($type->table . '.' . $type->primaryKey, $list[0]->getTypeId())->getRow();
+                    $rowType = $type->getListType([$type->table . '.' . $type->primaryKey => $list[0]->getTypeId()])->getRow();
 
                     $list = $this->field->setDataSelect($type->table, $list, $type->primaryKey, $rowType->md_type_id, $rowType->name . '_' . $rowType->subcategory);
                 }

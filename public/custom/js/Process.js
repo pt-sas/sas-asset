@@ -399,6 +399,36 @@ _tableServicePart = $(".tb_service_part").DataTable({
   autoWidth: false,
 });
 
+_tableMemory = $(".tb_memory").DataTable({
+  drawCallback: function (settings) {
+    $(this).find(".select2").select2({
+      placeholder: "Select an option",
+      theme: "bootstrap",
+      allowClear: true,
+    });
+  },
+  lengthChange: false,
+  paging: false,
+  searching: false,
+  ordering: false,
+  autoWidth: false,
+});
+
+_tableStorage = $(".tb_storage").DataTable({
+  drawCallback: function (settings) {
+    $(this).find(".select2").select2({
+      placeholder: "Select an option",
+      theme: "bootstrap",
+      allowClear: true,
+    });
+  },
+  lengthChange: false,
+  paging: false,
+  searching: false,
+  ordering: false,
+  autoWidth: false,
+});
+
 /**
  * Table Tree in Role
  */
@@ -898,6 +928,7 @@ $(".save_form").click(function (evt) {
         hideLoadingForm(form.prop("id"));
       },
       success: function (result) {
+        console.log(result);
         if (result[0].success) {
           Toast.fire({
             type: "success",
@@ -3563,7 +3594,7 @@ function replaceRupiah(numeric) {
  * Function initialize select2 dropdown based on url on the element html
  * @param {*} select
  */
-function initSelectData(select, field = null, id = null) {
+function initSelectData(select, field = null, id = null, ref = null) {
   $.each(select, function (i, item) {
     let url = $(item).attr("data-url");
     let defaultID = $(item).attr("default-id");
@@ -3597,6 +3628,7 @@ function initSelectData(select, field = null, id = null) {
             return {
               search: params.term,
               name: lastParam,
+              reference: ref,
             };
           },
           processResults: function (data, page) {
@@ -4908,5 +4940,30 @@ _tableLine.on("click", ".btn_accept", function (evt) {
     });
 
     $(_this).html(oriElement).prop("disabled", false);
+  }
+});
+
+//TODO : Event Handler for Getting Data Base on Checkbox Master Part on Master SubCategory & Type
+$(document).on("click", "#ismasterpart", function (e) {
+  const form = $(this).closest("form");
+  const elementTarget = $("#" + $(this).data("target"));
+  let select = form.find("select.select-data");
+
+  if (elementTarget.length) {
+    elementTarget.val("");
+
+    if ($(this).is(":checked")) {
+      elementTarget.attr(
+        "data-url",
+        elementTarget.attr("data-url") + "/$MasterPart"
+      );
+    } else {
+      let lastUrl = elementTarget.attr("data-url").split("/");
+      lastUrl.pop();
+
+      elementTarget.attr("data-url", lastUrl.join("/"));
+    }
+
+    initSelectData(select);
   }
 });

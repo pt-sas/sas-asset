@@ -19,7 +19,8 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="md_subcategory_id">Subcategory <span class="required">*</span></label>
-                    <select class="form-control select-data" id="md_subcategory_id" name="md_subcategory_id" data-url="subcategory/getList">
+                    <select class="form-control select-data" id="md_subcategory_id" name="md_subcategory_id"
+                        data-url="subcategory/getList">
                         <option value="">Select Sub-Category</option>
                     </select>
                     <small class="form-text text-danger" id="error_md_subcategory_id"></small>
@@ -31,6 +32,17 @@
                     </label>
                 </div>
             </div>
+            <?php if ($partField) { ?>
+                <div class="col-md-2 mt-4">
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input type="checkbox" class="form-check-input" id="ismasterpart" name="ismasterpart"
+                                data-target="md_subcategory_id" hidden>
+                            <span class="form-check-sign">Master Part</span>
+                        </label>
+                    </div>
+                </div>
+            <?php } ?>
         </div>
     </form>
 </div>

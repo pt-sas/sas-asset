@@ -15,7 +15,8 @@ class M_Type extends Model
         'isactive',
         'created_by',
         'updated_by',
-        'md_subcategory_id'
+        'md_subcategory_id',
+        'ismasterpart'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\Type';
@@ -72,7 +73,7 @@ class M_Type extends Model
         ];
     }
 
-    public function getListType($field = null, $where = null, $like = [], $orderBy = [])
+    public function getListType($where = [], $like = [], $orderBy = [])
     {
         $this->builder->select(
             $this->table . '.*,
@@ -82,7 +83,9 @@ class M_Type extends Model
         $this->builder->join('md_subcategory', 'md_subcategory.md_subcategory_id = ' . $this->table . '.md_subcategory_id', 'left');
 
         if (!empty($where))
-            $this->builder->where($field, $where);
+            foreach ($where as $key => $value) {
+                $this->builder->where($key, $value);
+            }
 
         if (count($like) > 0)
             $this->builder->like($like[0], $like[1]);

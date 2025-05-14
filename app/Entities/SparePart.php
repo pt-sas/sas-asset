@@ -9,7 +9,12 @@ class SparePart extends Entity
 	protected $md_sparepart_id;
 	protected $value;
 	protected $name;
-	protected $md_product_id;
+	protected $product_category_id;
+	protected $md_brand_id;
+	protected $md_category_id;
+	protected $md_subcategory_id;
+	protected $md_type_id;
+	protected $md_variant_id;
 	protected $description;
 	protected $isactive;
 	protected $created_by;
@@ -51,14 +56,64 @@ class SparePart extends Entity
 		$this->attributes['name'] = $name;
 	}
 
-	public function getProductId()
+	public function getProductCategoryId()
 	{
-		return $this->attributes['md_product_id'];
+		return $this->attributes['product_category_id'];
 	}
 
-	public function setProductId($md_product_id)
+	public function setProductCategoryId($product_category_id)
 	{
-		$this->attributes['md_product_id'] = $md_product_id;
+		$this->attributes['product_category_id'] = $product_category_id;
+	}
+
+	public function getBrandId()
+	{
+		return $this->attributes['md_brand_id'];
+	}
+
+	public function setBrandId($md_brand_id)
+	{
+		$this->attributes['md_brand_id'] = $md_brand_id;
+	}
+
+	public function getCategoryId()
+	{
+		return $this->attributes['md_category_id'];
+	}
+
+	public function setCategoryId($md_category_id)
+	{
+		$this->attributes['md_category_id'] = $md_category_id;
+	}
+
+	public function getSubCategoryId()
+	{
+		return $this->attributes['md_subcategory_id'];
+	}
+
+	public function setSubCategoryId($md_subcategory_id)
+	{
+		$this->attributes['md_subcategory_id'] = $md_subcategory_id;
+	}
+
+	public function getTypeId()
+	{
+		return $this->attributes['md_type_id'];
+	}
+
+	public function setTypeId($md_type_id)
+	{
+		$this->attributes['md_type_id'] = $md_type_id;
+	}
+
+	public function getVariantId()
+	{
+		return $this->attributes['md_variant_id'];
+	}
+
+	public function setVariantId($md_variant_id)
+	{
+		$this->attributes['md_variant_id'] = $md_variant_id;
 	}
 
 	public function getDescription()

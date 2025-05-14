@@ -18,7 +18,14 @@ class Subcategory extends BaseController
 
     public function index()
     {
-        return $this->template->render('masterdata/subcategory/v_subcategory');
+        $rolePartAdm = $this->access->getUserRoleName($this->session->get('sys_user_id'), 'W_IT_Admin');
+        $masterpartField = !is_null($rolePartAdm) ? true : false;
+
+        $data = [
+            'partField' => $masterpartField
+        ];
+
+        return $this->template->render('masterdata/subcategory/v_subcategory', $data);
     }
 
     public function showAll()
@@ -154,14 +161,20 @@ class Subcategory extends BaseController
 
             try {
                 if (isset($post['search'])) {
-                    $list = $this->model->getListSub('md_subcategory.isactive', 'Y', ['md_subcategory.name', $post['search']], ['name', 'ASC'])->getResult();
+                    if (!empty($post['name'])) {
+                        $list = $this->model->getListSub(['md_subcategory.isactive' => 'Y', 'md_subcategory.ismasterpart' => 'Y'], ['md_subcategory.name', $post['search']], ['name', 'ASC'])->getResult();
+                    } else {
+                        $list = $this->model->getListSub(['md_subcategory.isactive' => 'Y', 'md_subcategory.ismasterpart' => 'N'], ['md_subcategory.name', $post['search']], ['name', 'ASC'])->getResult();
+                    }
                 } else if (isset($post['reference']) && !empty($post['reference'])) {
                     $list = $this->model->where([
                         'isactive'          => 'Y',
                         'md_category_id'    => $post['reference']
                     ])->orderBy('name', 'ASC')->findAll();
+                } else if (!empty($post['name'])) {
+                    $list = $this->model->getListSub(['md_subcategory.isactive' => 'Y', 'md_subcategory.ismasterpart' => 'Y'])->getResult();
                 } else {
-                    $list = $this->model->getListSub('md_subcategory.isactive', 'Y', [], ['md_subcategory.name', 'ASC'])->getResult();
+                    $list = $this->model->getListSub(['md_subcategory.isactive' => 'Y', 'md_subcategory.ismasterpart' => 'N'], [], ['md_subcategory.name', 'ASC'])->getResult();
                 }
 
                 if (count($list) > 0) {

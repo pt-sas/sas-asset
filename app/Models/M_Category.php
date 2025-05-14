@@ -17,7 +17,8 @@ class M_Category extends Model
         'isactive',
         'created_by',
         'updated_by',
-        'pic'
+        'pic',
+        'ismasterpart'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\Category';
