@@ -225,7 +225,9 @@ function array_orderby()
  */
 function replaceStrBracket(string $str)
 {
-    if (preg_match('/^[^ ]+/', $str, $matches)) {
-        return $matches[0];
+    while (strpos($str, '(') !== false) {
+        $str = preg_replace('/\([^()]*\)/', '', $str);
     }
+
+    return trim($str);
 }
