@@ -51,4 +51,45 @@ class M_Transaction extends Model
 
         return $result;
     }
+
+    public function getSelect()
+    {
+        $sql = "{$this->table}.assetcode,
+                p.name AS product,
+                {$this->table}.transactiondate,
+                {$this->table}.transactiontype,
+                r.name AS room,
+                e.name AS employee,
+                re.documentno AS docreceipt,
+                me.documentno AS docmovement,
+                u.username AS created,
+                r.description";
+        return $sql;
+    }
+
+    public function getJoin()
+    {
+        $sql = [
+            $this->setDataJoin('trx_inventory i', "i.assetcode = {$this->table}.assetcode", 'inner'),
+            $this->setDataJoin('md_product p', "p.md_product_id = {$this->table}.md_product_id", 'left'),
+            $this->setDataJoin('md_room r', "r.md_room_id = {$this->table}.md_room_id", 'left'),
+            $this->setDataJoin('md_employee e', "e.md_employee_id = {$this->table}.md_employee_id", 'left'),
+            $this->setDataJoin('trx_receipt_detail rd', "rd.trx_receipt_detail_id = {$this->table}.trx_receipt_detail_id", 'left'),
+            $this->setDataJoin('trx_receipt re', 'rd.trx_receipt_id = re.trx_receipt_id', 'left'),
+            $this->setDataJoin('trx_movement_detail md', "md.trx_movement_detail_id = {$this->table}.trx_movement_detail_id", 'left'),
+            $this->setDataJoin('trx_movement me', 'md.trx_movement_id = me.trx_movement_id', 'left'),
+            $this->setDataJoin('sys_user u', "u.sys_user_id = {$this->table}.created_by", 'left')
+        ];
+
+        return $sql;
+    }
+
+    private function setDataJoin($tableJoin, $columnJoin, $typeJoin = "inner")
+    {
+        return [
+            "tableJoin" => $tableJoin,
+            "columnJoin" => $columnJoin,
+            "typeJoin" => $typeJoin
+        ];
+    }
 }

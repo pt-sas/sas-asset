@@ -383,6 +383,9 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('storage/show/(:any)', 'Backend\Storage::show/$1');
     $routes->get('storage/destroy/(:any)', 'Backend\Storage::destroy/$1');
     $routes->post('storage/tableLine', 'Backend\Storage::tableLine');
+
+    $routes->add('rpt_history_asset', 'Backend\Rpt_HistoryAsset::index');
+    $routes->match(['get', 'post'], 'rpt_history_asset/showAll', 'Backend\Rpt_HistoryAsset::showAll');
 });
 
 /*
