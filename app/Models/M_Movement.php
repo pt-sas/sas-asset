@@ -64,7 +64,8 @@ class M_Movement extends Model
 		'md_status.name',
 		'trx_movement.docstatus',
 		'sys_user.name',
-		'trx_movement.description'
+		'trx_movement.description',
+		'trx_movement_detail.assetcode'
 	];
 	protected $order = ['created_at' => 'DESC'];
 	protected $request;
@@ -81,8 +82,26 @@ class M_Movement extends Model
 
 	public function getSelect()
 	{
-		$sql = $this->table . '.*,' .
-			'sys_user.name as createdby,
+		$sql =
+			'DISTINCT(trx_movement.trx_movement_id),
+			trx_movement.isactive,
+			trx_movement.created_at,
+			trx_movement.created_by,
+			trx_movement.updated_at,
+			trx_movement.updated_by,
+			trx_movement.ref_movement_id,
+			trx_movement.documentno,
+			trx_movement.movementdate,
+			trx_movement.movementtype,
+			trx_movement.docstatus,
+			trx_movement.md_branch_id,
+			trx_movement.md_division_id,
+			trx_movement.md_branchto_id,
+			trx_movement.md_divisionto_id,
+			trx_movement.description,
+			trx_movement.movementstatus,
+			trx_movement.sys_wfscenario_id,
+			sys_user.name as createdby,
 			bfrom.name as branch,
 			dfrom.name as division,
 			bto.name as branchto,
@@ -101,6 +120,7 @@ class M_Movement extends Model
 
 		$sql = [
 			$this->setDataJoin('trx_movement ref', 'ref.trx_movement_id = ' . $this->table . '.ref_movement_id', 'left'),
+			$this->setDataJoin('trx_movement_detail', 'trx_movement_detail.trx_movement_id = ' . $this->table . '.trx_movement_id', 'left'),
 			$this->setDataJoin('sys_user', 'sys_user.sys_user_id = ' . $this->table . '.created_by', 'left'),
 			$this->setDataJoin('md_branch bfrom', 'bfrom.md_branch_id = ' . $this->table . '.md_branch_id', 'left'),
 			$this->setDataJoin('md_branch bto', 'bto.md_branch_id = ' . $this->table . '.md_branchto_id', 'left'),
