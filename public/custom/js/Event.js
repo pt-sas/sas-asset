@@ -2519,9 +2519,7 @@ $("#form_opname").on("change", "#md_employee_id", function (evt) {
             if (form.find("table.tb_displayline").length > 0) {
               let line = JSON.parse(arrMsg.line);
 
-              $.each(line, function (idx, elem) {
-                _tableLine.row.add(elem).draw(false);
-              });
+              _tableLine.rows.add(line).draw(false);
             }
 
             for (let i = 0; i < field.length; i++) {
