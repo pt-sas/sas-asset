@@ -55,6 +55,7 @@ class Rpt_AssetDetail extends BaseController
 
                     $row[] = $number;
                     $row[] = $value->assetcode;
+                    $row[] = $value->numberplate;
                     $row[] = $value->groupasset;
                     $row[] = $value->brand;
                     $row[] = $value->category;

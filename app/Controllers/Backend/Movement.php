@@ -705,7 +705,7 @@ class Movement extends BaseController
                     $this->field->fieldTable('select', null, 'division_to', null, null, 'readonly', null, $dataDivision, $row->division_to, 200, 'md_division_id', 'name'),
                     $this->field->fieldTable('input', 'text', 'room_from', null, 'required', 'readonly', null, null, $roomFrom, 200),
                     $this->field->fieldTable('select', null, 'room_to', 'updatable', 'required', null, null, $dataRoomTo, $row->room_to, 250, 'md_room_id', 'name, description'),
-                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250)
+                    $this->field->fieldTable('input', 'text', 'description', 'updatable', null, null, null, null, $row->description, 250)
                 ];
             endforeach;
         }
