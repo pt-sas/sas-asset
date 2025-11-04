@@ -3149,3 +3149,416 @@ $("#form_service").on("change", "#md_room_id", function (evt) {
     }
   });
 });
+
+$("#form_spesification").on("click", ".btn-memory,.btn-storage", function (e) {
+  const parent = $(this).closest("form");
+  let assetcode = parent
+    .find("select[name=trx_inventory_id] option:selected")
+    .text();
+  let product = parent.find("input[name=product]").val();
+
+  if (ID !== "undefined" && ID !== "" && setSave !== "add") {
+    let className = this.className.split(/\s+/);
+    let form, url, table, modalName;
+
+    if (className.includes("btn-memory")) {
+      $("#modal_memory").modal({
+        backdrop: "static",
+        keyboard: false,
+      });
+
+      form = $("#form_memory");
+      url = `${ORI_URL}/sas/memory${SHOW}${ID}`;
+      table = _tableMemory;
+      modalName = "memory";
+    } else {
+      $("#modal_storage").modal({
+        backdrop: "static",
+        keyboard: false,
+      });
+
+      form = $("#form_storage");
+      url = `${ORI_URL}/sas/storage${SHOW}${ID}`;
+      table = _tableStorage;
+      modalName = "storage";
+    }
+
+    form.find("input[name=assetcode]").val(assetcode);
+    form.find("input[name=product]").val(product);
+    form.find("input[name=id]").val(ID);
+
+    $.ajax({
+      url: url,
+      type: "GET",
+      cache: false,
+      dataType: "JSON",
+      beforeSend: function () {
+        loadingForm(modalName, "facebook");
+      },
+      complete: function () {
+        hideLoadingForm(modalName);
+      },
+      success: function (result) {
+        if (result[0].success) {
+          let arrMsg = result[0].message;
+
+          // Show datatable line
+          if (arrMsg.line) {
+            let arrLine = arrMsg.line;
+
+            if (table.context.length) {
+              let line = JSON.parse(arrLine);
+
+              table.rows.add(line).draw(false);
+            }
+          }
+        } else {
+          Toast.fire({
+            type: "error",
+            title: result[0].message,
+          });
+        }
+      },
+      error: function (jqXHR, exception) {
+        showError(jqXHR, exception);
+      },
+    });
+  } else {
+    Toast.fire({
+      type: "error",
+      title: "Please Insert Asset Code And Save First",
+    });
+  }
+});
+
+$(".close_modal").click(function (e) {
+  if (_tableMemory.context.length) {
+    _tableMemory.clear().draw();
+  }
+
+  if (_tableStorage.context.length) {
+    _tableStorage.clear().draw();
+  }
+});
+
+$("#form_spesification").on("change", "#trx_inventory_id", function (e) {
+  const _this = $(this);
+  const form = _this.closest("form");
+  let select = form.find("select.select-data:not(#trx_inventory_id)");
+
+  $.ajax({
+    url: `${CURRENT_URL}/getProduct`,
+    type: "POST",
+    cache: false,
+    data: {
+      trx_inventory_id: _this.val(),
+    },
+    dataType: "JSON",
+    beforeSend: function () {
+      $(".close_modal").attr("disabled", true);
+      loadingForm(form.prop("id"), "pulse");
+    },
+    complete: function () {
+      $(".close_modal").removeAttr("disabled");
+      hideLoadingForm(form.prop("id"));
+    },
+    success: function (result) {
+      if (result) {
+        form.find("input[name=product]").val(result.product);
+        initSelectData(select, null, null, result.product);
+      }
+    },
+    error: function (jqXHR, exception) {
+      showError(jqXHR, exception);
+    },
+  });
+});
+
+$(".add_row_spesification").click(function (evt) {
+  const _this = $(this);
+  const form = $(evt.target).closest("form");
+  let table, url;
+
+  let oriElement = _this.html();
+  let textElement = _this.text().trim();
+
+  let formData = new FormData(form[0]);
+
+  if (form.find("table").hasClass("tb_memory")) {
+    table = _tableMemory;
+    url = `${ORI_URL}/sas/memory${TABLE_LINE}`;
+  } else {
+    table = _tableStorage;
+    url = `${ORI_URL}/sas/storage${TABLE_LINE}`;
+  }
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: formData,
+    processData: false,
+    contentType: false,
+    cache: false,
+    dataType: "JSON",
+    beforeSend: function () {
+      $(".close_modal").attr("disabled", true);
+      $(".save_modal").attr("disabled", true);
+      $(_this)
+        .html(
+          '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' +
+            textElement
+        )
+        .prop("disabled", true);
+    },
+    complete: function () {
+      $(".close_modal").removeAttr("disabled");
+      $(".save_modal").removeAttr("disabled");
+      $(_this).html(oriElement).prop("disabled", false);
+    },
+    success: function (result) {
+      table.row.add(result).draw(false);
+    },
+    error: function (jqXHR, exception) {
+      showError(jqXHR, exception);
+    },
+  });
+});
+
+_tableMemory.on("click", ".btn_delete", function (evt) {
+  evt.preventDefault();
+  const tr = _tableMemory.$(this).closest("tr");
+  const row = _tableMemory.row(tr);
+  let id = this.id;
+
+  let url = `${ORI_URL}/sas/memory${DELETE}${id}`;
+
+  let _this = $(this);
+  let oriElement = _this.html();
+
+  $(_this)
+    .html(
+      '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+    )
+    .prop("disabled", true);
+
+  if (id === "") {
+    setTimeout(function () {
+      row.remove().draw(false);
+      $(_this).html(oriElement).prop("disabled", false);
+    }, 100);
+  } else {
+    Swal.fire({
+      title: "Delete?",
+      text: "Are you sure to delete the selected data line ? ",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Ok",
+      cancelButtonText: "Close",
+      reverseButtons: true,
+    }).then((data) => {
+      if (data.value)
+        $.getJSON(url, function (result) {
+          if (result[0].success) {
+            Swal.fire({
+              title: "Deleted!",
+              text: "Your data has been deleted.",
+              type: "success",
+              showConfirmButton: false,
+              timer: 1000,
+            });
+            row.remove().draw(false);
+          } else {
+            Toast.fire({
+              type: "error",
+              title: result[0].message,
+            });
+          }
+        }).fail(function (jqXHR, exception) {
+          showError(jqXHR, exception);
+        });
+    });
+
+    $(_this).html(oriElement).prop("disabled", false);
+  }
+});
+
+/**
+ * Button Save Form Data Memory
+ *
+ */
+$(".save_modal").click(function (evt) {
+  const _this = $(this);
+  const target = $(evt.target);
+  const modal = target.closest(".modal");
+  const modalBody = modal.find(".modal-body");
+  const form = modal.find("form");
+  const modalActive = $("#modal_storage, #modal_memory");
+  let formData = new FormData();
+  let table = "";
+
+  let field;
+
+  if (form.find("table").hasClass("tb_memory")) {
+    table = _tableMemory;
+    url = `${ORI_URL}/sas/memory${CREATE}`;
+  } else {
+    table = _tableStorage;
+    url = `${ORI_URL}/sas/storage${CREATE}`;
+  }
+
+  //* Populate field form header
+  $.each(form, function () {
+    const formHeader = $(this).find(".row");
+    field = $(formHeader).find("input, select, textarea").not(".line");
+  });
+
+  //? Remove attribute disabled when submit data
+  for (let i = 0; i < field.length; i++) {
+    if (field[i].name !== "") {
+      let className = field[i].className.split(/\s+/);
+
+      //* Field containing class foreignkey
+      if (className.includes("foreignkey")) {
+        formData.append(field[i].name, $(field[i]).val());
+      }
+    }
+  }
+
+  //? Check in form exists Table
+  if (table.context.length) {
+    const rows = table.rows().nodes().to$();
+
+    let output = [];
+
+    $.each(rows, function (i) {
+      const tag = $(this).find("input, select, button, span");
+
+      if (tag.length) {
+        let row = {};
+
+        //* Table cell from tag
+        $.each(tag, function () {
+          let className = this.className.split(/\s+/);
+          let name = $(this).attr("name");
+          let value = this.value;
+          let id = $(this).attr("id");
+
+          if (
+            this.type === "text" ||
+            this.type === "select-one" ||
+            this.type === "hidden"
+          ) {
+            row[name] = value;
+          } else if (typeof name !== "undefined") {
+            if (id !== "") row[name] = id;
+            else row[name] = "";
+          }
+        });
+
+        output[i] = row;
+      }
+    });
+
+    formData.append("table", JSON.stringify(output));
+  }
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: formData,
+    processData: false,
+    contentType: false,
+    cache: false,
+    dataType: "JSON",
+    beforeSend: function () {
+      $(".close_modal").attr("disabled", true);
+      _this.attr("disabled", true);
+      loadingForm(modalBody.prop("id"), "facebook");
+    },
+    complete: function () {
+      $(".close_modal").removeAttr("disabled");
+      _this.removeAttr("disabled");
+      hideLoadingForm(modalBody.prop("id"));
+    },
+    success: function (result) {
+      if (result[0].success) {
+        Toast.fire({
+          type: "success",
+          title: result[0].message,
+        });
+        modalActive.modal("hide");
+        $(".close_modal").click();
+      } else if (result[0].error) {
+        errorForm(form, result);
+      } else {
+        Toast.fire({
+          type: "error",
+          title: result[0].message,
+        });
+      }
+    },
+    error: function (jqXHR, exception) {
+      showError(jqXHR, exception);
+    },
+  });
+});
+
+_tableStorage.on("click", ".btn_delete", function (evt) {
+  evt.preventDefault();
+  const tr = _tableStorage.$(this).closest("tr");
+  const row = _tableStorage.row(tr);
+  let id = this.id;
+
+  let url = `${ORI_URL}/sas/storage${DELETE}${id}`;
+
+  let _this = $(this);
+  let oriElement = _this.html();
+
+  $(_this)
+    .html(
+      '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+    )
+    .prop("disabled", true);
+
+  if (id === "") {
+    setTimeout(function () {
+      row.remove().draw(false);
+      $(_this).html(oriElement).prop("disabled", false);
+    }, 100);
+  } else {
+    Swal.fire({
+      title: "Delete?",
+      text: "Are you sure to delete the selected data line ? ",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Ok",
+      cancelButtonText: "Close",
+      reverseButtons: true,
+    }).then((data) => {
+      if (data.value)
+        $.getJSON(url, function (result) {
+          if (result[0].success) {
+            Swal.fire({
+              title: "Deleted!",
+              text: "Your data has been deleted.",
+              type: "success",
+              showConfirmButton: false,
+              timer: 1000,
+            });
+            row.remove().draw(false);
+          } else {
+            Toast.fire({
+              type: "error",
+              title: result[0].message,
+            });
+          }
+        }).fail(function (jqXHR, exception) {
+          showError(jqXHR, exception);
+        });
+    });
+
+    $(_this).html(oriElement).prop("disabled", false);
+  }
+});
