@@ -188,6 +188,7 @@ class Product extends BaseController
 
     public function merge_name($brand_id, $category_id, $subcategory_id = null, $type_id = null, $variant_id = null)
     {
+        $groupasset = new M_GroupAsset($this->request);
         $brand = new M_Brand($this->request);
         $category = new M_Category($this->request);
         $subcategory = new M_Subcategory($this->request);
@@ -198,10 +199,11 @@ class Product extends BaseController
 
         $rowBrand = $brand->find($brand_id);
         $rowCategory = $category->find($category_id);
+        $rowGroupAsset = $groupasset->find($rowCategory->getGroupAssetId());
         $rowSubcategory = $subcategory->find($subcategory_id);
         $rowType = $type->find($type_id);
 
-        $text =  $rowBrand->getName() . $separator . $rowCategory->getName();
+        $text =  $rowGroupAsset->getInitialCode() . $separator . $rowBrand->getName() . $separator . $rowCategory->getName();
 
         if (!empty($rowSubcategory)) {
             $text .= $separator . $rowSubcategory->getName();
