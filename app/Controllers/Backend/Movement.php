@@ -559,6 +559,7 @@ class Movement extends BaseController
                 //? Where clause inventory 
                 $invWhere["md_branch_id"] = $post["md_branch_id"];
                 $invWhere['isactive'] = 'Y';
+                $invWhere['isdisposed'] = 'N';
 
                 //? Doesn't have Role W_Move_All_Data
                 if ($dataEmpl && !$role)
@@ -678,6 +679,8 @@ class Movement extends BaseController
                 $invOrWhere = [];
 
                 if ($move->getDocStatus() === $this->DOCSTATUS_Drafted) {
+                    $invWhere['isdisposed'] = 'N';
+
                     if ($move->getMovementStatus() == 100010)
                         $invWhere["isnew"] = "Y";
                     else

@@ -2120,7 +2120,6 @@ $("#form_disposal").on("change", "#disposaltype", function (e) {
         input.closest(".form-group").hide();
         input.val(null);
 
-        tr.find('input[name="unitprice"]').val(elem.label);
       } else {
         let select = form.find("select[name=md_supplier_id]");
         select.closest(".form-group").hide();

@@ -12,7 +12,6 @@
                 <th>Doc No</th>
                 <th>Date</th>
                 <th>Type</th>
-                <th>Supplier</th>
                 <th>Sale Amount</th>
                 <th>Doc Status</th>
                 <th>Description</th>

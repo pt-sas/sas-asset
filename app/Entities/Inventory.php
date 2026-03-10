@@ -23,6 +23,7 @@ class Inventory extends Entity
     protected $md_groupasset_id;
     protected $residualvalue;
     protected $numberPlate;
+    protected $isdisposed;
 
     protected $dates   = [
         'created_at',
@@ -218,5 +219,15 @@ class Inventory extends Entity
     public function setIsNew($isnew)
     {
         $this->attributes['isnew'] = $isnew;
+    }
+
+    public function getIsDisposed()
+    {
+        return $this->attributes['isdisposed'];
+    }
+
+    public function setIsDisposed($isdisposed)
+    {
+        $this->attributes['isdisposed'] = $isdisposed;
     }
 }

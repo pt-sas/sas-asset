@@ -17,6 +17,9 @@ class M_Disposal extends Model
 		'docstatus',
 		'description',
 		'md_supplier_id',
+		'bapno',
+		'bpkno',
+		'sjkno',
 		'created_by',
 		'updated_by'
 	];
@@ -112,7 +115,7 @@ class M_Disposal extends Model
 		}
 
 		$first = "DP";
-		$prefix = $first . date('ym') . $code;
+		$prefix = $first  . date('ym') . '-' . $code;
 		return $prefix;
 	}
 
@@ -120,5 +123,13 @@ class M_Disposal extends Model
 	{
 		$disposalDetail = new M_DisposalDetail($this->request);
 		$disposalDetail->where($this->primaryKey, $rows['id'])->delete();
+	}
+
+	public function getDetail($where)
+	{
+		$this->builder->join('trx_disposal_detail', "{$this->table}.trx_disposal_id = trx_disposal_detail.trx_disposal_id", 'left');
+		$this->builder->where($where);
+
+		return $this->builder->get();
 	}
 }

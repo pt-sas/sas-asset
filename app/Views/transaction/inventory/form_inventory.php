@@ -110,11 +110,19 @@
                     </label>
                 </div>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <div class="form-check">
                     <label class="form-check-label">
                         <input type="checkbox" class="form-check-input" id="isspare" name="isspare">
                         <span class="form-check-sign">Spare</span>
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-1">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="isdisposed" name="isdisposed" disabled>
+                        <span class="form-check-sign">Disposed</span>
                     </label>
                 </div>
             </div>

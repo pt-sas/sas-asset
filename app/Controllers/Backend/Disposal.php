@@ -9,6 +9,7 @@ use App\Models\M_Product;
 use App\Models\M_Reference;
 use App\Models\M_Supplier;
 use App\Models\M_Inventory;
+use App\Models\M_Room;
 use Config\Services;
 
 class Disposal extends BaseController
@@ -66,7 +67,6 @@ class Disposal extends BaseController
                 $row[] = $value->documentno;
                 $row[] = format_dmy($value->disposaldate, '-');
                 $row[] = $value->type;
-                $row[] = $value->supplier;
                 $row[] = formatRupiah($value->grandtotal);
                 $row[] = docStatus($value->docstatus);
                 $row[] = $value->description;
@@ -99,19 +99,36 @@ class Disposal extends BaseController
             ];
 
             try {
-                $this->entity->fill($post);
-                $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
-                $this->entity->setGrandTotal(arrSumField('unitprice', $table));
-
-                if (!isset($post['id'])) {
-                    $docNo = $this->model->getInvNumber();
-                    $this->entity->setDocumentNo($docNo);
-                }
-
                 if (!$this->validation->run($post, 'disposal')) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
-                    $response = $this->save();
+                    $assetCode = array_column($table, 'assetcode');
+
+                    // TODO : Check duplicate assetcode
+                    $whereClause = "trx_disposal.docstatus IN ('{$this->DOCSTATUS_Drafted}','{$this->DOCSTATUS_Inprogress}','{$this->DOCSTATUS_Completed}')";
+                    $whereClause .= " AND trx_disposal_detail.assetcode IN ('" . implode("', '", $assetCode) . "')";
+
+                    if (!empty($post['id'])) {
+                        $whereClause .= " AND trx_disposal.trx_disposal_id != {$post['id']}";
+                    }
+
+                    $checkAsset = $this->model->getDetail($whereClause)->getRow();
+
+                    if ($checkAsset) {
+                        $response = message('success', false, "Asset {$checkAsset->assetcode} already in disposal {$checkAsset->documentno}");
+                    } else {
+                        $this->entity->fill($post);
+                        $this->entity->setGrandTotal(arrSumField('unitprice', $table));
+
+                        if ($this->isNew()) {
+                            $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
+
+                            $docNo = $this->model->getInvNumber();
+                            $this->entity->setDocumentNo($docNo);
+                        }
+
+                        $response = $this->save();
+                    }
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -137,7 +154,7 @@ class Disposal extends BaseController
 
                 $result = [
                     'header'    => $this->field->store($this->model->table, $list),
-                    'line'      => $this->tableLine('edit', $detail)
+                    'line'      => $this->tableLine($list[0]->docstatus, $detail)
                 ];
 
                 $response = message('success', true, $result);
@@ -166,29 +183,36 @@ class Disposal extends BaseController
 
     public function processIt()
     {
+        $cWfs = new WScenario();
+
         if ($this->request->isAJAX()) {
             $post = $this->request->getVar();
 
             $_ID = $post['id'];
             $_DocAction = $post['docaction'];
 
-            $row = $this->model->find($_ID);
-
             try {
-                if (!empty($_DocAction) && $row->getDocStatus() !== $_DocAction) {
-                    $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->first();
+                $row = $this->model->find($_ID);
+                $menu = $this->request->uri->getSegment(2);
 
-                    if ($line || (!$line && $_DocAction !== $this->DOCSTATUS_Completed)) {
+                if (!empty($_DocAction)) {
+                    if ($_DocAction === $row->getDocStatus()) {
+                        $response = message('error', true, 'Please reload the Document');
+                    } else if ($_DocAction === $this->DOCSTATUS_Completed) {
+                        $line = $this->modelDetail->where($this->model->primaryKey, $_ID)->first();
+                        if ($line) {
+                            $this->message = $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $_ID, $_DocAction, $menu, $this->session);
+                            $response = message('success', true, $this->message);
+                        } else {
+                            $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
+                            $response = $this->save();
+                        }
+                    } else {
                         $this->entity->setDocStatus($_DocAction);
-                    } else if (!$line && $_DocAction === $this->DOCSTATUS_Completed) {
-                        $this->entity->setDocStatus($this->DOCSTATUS_Invalid);
+                        $response = $this->save();
                     }
-
-                    $response = $this->save();
-                } else if (empty($_DocAction)) {
-                    $response = message('error', true, 'Please Choose the Document Action first');
                 } else {
-                    $response = message('error', true, 'Please reload the Document');
+                    $response = message('error', true, 'Please Choose the Document Action first');
                 }
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -202,22 +226,9 @@ class Disposal extends BaseController
     {
         if ($this->request->isAJAX()) {
             try {
-                $row = $this->model->getDetail($this->modelDetail->primaryKey, $id)->getRow();
-
-                $grandTotal = ($row->grandtotal - $row->lineamt);
-
-                //* Update table quotation
-                $this->entity->setQuotationId($row->trx_quotation_id);
-                $this->entity->setGrandTotal($grandTotal);
-
-                $this->model->save($this->entity);
-
-                //* Delete row quotation detail
                 $delete = $this->modelDetail->delete($id);
 
-                $result = $delete ? $grandTotal : false;
-
-                $response = message('success', true, $result);
+                $response = message('success', true, $delete);
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
             }
@@ -230,11 +241,23 @@ class Disposal extends BaseController
     {
         $inventory = new M_Inventory($this->request);
         $product = new M_Product($this->request);
+        $room = new M_Room($this->request);
 
-        $invWhere['isactive'] = 'Y';
+        //* Data Room
+        $dataRoom = $room->where('isactive', 'Y')->groupStart()
+            ->like('description', 'Rusak')
+            ->orLike('description', 'Disposal')
+            ->groupEnd()->findAll();
 
-        //* Data Inventory 
-        $dataInventory = $inventory->where($invWhere)->orderBy('assetcode', 'ASC')->findAll();
+        //* Data Inventory
+        if (is_null($set) || $set == $this->DOCSTATUS_Drafted) {
+            $inventory->where([
+                'isactive' => 'Y',
+                'isdisposed' => 'N'
+            ])->whereIn('md_room_id', array_map(fn($row) => $row->md_room_id, $dataRoom));
+        }
+
+        $dataInventory = $inventory->orderBy('assetcode', 'ASC')->findAll();
 
         //* Data Product 
         $dataProduct = $product->where('isactive', 'Y')->findAll();
