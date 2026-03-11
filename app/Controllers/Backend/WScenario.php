@@ -410,6 +410,18 @@ class WScenario extends BaseController
                     }
                 }
             }
+
+            if ($table === 'trx_disposal') {
+                $this->sys_wfscenario_id = $mWfs->getScenario($menu, null, null, null, null, $trx->getDisposalType());
+
+                if ($this->sys_wfscenario_id) {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Inprogress);
+                    $this->entity->setWfScenarioId($this->sys_wfscenario_id);
+                    $isWfscenario = true;
+                } else {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Completed);
+                }
+            }
         }
 
         $this->entity->setUpdatedBy($session->get('sys_user_id'));

@@ -19,7 +19,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="disposaltype">Disposal Type <span class="required">*</span></label>
-                    <select class="form-control select2" id="disposaltype" name="disposaltype" hide-field="md_supplier_id">
+                    <select class="form-control select2" id="disposaltype" name="disposaltype" hide-field="md_supplier_id, bpkno, sjkno" , show-field="bapno">
                         <option value="">Select Status</option>
                         <?php foreach ($ref_list as $row) : ?>
                             <option value="<?= $row->value ?>"><?= $row->name ?></option>
@@ -27,6 +27,27 @@
                     </select>
                     <small class="form-text text-danger" id="error_disposaltype"></small>
                 </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="bapno">BAP No <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="bapno" name="bapno">
+                    <small class="form-text text-danger" id="error_bapno"></small>
+                </div>
+                <div class="form-group">
+                    <label for="bapno">BPK No <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="bpkno" name="bpkno">
+                    <small class="form-text text-danger" id="error_bpkno"></small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="bapno">SJK No <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="sjkno" name="sjkno">
+                    <small class="form-text text-danger" id="error_sjkno"></small>
+                </div>
+            </div>
+            <div class="col-md-6">
                 <div class="form-group">
                     <label for="description">Description </label>
                     <textarea type="text" class="form-control" id="description" name="description" rows="4"></textarea>
@@ -56,7 +77,7 @@
             </div>
             <div class="col-md-12">
                 <div class="form-group table-responsive">
-                    <table class="table table-hover tb_displayline" id="table_disposal" style="width: 100%">
+                    <table class="table-line table-hover tb_displayline" id="table_disposal" style="width: 100%">
                         <thead>
                             <tr>
                                 <th>Asset Code</th>

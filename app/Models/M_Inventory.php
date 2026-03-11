@@ -33,7 +33,8 @@ class M_Inventory extends Model
 		'updated_by',
 		'numberplate',
 		'isnew',
-		'description'
+		'description',
+		'isdisposed'
 	];
 	protected $useTimestamps	= true;
 	protected $allowCallbacks	= true;

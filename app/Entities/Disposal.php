@@ -15,6 +15,9 @@ class Disposal extends Entity
     protected $md_supplier_id;
     protected $description;
     protected $sys_wfscenario_id;
+    protected $bapno;
+    protected $bpkno;
+    protected $sjkno;
     protected $created_by;
     protected $updated_by;
 
@@ -102,6 +105,36 @@ class Disposal extends Entity
     public function setSupplierId($md_supplier_id)
     {
         $this->attributes['md_supplier_id'] = $md_supplier_id;
+    }
+
+    public function getBAPNo()
+    {
+        return $this->attributes['bapno'];
+    }
+
+    public function setBAPNo($bapno)
+    {
+        $this->attributes['bapno'] = $bapno;
+    }
+
+    public function getBPKNo()
+    {
+        return $this->attributes['bpkno'];
+    }
+
+    public function setBPKNo($bpkno)
+    {
+        $this->attributes['bpkno'] = $bpkno;
+    }
+
+    public function getSJKNo()
+    {
+        return $this->attributes['sjkno'];
+    }
+
+    public function setSJKNo($sjkno)
+    {
+        $this->attributes['sjkno'] = $sjkno;
     }
 
     public function getWfScenarioId()
