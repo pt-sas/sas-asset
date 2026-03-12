@@ -339,6 +339,7 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->get('disposal/destroy/(:any)', 'Backend\Disposal::destroy/$1');
     $routes->post('disposal/tableLine', 'Backend\Disposal::tableLine');
     $routes->get('disposal/destroyLine/(:any)', 'Backend\Disposal::destroyLine/$1');
+    $routes->match(['get', 'post'], 'disposal/destroyAllLine', 'Backend\Disposal::destroyAllLine');
     $routes->get('disposal/getSeqCode', 'Backend\Disposal::getSeqCode');
     $routes->get('disposal/processIt', 'Backend\Disposal::processIt');
 

@@ -10,6 +10,7 @@ class Disposal extends Entity
     protected $documentno;
     protected $disposaldate;
     protected $disposaltype;
+    protected $md_room_id;
     protected $grandtotal;
     protected $docstatus;
     protected $md_supplier_id;
@@ -65,6 +66,16 @@ class Disposal extends Entity
     public function setDisposalType($disposaltype)
     {
         $this->attributes['disposaltype'] = $disposaltype;
+    }
+
+    public function getRoomId()
+    {
+        return $this->attributes['md_room_id'];
+    }
+
+    public function setRoomId($md_room_id)
+    {
+        $this->attributes['md_room_id'] = $md_room_id;
     }
 
     public function getGrandTotal()

@@ -25,6 +25,7 @@ class Disposal extends BaseController
     public function index()
     {
         $reference = new M_Reference($this->request);
+        $room = new M_Room($this->request);
 
         $data = [
             'today'     => date('Y-m-d'),
@@ -35,7 +36,11 @@ class Disposal extends BaseController
             ], null, [
                 'field'     => 'sys_ref_detail.sys_ref_detail_id',
                 'option'    => 'ASC'
-            ])->getResult()
+            ])->getResult(),
+            'room_list' => $room->where('isactive', 'Y')->groupStart()
+                ->like('description', 'Rusak')
+                ->orLike('description', 'Disposal')
+                ->groupEnd()->findAll()
         ];
 
         return $this->template->render('transaction/disposal/v_disposal', $data);
@@ -237,27 +242,33 @@ class Disposal extends BaseController
         }
     }
 
+    public function destroyAllLine()
+    {
+        if ($this->request->isAJAX()) {
+            $post = $this->request->getVar();
+
+            try {
+                $result = $this->modelDetail->where($this->model->primaryKey, $post['trx_disposal_id'])->first();
+
+                //? Exists data movement detail
+                if ($result)
+                    $result = $this->modelDetail->where($this->model->primaryKey, $post['trx_disposal_id'])->delete();
+
+                $response = message('success', true, $result);
+            } catch (\Exception $e) {
+                $response = message('error', false, $e->getMessage());
+            }
+
+            return $this->response->setJSON($response);
+        }
+    }
+
     public function tableLine($set = null, $detail = [])
     {
         $inventory = new M_Inventory($this->request);
         $product = new M_Product($this->request);
-        $room = new M_Room($this->request);
 
-        //* Data Room
-        $dataRoom = $room->where('isactive', 'Y')->groupStart()
-            ->like('description', 'Rusak')
-            ->orLike('description', 'Disposal')
-            ->groupEnd()->findAll();
-
-        //* Data Inventory
-        if (is_null($set) || $set == $this->DOCSTATUS_Drafted) {
-            $inventory->where([
-                'isactive' => 'Y',
-                'isdisposed' => 'N'
-            ])->whereIn('md_room_id', array_map(fn($row) => $row->md_room_id, $dataRoom));
-        }
-
-        $dataInventory = $inventory->orderBy('assetcode', 'ASC')->findAll();
+        $post = $this->request->getVar();
 
         //* Data Product 
         $dataProduct = $product->where('isactive', 'Y')->findAll();
@@ -266,17 +277,37 @@ class Disposal extends BaseController
 
         //? Create
         if (empty($set)) {
-            $table = [
-                $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, null, 170, 'assetcode', 'assetcode'),
-                $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
-                $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, 0, 125),
-                $this->field->fieldTable('input', 'text', 'condition', null, null, null, null, null, null, 250),
-                $this->field->fieldTable('button', 'button', 'trx_disposal_detail_id')
-            ];
+            if (!$this->validation->run($post, 'disposalAddRow')) {
+                $table = $this->field->errorValidation($this->model->table, $post);
+            } else {
+                $dataInventory = $inventory->where([
+                    'isactive' => 'Y',
+                    'isdisposed' => 'N'
+                ])->where('md_room_id', $post['md_room_id'])->orderBy('assetcode', 'ASC')->findAll();
+
+                $table = [
+                    $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, null, 170, 'assetcode', 'assetcode'),
+                    $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
+                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', 'required', null, null, null, 0, 125),
+                    $this->field->fieldTable('input', 'text', 'condition', null, null, null, null, null, null, 250),
+                    $this->field->fieldTable('button', 'button', 'trx_disposal_detail_id')
+                ];
+            }
         }
 
         //? Update
         if (!empty($set) && count($detail) > 0) {
+            $disposal = $this->model->find($detail[0]->trx_disposal_id);
+
+            if ($set != $this->DOCSTATUS_Completed) {
+                $inventory->where([
+                    'isactive' => 'Y',
+                    'isdisposed' => 'N'
+                ]);
+            }
+
+            $dataInventory = $inventory->where('md_room_id', $disposal->md_room_id)->orderBy('assetcode', 'ASC')->findAll();
+
             foreach ($detail as $row) :
                 $table[] = [
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 170, 'assetcode', 'assetcode'),
