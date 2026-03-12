@@ -13,6 +13,7 @@ class M_Disposal extends Model
 		'documentno',
 		'disposaldate',
 		'disposaltype',
+		'md_room_id',
 		'grandtotal',
 		'docstatus',
 		'description',

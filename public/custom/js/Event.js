@@ -2139,6 +2139,42 @@ $("#form_disposal").on("change", "#disposaltype", function (e) {
   });
 });
 
+let previousValue;
+let eventChange = false;
+
+$("#md_room_id").on("select2:opening", function () {
+  previousValue = $(this).val();
+  eventChange = true;
+});
+
+$("#form_disposal").on("change", "#md_room_id", function (evt) {
+  if(!eventChange) return;
+
+    if(setSave === 'add') {
+      _tableLine.clear().draw(false);
+    } else if (setSave !== 'close' && _tableLine.data().any()) {
+      Swal.fire({
+        title: "Delete?",
+        text: "Are you sure you want to change all data ? ",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Okay",
+        cancelButtonText: "Close",
+        reverseButtons: true,
+      }).then((data) => {
+        if (data.value) {
+            _tableLine.clear().draw(false);
+              destroyAllLine("trx_disposal_id", ID);
+            } else {
+              $(this).val(previousValue).trigger("change.select2");;
+            }
+        });
+    }
+
+    eventChange = false;
+});
+
 $("#form_movement").on(
   "change",
   "#md_branch_id, #movementtype, #md_branchto_id, #md_divisionto_id, #movementstatus",

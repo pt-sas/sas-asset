@@ -1610,4 +1610,14 @@ class Validation
             ]
         ],
     ];
+
+    public $disposalAddRow = [
+        'md_room_id'        => [
+            'label'             => 'Room',
+            'rules'             => 'required',
+            'errors'            => [
+                'required'      => 'Please Choose the {field} first'
+            ]
+        ]
+    ];
 }

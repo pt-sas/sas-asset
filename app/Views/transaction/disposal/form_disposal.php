@@ -16,7 +16,7 @@
                     <small class="form-text text-danger" id="error_disposaldate"></small>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <div class="form-group">
                     <label for="disposaltype">Disposal Type <span class="required">*</span></label>
                     <select class="form-control select2" id="disposaltype" name="disposaltype" hide-field="md_supplier_id, bpkno, sjkno" , show-field="bapno">
@@ -26,6 +26,18 @@
                         <?php endforeach; ?>
                     </select>
                     <small class="form-text text-danger" id="error_disposaltype"></small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="md_room_id">Room <span class="required">*</span></label>
+                    <select class="form-control select2" id="md_room_id" name="md_room_id">
+                        <option value="">Select Room</option>
+                        <?php foreach ($room_list as $row) : ?>
+                            <option value="<?= $row->md_room_id ?>"><?= $row->name ?> (<?= $row->description ?>)</option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="form-text text-danger" id="error_md_room_id"></small>
                 </div>
             </div>
             <div class="col-md-3">
