@@ -77,7 +77,7 @@ class Rpt_Asset extends BaseController
                     $row[] = $value->branch;
                     $row[] = $value->division;
                     $row[] = $value->room;
-                    $row[] = $value->description;
+                    $row[] = $value->room_desc;
                     $row[] = $value->employee;
                     $row[] = active($value->isspare);
                     $data[] = $row;
