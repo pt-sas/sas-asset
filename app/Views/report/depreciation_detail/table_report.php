@@ -5,6 +5,7 @@
                 <th>Asset Code</th>
                 <th>Branch</th>
                 <th>Division</th>
+                <th>Room</th>
                 <th>Product</th>
                 <th>Transaction Date</th>
                 <th>Useful Life</th>

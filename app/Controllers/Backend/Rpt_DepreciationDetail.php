@@ -67,6 +67,7 @@ class Rpt_DepreciationDetail extends BaseController
                     $row[] = $value->assetcode;
                     $row[] = $value->branch;
                     $row[] = $value->division;
+                    $row[] = $value->room_name;
                     $row[] = $value->product;
                     $row[] = format_dmy($value->transactiondate, '-');
                     $row[] = $value->totalyear;

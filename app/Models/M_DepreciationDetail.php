@@ -64,6 +64,8 @@ class M_DepreciationDetail extends Model
         md_product.name as product,
         md_branch.name as branch,
         md_division.name as division,
+        md_room.room as room,
+        md_room.description as room_name,
         ABS(PERIOD_DIFF(
                 DATE_FORMAT(CONCAT(" . $this->table . ".period, '-01'), '%Y%m'),
                 DATE_FORMAT(CONCAT(
@@ -90,6 +92,7 @@ class M_DepreciationDetail extends Model
             $this->setDataJoin('trx_inventory', 'trx_inventory.assetcode = ' . $this->table . '.assetcode', 'left'),
             $this->setDataJoin('md_product', 'md_product.md_product_id = trx_inventory.md_product_id', 'left'),
             $this->setDataJoin('md_branch', 'md_branch.md_branch_id = trx_inventory.md_branch_id', 'left'),
+            $this->setDataJoin('md_room', 'md_room.md_room_id = trx_inventory.md_room_id', 'left'),
             $this->setDataJoin('md_division', 'md_division.md_division_id = trx_inventory.md_division_id', 'left'),
         ];
 
