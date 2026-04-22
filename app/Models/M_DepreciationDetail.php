@@ -64,7 +64,7 @@ class M_DepreciationDetail extends Model
         md_product.name as product,
         md_branch.name as branch,
         md_division.name as division,
-        md_room.room as room,
+        md_room.name as room,
         md_room.description as room_name,
         ABS(PERIOD_DIFF(
                 DATE_FORMAT(CONCAT(" . $this->table . ".period, '-01'), '%Y%m'),
