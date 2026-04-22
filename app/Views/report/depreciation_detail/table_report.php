@@ -3,6 +3,8 @@
         <thead>
             <tr>
                 <th>Asset Code</th>
+                <th>Branch</th>
+                <th>Division</th>
                 <th>Product</th>
                 <th>Transaction Date</th>
                 <th>Useful Life</th>
@@ -13,6 +15,7 @@
                 <th>Book Value</th>
                 <th>Current Month</th>
                 <th>Depreciation Type</th>
+                <th>Sisa Waktu Manfaat</th>
             </tr>
         </thead>
     </table>

@@ -59,9 +59,23 @@ class M_DepreciationDetail extends Model
 
     public function getSelect()
     {
-        $sql = $this->table . '.*,
+        $sql = $this->table . ".*,
         sys_ref_detail.name as depreciationtype,
-        md_product.name as product';
+        md_product.name as product,
+        md_branch.name as branch,
+        md_division.name as division,
+        ABS(PERIOD_DIFF(
+                DATE_FORMAT(CONCAT(" . $this->table . ".period, '-01'), '%Y%m'),
+                DATE_FORMAT(CONCAT(
+                    (
+                        SELECT MAX(tdd.period)
+                        FROM trx_depreciation_detail tdd
+                        WHERE tdd.assetcode = " . $this->table . ".assetcode
+                    ),
+                    '-01'),'%Y%m'
+                )
+            )
+        ) as sisa_waktu";
 
         return $sql;
     }
@@ -75,6 +89,8 @@ class M_DepreciationDetail extends Model
             $this->setDataJoin('sys_ref_detail', 'sys_ref_detail.sys_reference_id = ' . $defaultID . ' AND sys_ref_detail.value = ' . $this->table . '.depreciationtype', 'left'),
             $this->setDataJoin('trx_inventory', 'trx_inventory.assetcode = ' . $this->table . '.assetcode', 'left'),
             $this->setDataJoin('md_product', 'md_product.md_product_id = trx_inventory.md_product_id', 'left'),
+            $this->setDataJoin('md_branch', 'md_branch.md_branch_id = trx_inventory.md_branch_id', 'left'),
+            $this->setDataJoin('md_division', 'md_division.md_division_id = trx_inventory.md_division_id', 'left'),
         ];
 
         return $sql;

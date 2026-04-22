@@ -4,6 +4,8 @@ namespace App\Controllers\Backend;
 
 use App\Controllers\BaseController;
 use App\Models\M_DepreciationDetail;
+use App\Models\M_Branch;
+use App\Models\M_Employee;
 use Config\Services;
 
 class Rpt_DepreciationDetail extends BaseController
@@ -16,7 +18,26 @@ class Rpt_DepreciationDetail extends BaseController
 
     public function index()
     {
-        return $this->template->render('report/depreciation_detail/v_depreciation_detail');
+        $mEmpl = new M_Employee($this->request);
+        $mBranch = new M_Branch($this->request);
+
+        $data = [];
+
+        $employee = $mEmpl->where("sys_user_id", $this->access->getSessionUser())->first();
+
+        if (isset($employee))
+            $branch = $mBranch->where("md_branch_id", $employee->getBranchId())->first();
+
+        $roleViewAll = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Data');
+        $roleViewMgrAll = $this->access->getUserRoleName($this->access->getSessionUser(), 'W_View_All_Mgr_Data');
+
+        if (empty($roleViewAll) && empty($roleViewMgrAll))
+            $data["employee"] = $employee;
+
+        if (empty($roleViewAll) && $roleViewMgrAll)
+            $data["branch"] = $branch;
+
+        return $this->template->render('report/depreciation_detail/v_depreciation_detail', $data);
     }
 
     public function showAll()
@@ -29,6 +50,7 @@ class Rpt_DepreciationDetail extends BaseController
 
         if ($this->request->getMethod(true) === 'POST') {
             if (isset($post['form']) && $post['clear'] === 'false') {
+                log_message('debug', 'showAll: ' . json_encode($post));
                 $table = $this->model->table;
                 $select = $this->model->getSelect();
                 $join = $this->model->getJoin();
@@ -43,6 +65,8 @@ class Rpt_DepreciationDetail extends BaseController
                     $row = [];
 
                     $row[] = $value->assetcode;
+                    $row[] = $value->branch;
+                    $row[] = $value->division;
                     $row[] = $value->product;
                     $row[] = format_dmy($value->transactiondate, '-');
                     $row[] = $value->totalyear;
@@ -53,6 +77,7 @@ class Rpt_DepreciationDetail extends BaseController
                     $row[] = formatRupiah(round($value->bookvalue, 2, PHP_ROUND_HALF_UP));
                     $row[] = $value->currentmonth;
                     $row[] = $value->depreciationtype;
+                    $row[] = $value->sisa_waktu;
 
                     $data[] = $row;
 
