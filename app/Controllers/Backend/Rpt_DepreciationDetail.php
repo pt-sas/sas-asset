@@ -37,6 +37,8 @@ class Rpt_DepreciationDetail extends BaseController
         if (empty($roleViewAll) && $roleViewMgrAll)
             $data["branch"] = $branch;
 
+        $data["month"] = date('M-Y');
+
         return $this->template->render('report/depreciation_detail/v_depreciation_detail', $data);
     }
 

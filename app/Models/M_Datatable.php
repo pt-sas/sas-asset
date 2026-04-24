@@ -118,6 +118,9 @@ class M_Datatable extends Model
                         if ($field->name === $value['name'] && $field->type !== 'timestamp') {
                             if (isset($value['type']) && $value['type'] === 'select-multiple') {
                                 $this->builder->whereIn($table . '.' . $value['name'] . '', $value['value']);
+                            } else if ($value['name'] === 'period' || $value['name'] === 'periode') {
+                                $period = date('Y-m', strtotime($value['value']));
+                                $this->builder->where($table . '.' . $value['name'] . '', $period);
                             } else {
                                 $this->builder->where($table . '.' . $value['name'] . '', $value['value']);
                             }

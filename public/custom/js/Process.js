@@ -107,7 +107,7 @@ $(document).ready(function (e) {
     $(this).val(
       $(this)
         .val()
-        .replace(/[^\d-].+/, "")
+        .replace(/[^\d-].+/, ""),
     );
     if (
       (evt.which < 48 && evt.which != 45) ||
@@ -132,6 +132,14 @@ $(document).ready(function (e) {
 
   $(".datepicker").datetimepicker({
     format: "YYYY-MM-DD",
+  });
+
+  $(".datepicker-year").datepicker({
+    format: "M-yyyy",
+    startView: "months",
+    minViewMode: "months",
+    autoclose: true,
+    clearBtn: true,
   });
 
   $(".timepicker").datetimepicker({
@@ -238,7 +246,7 @@ $(document).ready(function (e) {
     $(this).val(
       picker.startDate.format("YYYY-MM-DD") +
         " - " +
-        picker.endDate.format("YYYY-MM-DD")
+        picker.endDate.format("YYYY-MM-DD"),
     );
   });
 
@@ -256,7 +264,7 @@ $(document).ready(function (e) {
     },
     onError: function (string, qty) {
       $("[name='scan_assetcode']").val(
-        $("[name='scan_assetcode']").val() + string
+        $("[name='scan_assetcode']").val() + string,
       );
     },
   });
@@ -327,7 +335,7 @@ _tableLine = $(".tb_displayline").DataTable({
         $(this).val(
           $(this)
             .val()
-            .replace(/[^\d-].+/, "")
+            .replace(/[^\d-].+/, ""),
         );
         if (
           (evt.which < 48 && evt.which != 45) ||
@@ -349,7 +357,7 @@ _tableLine = $(".tb_displayline").DataTable({
   },
   initComplete: function (settings, json) {
     $(".tb_displayline").wrap(
-      "<div style='overflow:auto; width:100%; position:relative;'></div>"
+      "<div style='overflow:auto; width:100%; position:relative;'></div>",
     );
   },
   lengthChange: false,
@@ -367,7 +375,7 @@ _tableServicePart = $(".tb_service_part").DataTable({
         $(this).val(
           $(this)
             .val()
-            .replace(/[^\d-].+/, "")
+            .replace(/[^\d-].+/, ""),
         );
         if (
           (evt.which < 48 && evt.which != 45) ||
@@ -389,7 +397,7 @@ _tableServicePart = $(".tb_service_part").DataTable({
   },
   initComplete: function (settings, json) {
     $(".tb_service_part").wrap(
-      "<div style='overflow:auto; width:100%; position:relative;'></div>"
+      "<div style='overflow:auto; width:100%; position:relative;'></div>",
     );
   },
   lengthChange: false,
@@ -455,7 +463,7 @@ _tableInfo = $(".table_info").DataTable({
         $(this).val(
           $(this)
             .val()
-            .replace(/[^\d-].+/, "")
+            .replace(/[^\d-].+/, ""),
         );
         if (
           (evt.which < 48 && evt.which != 45) ||
@@ -664,7 +672,7 @@ $(".save_form").click(function (evt) {
               field[i].name +
               "], select[name=" +
               field[i].name +
-              "]"
+              "]",
           )
           .not(".line")
           .removeAttr("disabled");
@@ -730,7 +738,7 @@ $(".save_form").click(function (evt) {
         if (field[i].type === "select-multiple") {
           formData.append(
             field[i].name,
-            $("[name = " + field[i].name + "]").val()
+            $("[name = " + field[i].name + "]").val(),
           );
         }
 
@@ -833,7 +841,7 @@ $(".save_form").click(function (evt) {
         isCreate,
         isUpdate,
         isDelete,
-        accessID
+        accessID,
       );
 
       formData.append("roles", JSON.stringify(arrRole));
@@ -914,7 +922,7 @@ $(".save_form").click(function (evt) {
       beforeSend: function () {
         $(_this)
           .html(
-            '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+            '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>',
           )
           .prop("disabled", true);
         $(".x_form").prop("disabled", true);
@@ -980,7 +988,7 @@ $(".save_form").click(function (evt) {
             {
               scrollTop: $(".container").offset().top,
             },
-            1500
+            1500,
           );
         } else {
           Toast.fire({
@@ -1011,7 +1019,7 @@ $(".save_form").click(function (evt) {
                   field[i].name +
                   "], select[name=" +
                   field[i].name +
-                  "]"
+                  "]",
               )
               .removeAttr("disabled");
           } else {
@@ -1021,7 +1029,7 @@ $(".save_form").click(function (evt) {
                   field[i].name +
                   "], select[name=" +
                   field[i].name +
-                  "]"
+                  "]",
               )
               .not(".line")
               .prop("disabled", true);
@@ -1034,7 +1042,7 @@ $(".save_form").click(function (evt) {
                   field[i].name +
                   "], select[name=" +
                   field[i].name +
-                  "]"
+                  "]",
               )
               .not(".line")
               .prop("disabled", true);
@@ -1053,7 +1061,7 @@ $(".save_form").click(function (evt) {
                 field[i].name +
                 "], select[name=" +
                 field[i].name +
-                "]"
+                "]",
             )
             .not(".line")
             .prop("disabled", true);
@@ -1249,7 +1257,7 @@ function Edit(id, status, last_url) {
                               item.name +
                               "], input:radio[name=" +
                               item.name +
-                              "]"
+                              "]",
                           ).prop("disabled", true);
                         } else {
                           tr.find(
@@ -1257,7 +1265,7 @@ function Edit(id, status, last_url) {
                               item.name +
                               "], textarea[name=" +
                               item.name +
-                              "]"
+                              "]",
                           ).prop("readonly", true);
                         }
                     });
@@ -1349,7 +1357,7 @@ function Edit(id, status, last_url) {
                 {
                   scrollTop: $(".main-panel").offset().top,
                 },
-                500
+                500,
               );
             } else {
               Toast.fire({
@@ -1457,7 +1465,7 @@ _tableLine.on("click", ".btn_delete", function (evt) {
 
   $(_this)
     .html(
-      '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+      '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>',
     )
     .prop("disabled", true);
 
@@ -1695,7 +1703,7 @@ $(document).on("click", ".x_form, .close_form, .reset_form", function (evt) {
       {
         scrollTop: $(".main-panel").offset().top,
       },
-      500
+      500,
     );
   }
 
@@ -1736,7 +1744,7 @@ $(".new_form").click(function (evt) {
     $(_this)
       .html(
         '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' +
-          textElement
+          textElement,
       )
       .prop("disabled", true);
 
@@ -1828,7 +1836,7 @@ $(".new_form").click(function (evt) {
                                 fields[i] +
                                 "], select[name=" +
                                 fields[i] +
-                                "]"
+                                "]",
                             )
                             .closest(".form-group, .form-check");
                           formGroup.hide();
@@ -1843,7 +1851,7 @@ $(".new_form").click(function (evt) {
                                 fields[i] +
                                 "], select[name=" +
                                 fields[i] +
-                                "]"
+                                "]",
                             )
                             .closest(".form-group, .form-check");
                           formGroup.show();
@@ -1859,7 +1867,7 @@ $(".new_form").click(function (evt) {
                               fields[i] +
                               "], select[name=" +
                               fields[i] +
-                              "]"
+                              "]",
                           )
                           .closest(".form-group, .form-check");
                         formGroup.hide();
@@ -1885,7 +1893,7 @@ $(".new_form").click(function (evt) {
                                 fields[i] +
                                 "], select[name=" +
                                 fields[i] +
-                                "]"
+                                "]",
                             )
                             .closest(".form-group, .form-check");
                           formGroup.show();
@@ -1900,7 +1908,7 @@ $(".new_form").click(function (evt) {
                                 fields[i] +
                                 "], select[name=" +
                                 fields[i] +
-                                "]"
+                                "]",
                             )
                             .closest(".form-group, .form-check");
                           formGroup.hide();
@@ -1916,7 +1924,7 @@ $(".new_form").click(function (evt) {
                               fields[i] +
                               "], select[name=" +
                               fields[i] +
-                              "]"
+                              "]",
                           )
                           .closest(".form-group, .form-check");
                         formGroup.show();
@@ -1996,7 +2004,7 @@ $(".btn_export").click(function (evt) {
 
   $(_this)
     .html(
-      '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+      '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>',
     )
     .prop("disabled", true);
 
@@ -2026,7 +2034,7 @@ $(".btn_filter").click(function (evt) {
   $(_this)
     .html(
       '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' +
-        textElement
+        textElement,
     )
     .prop("disabled", true);
 
@@ -2090,7 +2098,7 @@ $(".add_row").click(function (evt) {
               field[i].name +
               "], select[name=" +
               field[i].name +
-              "]"
+              "]",
           )
           .removeAttr("disabled");
       }
@@ -2112,7 +2120,7 @@ $(".add_row").click(function (evt) {
         $(_this)
           .html(
             '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' +
-              textElement
+              textElement,
           )
           .prop("disabled", true);
 
@@ -2123,7 +2131,7 @@ $(".add_row").click(function (evt) {
                 fieldReadOnly[i] +
                 "], select[name=" +
                 fieldReadOnly[i] +
-                "]"
+                "]",
             )
             .not(".line")
             .attr("disabled", true);
@@ -2148,7 +2156,7 @@ $(".add_row").click(function (evt) {
                     field[i].name +
                     "], select[name=" +
                     field[i].name +
-                    "]"
+                    "]",
                 )
                 .closest(".form-group")
                 .removeClass("has-error");
@@ -2199,7 +2207,7 @@ $(".create_line").click(function (evt) {
     $(_this)
       .html(
         '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' +
-          textElement
+          textElement,
       )
       .prop("disabled", true);
 
@@ -2361,7 +2369,7 @@ $(".btn_save_info").click(function (evt) {
       beforeSend: function () {
         $(_this)
           .html(
-            '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+            '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>',
           )
           .prop("disabled", true);
         $(".btn_requery_info").attr("disabled", true);
@@ -2563,7 +2571,7 @@ $(".btn_login").click(function () {
       $(this).prop("disabled", true);
       $(_this)
         .html(
-          '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+          '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>',
         )
         .prop("disabled", true);
     },
@@ -2640,7 +2648,7 @@ $(".save_form_pass").click(function (evt) {
       loadingForm(form.prop("id"), "facebook");
       $(_this)
         .html(
-          '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+          '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>',
         )
         .prop("disabled", true);
     },
@@ -2715,7 +2723,7 @@ $("input.active:checkbox").change(function (evt) {
                 field[i].name +
                 "], input:password[name=" +
                 field[i].name +
-                "]"
+                "]",
             )
             .not(".line")
             .removeAttr("readonly");
@@ -2735,7 +2743,7 @@ $("input.active:checkbox").change(function (evt) {
                 field[i].name +
                 "], button[name=" +
                 field[i].name +
-                "]"
+                "]",
             )
             .not(".line")
             .removeAttr("disabled");
@@ -2783,7 +2791,7 @@ $("input.active:checkbox").change(function (evt) {
                 field[i].name +
                 "], input:password[name=" +
                 field[i].name +
-                "]"
+                "]",
             )
             .not(".line")
             .prop("readonly", true);
@@ -2803,7 +2811,7 @@ $("input.active:checkbox").change(function (evt) {
                 field[i].name +
                 "], button[name=" +
                 field[i].name +
-                "]"
+                "]",
             )
             .not(".line")
             .prop("disabled", true);
@@ -2926,7 +2934,7 @@ function errorForm(parent, data) {
               inputName +
               "], input:password[name=" +
               inputName +
-              "]"
+              "]",
           )
           .not(".line")
           .closest(".form-group")
@@ -3028,7 +3036,7 @@ function errorForm(parent, data) {
             inputName +
             "], input:password[name=" +
             inputName +
-            "]"
+            "]",
         )
         .not(".line")
         .closest(".form-group")
@@ -3056,7 +3064,7 @@ function clearErrorForm(form) {
             field[i].name +
             "], select[name=" +
             field[i].name +
-            "]"
+            "]",
         )
         .closest(".form-group")
         .removeClass("has-error");
@@ -3112,7 +3120,7 @@ function clearForm(evt) {
               field[i].name +
               "], textarea[name=" +
               field[i].name +
-              "]"
+              "]",
           )
           .removeAttr("readonly")
           .closest(".form-group")
@@ -3126,7 +3134,7 @@ function clearForm(evt) {
                 field[i].name +
                 "], textarea[name=" +
                 field[i].name +
-                "]"
+                "]",
             )
             .removeAttr("readonly")
             .closest(".form-group")
@@ -3138,7 +3146,7 @@ function clearForm(evt) {
                 field[i].name +
                 "], textarea[name=" +
                 field[i].name +
-                "]"
+                "]",
             )
             .closest(".form-group")
             .removeClass("has-error");
@@ -3253,7 +3261,7 @@ function clearForm(evt) {
               field[i].name +
               "], input:radio[name=" +
               field[i].name +
-              "]"
+              "]",
           )
           .removeAttr("disabled");
 
@@ -3263,7 +3271,7 @@ function clearForm(evt) {
             field[i].name +
             "], button[name=" +
             field[i].name +
-            "]"
+            "]",
         )
         .removeAttr("disabled");
     }
@@ -3302,7 +3310,7 @@ function readonly(parent, value) {
               field[i].name +
               "], input:password[name=" +
               field[i].name +
-              "]"
+              "]",
           )
           .not(".line")
           .prop("readonly", value);
@@ -3322,7 +3330,7 @@ function readonly(parent, value) {
               field[i].name +
               "], button[name=" +
               field[i].name +
-              "]"
+              "]",
           )
           .not(".line")
           .prop("disabled", value);
@@ -3827,7 +3835,7 @@ $(document).on("click", "input:checkbox", function () {
             dataNode +
             "] td:nth-child(" +
             index +
-            ") input:checkbox"
+            ") input:checkbox",
         )
         .prop("checked", true);
     }
@@ -3852,7 +3860,7 @@ $(document).on("click", "input:checkbox", function () {
             dataNode +
             "] td:nth-child(" +
             index +
-            ") input:checkbox"
+            ") input:checkbox",
         )
         .prop("checked", false);
     }
@@ -3903,7 +3911,7 @@ _tableLine.on("change", "input.active:checkbox", function (evt) {
         className = field[i].className.split(/\s+/);
 
         tr.find("input:text[name=" + field[i].name + "]").removeAttr(
-          "readonly"
+          "readonly",
         );
 
         if (field[i].type !== "text" && !className.includes("active")) {
@@ -3912,7 +3920,7 @@ _tableLine.on("change", "input.active:checkbox", function (evt) {
               field[i].name +
               "], select[name=" +
               field[i].name +
-              "]"
+              "]",
           ).removeAttr("disabled");
         }
       }
@@ -3924,7 +3932,7 @@ _tableLine.on("change", "input.active:checkbox", function (evt) {
 
         tr.find("input:text[name=" + field[i].name + "]").prop(
           "readonly",
-          true
+          true,
         );
 
         if (field[i].type !== "text" && !className.includes("active")) {
@@ -3933,7 +3941,7 @@ _tableLine.on("change", "input.active:checkbox", function (evt) {
               field[i].name +
               "], select[name=" +
               field[i].name +
-              "]"
+              "]",
           ).prop("disabled", true);
         }
       }
@@ -4024,7 +4032,7 @@ function showFormData(form) {
                               fields[i] +
                               "], select[name=" +
                               fields[i] +
-                              "]"
+                              "]",
                           )
                           .closest(".form-group, .form-check");
                         formGroup.hide();
@@ -4039,7 +4047,7 @@ function showFormData(form) {
                               fields[i] +
                               "], select[name=" +
                               fields[i] +
-                              "]"
+                              "]",
                           )
                           .closest(".form-group, .form-check");
                         formGroup.show();
@@ -4055,7 +4063,7 @@ function showFormData(form) {
                             fields[i] +
                             "], select[name=" +
                             fields[i] +
-                            "]"
+                            "]",
                         )
                         .closest(".form-group, .form-check");
                       formGroup.hide();
@@ -4081,7 +4089,7 @@ function showFormData(form) {
                               fields[i] +
                               "], select[name=" +
                               fields[i] +
-                              "]"
+                              "]",
                           )
                           .closest(".form-group, .form-check");
                         formGroup.show();
@@ -4096,7 +4104,7 @@ function showFormData(form) {
                               fields[i] +
                               "], select[name=" +
                               fields[i] +
-                              "]"
+                              "]",
                           )
                           .closest(".form-group, .form-check");
                         formGroup.hide();
@@ -4112,7 +4120,7 @@ function showFormData(form) {
                             fields[i] +
                             "], select[name=" +
                             fields[i] +
-                            "]"
+                            "]",
                         )
                         .closest(".form-group, .form-check");
                       formGroup.show();
@@ -4226,7 +4234,7 @@ function putFieldData(form, data) {
                   fieldName +
                   "], input:password[name=" +
                   fieldName +
-                  "] "
+                  "] ",
               )
               .not(".line")
               .val(label);
@@ -4310,7 +4318,7 @@ function putFieldData(form, data) {
                   fieldName +
                   "], input:radio[name=" +
                   fieldName +
-                  "]"
+                  "]",
               )
               .not(".line")
               .prop("disabled", true);
@@ -4347,7 +4355,7 @@ function putFieldData(form, data) {
               previewImage(
                 form.find("input[name=" + fieldName + "]")[0],
                 "",
-                label
+                label,
               );
             }
           }
@@ -4372,7 +4380,7 @@ function putFieldData(form, data) {
                       fields[i] +
                       "], select[name=" +
                       fields[i] +
-                      "]"
+                      "]",
                   )
                   .not(".line")
                   .closest(".form-group, .form-check");
@@ -4388,7 +4396,7 @@ function putFieldData(form, data) {
                       fields[i] +
                       "], select[name=" +
                       fields[i] +
-                      "]"
+                      "]",
                   )
                   .not(".line")
                   .closest(".form-group, .form-check");
@@ -4430,7 +4438,7 @@ function putFieldData(form, data) {
                       fields[i] +
                       "], select[name=" +
                       fields[i] +
-                      "]"
+                      "]",
                   )
                   .not(".line");
 
@@ -4464,7 +4472,7 @@ function putFieldData(form, data) {
                       fields[i] +
                       "], select[name=" +
                       fields[i] +
-                      "]"
+                      "]",
                   )
                   .not(".line")
                   .closest(".form-group, .form-check");
@@ -4480,7 +4488,7 @@ function putFieldData(form, data) {
                       fields[i] +
                       "], select[name=" +
                       fields[i] +
-                      "]"
+                      "]",
                   )
                   .not(".line")
                   .closest(".form-group, .form-check");
@@ -4649,7 +4657,7 @@ $(".btn_ok_answer").click(function (evt) {
     beforeSend: function () {
       $(_this)
         .html(
-          '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+          '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>',
         )
         .prop("disabled", true);
       // $('.x_form').prop('disabled', true);
@@ -4795,7 +4803,7 @@ $(".btn_print_qrcode").on("click", function (evt) {
       $(_this)
         .html(
           '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>' +
-            textElement
+            textElement,
         )
         .prop("disabled", true);
       $(".btn_ok_form").prop("disabled", true);
@@ -4897,7 +4905,7 @@ _tableLine.on("click", ".btn_accept", function (evt) {
 
   $(_this)
     .html(
-      '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+      '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>',
     )
     .prop("disabled", true);
 
@@ -4955,7 +4963,7 @@ $(document).on("click", "#ismasterpart", function (e) {
     if ($(this).is(":checked")) {
       elementTarget.attr(
         "data-url",
-        elementTarget.attr("data-url") + "/$MasterPart"
+        elementTarget.attr("data-url") + "/$MasterPart",
       );
     } else {
       let lastUrl = elementTarget.attr("data-url").split("/");

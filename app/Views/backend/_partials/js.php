@@ -25,6 +25,8 @@
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.colVis.min.js"></script>
 <!-- DateTimePicker -->
 <script src="<?= base_url('atlantis-pro/js/plugin/datepicker/bootstrap-datetimepicker.min.js') ?>"></script>
+<!-- DatePicker -->
+<script src="<?= base_url('atlantis-pro/js/plugin/bootstrap-datepicker/js/bootstrap-datepicker.min.js') ?>"></script>
 <!-- DateRangePicker -->
 <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <!-- Summernote -->
