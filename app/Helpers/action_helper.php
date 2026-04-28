@@ -78,9 +78,11 @@ function replaceFormat(string $rupiah)
  * @param [type] $numeric
  * @return float
  */
-function formatRupiah(int $numeric)
+function formatRupiah(float $numeric, bool $withPrefix = false)
 {
-    return number_format($numeric, 0, '', ',');
+    $formatted = number_format($numeric, 2, ',', '.');
+
+    return $withPrefix ? 'Rp ' . $formatted : $formatted;
 }
 
 /**

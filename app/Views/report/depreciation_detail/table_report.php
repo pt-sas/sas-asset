@@ -7,7 +7,9 @@
                 <th>Division</th>
                 <th>Room</th>
                 <th>Product</th>
+                <th>Employee</th>
                 <th>Transaction Date</th>
+                <th>Unit Price</th>
                 <th>Useful Life</th>
                 <th>Period</th>
                 <th>Residual</th>

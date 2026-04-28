@@ -77,7 +77,9 @@ class M_DepreciationDetail extends Model
                     '-01'),'%Y%m'
                 )
             )
-        ) as sisa_waktu";
+        ) as sisa_waktu,
+        trx_inventory.unitprice as unitprice,
+        md_employee.name as employee";
 
         return $sql;
     }
@@ -93,6 +95,7 @@ class M_DepreciationDetail extends Model
             $this->setDataJoin('md_product', 'md_product.md_product_id = trx_inventory.md_product_id', 'left'),
             $this->setDataJoin('md_branch', 'md_branch.md_branch_id = trx_inventory.md_branch_id', 'left'),
             $this->setDataJoin('md_room', 'md_room.md_room_id = trx_inventory.md_room_id', 'left'),
+            $this->setDataJoin('md_employee', 'md_employee.md_employee_id = trx_inventory.md_employee_id', 'left'),
             $this->setDataJoin('md_division', 'md_division.md_division_id = trx_inventory.md_division_id', 'left'),
         ];
 
