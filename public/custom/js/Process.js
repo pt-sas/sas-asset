@@ -2494,6 +2494,21 @@ $(".btn_ok_form").on("click", function (evt) {
             },
             exportOptions: {
               columns: ":visible",
+              format: {
+                body: function (data, row, column, node) {
+                  let text = $("<div>").html(data).text();
+
+                  // handle format SALAH: 65,989,58
+                  if (text.match(/^\d{1,3}(,\d{3})*(,\d+)?$/)) {
+                    let parts = text.split(",");
+                    let decimal = parts.pop();
+                    let integer = parts.join("");
+                    return integer + "." + decimal;
+                  }
+
+                  return text;
+                },
+              },
             },
           },
         ],
