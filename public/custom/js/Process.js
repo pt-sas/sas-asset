@@ -2496,14 +2496,44 @@ $(".btn_ok_form").on("click", function (evt) {
               columns: ":visible",
               format: {
                 body: function (data, row, column, node) {
-                  let text = $("<div>").html(data).text();
+                  let text = $("<div>").html(data).text().trim();
 
-                  // handle format SALAH: 65,989,58
-                  if (text.match(/^\d{1,3}(,\d{3})*(,\d+)?$/)) {
+                  // =========================
+                  // 1. Skip kalau bukan angka sama sekali
+                  // =========================
+                  if (!/[\d]/.test(text)) return text;
+
+                  // =========================
+                  // 2. Format INDONESIA (65.989,58)
+                  // =========================
+                  if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(text)) {
+                    return text
+                      .replace(/\./g, "") // hapus ribuan
+                      .replace(",", "."); // ubah desimal
+                  }
+
+                  // =========================
+                  // 3. Format SALAH
+                  // =========================
+                  if (/^\d{1,3}(,\d{3})+(,\d+)?$/.test(text)) {
                     let parts = text.split(",");
                     let decimal = parts.pop();
                     let integer = parts.join("");
                     return integer + "." + decimal;
+                  }
+
+                  // =========================
+                  // 4. Format US → biarkan
+                  // =========================
+                  if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(text)) {
+                    return text.replace(/,/g, "");
+                  }
+
+                  // =========================
+                  // 5. Angka biasa decimal → biarkan
+                  // =========================
+                  if (/^\d+(\.\d+)?$/.test(text)) {
+                    return text;
                   }
 
                   return text;
