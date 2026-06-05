@@ -46,6 +46,7 @@ $routes->get('cron-approved', 'Backend\WActivity::doApproved');
 
 $routes->group('sas', ['filter' => 'auth'], function ($routes) {
     $routes->add('/', 'Backend\Dashboard::index');
+    $routes->add('depreciation', 'Backend\Depreciation::index');
 
     $routes->post('(:any)/accessmenu/getAccess', 'Backend\AccessMenu::getAccess');
 
@@ -387,6 +388,9 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
 
     $routes->add('rpt_history_asset', 'Backend\Rpt_HistoryAsset::index');
     $routes->match(['get', 'post'], 'rpt_history_asset/showAll', 'Backend\Rpt_HistoryAsset::showAll');
+
+    $routes->add('generate-depreciation', 'Backend\Gen_Depreciation::index');
+    $routes->match(['get', 'post'], 'generate-depreciation/showAll', 'Backend\Gen_Depreciation::showAll');
 });
 
 /*

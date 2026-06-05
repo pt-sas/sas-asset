@@ -2411,57 +2411,139 @@ $(".btn_ok_form").on("click", function (evt) {
   const disabled = form.find("[disabled]");
   const checkAll = $(".ischeckall");
 
-  //! Remove attribute disabled field
+  // ==========================
+  // VALIDASI REQUIRED
+  // ==========================
+  let isValid = true;
+  let firstInvalid = null;
+
+  form
+    .find("input.required, select.required, textarea.required")
+    .each(function () {
+      const field = $(this);
+      const value = field.val();
+
+      let isEmpty = false;
+
+      // Reset error
+      field.removeClass("is-invalid");
+
+      field.closest(".form-group").find(".form-text.text-danger").text("");
+
+      // Checkbox
+      if (field.is(":checkbox")) {
+        isEmpty = !field.is(":checked");
+      }
+      // Select multiple
+      else if (Array.isArray(value)) {
+        isEmpty = value.length === 0;
+      }
+      // Input biasa
+      else {
+        isEmpty = value === null || $.trim(value) === "";
+      }
+
+      if (isEmpty) {
+        isValid = false;
+
+        const label = field
+          .closest(".form-group")
+          .find("label")
+          .first()
+          .text()
+          .replace("*", "")
+          .trim();
+
+        field.addClass("is-invalid");
+
+        field
+          .closest(".form-group")
+          .find(".form-text.text-danger")
+          .text(`Please Insert the ${label} first`);
+
+        // Handle Select2
+        if (field.hasClass("select2-hidden-accessible")) {
+          field
+            .next(".select2")
+            .find(".select2-selection")
+            .css("border-color", "#dc3545");
+        }
+
+        if (!firstInvalid) {
+          firstInvalid = field;
+        }
+      } else {
+        // Reset border Select2
+        if (field.hasClass("select2-hidden-accessible")) {
+          field
+            .next(".select2")
+            .find(".select2-selection")
+            .css("border-color", "");
+        }
+      }
+    });
+
+  if (!isValid) {
+    return false;
+  }
+
+  // ==========================
+  // COLLECT FORM DATA
+  // ==========================
   disabled.removeAttr("disabled");
 
-  //TODO: Collect field array
-  let field = form
+  formReport = form
     .find("input, select")
     .map(function () {
-      if (typeof $(this).attr("name") !== "undefined") {
-        let row = {};
+      const name = $(this).attr("name");
 
-        row["name"] = $(this).attr("name");
-
-        if (this.type !== "checkbox" && this.type !== "select-multiple")
-          row["value"] = this.value;
-        else if (this.type === "select-multiple") row["value"] = $(this).val();
-        else row["value"] = this.checked ? "Y" : "N";
-
-        row["type"] = this.type;
-
-        return row;
+      if (!name) {
+        return null;
       }
+
+      let value;
+
+      if (this.type === "checkbox") {
+        value = this.checked ? "Y" : "N";
+      } else if (this.type === "select-multiple") {
+        value = $(this).val();
+      } else {
+        value = this.value;
+      }
+
+      return {
+        name: name,
+        value: value,
+        type: this.type,
+      };
     })
     .get();
 
-  formReport = field;
-
-  //! Set attribute disabled field
   disabled.prop("disabled", true);
 
-  //* Set clear to true
+  // ==========================
+  // SHOW REPORT
+  // ==========================
   clear = false;
 
-  //* Show Toolbar Button
   floatRight.removeClass("d-none");
+  cardTableReport.addClass("d-block");
 
-  //TODO: Loading and processing
-  pageInner.length &&
-    (pageInner.addClass("is-loading"),
-    reloadTable(),
+  if (pageInner.length) {
+    pageInner.addClass("is-loading");
+
+    reloadTable();
+
     setTimeout(function () {
       checkAll.prop("checked", true);
       pageInner.removeClass("is-loading");
-    }, 700));
+    }, 700);
+  }
 
-  //* Show Toolbar Button
-  cardTableReport.addClass("d-block");
-
-  /**
-   * Button Table Report
-   */
-  let button = {
+  // ==========================
+  // DATATABLE BUTTONS
+  // ==========================
+  const button = {
     buttons: [
       {
         extend: "colvis",
@@ -2486,52 +2568,41 @@ $(".btn_ok_form").on("click", function (evt) {
             titleAttr: "Export to Excel",
             title: "",
             customize: function (xlsx) {
-              var sheet = xlsx.xl.worksheets["sheet1.xml"];
-              //* Bold and Border first column
+              const sheet = xlsx.xl.worksheets["sheet1.xml"];
+
               $("row:first c", sheet).attr("s", "27");
-              //* Border all column except first column
               $("row:not(:first) c", sheet).attr("s", "25");
             },
             exportOptions: {
               columns: ":visible",
               format: {
-                body: function (data, row, column, node) {
+                body: function (data) {
                   let text = $("<div>").html(data).text().trim();
 
-                  // =========================
-                  // 1. Skip kalau bukan angka sama sekali
-                  // =========================
-                  if (!/[\d]/.test(text)) return text;
-
-                  // =========================
-                  // 2. Format INDONESIA (65.989,58)
-                  // =========================
-                  if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(text)) {
-                    return text
-                      .replace(/\./g, "") // hapus ribuan
-                      .replace(",", "."); // ubah desimal
+                  if (!/[\d]/.test(text)) {
+                    return text;
                   }
 
-                  // =========================
-                  // 3. Format SALAH
-                  // =========================
+                  // Format Indonesia
+                  if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(text)) {
+                    return text.replace(/\./g, "").replace(",", ".");
+                  }
+
+                  // Format salah
                   if (/^\d{1,3}(,\d{3})+(,\d+)?$/.test(text)) {
-                    let parts = text.split(",");
-                    let decimal = parts.pop();
-                    let integer = parts.join("");
+                    const parts = text.split(",");
+                    const decimal = parts.pop();
+                    const integer = parts.join("");
+
                     return integer + "." + decimal;
                   }
 
-                  // =========================
-                  // 4. Format US → biarkan
-                  // =========================
+                  // Format US
                   if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(text)) {
                     return text.replace(/,/g, "");
                   }
 
-                  // =========================
-                  // 5. Angka biasa decimal → biarkan
-                  // =========================
+                  // Decimal biasa
                   if (/^\d+(\.\d+)?$/.test(text)) {
                     return text;
                   }
@@ -2547,9 +2618,10 @@ $(".btn_ok_form").on("click", function (evt) {
   };
 
   new $.fn.dataTable.Buttons(_tableReport, button);
+
   _tableReport.buttons().container().appendTo($("#dt-button"));
 
-  if (checkAll.length == 0) {
+  if (!checkAll.length) {
     $(".btn_print_qrcode").hide();
   }
 });
