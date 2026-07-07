@@ -4,6 +4,7 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 use CodeIgniter\HTTP\RequestInterface;
+use DateTime;
 
 class M_Depreciation extends Model
 {
@@ -307,8 +308,10 @@ class M_Depreciation extends Model
                     if ($strDate !== strtotime($dateTrx) || $currDate <= $dateCO)
                         $increment = $i - 1;
 
-                    $period = date("m", strtotime("+" . $increment . " months", $strDate));
-                    $period = $startYear . "-" . $period;
+                    $date = new DateTime($dateTrx);
+                    $date->modify("first day of +{$increment} month");
+
+                    $period = $date->format('Y-m');
 
                     $accumulation += $cost;
 

@@ -21,6 +21,7 @@ use App\Models\M_QuotationDetail;
 use App\Models\M_User;
 use Html2Text\Html2Text;
 use Config\Services;
+use DateTime;
 
 class Receipt extends BaseController
 {
@@ -695,8 +696,10 @@ class Receipt extends BaseController
                     if ($strDate !== strtotime($dateTrx) || $currDate <= $dateCO)
                         $increment = $i - 1;
 
-                    $period = date("m", strtotime("+" . $increment . " months", $strDate));
-                    $period = $startYear . "-" . $period;
+                    $date = new DateTime($dateTrx);
+                    $date->modify("first day of +{$increment} month");
+
+                    $period = $date->format('Y-m');
 
                     $accumulation += $cost;
 
