@@ -458,133 +458,109 @@ class Receipt extends BaseController
             $receiptID = $data->getReceiptId();
             $rowAsset = $inventory->where('trx_receipt_id', $receiptID)->findAll();
 
-            //* Full month in one year 
             $fullMonth = 12;
-
-            //* Cut off date
-            $dateCO = 15;
+            $cutOffDate = 15;
 
             $arrData = [];
-            foreach ($rowAsset as $key => $val) :
+
+            foreach ($rowAsset as $val) {
+
                 $group = $groupasset->find($val->getGroupAssetId());
 
-                //* Transaction Date 
                 $dateTrx = $val->getInventoryDate();
 
-                $strDate = strtotime($dateTrx);
-                $currDate = date('d', $strDate);
-                $currMonth = date('m', $strDate);
+                $startDate = new DateTime($dateTrx);
 
-                //* Use Full Life from group asset
-                $useFulLife = $group->getUsefulLife();
-                $useLength = $useFulLife;
-
-                //* book value of unitprice in inventory 
-                $bookValue = $val->getUnitPrice();
-                $residualValue = $val->getResidualValue();
-
-                //* accumulated depreciation 
-                $accumulation = 0;
-
-                //? Check the date less than equal cut off date 
-                if ($currDate <= $dateCO) {
-                    //? Check this month of january
-                    $notFullMonth = $currMonth == 01 ? $fullMonth : ($fullMonth - $currMonth) + 1;
-                    $remainMonth = ($fullMonth - $notFullMonth);
+                // Tentukan mulai depresiasi
+                if ((int)$startDate->format('d') > $cutOffDate) {
+                    $startDate->modify('first day of next month');
+                } else {
+                    $startDate->modify('first day of this month');
                 }
 
-                //? Check the date month than cut off date 
-                if ($currDate > $dateCO) {
-                    $addMonth = strtotime("+1 months", $strDate);
-                    $nextMonth = date('m', $addMonth);
+                $startYear  = (int)$startDate->format('Y');
+                $startMonth = (int)$startDate->format('n');
 
-                    //* Total month substract next month add current month to calculate 
-                    $notFullMonth = ($fullMonth - $nextMonth) + 1;
-                    $remainMonth = ($fullMonth - $notFullMonth);
+                $usefulLife = $group->getUsefulLife();
+                $useLength  = $usefulLife;
+
+                $bookValue      = $val->getUnitPrice();
+                $residualValue  = $val->getResidualValue();
+                $accumulation   = 0;
+
+                // Bulan pertama
+                $notFullMonth = 13 - $startMonth;
+
+                // Bulan terakhir
+                $remainMonth = $fullMonth - $notFullMonth;
+
+                if ($remainMonth > 0) {
+                    $useLength++;
                 }
 
-                if (!empty($remainMonth))
-                    $useLength = $useFulLife + 1;
-
-                //TODO: Method Straight Line 
-                $straightLine = (($bookValue - $residualValue) / $useFulLife);
+                $straightLine = ($bookValue - $residualValue) / $usefulLife;
 
                 for ($i = 0; $i <= $useLength; $i++) {
+
                     $row = [];
+
                     $cost = 0;
                     $currentMonth = 0;
 
-                    $year = date('Y', $strDate);
+                    $tmpDate = clone $startDate;
+                    $tmpDate->modify("+{$i} year");
 
-                    //TODO: Method Double Decline
-                    $doubleLine = ((($bookValue - $residualValue) / $useFulLife) * 2);
+                    $year = $tmpDate->format('Y');
+
+                    $doubleLine = (($bookValue - $residualValue) / $usefulLife) * 2;
 
                     $isType = $group->getDepreciationType();
 
-                    //? Check method calculate depreciation
-                    $calculate = $isType === 'SL' ? $straightLine : $doubleLine;
+                    $calculate = ($isType === 'SL')
+                        ? $straightLine
+                        : $doubleLine;
 
-                    //* Index 1
-                    if ($i == 1) {
-                        //? Check this month of december and date month than cut off date
-                        if ($currMonth == 12 && $currDate > $dateCO) {
-                            $addYear = addYear($dateTrx, $i);
-                            $year = date('Y', $addYear);
-                            $dateTrx = date('Y-m-d', $addYear);
-                        }
+                    if ($i == 0) {
 
                         $calculate *= ($notFullMonth / $fullMonth);
 
-                        //* Set to check is not full month
                         $currentMonth = $notFullMonth;
+                    } else {
 
-                        $cost += $calculate;
-                        $accumulation += $cost;
-                        $bookValue -= $cost;
-                        $row['bookvalue'] = round($bookValue, 2, PHP_ROUND_HALF_UP);
-                        $row['costdepreciation'] = round($cost, 2, PHP_ROUND_HALF_UP);
-                    }
+                        if ($remainMonth > 0 && $i == $useLength) {
 
-                    //* Index greather than 1
-                    if ($i > 1) {
-                        $increment = $i - 1;
-                        $addYear = addYear($dateTrx, $increment);
-                        $year = date('Y', $addYear);
-
-                        //? Check current month if available remaining month
-                        if (!empty($remainMonth) && $i == $useLength) {
                             $calculate *= ($remainMonth / $fullMonth);
 
-                            //* Set remaining month 
                             $currentMonth = $remainMonth;
                         } else {
-                            $calculate *= ($fullMonth / $fullMonth);
 
-                            //* Set full month
                             $currentMonth = $fullMonth;
                         }
-
-                        $cost += $calculate;
-                        $accumulation += $cost;
-                        $bookValue -= $cost;
                     }
 
+                    $cost = $calculate;
+
+                    $accumulation += $cost;
+
+                    $bookValue -= $cost;
+
                     $row['assetcode'] = $val->getAssetCode();
-                    $row['transactiondate'] = $val->getInventoryDate();
-                    $row['totalyear'] = $useFulLife;
+                    $row['transactiondate'] = $dateTrx;
+                    $row['totalyear'] = $usefulLife;
                     $row['startyear'] = $year;
-                    $row['residualvalue'] = round($residualValue, 2, PHP_ROUND_HALF_UP);
-                    $row['costdepreciation'] = round($cost, 2, PHP_ROUND_HALF_UP);
-                    $row['accumulateddepreciation'] = round($accumulation, 2, PHP_ROUND_HALF_UP);
-                    $row['bookvalue'] = round($bookValue, 2, PHP_ROUND_HALF_UP);
+                    $row['residualvalue'] = round($residualValue, 2);
+                    $row['costdepreciation'] = round($cost, 2);
+                    $row['accumulateddepreciation'] = round($accumulation, 2);
+                    $row['bookvalue'] = round($bookValue, 2);
                     $row['currentmonth'] = $currentMonth;
                     $row['depreciationtype'] = $isType;
                     $row['unitprice'] = $val->getUnitPrice();
                     $row['created_by'] = $this->access->getSessionUser();
                     $row['updated_by'] = $this->access->getSessionUser();
+
                     $arrData[] = $row;
                 }
-            endforeach;
+            }
 
             $arrDetail = $this->createDepreceiationMonth($arrData);
 
@@ -647,7 +623,7 @@ class Receipt extends BaseController
         $fullMonth = 12;
 
         //* Cut off date
-        $dateCO = 15;
+        $cutOffDate = 15;
 
         $arrDetail = [];
         foreach ($data as $key => $val) :
@@ -690,21 +666,19 @@ class Receipt extends BaseController
                 for ($i; $i <= $currentMonth; $i++) {
                     $bookValue = $val['unitprice'];
 
-                    if ($currDate > $dateCO)
+                    if ($currDate > $cutOffDate)
                         $increment = $i;
 
-                    if ($strDate !== strtotime($dateTrx) || $currDate <= $dateCO)
+                    if ($strDate !== strtotime($dateTrx) || $currDate <= $cutOffDate)
                         $increment = $i - 1;
 
-                    $date = new DateTime($dateTrx);
-                    $date->modify("first day of +{$increment} month");
-
-                    $period = $date->format('Y-m');
+                    $date = date('Y-m-01', $strDate);
+                    $period = date('Y-m', strtotime("+{$increment} month", strtotime($date)));
 
                     $accumulation += $cost;
 
                     //? Check index first and strDate equal dateTrx or this month and cut off date
-                    if ($i == 1 && $currentMonth != $currMonth && ($strDate == strtotime($dateTrx) || ($strDate == strtotime($dateTrx) && $currMonth == 01 && $currDate <= $dateCO) || $currMonth == 12 && $currDate > $dateCO))
+                    if ($i == 1 && $currentMonth != $currMonth && ($strDate == strtotime($dateTrx) || ($strDate == strtotime($dateTrx) && $currMonth == 01 && $currDate <= $cutOffDate) || $currMonth == 12 && $currDate > $cutOffDate))
                         $accumulation = $cost + 0;
 
                     $bookValue -= $accumulation;
