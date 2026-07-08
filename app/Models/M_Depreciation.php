@@ -199,8 +199,8 @@ class M_Depreciation extends Model
                 $row['currentmonth'] = $currentMonth;
                 $row['depreciationtype'] = $isType;
                 $row['unitprice'] = $val->getUnitPrice();
-                $row['created_by'] = $this->access->getSessionUser();
-                $row['updated_by'] = $this->access->getSessionUser();
+                $row['created_by'] = session()->get('sys_user_id');
+                $row['updated_by'] = session()->get('sys_user_id');
 
                 $arrData[] = $row;
             }
