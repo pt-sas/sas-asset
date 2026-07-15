@@ -102,6 +102,23 @@ class M_DepreciationDetail extends Model
         return $sql;
     }
 
+    public function getSelectRptJournal()
+    {
+        $sql = $this->table . ".*,
+        trx_inventory.md_groupasset_id";
+
+        return $sql;
+    }
+
+    public function getRptJournalJoin()
+    {
+        $sql = [
+            $this->setDataJoin('trx_inventory', "{$this->table}.assetcode = trx_inventory.assetcode", 'left'),
+        ];
+
+        return $sql;
+    }
+
     private function setDataJoin($tableJoin, $columnJoin, $typeJoin = "inner")
     {
         return [
