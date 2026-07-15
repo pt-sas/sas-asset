@@ -391,6 +391,15 @@ $routes->group('sas', ['filter' => 'auth'], function ($routes) {
 
     $routes->add('generate-depreciation', 'Backend\Gen_Depreciation::index');
     $routes->match(['get', 'post'], 'generate-depreciation/showAll', 'Backend\Gen_Depreciation::showAll');
+
+    $routes->add('rpt_journal_depre_montly', 'Backend\Rpt_JournalDepreciation::index');
+    $routes->match(['get', 'post'], 'rpt_journal_depre_montly/showAll', 'Backend\Rpt_JournalDepreciation::showAll');
+
+    $routes->add('rpt_journal_disposal_asset', 'Backend\Rpt_JournalDisposal::index');
+    $routes->match(['get', 'post'], 'rpt_journal_disposal_asset/showAll', 'Backend\Rpt_JournalDisposal::showAll');
+
+    $routes->add('rpt_journal_selling_asset', 'Backend\Rpt_JournalSelling::index');
+    $routes->match(['get', 'post'], 'rpt_journal_selling_asset/showAll', 'Backend\Rpt_JournalSelling::showAll');
 });
 
 /*
