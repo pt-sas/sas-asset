@@ -444,19 +444,51 @@ class WActivity extends BaseController
                 $line = $disposalDetail->where('trx_disposal_id', $record_id)->findAll();
 
                 // TODO : Update Next Period Depreciation Detail
-                $periodDisposal = date('Y-m', strtotime($sql->disposaldate));
+                $dateDispose = date('d', strtotime($sql->disposaldate));
+                $dateDisposal = date('Y-m-d', strtotime($sql->disposaldate));
+                $isLastDateDisposal =  $dateDisposal == date('Y-m-t', strtotime($sql->disposaldate));
 
                 $assetList = array_map(fn($row) => $row->assetcode, $line);
-                $allNextPeriodDepreciation = $depreciationDetail->whereIn('assetcode', $assetList)->where('period >', $periodDisposal)->findAll();
+                $allInventory = $inventory->whereIn('assetcode', $assetList)->findAll();
 
+                //* Fetch ALL depreciation detail rows for these assets once, up front.
+                $depreciationDetailByAsset = [];
+                foreach ($depreciationDetail->whereIn('assetcode', $assetList)->findAll() as $row) {
+                    $depreciationDetailByAsset[$row->assetcode][] = $row;
+                }
+
+                //* This for update Inventory Table later
+                $dataInventory = [];
+
+                //* Data pool Data Depreciation Detail updates
                 $dataDepreDetail = [];
-                foreach ($allNextPeriodDepreciation as $row) {
-                    $dataDepreDetail[] = [
-                        'trx_depreciation_detail_id' => $row->trx_depreciation_detail_id,
-                        'bookvalue' => 0,
-                        'accumulateddepreciation' => 0,
-                        'costdepreciation' => 0
-                    ];
+
+                //* Tracks each asset's OWN disposal period.
+                $periodDisposalMap = [];
+
+                foreach ($allInventory as $asset) {
+                    //* Settle Condition Var
+                    $inventoryDay = date('d', strtotime($asset->inventorydate));
+                    $isDisposeBigThanAcq = $inventoryDay <= $dateDispose;
+
+                    $isLastDate = $isLastDateDisposal ? date('Y-m-d', strtotime($asset->inventorydate)) == date('Y-m-t', strtotime($asset->inventorydate)) : false;
+
+                    $periodDisposal = ($isLastDate || $isDisposeBigThanAcq) ? date('Y-m', strtotime($sql->disposaldate)) : date('Y-m', strtotime('-1 month', strtotime($sql->disposaldate)));
+
+                    $periodDisposalMap[$asset->assetcode] = $periodDisposal;
+
+                    foreach ($depreciationDetailByAsset[$asset->assetcode] ?? [] as $row) {
+                        if ($row->period > $periodDisposal) {
+                            $dataDepreDetail[] = [
+                                'trx_depreciation_detail_id' => $row->trx_depreciation_detail_id,
+                                'bookvalue' => 0,
+                                'accumulateddepreciation' => 0,
+                                'costdepreciation' => 0
+                            ];
+                        }
+                    }
+
+                    $dataInventory[] = ['trx_inventory_id' => $asset->trx_inventory_id, 'isdisposed' => 'Y'];
                 }
 
                 if (!empty($dataDepreDetail))
@@ -464,9 +496,21 @@ class WActivity extends BaseController
 
                 // TODO : Update Current & Next Year Depreciation
                 $yearDisposal = date('Y', strtotime($sql->disposaldate));
-                $allDisposedDepreciation = $depreciationDetail->whereIn('assetcode', $assetList)->where('period', $periodDisposal)->findAll();
 
-                // Get All Year Depreciation
+                $allDisposedDepreciation = [];
+                foreach ($depreciationDetailByAsset as $assetcode => $rows) {
+                    if (!isset($periodDisposalMap[$assetcode])) {
+                        continue;
+                    }
+
+                    foreach ($rows as $row) {
+                        if ($row->period == $periodDisposalMap[$assetcode]) {
+                            $allDisposedDepreciation[] = $row;
+                        }
+                    }
+                }
+
+                //* Get All Year Depreciation
                 $dataDepre = $depreciation->whereIn('assetcode', $assetList)->where('startyear >=', $yearDisposal)->findAll();
 
                 $allYearDepreciation = [];
@@ -474,11 +518,13 @@ class WActivity extends BaseController
                     $allYearDepreciation[$row->assetcode][] = $row;
                 }
 
-                // Get All Sum Depreciation
+                //* Get All Sum Depreciation
                 $dataDepre = $depreciationDetail->select('assetcode, SUM(costdepreciation) as total_cost, count(trx_depreciation_detail_id) as total_month')
                     ->whereIn('assetcode', $assetList)
                     ->where('costdepreciation !=', 0)
-                    ->like('period', $yearDisposal)->groupBy('assetcode')->findAll();
+                    ->like('period', $yearDisposal)
+                    ->groupBy('assetcode')
+                    ->findAll();
 
                 $allCostSumDepreciation = [];
                 $allTotalMonthDepreciation = [];
@@ -488,19 +534,24 @@ class WActivity extends BaseController
                 }
 
                 $dataDepre = [];
+                $processedDepreciationIds = [];
                 foreach ($allDisposedDepreciation as $row) {
-                    $depreYear = isset($allYearDepreciation[$row->assetcode]) ? $allYearDepreciation[$row->assetcode] : [];
+                    foreach ($allYearDepreciation[$row->assetcode] ?? [] as $val) {
+                        if (isset($processedDepreciationIds[$val->trx_depreciation_id])) {
+                            continue;
+                        }
 
-                    foreach ($depreYear as $val) {
                         $isCurrentYear = $val->startyear == $yearDisposal;
 
                         $dataDepre[] = [
                             'trx_depreciation_id' => $val->trx_depreciation_id,
-                            'costdepreciation' => $isCurrentYear && isset($allCostSumDepreciation[$val->assetcode]) ? $allCostSumDepreciation[$val->assetcode] : 0,
+                            'costdepreciation' => $isCurrentYear ? ($allCostSumDepreciation[$val->assetcode] ?? 0) : 0,
                             'accumulateddepreciation' => $isCurrentYear ? $row->accumulateddepreciation : 0,
-                            'bookvalue' => $isCurrentYear ?  $row->bookvalue : 0,
-                            'currentmonth' => $isCurrentYear && isset($allTotalMonthDepreciation[$val->assetcode]) ? $allTotalMonthDepreciation[$val->assetcode] : 0,
+                            'bookvalue' => $isCurrentYear ? $row->bookvalue : 0,
+                            'currentmonth' => $isCurrentYear ? ($allTotalMonthDepreciation[$val->assetcode] ?? 0) : 0,
                         ];
+
+                        $processedDepreciationIds[$val->trx_depreciation_id] = true;
                     }
                 }
 
@@ -508,13 +559,6 @@ class WActivity extends BaseController
                     $depreciation->updateBatch($dataDepre, 'trx_depreciation_id');
 
                 // TODO : Update Inventory
-                $allInventory = $inventory->whereIn('assetcode', $assetList)->findAll();
-
-                $dataInventory = [];
-                foreach ($allInventory as $row) {
-                    $dataInventory[] = ['trx_inventory_id' => $row->trx_inventory_id, 'isdisposed' => 'Y'];
-                }
-
                 if (!empty($dataInventory))
                     $inventory->updateBatch($dataInventory, 'trx_inventory_id');
             }

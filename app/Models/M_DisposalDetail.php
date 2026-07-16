@@ -52,6 +52,7 @@ class M_DisposalDetail extends Model
 					FROM trx_depreciation_detail trd
 					WHERE trd.assetcode = {$this->table}.assetcode
 					AND trd.period <= disposal.period
+					AND trd.accumulateddepreciation != 0
 					ORDER BY period DESC
 					LIMIT 1)";
 
