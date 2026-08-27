@@ -471,7 +471,6 @@ class Receipt extends BaseController
 
                 $startDate = new DateTime($dateTrx);
 
-                // Tentukan mulai depresiasi
                 if ((int)$startDate->format('d') > $cutOffDate) {
                     $startDate->modify('first day of next month');
                 } else {
@@ -488,11 +487,8 @@ class Receipt extends BaseController
                 $residualValue  = $val->getResidualValue();
                 $accumulation   = 0;
 
-                // Bulan pertama
                 $notFullMonth = 13 - $startMonth;
-
-                // Bulan terakhir
-                $remainMonth = $fullMonth - $notFullMonth;
+                $remainMonth  = $fullMonth - $notFullMonth;
 
                 if ($remainMonth > 0) {
                     $useLength++;
@@ -500,10 +496,11 @@ class Receipt extends BaseController
 
                 $straightLine = ($bookValue - $residualValue) / $usefulLife;
 
-                for ($i = 0; $i <= $useLength; $i++) {
+                $isType = $group->getDepreciationType();
+
+                for ($i = 0; $i < $useLength; $i++) {
 
                     $row = [];
-
                     $cost = 0;
                     $currentMonth = 0;
 
@@ -512,9 +509,8 @@ class Receipt extends BaseController
 
                     $year = $tmpDate->format('Y');
 
-                    $doubleLine = (($bookValue - $residualValue) / $usefulLife) * 2;
-
-                    $isType = $group->getDepreciationType();
+                    // book value SAAT INI (bukan bookValue - residual)
+                    $doubleLine = $bookValue * (2 / $usefulLife);
 
                     $calculate = ($isType === 'SL')
                         ? $straightLine
@@ -523,26 +519,32 @@ class Receipt extends BaseController
                     if ($i == 0) {
 
                         $calculate *= ($notFullMonth / $fullMonth);
-
                         $currentMonth = $notFullMonth;
                     } else {
 
-                        if ($remainMonth > 0 && $i == $useLength) {
-
+                        if ($remainMonth > 0 && $i == $useLength - 1) {
                             $calculate *= ($remainMonth / $fullMonth);
-
                             $currentMonth = $remainMonth;
                         } else {
-
                             $currentMonth = $fullMonth;
                         }
+                    }
+
+                    // berlaku untuk SL maupun DDB (jaga-jaga pembulatan)
+                    $maxAllowed = $bookValue - $residualValue;
+
+                    if ($calculate > $maxAllowed) {
+                        $calculate = $maxAllowed;
+                    }
+
+                    if ($calculate < 0) {
+                        $calculate = 0;
                     }
 
                     $cost = $calculate;
 
                     $accumulation += $cost;
-
-                    $bookValue -= $cost;
+                    $bookValue    -= $cost;
 
                     $row['assetcode'] = $val->getAssetCode();
                     $row['transactiondate'] = $dateTrx;
@@ -555,10 +557,15 @@ class Receipt extends BaseController
                     $row['currentmonth'] = $currentMonth;
                     $row['depreciationtype'] = $isType;
                     $row['unitprice'] = $val->getUnitPrice();
-                    $row['created_by'] = $this->access->getSessionUser();
-                    $row['updated_by'] = $this->access->getSessionUser();
+                    $row['created_by'] = session()->get('sys_user_id');
+                    $row['updated_by'] = session()->get('sys_user_id');
 
                     $arrData[] = $row;
+
+                    // Opsional: kalau book value sudah pas di residual, tidak perlu lanjut
+                    if ($bookValue <= $residualValue) {
+                        break;
+                    }
                 }
             }
 
