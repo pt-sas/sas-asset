@@ -24,6 +24,7 @@ class M_Variant extends Model
         '', // Number column
         'md_variant.value',
         'md_variant.name',
+        'md_variant.ismasterpart',
         'md_variant.isactive'
     ];
     protected $column_search = [

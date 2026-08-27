@@ -54,6 +54,7 @@ class Subcategory extends BaseController
                 $row[] = $value->value;
                 $row[] = $value->name;
                 $row[] = $value->category;
+                $row[] = active($value->ismasterpart);
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;

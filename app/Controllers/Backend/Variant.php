@@ -51,6 +51,7 @@ class Variant extends BaseController
                 $row[] = $number;
                 $row[] = $value->value;
                 $row[] = $value->name;
+                $row[] = active($value->ismasterpart);
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
