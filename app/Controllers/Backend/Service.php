@@ -20,6 +20,7 @@ class Service extends BaseController
         $this->request = Services::request();
         $this->model = new M_Service($this->request);
         $this->modelDetail = new M_ServiceDetail($this->request);
+        $this->subModelDetail = new M_ServicePart($this->request);
         $this->entity = new \App\Entities\Service();
     }
 
@@ -62,7 +63,7 @@ class Service extends BaseController
                 $row[] = docStatus($value->docstatus);
                 $row[] = $value->createdby;
                 $row[] = $value->description;
-                $row[] = $this->template->tableButton($ID, $value->docstatus);
+                $row[] = $this->template->tableButton($ID, $value->docstatus, 'SERVICE');
                 $data[] = $row;
             endforeach;
 
@@ -95,7 +96,14 @@ class Service extends BaseController
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
                     $this->entity->fill($post);
-                    $this->entity->setGrandTotal(arrSumField('lineamt', $table));
+
+                    //* Sum if status not Service Canceled
+                    $arrTableSum = [];
+                    foreach ($table as $item) {
+                        if ($item->md_status_id != 100006) $arrTableSum[] = $item;
+                    }
+
+                    $this->entity->setGrandTotal(arrSumField('lineamt', $arrTableSum));
 
                     if ($this->isNew()) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
@@ -150,7 +158,7 @@ class Service extends BaseController
     {
         if ($this->request->isAJAX()) {
             try {
-                $result = $this->model->delete($id);
+                $result = $this->delete($id);
                 $response = message('success', true, $result);
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());
@@ -190,6 +198,7 @@ class Service extends BaseController
 
     public function processIt()
     {
+        $cWfs = new WScenario();
         if ($this->request->isAJAX()) {
             $post = $this->request->getVar();
 
@@ -202,9 +211,14 @@ class Service extends BaseController
                 ->first();
 
             try {
+                $menu = $this->request->uri->getSegment(2);
+
                 if (!empty($_DocAction)) {
                     if ($_DocAction === $row->getDocStatus()) {
                         $response = message('error', true, 'Please reload the Document');
+                    } else if ($_DocAction === $this->DOCSTATUS_Inprogress) {
+                        $this->message = $cWfs->setScenario($this->entity, $this->model, $this->modelDetail, $_ID, $this->DOCSTATUS_Completed, $menu, $this->session);
+                        $response = message('success', true, $this->message);
                     } else if ($_DocAction === $this->DOCSTATUS_Completed) {
                         if (is_null($serviceOnDelivery)) {
                             $this->entity->setDocStatus($this->DOCSTATUS_Completed);
@@ -229,34 +243,34 @@ class Service extends BaseController
 
     public function tableLine($set = null, $detail = [])
     {
-        $inventory = new M_Inventory($this->request);
-        $product = new M_Product($this->request);
-        $status = new M_Status($this->request);
+        $mInventory = new M_Inventory($this->request);
+        $mProduct = new M_Product($this->request);
+        $mStatus = new M_Status($this->request);
 
         $post = $this->request->getVar();
 
         $uri = $this->request->uri->getSegment(2);
 
-        $dataProduct = $product->where('isactive', 'Y')->findAll();
-        $dataStatus = $status->where([
-            'isactive'  => 'Y',
-            'isline'    => 'Y'
-        ])->like('menu_id', $uri, 'both')
-            ->orderBy('name', 'ASC')
-            ->findAll();
+        $dataProduct = $mProduct->where('isactive', 'Y')->findAll();
 
         $table = [];
 
         $subQuery = $this->model->builder->select('trx_service_detail.assetcode')
             ->join('trx_service_detail', 'trx_service_detail.trx_service_id = trx_service.trx_service_id')
-            ->whereIn('trx_service_detail.md_status_id', [100004, 100005])
             ->where('trx_service_detail.assetcode = trx_inventory.assetcode')
+            ->whereIn('trx_service_detail.md_status_id', [100004, 100005])
             ->getCompiledSelect();
-
 
         //? Create
         if (empty($set)) {
-            $dataInventory = $inventory->where('isactive', 'Y')
+            $dataStatus = $mStatus->where([
+                'isactive'  => 'Y',
+                'isline'    => 'Y'
+            ])->like('menu_id', $uri, 'both')
+                ->orderBy('name', 'ASC')
+                ->findAll();
+
+            $dataInventory = $mInventory->where('isactive', 'Y')
                 ->where('md_room_id', $post['md_room_id'])
                 ->where("NOT EXISTS ($subQuery)", null, false) // Raw SQL for NOT EXISTS
                 ->orderBy('assetcode', 'ASC')
@@ -268,6 +282,7 @@ class Service extends BaseController
                 "",
                 $this->field->fieldTable('input', 'text', 'lineamt', 'number', 'required', 'readonly', null, null, null, 250),
                 $this->field->fieldTable('select', null, 'md_status_id', null, 'required', 'readonly', null, $dataStatus, 'On Delivery', 150, 'md_status_id', 'name'),
+                "",
                 $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250),
                 $this->field->fieldTable('button', 'button', 'trx_service_detail_id')
             ];
@@ -277,29 +292,49 @@ class Service extends BaseController
         if (!empty($set) && count($detail) > 0) {
             $service = $this->model->find($detail[0]->trx_service_id);
 
-            if ($service->getDocStatus() === $this->DOCSTATUS_Prepare) {
-                $btnDetail = '<div class="form-group">';
-                $btnDetail .= '<button type="button" title="Detail" class="btn btn-sm btn-round line btn-info btn_isdetail numeric" id="" name="isdetail" value="0">';
-                $btnDetail .= '<i class="fas fa-th-list"></i>';
-                $btnDetail .= '</button>';
-                $btnDetail .= '</div>';
-            } else {
-                $btnDetail = "";
-            }
-
             foreach ($detail as $row) :
-                $dataInventory = $inventory->where('isactive', 'Y')
+                if ($row->isagree === 'Y' || $service->getDocStatus() == $this->DOCSTATUS_Completed) {
+                    $status = [100006, 100004, 100011];
+                } else {
+                    $status = [100006, 100005];
+                }
+
+                $dataStatus = $mStatus->where([
+                    'isactive'  => 'Y',
+                    'isline'    => 'Y'
+                ])->whereIn('md_status_id', $status)
+                    ->like('menu_id', $uri, 'both')
+                    ->orderBy('name', 'ASC')
+                    ->findAll();
+                $dataInventory = $mInventory->where('isactive', 'Y')
                     ->where('md_room_id', $service->md_room_id)
                     ->orderBy('assetcode', 'ASC')
                     ->findAll();
+
+                if ($service->getDocStatus() === $this->DOCSTATUS_Prepare || ($service->getDocStatus() === $this->DOCSTATUS_Inprogress && $row->isagree != null) || $service->getDocStatus() === $this->DOCSTATUS_Completed) {
+                    $btnDetail = '<div class="form-group">';
+                    $btnDetail .= '<button type="button" title="Detail" class="btn btn-sm btn-round line btn-info btn_isdetail numeric" id="" name="isdetail" value="0">';
+                    $btnDetail .= '<i class="fas fa-th-list"></i>';
+                    $btnDetail .= '</button>';
+                    $btnDetail .= '</div>';
+                } else {
+                    $btnDetail = "";
+                }
+
+                $updateable = null;
+
+                if ($service->getDocStatus() === $this->DOCSTATUS_Prepare || ($service->getDocStatus() === $this->DOCSTATUS_Inprogress && $row->isagree != null)) {
+                    $updateable = 'updatable';
+                }
 
                 $table[] = [
                     $this->field->fieldTable('select', null, 'assetcode', 'unique', 'required', null, null, $dataInventory, $row->assetcode, 200, 'assetcode', 'assetcode'),
                     $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                     $btnDetail,
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row->lineamt, 250),
-                    $this->field->fieldTable('select', null, 'md_status_id', $service->getDocStatus() === $this->DOCSTATUS_Prepare ? 'updatable' : null, 'required', $service->getDocStatus() === $this->DOCSTATUS_Drafted ? 'readonly' : null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, $row->description, 250),
+                    $this->field->fieldTable('select', null, 'md_status_id', $updateable, 'required', $service->getDocStatus() === $this->DOCSTATUS_Drafted ? 'readonly' : null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
+                    statusRealize($row->isagree),
+                    $this->field->fieldTable('input', 'text', 'description', $updateable, null, null, null, null, $row->description, 250),
                     $this->field->fieldTable('button', 'button', 'trx_service_detail_id', null, null, null, null, null, $row->trx_service_detail_id)
                 ];
             endforeach;

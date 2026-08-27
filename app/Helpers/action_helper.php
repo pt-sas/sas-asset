@@ -233,3 +233,17 @@ function replaceStrBracket(string $str)
 
     return trim($str);
 }
+
+function statusRealize($str)
+{
+    switch ($str) {
+        case "Y":
+            return '<small class="badge badge-success">Disetujui</small>';
+        case "N":
+            return '<small class="badge badge-warning">Tidak Disetujui</small>';
+        case 'H':
+            return '<small class="badge badge-dark">Menunggu Persetujuan</small>';
+        default:
+            return "";
+    }
+}

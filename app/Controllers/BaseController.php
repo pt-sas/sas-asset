@@ -49,6 +49,7 @@ class BaseController extends Controller
 	protected $validation;
 	protected $model;
 	protected $modelDetail;
+	protected $subModelDetail;
 	protected $entity;
 	protected $email;
 
@@ -882,5 +883,48 @@ class BaseController extends Controller
 		endforeach;
 
 		return $result;
+	}
+
+	public function delete(int $id): bool
+	{
+		$row = $this->model->where($this->model->primaryKey, $id)->findAll();
+
+
+		if ($this->modelDetail) {
+			$lines = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
+
+			if ($this->modelSubDetail) {
+				foreach ($lines as $detail) {
+					$subLines = $this->modelSubDetail->where(
+						$this->modelDetail->primaryKey,
+						$detail->{$this->modelDetail->primaryKey}
+					)->findAll();
+					$this->modelSubDetail->where(
+						$this->modelDetail->primaryKey,
+						$detail->{$this->modelDetail->primaryKey}
+					)->delete();
+					$this->logChanges($this->modelSubDetail->table, $this->modelSubDetail->primaryKey, $subLines, $this->modelSubDetail->db->getFieldNames($this->modelSubDetail->table));
+				}
+			}
+
+			$this->modelDetail->where($this->model->primaryKey, $id)->delete();
+			$this->logChanges($this->modelDetail->table, $this->modelDetail->primaryKey, $lines, $this->modelDetail->db->getFieldNames($this->modelDetail->table));
+		}
+
+		$result = $this->model->delete($id);
+		$this->logChanges($this->model->table, $this->model->primaryKey, $row, $this->model->db->getFieldNames($this->model->table));
+
+		return $result;
+	}
+
+	private function logChanges($table, $primaryKey, $rows, $fields)
+	{
+		$changeLog = new M_ChangeLog($this->request);
+
+		foreach ((array) $rows as $row) {
+			foreach ($fields as $column) {
+				$changeLog->insertLog($table, $column, $row->{$primaryKey}, $row->{$column}, null, $this->EVENTCHANGELOG_Delete);
+			}
+		}
 	}
 }

@@ -19,6 +19,7 @@ use App\Models\M_Inventory;
 use App\Models\M_Menu;
 use App\Models\M_Movement;
 use App\Models\M_Room;
+use App\Models\M_ServiceDetail;
 use Config\Services;
 use Pusher\Pusher;
 use Html2Text\Html2Text;
@@ -71,16 +72,25 @@ class WActivity extends BaseController
                     $record_id = $value->record_id;
                     $table = $value->table;
                     $menu = $value->menu;
+                    $tableLine = $value->tableline;
+                    $recordLine_id = $value->recordline_id;
 
                     $menuName = $mMenu->getMenuBy($menu);
                     $node = 'Approval ' . ucwords($menuName);
 
-                    $trx = $this->model->getDataTrx($table, $record_id);
+                    if ($tableLine) {
+                        $trx = $this->model->getDataTrx($table, $recordLine_id, $tableLine);
+                    } else {
+                        $trx = $this->model->getDataTrx($table, $record_id);
+                    }
 
-                    if ($trx)
+                    if ($trx && $table == 'trx_service') {
+                        $summary = ucwords($menuName) . ' ' . $trx->documentno . ' : ' . $trx->usercreated_by . ' : ' . $trx->assetcode . " : Amount " . formatRupiah($trx->lineamt);
+                    } else if ($trx) {
                         $summary = ucwords($menuName) . ' ' . $trx->documentno . ': ' . $trx->usercreated_by;
-                    else
+                    } else {
                         $summary = ucwords($menuName) . ' ' . $record_id;
+                    }
 
                     $row[] = $ID;
                     $row[] = $record_id;
@@ -100,7 +110,7 @@ class WActivity extends BaseController
         }
     }
 
-    public function setActivity($sys_wfactivity_id, $sys_wfscenario_id, $sys_wfresponsible_id, $user_by, $state, $processed, $textmsg, $table, $record_id, $menu)
+    public function setActivity($sys_wfactivity_id, $sys_wfscenario_id, $sys_wfresponsible_id, $user_by, $state, $processed, $textmsg, $table, $record_id, $menu, $tableLine = null, $recordLine_id = null)
     {
         $mWr = new M_Responsible($this->request);
         $mWe = new M_WEvent($this->request);
@@ -112,6 +122,8 @@ class WActivity extends BaseController
         $this->entity->setTable($table);
         $this->entity->setRecordId($record_id);
         $this->entity->setMenu($menu);
+        $this->entity->setTableLine($tableLine);
+        $this->entity->setRecordLineId($recordLine_id);
 
         $user_id = $mWr->getUserByResponsible($sys_wfresponsible_id);
         $menuName = $mMenu->getMenuBy($menu);
@@ -127,7 +139,7 @@ class WActivity extends BaseController
             $result = $this->model->save($this->entity);
 
             $sys_wfactivity_id = $this->model->getInsertID();
-            $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+            $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by, false, $tableLine, $recordLine_id);
 
             $resp = $mWr->find($sys_wfresponsible_id);
             $list = $mUser->detail(['sr.sys_role_id' => $resp->getRoleId()])->getResult();
@@ -139,10 +151,17 @@ class WActivity extends BaseController
             $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please approve document below.</span></p><div><br></div>';
             $message .= "-----" . " " . ucwords($menuName) . " ";
 
-            if (isset($sql->grandtotal))
+            if ($tableLine == 'trx_service_detail' && $recordLine_id) {
+                $builderLine = $this->getBuilder($tableLine);
+                $builderLine->where($this->getPrimaryKey($tableLine), $recordLine_id);
+                $sqlLine = $builderLine->get()->getRow();
+
+                $message .= $sql->documentno . ": Assetcode = " . $sqlLine->assetcode . " : Amount = " . formatRupiah($sqlLine->lineamt);
+            } else  if (isset($sql->grandtotal)) {
                 $message .= $sql->documentno . ": Approval Amount =" . formatRupiah($sql->grandtotal);
-            else
+            } else {
                 $message .= $sql->documentno;
+            }
 
             $message = new Html2Text($message);
             $message = $message->getText();
@@ -185,12 +204,18 @@ class WActivity extends BaseController
                     }
                 endforeach;
             }
+
+            if ($tableLine && $recordLine_id) {
+                $mServiceDetail = new M_ServiceDetail($this->request);
+
+                $mServiceDetail->where($mServiceDetail->primaryKey, $recordLine_id)->set('isagree', 'H')->update();
+            }
         } else {
             if (!empty($this->getNextResponsible())) {
                 $newWfResponsibleId = $this->getNextResponsible();
                 $user_id = $mWr->getUserByResponsible($newWfResponsibleId);
 
-                $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by, true);
+                $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by, true, $tableLine, $recordLine_id);
 
                 $sys_wfresponsible_id = $newWfResponsibleId;
                 $user = $mUser->find($user_by);
@@ -205,7 +230,7 @@ class WActivity extends BaseController
                 if ($state === $this->DOCSTATUS_Completed && $processed) {
                     $state = $this->DOCSTATUS_Suspended;
                     $processed = false;
-                    $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+                    $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by, false, $tableLine, $recordLine_id);
                 }
 
                 $resp = $mWr->find($sys_wfresponsible_id);
@@ -218,10 +243,17 @@ class WActivity extends BaseController
                 $message =  '<p>Dear Mr/Ms,</p><p><span style="letter-spacing: 0.05em;">Please approve document below.</span></p><div><br></div>';
                 $message .= "-----" . " " . ucwords($menuName) . " ";
 
-                if (isset($sql->grandtotal))
+                if ($tableLine == 'trx_service_detail' && $recordLine_id) {
+                    $builderLine = $this->getBuilder($tableLine);
+                    $builderLine->where($this->getPrimaryKey($tableLine), $recordLine_id);
+                    $sqlLine = $builderLine->get()->getRow();
+
+                    $message .= $sql->documentno . ": Assetcode = " . $sqlLine->assetcode . " : Amount = " . formatRupiah($sqlLine->lineamt);
+                } else if (isset($sql->grandtotal)) {
                     $message .= $sql->documentno . ": Approval Amount =" . formatRupiah($sql->grandtotal);
-                else
+                } else {
                     $message .= $sql->documentno;
+                }
 
                 $message = new Html2Text($message);
                 $message = $message->getText();
@@ -232,26 +264,35 @@ class WActivity extends BaseController
 
                 $this->toForwardAlert('sys_wfresponsible', $sys_wfresponsible_id, $subject, $message);
             } else {
-                $builder = $this->model->db->table($table);
+                $trxTable = $tableLine ? $tableLine : $table;
+                $trxID = $tableLine ? $recordLine_id : $record_id;
+
+                $builder = $this->model->db->table($trxTable);
 
                 if ($state === $this->DOCSTATUS_Aborted && $processed) {
-                    $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+                    $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by, false, $tableLine, $recordLine_id);
 
-                    $data = [
-                        'docstatus' => $this->DOCSTATUS_NotApproved
-                    ];
+                    $data = [];
 
-                    $builder->where($this->getPrimaryKey($table), $record_id)->update($data);
+                    if ($trxTable == $tableLine) {
+                        $data['isagree'] = 'N';
+                    } else {
+                        $data['docstatus'] = $this->DOCSTATUS_NotApproved;
+                    }
+
+                    $builder->where($this->getPrimaryKey($trxTable), $trxID)->update($data);
                 } else {
                     $state = $this->DOCSTATUS_Completed;
                     $processed = true;
-                    $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by);
+                    $mWe->setEventAudit($sys_wfactivity_id, $sys_wfresponsible_id, $user_id, $state, $processed, $table, $record_id, $user_by, false, $tableLine, $recordLine_id);
 
-                    $data = [
-                        'docstatus' => $state
-                    ];
+                    if ($trxTable == $tableLine) {
+                        $data['isagree'] = 'Y';
+                    } else {
+                        $data['docstatus'] = $state;
+                    }
 
-                    $builder->where($this->getPrimaryKey($table), $record_id)->update($data);
+                    $builder->where($this->getPrimaryKey($trxTable), $trxID)->update($data);
 
                     $builder = $this->getBuilder($table);
                     $builder->where($this->getPrimaryKey($table), $record_id);
@@ -562,6 +603,12 @@ class WActivity extends BaseController
                 if (!empty($dataInventory))
                     $inventory->updateBatch($dataInventory, 'trx_inventory_id');
             }
+
+            if ($this->entity->getState() == $this->DOCSTATUS_Completed && $table == 'trx_service') {
+                $mServiceDetail = new M_ServiceDetail($this->request);
+
+                $mServiceDetail->where($mServiceDetail->primaryKey, $recordLine_id)->set('md_status_id', 100004)->update();
+            }
         }
 
         return $result;
@@ -593,9 +640,9 @@ class WActivity extends BaseController
 
                     $this->wfScenarioId = $activity->getWfScenarioId();
 
-                    $response = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Completed, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
+                    $response = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Completed, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu(), $activity->getTableLine(), $activity->getRecordLineId());
                 } else {
-                    $response = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Aborted, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu());
+                    $response = $this->setActivity($_ID, $activity->getWfScenarioId(), $activity->getWfResponsibleId(), $this->access->getSessionUser(), $this->DOCSTATUS_Aborted, true, $txtMsg, $activity->getTable(), $activity->getRecordId(), $activity->getMenu(), $activity->getTableLine(), $activity->getRecordLineId());
 
                     $builder = $this->getBuilder($activity->getTable());
                     $builder->where($this->getPrimaryKey($activity->getTable()), $activity->getRecordId());

@@ -98,7 +98,7 @@ class Template
         else if ($update === 'Y' && (!empty($status) && $status !== 'DR'))
             $allBtn .= $btnDetail;
 
-        if ($update === 'Y' && !empty($status) && ($status === 'CO' || $status === 'DR' || $status === 'NA' || $status === 'PR'))
+        if ($update === 'Y' && !empty($status) && ($status === 'CO' || $status === 'DR' || $status === 'NA' || $status === 'PR' || ($status === 'IP' && $type === 'SERVICE')))
             $allBtn .= $btnProcess;
 
         if ($delete === 'Y')

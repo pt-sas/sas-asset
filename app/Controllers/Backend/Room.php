@@ -173,6 +173,7 @@ class Room extends BaseController
                         $list = $this->model->where('isactive', 'Y')
                             ->like('name', $post['search'])
                             ->like('name', $post['name'])
+                            ->orLike('description', $post['name'])
                             ->orderBy('name', 'ASC')
                             ->findAll();
                     } else {
@@ -184,6 +185,7 @@ class Room extends BaseController
                 } else if (isset($post['name'])) {
                     $list = $this->model->where('isactive', 'Y')
                         ->like('name', $post['name'])
+                        ->orLike('description', $post['name'])
                         ->orderBy('name', 'ASC')
                         ->findAll();
                 } else if (!empty($post['reference'])) {

@@ -16,6 +16,8 @@ class WActivity extends Entity
     protected $table;
     protected $record_id;
     protected $menu;
+    protected $tableline;
+    protected $recordline_id;
     protected $isactive;
     protected $created_by;
     protected $updated_by;
@@ -170,5 +172,31 @@ class WActivity extends Entity
     public function setUpdatedBy($updated_by)
     {
         $this->attributes['updated_by'] = $updated_by;
+    }
+
+    public function getTableLine()
+    {
+        return $this->attributes['tableline'];
+    }
+
+    public function setTableLine($tableline)
+    {
+        if (is_null($tableline))
+            $this->attributes['tableline'] = NULL;
+        else
+            $this->attributes['tableline'] = $tableline;
+    }
+
+    public function getRecordLineId()
+    {
+        return $this->attributes['recordline_id'];
+    }
+
+    public function setRecordLineId($recordline_id)
+    {
+        if (is_null($recordline_id))
+            $this->attributes['recordline_id'] = NULL;
+        else
+            $this->attributes['recordline_id'] = $recordline_id;
     }
 }

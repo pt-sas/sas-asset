@@ -29,15 +29,27 @@ class DocAction extends BaseController
 
             if ($checkAccess) {
                 if ($post['status'] === $this->DOCSTATUS_Drafted) {
+                    $status = [$this->DOCSTATUS_Voided, $this->DOCSTATUS_Completed, $this->DOCSTATUS_Prepare];
+
+                    //* Remove Doc Action Complete if service menu
+                    if ($post['url'] == 'service')
+                        $status = array_diff($status, [$this->DOCSTATUS_Completed]);
+
                     $list = $this->model->where([
                         'menu'          => $post['url'],
                         'isactive'      => 'Y',
                         'sys_role_id'   => $this->access->getSessionRole()
-                    ])->whereIn('ref_list', [$this->DOCSTATUS_Voided, $this->DOCSTATUS_Completed, $this->DOCSTATUS_Prepare])->findAll();
+                    ])->whereIn('ref_list', $status)->findAll();
                 } else if ($post['status'] === $this->DOCSTATUS_Prepare) {
                     $list = $this->model->where([
                         'menu'          => $post['url'],
                         'isactive'      => 'Y',
+                        'sys_role_id'   => $this->access->getSessionRole()
+                    ])->whereIn('ref_list', [$this->DOCSTATUS_Inprogress])->findAll();
+                } else if ($post['url'] === 'service' && $post['status'] === $this->DOCSTATUS_Inprogress) {
+                    $list = $this->model->where([
+                        'menu'      => $post['url'],
+                        'isactive'  => 'Y',
                         'sys_role_id'   => $this->access->getSessionRole()
                     ])->whereIn('ref_list', [$this->DOCSTATUS_Completed])->findAll();
                 } else {
@@ -45,7 +57,7 @@ class DocAction extends BaseController
                         'menu'      => $post['url'],
                         'isactive'  => 'Y',
                         'sys_role_id'   => $this->access->getSessionRole()
-                    ])->whereNotIn('ref_list', [$this->DOCSTATUS_Completed])->findAll();
+                    ])->whereNotIn('ref_list', [$this->DOCSTATUS_Completed, $this->DOCSTATUS_Prepare])->findAll();
                 }
 
                 foreach ($list as $key => $row) :

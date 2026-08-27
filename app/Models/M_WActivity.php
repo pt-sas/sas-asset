@@ -19,6 +19,8 @@ class M_WActivity extends Model
 		'table',
 		'record_id',
 		'menu',
+		'tableline',
+		'recordline_id',
 		'isactive',
 		'created_by',
 		'updated_by',
@@ -90,24 +92,40 @@ class M_WActivity extends Model
 		return $sql;
 	}
 
-	public function getDataTrx(string $table, $id)
+	public function getDataTrx(string $table, $id, string $tableLine = null)
 	{
-		$fields = $this->db->getFieldData($table);
+		$_table = is_null($tableLine) ? $table : $tableLine;
 
-		$this->builder = $this->db->table($table);
+		$fields = $this->db->getFieldData($_table);
 
-		$this->builder->select($table . '.*,
-						sys_user.name as usercreated_by');
+		$this->builder = $this->db->table($_table);
 
-		$this->builder->join('sys_user', 'sys_user.sys_user_id = ' . $table . '.created_by');
-		$this->builder->where([
-			$table . ".docstatus" => "IP"
-		]);
+		$query = $_table . '.*,
+						sys_user.name as usercreated_by';
+
+		$this->builder->join('sys_user', 'sys_user.sys_user_id = ' . $_table . '.created_by', 'left');
+
+		if (is_null($tableLine)) {
+			$this->builder->where([$_table . ".docstatus" => "IP"]);
+		} else {
+			$fieldH = $this->db->getFieldData($table);
+
+			foreach ($fieldH as $field) {
+				if ($field->primary_key == 1) {
+					$this->builder->join($table, $table . '.' . $field->name . ' = ' . $_table . '.' . $field->name);
+				}
+			}
+
+			$query .= ',';
+			$query .= $table . '.documentno';
+		}
+
+		$this->builder->select($query);
 
 		foreach ($fields as $field) {
 			if ($field->primary_key == 1) {
 				$this->builder->where([
-					$table . "." . $field->name => $id
+					$_table . "." . $field->name => $id
 				]);
 			}
 		}

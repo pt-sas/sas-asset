@@ -17,6 +17,8 @@ class M_Service extends Model
         'docstatus',
         'grandtotal',
         'description',
+        'isapproved',
+        'sys_wfscenario_id',
         'created_by',
         'updated_by',
         'md_room_id'

@@ -266,7 +266,7 @@ class WScenario extends BaseController
         } else if ($docStatus === $this->DOCSTATUS_Voided) {
             $this->entity->setDocStatus($this->DOCSTATUS_Voided);
         } else if ($trxLine && $docStatus === $this->DOCSTATUS_Completed) {
-            $trx = $this->model->find($trxID);;
+            $trx = $this->model->find($trxID);
 
             if ($table === 'trx_quotation') {
                 if (empty($trx->getQuotationType()))
@@ -422,6 +422,21 @@ class WScenario extends BaseController
                     $this->entity->setDocStatus($this->DOCSTATUS_Completed);
                 }
             }
+
+            if ($table === 'trx_service') {
+                $this->sys_wfscenario_id = $mWfs->getScenario($menu);
+
+                if ($this->sys_wfscenario_id) {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Inprogress);
+                    $this->entity->setWfScenarioId($this->sys_wfscenario_id);
+                    $isWfscenario = true;
+                } else {
+                    $this->entity->setDocStatus($this->DOCSTATUS_Completed);
+
+                    //* DO Update Line to Service Completed
+                    $this->modelDetail->where([$this->model->primaryKey => $trxID, 'md_status_id !=' => 100006])->set('md_status_id', 100011)->update();
+                }
+            }
         }
 
         $this->entity->setUpdatedBy($session->get('sys_user_id'));
@@ -434,7 +449,16 @@ class WScenario extends BaseController
         }
 
         if ($result && $isWfscenario) {
-            $result = $cWfa->setActivity(null, $this->sys_wfscenario_id, $this->getScenarioResponsible($this->sys_wfscenario_id), $sessionUserId, $this->DOCSTATUS_Suspended, false, null, $table, $trxID, $menu);
+            if ($table == "trx_service") {
+                //* Set Activity By Line
+                $trxLine = $modelDetail->where([$primaryKey => $trxID, 'md_status_id !=' => 100006])->findAll();
+
+                foreach ($trxLine as $line) {
+                    $result = $cWfa->setActivity(null, $this->sys_wfscenario_id, $this->getScenarioResponsible($this->sys_wfscenario_id), $sessionUserId, $this->DOCSTATUS_Suspended, false, null, $table, $trxID, $menu, $modelDetail->table, $line->{$modelDetail->primaryKey});
+                }
+            } else {
+                $result = $cWfa->setActivity(null, $this->sys_wfscenario_id, $this->getScenarioResponsible($this->sys_wfscenario_id), $sessionUserId, $this->DOCSTATUS_Suspended, false, null, $table, $trxID, $menu);
+            }
 
             $options = array(
                 'cluster' => 'ap1',
