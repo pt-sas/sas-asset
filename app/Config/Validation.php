@@ -326,6 +326,32 @@ class Validation
         ]
     ];
 
+    public $category_masterpart = [
+        'value'    => [
+            'label'        =>    'Category Code',
+            'rules'            =>    'required|min_length[7]|max_length[7]|is_unique[md_category.value,md_category_id,{id}]',
+            'errors'     => [
+                'is_unique' => 'This {field} already exists.',
+                'required'    => 'Please Fill {field} first'
+            ]
+        ],
+        'name'        => [
+            'label'        =>    'Category Name',
+            'rules'            =>    'required|is_unique[md_category.name,md_category_id,{id}]',
+            'errors'     => [
+                'is_unique' => 'This {field} already exists.',
+                'required'    => 'Please Fill {field} first'
+            ]
+        ],
+        'md_groupasset_id'            => [
+            'label'            => 'Group Asset',
+            'rules'            => 'required',
+            'errors'        => [
+                'required'    => 'Please Choose the {field} first'
+            ]
+        ]
+    ];
+
     public $subcategory = [
         'value'             => [
             'label'            => 'Subcategory Code',

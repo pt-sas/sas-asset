@@ -3721,6 +3721,30 @@ function replaceRupiah(numeric) {
  */
 function initSelectData(select, field = null, id = null, ref = null) {
   $.each(select, function (i, item) {
+
+    //* For Master Part
+    const form = $(item).closest("form");
+    const isMasterPart = form.find("#ismasterpart");
+
+    if(isMasterPart.length) {
+        if(isMasterPart.is(":checked")) {
+        const suffix = "/$MasterPart";
+        let urlProduct = $(item).attr("data-url");
+
+        if (!urlProduct.endsWith(suffix)) {
+            $(item).attr("data-url", urlProduct + suffix);
+          }
+        } else {
+        let lastUrl = $(item).attr("data-url").split("/");
+
+        if (lastUrl[lastUrl.length - 1] === "$MasterPart") {
+          lastUrl.pop();
+        }
+
+        $(item).attr("data-url", lastUrl.join("/"));
+        }
+    }
+    
     let url = $(item).attr("data-url");
     let defaultID = $(item).attr("default-id");
     let defaultText = $(item).attr("default-text");
@@ -4295,11 +4319,6 @@ function putFieldData(form, data) {
   if (data.length > 1) {
     const field = form.find("input, textarea, select").not(".line");
 
-    if (form.find("select.select-data").length > 0) {
-      let select = form.find("select.select-data");
-      initSelectData(select, data[1].field, data[1].label);
-    }
-
     for (let i = 0; i < field.length; i++) {
       //? Retrieve field name default is readonly/disabled in the attribute field
       if (
@@ -4615,6 +4634,11 @@ function putFieldData(form, data) {
           }
         }
       }
+    }
+
+    if (form.find("select.select-data").length > 0) {
+      let select = form.find("select.select-data");
+      initSelectData(select, data[1].field, data[1].label);
     }
   }
 }
@@ -5069,25 +5093,13 @@ _tableLine.on("click", ".btn_accept", function (evt) {
 });
 
 //TODO : Event Handler for Getting Data Base on Checkbox Master Part on Master SubCategory & Type
-$(document).on("click", "#ismasterpart", function (e) {
+$(document).on("change", "#ismasterpart", function (e) {
   const form = $(this).closest("form");
   const elementTarget = $("#" + $(this).data("target"));
   let select = form.find("select.select-data");
 
   if (elementTarget.length) {
     elementTarget.val("");
-
-    if ($(this).is(":checked")) {
-      elementTarget.attr(
-        "data-url",
-        elementTarget.attr("data-url") + "/$MasterPart",
-      );
-    } else {
-      let lastUrl = elementTarget.attr("data-url").split("/");
-      lastUrl.pop();
-
-      elementTarget.attr("data-url", lastUrl.join("/"));
-    }
 
     initSelectData(select);
   }

@@ -16,7 +16,8 @@ class M_ServiceDetail extends Model
         'lineamt',
         'description',
         'md_status_id',
-        'md_product_id'
+        'md_product_id',
+        'isagree'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\ServiceDetail';

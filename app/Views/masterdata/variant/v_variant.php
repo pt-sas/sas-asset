@@ -11,6 +11,7 @@
                 <th>No</th>
                 <th>Variant Code</th>
                 <th>Name</th>
+                <th>Master Part</th>
                 <th>Active</th>
                 <th>Actions</th>
             </tr>

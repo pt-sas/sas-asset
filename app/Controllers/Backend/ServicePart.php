@@ -5,6 +5,7 @@ namespace App\Controllers\Backend;
 use App\Controllers\BaseController;
 use App\Models\M_ServicePart;
 use App\Models\M_Product;
+use App\Models\M_Service;
 use App\Models\M_ServiceDetail;
 use App\Models\M_SparePart;
 
@@ -60,12 +61,17 @@ class ServicePart extends BaseController
 
     public function show($id)
     {
+        $mService = new M_Service($this->request);
+
         if ($this->request->isAJAX()) {
             try {
                 $detail = $this->modelDetail->where($this->model->primaryKey, $id)->findAll();
+                $serviceDetail = $this->model->where($this->model->primaryKey, $id)->first();
+                $service = $mService->where($mService->primaryKey, $serviceDetail->trx_service_id)->first();
 
                 $result = [
-                    'line'      => $this->tableLine('edit', $detail)
+                    'line'      => $this->tableLine('edit', $detail),
+                    'docstatus' => $service->getDocStatus()
                 ];
 
                 $response = message('success', true, $result);
@@ -93,6 +99,7 @@ class ServicePart extends BaseController
 
     public function tableLine($set = null, $detail = [])
     {
+        $mService = new M_Service($this->request);
         $mProduct = new M_Product($this->request);
         $mSparePart = new M_SparePart($this->request);
 
@@ -108,10 +115,9 @@ class ServicePart extends BaseController
             ])->first();
 
             $dataPart = $mSparePart->where([
-                'isactive'          => 'Y',
-                'md_product_id'     => $rowProduct->getProductId()
-            ])->orderBy('name', 'ASC')
-                ->findAll();
+                'isactive'              => 'Y',
+                'product_category_id'   => $rowProduct->getCategoryId()
+            ])->orderBy('name', 'ASC')->findAll();
 
             $table = [
                 $this->field->fieldTable('select', null, 'md_sparepart_id', 'unique', 'required', null, null, $dataPart, null, 250, 'md_sparepart_id', 'name'),
@@ -124,21 +130,27 @@ class ServicePart extends BaseController
 
         //? Update
         if (!empty($set) && count($detail) > 0) {
-            $serviceDetail = $this->model->find($detail[0]->trx_service_detail_id);
+            $serviceDetail = $this->model->join('md_product p', $this->model->table . ".md_product_id = p.md_product_id")
+                ->find($detail[0]->trx_service_detail_id);
+
+            $service = $mService->where($mService->primaryKey, $serviceDetail->trx_service_id)->first();
+
+            $readOnly = null;
+            if ($service->getDocStatus() == $this->DOCSTATUS_Completed) $readOnly = 'readonly';
 
             $dataPart = $mSparePart->where([
                 'isactive'          => 'Y',
-                'md_product_id'     => $serviceDetail->md_product_id
+                'product_category_id'   => $serviceDetail->md_category_id
             ])->orderBy('name', 'ASC')
                 ->findAll();
 
             foreach ($detail as $row) :
                 $table[] = [
-                    $this->field->fieldTable('select', null, 'md_sparepart_id', 'unique', 'required', null, null, $dataPart, $row->md_sparepart_id, 250, 'md_sparepart_id', 'name'),
-                    $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, null, null, null, $row->qtyentered, 100),
-                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', null, null, null, null, $row->unitprice, 200),
+                    $this->field->fieldTable('select', null, 'md_sparepart_id', 'unique', 'required', $readOnly, null, $dataPart, $row->md_sparepart_id, 250, 'md_sparepart_id', 'name'),
+                    $this->field->fieldTable('input', 'text', 'qtyentered', 'number', null, $readOnly, null, null, $row->qtyentered, 100),
+                    $this->field->fieldTable('input', 'text', 'unitprice', 'rupiah', null, $readOnly, null, null, $row->unitprice, 200),
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', null, 'readonly', null, null, $row->lineamt, 200),
-                    $this->field->fieldTable('button', 'button', 'trx_service_part_id', null, null, null, null, null, $row->trx_service_part_id)
+                    !$readOnly ? $this->field->fieldTable('button', 'button', 'trx_service_part_id', null, null, null, null, null, $row->trx_service_part_id) : ""
                 ];
             endforeach;
         }

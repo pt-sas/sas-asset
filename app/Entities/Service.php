@@ -13,7 +13,9 @@ class Service extends Entity
 	protected $docstatus;
 	protected $md_supplier_id;
 	protected $md_room_id;
+	protected $isapproved;
 	protected $description;
+	protected $sys_wfscenario_id;
 	protected $created_by;
 	protected $updated_by;
 
@@ -131,5 +133,25 @@ class Service extends Entity
 	public function setRoomId($md_room_id)
 	{
 		$this->attributes['md_room_id'] = $md_room_id;
+	}
+
+	public function getIsApproved()
+	{
+		return $this->attributes['isapproved'];
+	}
+
+	public function setIsApproved($isapproved)
+	{
+		$this->attributes['isapproved'] = $isapproved;
+	}
+
+	public function getWfScenarioId()
+	{
+		return $this->attributes['sys_wfscenario_id'];
+	}
+
+	public function setWfScenarioId($sys_wfscenario_id)
+	{
+		$this->attributes['sys_wfscenario_id'] = $sys_wfscenario_id;
 	}
 }

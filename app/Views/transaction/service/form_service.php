@@ -5,7 +5,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="documentno">Document No <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="documentno" name="documentno" placeholder="[auto]" readonly>
+                    <input type="text" class="form-control" id="documentno" name="documentno" placeholder="[auto]" disabled>
                     <small class="form-text text-danger" id="error_documentno"></small>
                 </div>
             </div>
@@ -65,6 +65,7 @@
                                 <th class="text-center">Parts</th>
                                 <th class="text-center">Line Amount</th>
                                 <th class="text-center">Status</th>
+                                <th class="text-center">Status Approval</th>
                                 <th class="text-center">Description</th>
                                 <th class="text-center">Action</th>
                             </tr>

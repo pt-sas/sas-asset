@@ -57,6 +57,7 @@ class Category extends BaseController
                 $row[] = $value->initialcode;
                 $row[] = $value->groupasset;
                 $row[] = $value->pic;
+                $row[] = active($value->ismasterpart);
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
@@ -80,8 +81,9 @@ class Category extends BaseController
 
             try {
                 $this->entity->fill($post);
+                $isMasterPart = $post['ismasterpart'] == 'Y';
 
-                if (!$this->validation->run($post, 'category')) {
+                if ((!$isMasterPart && !$this->validation->run($post, 'category')) && ($isMasterPart && !$this->validation->run($post, 'category_masterpart'))) {
                     $response = $this->field->errorValidation($this->model->table, $post);
                 } else {
                     $response = $this->save();

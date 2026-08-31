@@ -27,6 +27,7 @@ class M_Subcategory extends Model
         'md_subcategory.value',
         'md_subcategory.name',
         'md_category.name',
+        'md_subcategory.ismasterpart',
         'md_subcategory.isactive'
     ];
     protected $column_search = [

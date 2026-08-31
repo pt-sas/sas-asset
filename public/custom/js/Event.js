@@ -2664,6 +2664,18 @@ _tableLine.on("click", ".btn_isdetail", function (evt) {
         if (result[0].success) {
           let arrMsg = result[0].message;
 
+          if (arrMsg.docstatus) {
+            if (arrMsg.docstatus == 'CO') {
+                    $(".add_row_part").css("display", "none");
+
+                    $(".save_form_part").prop('disabled', true);
+            } else {
+                    $(".add_row_part").css("display", "block");
+
+                    $(".save_form_part").prop('disabled', false);
+            }
+          }
+
           // Show datatable line
           if (arrMsg.line) {
             let arrLine = arrMsg.line;

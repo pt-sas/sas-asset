@@ -30,6 +30,7 @@ class M_Category extends Model
         'md_category.initialcode',
         'md_groupasset.name',
         'md_employee.name',
+        'md_category.ismasterpart',
         'md_category.isactive'
     ];
     protected $column_search = [

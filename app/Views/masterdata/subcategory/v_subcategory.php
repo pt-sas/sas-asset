@@ -12,6 +12,7 @@
                 <th>Subcategory Code</th>
                 <th>Name</th>
                 <th>Category</th>
+                <th>Master Part</th>
                 <th>Active</th>
                 <th>Actions</th>
             </tr>

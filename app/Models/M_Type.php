@@ -26,6 +26,7 @@ class M_Type extends Model
         'md_type.value',
         'md_type.name',
         'md_subcategory.name',
+        'md_type.ismasterpart',
         'md_type.isactive'
     ];
     protected $column_search = [

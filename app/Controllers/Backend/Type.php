@@ -54,6 +54,7 @@ class Type extends BaseController
                 $row[] = $value->value;
                 $row[] = $value->name;
                 $row[] = $value->subcategory;
+                $row[] = active($value->ismasterpart);
                 $row[] = active($value->isactive);
                 $row[] = $this->template->tableButton($ID);
                 $data[] = $row;
