@@ -63,7 +63,8 @@
                                 <th class="text-center">Asset Code</th>
                                 <th class="text-center">Product</th>
                                 <th class="text-center">Parts</th>
-                                <th class="text-center">Line Amount</th>
+                                <th class="text-center">Part Amount</th>
+                                <th class="text-center">Repair Cost</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Status Approval</th>
                                 <th class="text-center">Description</th>

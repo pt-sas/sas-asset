@@ -87,7 +87,20 @@ class ServicePart extends BaseController
     {
         if ($this->request->isAJAX()) {
             try {
+                $servicePart = $this->modelDetail->where($this->modelDetail->primaryKey, $id)->first();
+
                 $result = $this->modelDetail->delete($id);
+
+                if ($result) {
+                    $amount = $this->modelDetail->select('SUM(lineamt) as sum_amt')->where($this->model->primaryKey, $servicePart->{$this->model->primaryKey})->first();
+
+                    $entity = new \App\Entities\ServiceDetail();
+                    $entity->{$this->model->primaryKey} = $servicePart->{$this->model->primaryKey};
+                    $entity->lineamt = $amount->sum_amt;
+
+                    $this->model->save($entity);
+                }
+
                 $response = message('success', true, $result);
             } catch (\Exception $e) {
                 $response = message('error', false, $e->getMessage());

@@ -103,7 +103,7 @@ class Service extends BaseController
                         if ($item->md_status_id != 100006) $arrTableSum[] = $item;
                     }
 
-                    $this->entity->setGrandTotal(arrSumField('lineamt', $arrTableSum));
+                    $this->entity->setGrandTotal(arrSumField('repair_cost', $arrTableSum) + arrSumField('lineamt', $arrTableSum));
 
                     if ($this->isNew()) {
                         $this->entity->setDocStatus($this->DOCSTATUS_Drafted);
@@ -281,6 +281,7 @@ class Service extends BaseController
                 $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, null, 300, 'md_product_id', 'name'),
                 "",
                 $this->field->fieldTable('input', 'text', 'lineamt', 'number', 'required', 'readonly', null, null, null, 250),
+                $this->field->fieldTable('input', 'text', 'repair_cost', 'rupiah', 'required', 'readonly', null, null, null, 250),
                 $this->field->fieldTable('select', null, 'md_status_id', null, 'required', 'readonly', null, $dataStatus, 'On Delivery', 150, 'md_status_id', 'name'),
                 "",
                 $this->field->fieldTable('input', 'text', 'description', null, null, null, null, null, null, 250),
@@ -332,6 +333,7 @@ class Service extends BaseController
                     $this->field->fieldTable('select', null, 'md_product_id', null, 'required', 'readonly', null, $dataProduct, $row->md_product_id, 300, 'md_product_id', 'name'),
                     $btnDetail,
                     $this->field->fieldTable('input', 'text', 'lineamt', 'rupiah', 'required', 'readonly', null, null, $row->lineamt, 250),
+                    $this->field->fieldTable('input', 'text', 'repair_cost', "rupiah " . $updateable, 'required', $service->getDocStatus() === $this->DOCSTATUS_Drafted ? 'readonly' : null, null, null, $row->repair_cost, 250),
                     $this->field->fieldTable('select', null, 'md_status_id', $updateable, 'required', $service->getDocStatus() === $this->DOCSTATUS_Drafted ? 'readonly' : null, null, $dataStatus, $row->md_status_id, 150, 'md_status_id', 'name'),
                     statusRealize($row->isagree),
                     $this->field->fieldTable('input', 'text', 'description', $updateable, null, null, null, null, $row->description, 250),
