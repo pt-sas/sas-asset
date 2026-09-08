@@ -17,7 +17,8 @@ class M_ServiceDetail extends Model
         'description',
         'md_status_id',
         'md_product_id',
-        'isagree'
+        'isagree',
+        'repair_cost'
     ];
     protected $useTimestamps = true;
     protected $returnType = 'App\Entities\ServiceDetail';
