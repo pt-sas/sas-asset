@@ -4319,6 +4319,11 @@ function putFieldData(form, data) {
   if (data.length > 1) {
     const field = form.find("input, textarea, select").not(".line");
 
+    if (form.find("select.select-data").length > 0) {
+      let select = form.find("select.select-data");
+      initSelectData(select, data[1].field, data[1].label);
+    }
+
     for (let i = 0; i < field.length; i++) {
       //? Retrieve field name default is readonly/disabled in the attribute field
       if (
@@ -4634,11 +4639,6 @@ function putFieldData(form, data) {
           }
         }
       }
-    }
-
-    if (form.find("select.select-data").length > 0) {
-      let select = form.find("select.select-data");
-      initSelectData(select, data[1].field, data[1].label);
     }
   }
 }
